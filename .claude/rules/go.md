@@ -5,6 +5,13 @@ paths:
 
 We are peers writing Go. Prioritize correctness, clarity, and best practices.
 
+## Tooling
+
+- Run `go vet ./...`
+- Run `go-critic check ./...` (if not installed: `go install -v github.com/go-critic/go-critic/cmd/go-critic@latest`)
+- Run `gofumpt -l -w .` (if not installed: `go install mvdan.cc/gofumpt@latest`)
+- Run `staticcheck ./...` (if not installed: `go install honnef.co/go/tools/cmd/staticcheck@latest`)
+
 ## Structs
 
 - Fields sorted alphabetically; embedded structs first.
