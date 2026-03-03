@@ -225,3 +225,50 @@ perspectives.
 
 - https://go.dev/doc/effective_go — Full Effective Go document used by the
   Idiomatic Go Review agent
+
+## Prerequisites
+
+### GitHub MCP server (PR mode only)
+
+The skill uses `mcp__github__pull_request_read` and
+`mcp__github__get_file_contents` from the
+[GitHub MCP server](https://github.com/github/github-mcp-server).
+This is only required for PR mode — local mode needs no extra setup.
+
+Install it:
+
+```bash
+go install github.com/github/github-mcp-server/cmd/github-mcp-server@latest
+```
+
+Then add it to Claude Code with at least the `repos` and
+`pull_requests` toolsets enabled and a
+[GitHub personal access token](https://github.com/settings/tokens)
+with `repo` scope:
+
+```bash
+claude mcp add github \
+  -e GITHUB_PERSONAL_ACCESS_TOKEN=ghp_... \
+  -e GITHUB_TOOLSETS=context,repos,pull_requests \
+  -- github-mcp-server stdio
+```
+
+#### Why this MCP server?
+
+Running it locally allows you to limit the number of tools loaded,
+reducing the context it takes up.
+
+### Claude Code agent teams (experimental)
+
+The skill uses [agent teams](https://code.claude.com/docs/en/agent-teams)
+(`TeamCreate`, `SendMessage`, `Task` with `team_name`) to run four
+review agents in parallel. Enable the feature by adding the
+following to `.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
