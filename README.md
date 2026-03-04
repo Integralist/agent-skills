@@ -74,6 +74,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 │   └── markdown.md     # Markdown linting
 └── skills/
     ├── cleanup/
+    ├── code-research/
     ├── code-review/
     ├── commit/
     ├── delegate/
