@@ -73,6 +73,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 │   ├── go.md           # Go conventions
 │   └── markdown.md     # Markdown linting
 └── skills/
+    ├── cleanup/
     ├── code-review/
     ├── commit/
     ├── delegate/
