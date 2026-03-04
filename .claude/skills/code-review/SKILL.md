@@ -29,7 +29,11 @@ The argument is available as `$ARGUMENTS`. Detect the mode:
 
 ## PR Mode: Fetch Context
 
-Use the GitHub MCP tools to fetch PR metadata and the full diff:
+Use the GitHub MCP tools to fetch PR metadata and the full diff.
+If any MCP call fails (e.g., 403 SAML enforcement), fall back to the
+`gh` CLI equivalents shown below.
+
+### Primary: GitHub MCP
 
 1. `mcp__github__pull_request_read` with `method: "get"`, `owner`,
    `repo`, `pullNumber` — returns title, body, base/head refs,
@@ -38,6 +42,12 @@ Use the GitHub MCP tools to fetch PR metadata and the full diff:
    `owner`, `repo`, `pullNumber` — returns the list of changed files
 1. `mcp__github__pull_request_read` with `method: "get_diff"`,
    `owner`, `repo`, `pullNumber` — returns the full diff
+
+### Fallback: `gh` CLI
+
+1. `gh pr view <number> --repo <owner>/<repo> --json title,body,baseRefName,headRefName,additions,deletions`
+1. `gh pr diff <number> --repo <owner>/<repo> --name-only`
+1. `gh pr diff <number> --repo <owner>/<repo>`
 
 ## Local Mode: Gather Context
 
@@ -128,10 +138,18 @@ agent prompt must include:
 
 ### PR mode agent instructions
 
-- Use `mcp__github__pull_request_read` with `method: "get_diff"`, `owner`,
-  `repo`, `pullNumber` for the full diff
-- Use `mcp__github__get_file_contents` with `owner`, `repo`, `path`, and
-  `ref: "refs/heads/<head-branch>"` to read full file context when needed
+Primary (GitHub MCP):
+
+- Use `mcp__github__pull_request_read` with `method: "get_diff"`,
+  `owner`, `repo`, `pullNumber` for the full diff
+- Use `mcp__github__get_file_contents` with `owner`, `repo`, `path`,
+  and `ref: "refs/heads/<head-branch>"` to read full file context
+
+Fallback (`gh` CLI) — use if MCP calls fail:
+
+- `gh pr diff <number> --repo <owner>/<repo>` for the full diff
+- `gh api repos/<owner>/<repo>/contents/<path>?ref=<head-branch>`
+  to read full file context
 
 ### Local mode agent instructions
 
@@ -228,12 +246,16 @@ perspectives.
 
 ## Prerequisites
 
-### GitHub MCP server (PR mode only)
+### GitHub access (PR mode only)
+
+Local mode needs no extra setup. PR mode needs one of the following
+(tried in order):
+
+#### Option 1: GitHub MCP server (preferred)
 
 The skill uses `mcp__github__pull_request_read` and
 `mcp__github__get_file_contents` from the
 [GitHub MCP server](https://github.com/github/github-mcp-server).
-This is only required for PR mode — local mode needs no extra setup.
 
 Install it:
 
@@ -253,10 +275,25 @@ claude mcp add github \
   -- github-mcp-server stdio
 ```
 
-#### Why this MCP server?
+**SAML SSO orgs:** If you get a 403 "Resource protected by
+organization SAML enforcement" error, go to
+[github.com/settings/tokens](https://github.com/settings/tokens),
+click **Configure SSO** next to your token, and **Authorize** it for
+the org. Alternatively the `gh` CLI fallback (below) will be used
+automatically.
 
-Running it locally allows you to limit the number of tools loaded,
-reducing the context it takes up.
+#### Option 2: `gh` CLI (fallback)
+
+If the GitHub MCP server is unavailable or returns errors, the skill
+falls back to the
+[GitHub CLI](https://cli.github.com/) (`gh`). Authenticate with:
+
+```bash
+gh auth login
+```
+
+The `gh` CLI uses browser-based OAuth which inherits your SSO
+sessions, so it works with SAML-enforced orgs out of the box.
 
 ### Claude Code agent teams (experimental)
 
