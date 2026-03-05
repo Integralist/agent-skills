@@ -60,8 +60,59 @@ user before proceeding:
 
 Prefer a short clarifying question over a wrong assumption.
 
-## Research
+## Create Team and Task
 
-Once the repo is local, use Explore agents and read tools to answer
-the user's question about it. Set the exploration path to the repo
-root (`~/code/{org}/{repo}`).
+Create a team named `code-research-{repo}` with one task:
+
+1. **Research** — explore the repo and answer the user's question
+
+## Spawn Agent
+
+Spawn a single `general-purpose` agent named `code-researcher` on
+the team, assigned to the **Research** task. The agent prompt must
+include:
+
+- The repo path (`~/code/{org}/{repo}`)
+- The user's question or research goal
+- Instructions to use `Read`, `Glob`, `Grep`, and Explore patterns
+  to investigate the codebase
+- Instructions to use any relevant MCP servers available in the
+  session (e.g. `gopls` for Go projects — `go_search`,
+  `go_file_context`, `go_package_api`; `context7` for library
+  documentation lookups)
+- **Send findings back to team-lead via `SendMessage` and mark the
+  task as completed when done**
+
+## Main Agent Continues
+
+While `@code-researcher` runs, the main agent remains available
+(can answer other questions, do lightweight lookups, etc.).
+
+## Collect Results
+
+When `@code-researcher` reports back via `SendMessage`, acknowledge
+receipt and send a `shutdown_request`. Then delete the team.
+
+## Present Findings
+
+Summarize the research to the user, then prompt if they want a
+project plan document created around it. See
+@../project-plan/SKILL.md
+
+## Prerequisites
+
+### Claude Code agent teams (experimental)
+
+The skill uses
+[agent teams](https://code.claude.com/docs/en/agent-teams)
+(`TeamCreate`, `SendMessage`, `Task` with `team_name`) to run the
+research agent in parallel. Enable the feature by adding the
+following to `.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
