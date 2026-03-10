@@ -82,8 +82,10 @@ patterns, conventions, and preferences I want Claude to follow consistently.
     ├── go-testing/
     ├── grepai/
     ├── markdown-to-skill/
+    ├── next-task/
     ├── project-plan/
-    └── systematic-debugging/
+    ├── systematic-debugging/
+    └── test-feedback/
 ```
 
 > [!NOTE]
