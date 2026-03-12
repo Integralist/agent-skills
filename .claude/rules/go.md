@@ -74,7 +74,14 @@ import (
   return nil, fmt.Errorf("service: failed to create config: %w", err)
   ```
 - Custom error types implement `Error()` and `Unwrap()`.
-- Classify errors for retry decisions (`errors.Is`, `errors.As`).
+- Classify errors for retry decisions (`errors.Is`, `errors.AsType`).
+- Use `errors.AsType[T]` (Go 1.26+) instead of `errors.As`. It returns
+  `(T, bool)` and avoids the need for a pre-declared target variable:
+  ```go
+  if dnsErr, ok := errors.AsType[*net.DNSError](err); ok {
+      // use dnsErr
+  }
+  ```
 - Never panic; return errors.
 
 ## Constructors
@@ -200,7 +207,23 @@ s.metrics.Count(ctx, "path_operations_total", "operation=create", "result="+resu
 s.metrics.Measure(ctx, "service_operation_duration_seconds", time.Since(start).Seconds(), "operation=create_path", "result="+result)
 ```
 
-## Context
+## Context Cancellation
+
+Always use the `*Cause` variants so every cancellation carries a reason:
+
+- `context.WithCancelCause` instead of `context.WithCancel`
+- `context.WithTimeoutCause` instead of `context.WithTimeout`
+- `context.WithDeadlineCause` instead of `context.WithDeadline`
+- `context.AfterFunc` callbacks should pass causes via `context.Cause(ctx)`
+
+```go
+ctx, cancel := context.WithTimeoutCause(ctx, 5*time.Second, errors.New("service: timed out fetching config"))
+defer cancel()
+```
+
+Retrieve the cause with `context.Cause(ctx)` rather than checking `ctx.Err()` alone.
+
+## Context Values
 
 Unexported struct keys; exported `WithXxx`/`XxxFromContext` helpers.
 
