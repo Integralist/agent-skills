@@ -83,7 +83,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
     ├── grepai/
     ├── markdown-to-skill/
     ├── next-task/
-    ├── project-plan/
+    ├── research-plan/
     ├── systematic-debugging/
     └── test-feedback/
 ```
