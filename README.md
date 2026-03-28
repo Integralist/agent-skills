@@ -77,6 +77,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
     ├── code-research/
     ├── code-review/
     ├── commit/
+    ├── critique/
     ├── delegate/
     ├── go-api/
     ├── go-testing/
