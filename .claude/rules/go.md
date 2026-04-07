@@ -44,6 +44,22 @@ type Service struct {
 }
 ```
 
+## Variables
+
+Group consecutive `var` declarations into a single block:
+
+```go
+// Good
+var (
+	direction    string
+	cursorValues []string
+)
+
+// Bad
+var direction string
+var cursorValues []string
+```
+
 ## Abbreviations
 
 Only: `ctx`, `err`, `req`, `resp`, `cfg`.
