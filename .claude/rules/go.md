@@ -333,6 +333,34 @@ for _, tc := range testCases {
 - Build tag `e2e` for integration tests; unit tests have no build tags.
 - Compile-time interface compliance in test utility packages.
 - Always add code comments above the test function to explain what it validates.
+- Use `httptest.NewRequestWithContext` instead of `httptest.NewRequest` to
+  satisfy the `noctx` linter:
+  ```go
+  // Bad — noctx warns.
+  req := httptest.NewRequest(http.MethodGet, "/path", nil)
+
+  // Good — context is explicit.
+  req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/path", nil)
+  ```
+- Narrow variable scope to satisfy the `scopeguard` linter. When a variable is
+  only used inside an `if` block, fold the assignment into the `if` init
+  statement:
+  ```go
+  // Good — result scoped to the if block.
+  if result := cm.extractCustomerID(tt.cacheKey); result != tt.expected {
+      t.Errorf("extractCustomerID(%q) = %q, expected %q", tt.cacheKey, result, tt.expected)
+  }
+  ```
+  When folding into an `if` init statement would hurt readability (e.g. multiple
+  short assignments that compare against each other), suppress with
+  `//nolint:scopeguard` instead:
+  ```go
+  result := cm.customerKeySetName("customer123") //nolint:scopeguard
+  expected := "br:customer123:_keys"             //nolint:scopeguard
+  if result != expected {
+      t.Errorf("customerKeySetName(%q) = %q, expected %q", "customer123", result, expected)
+  }
+  ```
 
 ## HTTP Handlers
 
