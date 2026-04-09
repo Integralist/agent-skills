@@ -80,6 +80,7 @@ include:
   session (e.g. `gopls` for Go projects — `go_search`,
   `go_file_context`, `go_package_api`; `context7` for library
   documentation lookups)
+- Instructions to save findings to `docs/research/{repo}.md`
 - **Send findings back to team-lead via `SendMessage` and mark the
   task as completed when done**
 
@@ -93,11 +94,16 @@ While `@code-researcher` runs, the main agent remains available
 When `@code-researcher` reports back via `SendMessage`, acknowledge
 receipt and send a `shutdown_request`. Then delete the team.
 
+## Save Findings
+
+Write a research document to `docs/research/{repo}.md` containing
+the full findings. If the file already exists, overwrite it with the
+latest research.
+
 ## Present Findings
 
-Summarize the research to the user, then prompt if they want a
-project plan document created around it. See
-@../project-plan/SKILL.md
+Summarize the research to the user and note where the full document
+was saved.
 
 ## Prerequisites
 
