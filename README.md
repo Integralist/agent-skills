@@ -110,16 +110,6 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 | **systematic-debugging** | `/systematic-debugging`                                    | Four-phase debugging methodology emphasizing root cause analysis before any fix is attempted.                                                                               |
 | **test-feedback**        | `/test-feedback`                                           | Parse test failure output and spawn a background agent to fix the failing tests.                                                                                            |
 
-> [!TIP]
-> I have the following workflow:\\
->
-> - code-research
-> - research-plan
-> - next-task
-> - critique
-> - code-review
-> - refactor
-
 > [!NOTE]
 > If you need to generate Markdown files for the `markdown-to-skill` Skill, then
 > you can use [`rodydavis/agent-skills-generator`][agent-skills-generator].
@@ -136,6 +126,19 @@ EOF
 
 go run main.go crawl
 ```
+
+## Workflow
+
+I have the following workflow (you can skip items if they're not necessary):
+
+- code-research (creates `docs/research/{repo}.md` documents)
+- research-plan (creates `docs/research/{topic}.md` + `docs/plans/{project}.md` documents)
+- critique (reviews plans and highlights issues)
+- next-task (finds latest plan and starts next task)
+- commit (commit code changes; or you can do at the end)
+- code-review (reviews implementation code)
+- cleanup (cleans up obvious AI code; like verbose code comments)
+- refactor (redesigns a code feature)
 
 ## Contributing
 
