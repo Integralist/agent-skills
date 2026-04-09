@@ -404,6 +404,15 @@ for _, tc := range testCases {
   // Good — context is explicit.
   req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/path", nil)
   ```
+- Similarly, use `http.NewRequestWithContext` instead of `http.NewRequest` in
+  production code:
+  ```go
+  // Bad — noctx warns.
+  req, err := http.NewRequest(http.MethodGet, url, body)
+
+  // Good — context is explicit.
+  req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, body)
+  ```
 - Narrow variable scope to satisfy the `scopeguard` linter. When a variable is
   only used inside an `if` block, fold the assignment into the `if` init
   statement:
