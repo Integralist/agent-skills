@@ -184,10 +184,99 @@ required before implementation begins.}
 | -------------- | ------------------------------ |
 | `path/to/file` | {Brief description of changes} |
 
+## Parallel Execution
+
+This section defines how to split implementation across
+an agent team for parallel work. The team lead coordinates
+and owns integration; teammates own independent work
+streams.
+
+### Team Definition
+
+- **Team name**: `{kebab-case-project-name}`
+- **Team lead**: Coordinates tasks, resolves blockers,
+  integrates results.
+
+| Teammate    | Role / Responsibility             |
+| ----------- | --------------------------------- |
+| `{name-a}`  | {What this agent owns}            |
+| `{name-b}`  | {What this agent owns}            |
+
+### Work Streams
+
+Group tasks into independent work streams that can run
+in parallel. Each stream is assigned to a teammate.
+
+**Stream 1 — {Stream Name}** (`{teammate-name}`)
+
+- Task {X.Y}
+- Task {X.Z}
+
+**Stream 2 — {Stream Name}** (`{teammate-name}`)
+
+- Task {X.Y}
+- Task {X.Z}
+
+### Synchronization Points
+
+List points where streams must wait for each other
+before proceeding. Reference specific task IDs.
+
+| Sync Point           | Blocked Stream | Waiting On            |
+| -------------------- | -------------- | --------------------- |
+| {e.g., API contract} | `{name-b}`     | `{name-a}` Task {X.Y} |
+
+### Execution Instructions
+
+To execute this plan with agent teams:
+
+1. Create the team: `TeamCreate("{team-name}")`
+2. Create all tasks from the Implementation Tasks section
+   using `TaskCreate`, setting `blockedBy` where the
+   Synchronization Points table indicates dependencies.
+3. Spawn teammates using the Agent tool with `team_name`
+   and `name` matching the Team Definition table.
+4. Assign each teammate their work stream tasks via
+   `TaskUpdate` with `owner`.
+5. Teammates mark tasks completed via `TaskUpdate` and
+   pull their next unblocked task from `TaskList`.
+6. At synchronization points, the blocked teammate waits
+   for a `SendMessage` from the teammate it depends on
+   confirming the blocking task is done.
+7. When all tasks are complete, the team lead sends
+   `{type: "shutdown_request"}` to each teammate.
+
 ## Notes & Caveats
 
 - {Edge cases, decisions, risks, or open questions.}
 ````
+
+### Parallel execution section
+
+When filling in the Parallel Execution section of the
+plan template:
+
+1. **Identify independent work streams.** Look for tasks
+   that touch different files, packages, or layers with
+   no shared state. These can run in parallel.
+1. **Define teammates by stream, not by task.** Each
+   teammate should own a coherent slice of the system
+   (e.g., "API layer", "database migrations", "CLI
+   commands"), not a grab-bag of unrelated tasks.
+1. **Minimize synchronization points.** Prefer designs
+   where streams share a contract (interface, schema,
+   API spec) agreed up front so they can work
+   independently. Only add sync points where one stream
+   genuinely cannot proceed without another's output.
+1. **Keep the team small.** Two to four teammates is
+   typical. More teammates means more coordination
+   overhead. Only add a teammate when the work is
+   substantial enough to justify it.
+1. **Make execution instructions concrete.** The plan
+   will be handed to an AI agent later. The Execution
+   Instructions must be specific enough that the agent
+   can follow them mechanically — real team names, real
+   task references, real dependency relationships.
 
 ### After plan completes
 
