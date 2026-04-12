@@ -47,6 +47,59 @@ If the repo is not found locally and `{org}` is known:
 gh repo clone {org}/{repo} ~/code/{org}/{repo}
 ```
 
+## Gather project metadata
+
+Before spawning the research agent, run the following git commands
+inside the repo directory to build a diagnostic snapshot. Capture the
+output of each command and include it in the agent prompt as context.
+
+### Churn hotspots — most-changed files in the last year
+
+```bash
+git -C {repo_path} log --format=format: --name-only --since="1 year ago" \
+  | sort | uniq -c | sort -nr | head -20
+```
+
+### Bus factor — contributors ranked by commit count
+
+```bash
+git -C {repo_path} shortlog -sn --no-merges
+```
+
+Also check for recent activity (last 6 months) to flag absent top
+contributors:
+
+```bash
+git -C {repo_path} shortlog -sn --no-merges --since="6 months ago"
+```
+
+### Bug clusters — files most often touched in bug-fix commits
+
+```bash
+git -C {repo_path} log -i -E --grep="fix|bug|broken" \
+  --name-only --format='' | sort | uniq -c | sort -nr | head -20
+```
+
+### Commit velocity — commits per month
+
+```bash
+git -C {repo_path} log --format='%ad' --date=format:'%Y-%m' \
+  | sort | uniq -c
+```
+
+### Crisis patterns — reverts, hotfixes, and rollbacks
+
+```bash
+git -C {repo_path} log --oneline --since="1 year ago" \
+  | grep -iE 'revert|hotfix|emergency|rollback'
+```
+
+### Cross-reference
+
+Files that appear in **both** the churn hotspots and the bug clusters
+lists are the highest-risk code. Flag these explicitly in the metadata
+passed to the agent.
+
 ## When in doubt, ask
 
 Do not guess. If any of the following are unclear, stop and ask the
@@ -74,6 +127,10 @@ include:
 
 - The repo path (`~/code/{org}/{repo}`)
 - The user's question or research goal
+- The **project metadata** gathered above (churn hotspots, bus
+  factor, bug clusters, commit velocity, crisis patterns, and
+  cross-referenced high-risk files) — instruct the agent to use
+  this metadata to prioritize which code to read first
 - Instructions to use `Read`, `Glob`, `Grep`, and Explore patterns
   to investigate the codebase
 - Instructions to use any relevant MCP servers available in the
@@ -97,7 +154,10 @@ receipt and send a `shutdown_request`. Then delete the team.
 ## Save Findings
 
 Write a research document to `docs/research/{repo}.md` containing
-the full findings. If the file already exists, overwrite it with the
+the full findings. The document must include a **Project Metadata**
+section at the top with the git diagnostic snapshot (churn hotspots,
+bus factor, bug clusters, commit velocity, crisis patterns, and
+high-risk files). If the file already exists, overwrite it with the
 latest research.
 
 ## Present Findings
