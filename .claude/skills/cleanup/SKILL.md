@@ -37,6 +37,33 @@ Expand any globs with `Glob`, then validate paths exist.
 
 If no files are found, report "No files to review" and stop.
 
+## Gather project metadata
+
+Before spawning the cleanup agent, run the following git commands
+to build a diagnostic snapshot. Use this to prioritize which files
+to examine first — high-churn, high-bug files are the most
+valuable targets for cleanup.
+
+### Churn hotspots — most-changed files in the last year
+
+```bash
+git log --format=format: --name-only --since="1 year ago" \
+  | sort | uniq -c | sort -nr | head -20
+```
+
+### Bug clusters — files most often touched in bug-fix commits
+
+```bash
+git log -i -E --grep="fix|bug|broken" \
+  --name-only --format='' | sort | uniq -c | sort -nr | head -20
+```
+
+### Cross-reference
+
+Files that appear in **both** the churn hotspots and the bug
+clusters lists are the highest-risk code. Flag these explicitly
+in the metadata passed to the agent.
+
 ## Create Team and Task
 
 Create a team named `cleanup-<timestamp>` with one task:
@@ -52,6 +79,9 @@ prompt must include:
 
 - The full "What to look for" checklist below
 - The list of files in scope
+- The **project metadata** gathered above (churn hotspots, bug
+  clusters, and cross-referenced high-risk files) — instruct the
+  agent to examine high-risk files first
 - Instructions to work file by file, making edits directly
 - Instructions to track every change and every flagged item
 

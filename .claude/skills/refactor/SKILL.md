@@ -27,6 +27,60 @@ Parse the response into a short kebab-case slug (e.g.,
 `auth-middleware`, `config-loading`) for use in team and file
 names.
 
+## Gather project metadata
+
+Before spawning the investigation agent, run the following git
+commands in the current working directory to build a diagnostic
+snapshot. Capture the output of each command and include it in
+the agent prompt as context.
+
+### Churn hotspots — most-changed files in the last year
+
+```bash
+git log --format=format: --name-only --since="1 year ago" \
+  | sort | uniq -c | sort -nr | head -20
+```
+
+### Bus factor — contributors ranked by commit count
+
+```bash
+git shortlog -sn --no-merges
+```
+
+Also check for recent activity (last 6 months) to flag absent
+top contributors:
+
+```bash
+git shortlog -sn --no-merges --since="6 months ago"
+```
+
+### Bug clusters — files most often touched in bug-fix commits
+
+```bash
+git log -i -E --grep="fix|bug|broken" \
+  --name-only --format='' | sort | uniq -c | sort -nr | head -20
+```
+
+### Commit velocity — commits per month
+
+```bash
+git log --format='%ad' --date=format:'%Y-%m' \
+  | sort | uniq -c
+```
+
+### Crisis patterns — reverts, hotfixes, and rollbacks
+
+```bash
+git log --oneline --since="1 year ago" \
+  | grep -iE 'revert|hotfix|emergency|rollback'
+```
+
+### Cross-reference
+
+Files that appear in **both** the churn hotspots and the bug
+clusters lists are the highest-risk code. Flag these explicitly
+in the metadata passed to the agent.
+
 ## Create Team and Task
 
 Create a team named `refactor-<slug>` with one task:
@@ -43,6 +97,11 @@ prompt must include:
 
 - The feature or area to investigate
 - The current working directory
+- The **project metadata** gathered above (churn hotspots, bus
+  factor, bug clusters, commit velocity, crisis patterns, and
+  cross-referenced high-risk files) — instruct the agent to use
+  this metadata to prioritize which code to investigate first
+  and to corroborate its findings against the empirical data
 - The investigation checklist below (include verbatim)
 - Instructions to use `Read`, `Glob`, `Grep`, and any relevant
   MCP servers (e.g. `gopls` for Go — `go_search`,
