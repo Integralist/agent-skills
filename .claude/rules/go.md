@@ -751,6 +751,24 @@ key := cm.HierarchicalKeyFor(customerID, "config", configID)
 - `model.go` for domain types
 - `interface.go` for shared interfaces
 - `cache.go` for cache logic
+- `README.md` for every package (see below)
+
+### Package README
+
+Every Go package must have a `README.md` in its directory. When creating a
+new package, add one. When editing a file in an existing package, check for
+a missing `README.md` and add one if absent.
+
+Contents — keep it short and factual:
+
+1. **Purpose** — one or two sentences on what the package does and why it
+   exists.
+2. **Responsibilities** — bullet list of what this package owns.
+3. **Usage** — a brief code snippet showing the primary entry point or
+   typical call pattern.
+
+Do not duplicate godoc. The README orients a reader who is browsing the
+directory tree; godoc covers the API surface.
 
 ## Type Definitions
 
