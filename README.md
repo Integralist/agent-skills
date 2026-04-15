@@ -73,6 +73,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 │   ├── go.md           # Go conventions
 │   └── markdown.md     # Markdown linting
 └── skills/
+    ├── brevity/
     ├── cleanup/
     ├── code-review/
     ├── commit/
@@ -93,6 +94,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 
 | Skill                    | Invocation                                                 | Description                                                                                                                                                                 |
 | ------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [**brevity**](.claude/skills/brevity/SKILL.md)                         | `/brevity [lite \| full \| ultra \| off]`                  | Ultra-compressed communication mode with 3 intensity levels. Drops filler while keeping full technical accuracy.                                                            |
 | [**cleanup**](.claude/skills/cleanup/SKILL.md)                         | `/cleanup [path \| glob]`                                  | Audit a codebase for AI slop. Fixes obvious issues directly and flags anything that would change behavior. Runs as a background agent.                                      |
 | [**code-review**](.claude/skills/code-review/SKILL.md)                | `/code-review [PR_URL \| --diff \| --uncommitted \| path]` | Review code using six specialized agents working in parallel, each focused on a different dimension (consistency, idiomatic Go, data correctness, security, architecture, documentation). |
 | [**commit**](.claude/skills/commit/SKILL.md)                          | `/commit`                                                  | Create git commits with intelligent file grouping based on staged/unstaged changes.                                                                                         |
