@@ -134,6 +134,8 @@ Before claiming a bug is fixed:
 - [ ] Full test suite passes
 - [ ] No "quick fix" rationalization used
 - [ ] Fix is minimal and focused
+- [ ] Documentation updated if behavior changed (`docs/**/*.md`,
+  `**/README.md`)
 
 ## Success Metrics
 

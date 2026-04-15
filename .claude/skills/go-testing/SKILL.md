@@ -477,6 +477,19 @@ func TestLoadConfig(t *testing.T) {
 }
 ```
 
+## Documentation Updates
+
+When test changes introduce new patterns, helpers, or testing
+conventions, update the relevant documentation:
+
+- Package-level `README.md` — if the package's test approach or
+  test helpers change
+- `docs/**/*.md` — if testing instructions, examples, or
+  prerequisites change
+
+Do not create new documentation files unless the change
+introduces a wholly new component.
+
 ## Running Tests
 
 ```bash

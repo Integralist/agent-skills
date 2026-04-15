@@ -88,6 +88,15 @@ allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 - Use counts: "3 files" not "several files"
 - Active voice, specific language
 
+## Documentation Check
+
+Before committing, verify that documentation is up to date:
+
+- If the change alters behavior, public APIs, or usage patterns,
+  check that the corresponding `docs/**/*.md` or `**/README.md`
+  files have been updated
+- If documentation is stale, warn the user before committing
+
 ## Safety
 
 - NEVER commit secrets (.env, credentials, keys)

@@ -102,6 +102,11 @@ Include this in the agent prompt:
 > - Be aggressive about removing slop but conservative about
 >   changing behavior
 >
+> When code changes alter behavior, public APIs, or usage
+> patterns, update the corresponding `docs/**/*.md` or
+> `**/README.md` files. Do not create new documentation
+> files unless the change introduces a wholly new component.
+>
 > When finished, send your findings back to the team lead via
 > `SendMessage`. Structure your message as:
 >

@@ -33,6 +33,9 @@ The user may provide a file path to test output. Default: `/tmp/output`
      test assertions
    - Instruction to run `make test` after fixing (up to 3
      iterations)
+   - Instruction to update `docs/**/*.md` or `**/README.md`
+     if the fix changes behavior, public APIs, or usage
+     patterns
    - Instruction to NOT commit — leave that to the user
    - If the output contains `e2e` or integration test failures,
      note that `make test-integration` requires a running stack

@@ -192,6 +192,13 @@ required before implementation begins.}
 
 - [ ] **Task 2.1**: {Specific task description}
 
+### Phase N-1: Documentation
+
+- [ ] **Task (N-1).1**: Update `**/README.md` files for
+  packages whose public API changed
+- [ ] **Task (N-1).2**: Update `docs/**/*.md` for user-facing
+  behavior changes
+
 ### Phase N: Verification
 
 - [ ] **Task N.1**: {How to test end-to-end}

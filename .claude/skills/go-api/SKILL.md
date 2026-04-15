@@ -166,4 +166,10 @@ make lint-all
 - Place all documentation in `docs/`
 - Project plans go in `docs/plans/`
 - Move completed plans to `docs/plans/completed/`
-- Each internal package MUST have a `README.md` explaining its purpose and usage
+- Each internal package MUST have a `README.md` explaining its
+  purpose and usage
+- When code changes alter behavior, public APIs, or usage
+  patterns, update the corresponding `docs/**/*.md` or
+  `**/README.md` files
+- Do not create new documentation files unless the change
+  introduces a wholly new component

@@ -28,6 +28,9 @@ with.
    - The current working directory
    - Instructions to use all relevant tools (`Read`, `Glob`, `Grep`,
      `Edit`, `Bash`, MCP servers like `gopls`, `context7`, etc.)
+   - If the work changes code: update corresponding `docs/**/*.md`
+     or `**/README.md` when behavior, public APIs, or usage patterns
+     change
    - **Send findings back to team-lead via `SendMessage` and mark the
      task as completed when done**
 6. Tell the user the agent is running and they can continue chatting here.

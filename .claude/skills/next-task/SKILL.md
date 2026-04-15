@@ -59,6 +59,8 @@ directly in the main thread (`--skip-agents`).
   - Instruction to write tests first (no code without a failing
     test)
   - Instruction to run `make test` when done
+  - Instruction to update `docs/**/*.md` or `**/README.md` if
+    the change alters behavior, public APIs, or usage patterns
   - Instruction to NOT mark the checkbox as complete
   - Instruction to NOT commit — leave that to the user
   - The project's layer separation: handlers -> service ->
@@ -76,6 +78,8 @@ directly in the main thread (`--skip-agents`).
 - Follow the same rules the agent would follow:
   - Write tests first (no code without a failing test)
   - Run `make test` when done
+  - Update `docs/**/*.md` or `**/README.md` if the change
+    alters behavior, public APIs, or usage patterns
   - Do NOT mark the checkbox as complete in the plan
   - Do NOT commit — leave that to the user
   - Respect the project's layer separation: handlers -> service ->

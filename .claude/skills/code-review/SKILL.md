@@ -106,7 +106,7 @@ embedding the entire diff in the prompt.
 
 ## Create Team and Tasks
 
-Create a team named `code-review-<branch-or-context>` with five
+Create a team named `code-review-<branch-or-context>` with six
 tasks:
 
 1. **Consistency Review** — naming patterns, code style consistency, error
@@ -126,10 +126,13 @@ tasks:
    package cohesion and coupling, adherence to existing architectural patterns in
    the codebase, inappropriate layering violations, single-responsibility at the
    package and type level, extensibility without over-engineering
+1. **Documentation Review** — if the change alters behavior, public APIs, or
+   usage patterns, verify that the corresponding `docs/**/*.md` or
+   `**/README.md` files have been updated; flag missing documentation updates
 
-## Spawn Five Agents in Parallel
+## Spawn Six Agents in Parallel
 
-Spawn five `general-purpose` agents on the team, one per task. Each
+Spawn six `general-purpose` agents on the team, one per task. Each
 agent prompt must include:
 
 - The review dimension and what to focus on
@@ -176,7 +179,7 @@ send a shutdown_request.
 
 ## Compile Summary
 
-After all five agents have reported, delete the team.
+After all six agents have reported, delete the team.
 
 ### PR mode output
 
@@ -303,7 +306,7 @@ sessions, so it works with SAML-enforced orgs out of the box.
 ### Claude Code agent teams (experimental)
 
 The skill uses [agent teams](https://code.claude.com/docs/en/agent-teams)
-(`TeamCreate`, `SendMessage`, `Task` with `team_name`) to run four
+(`TeamCreate`, `SendMessage`, `Task` with `team_name`) to run six
 review agents in parallel. Enable the feature by adding the
 following to `.claude/settings.json`:
 

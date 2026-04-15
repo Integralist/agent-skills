@@ -138,6 +138,8 @@ include:
   `go_file_context`, `go_package_api`; `context7` for library
   documentation lookups)
 - Instructions to save findings to `docs/research/{repo}.md`
+- Instructions to note any stale `docs/**/*.md` or
+  `**/README.md` files discovered during research
 - **Send findings back to team-lead via `SendMessage` and mark the
   task as completed when done**
 
