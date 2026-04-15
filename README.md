@@ -74,7 +74,6 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 │   └── markdown.md     # Markdown linting
 └── skills/
     ├── cleanup/
-    ├── code-research/
     ├── code-review/
     ├── commit/
     ├── critique/
@@ -95,8 +94,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 | Skill                    | Invocation                                                 | Description                                                                                                                                                                 |
 | ------------------------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [**cleanup**](.claude/skills/cleanup/SKILL.md)                         | `/cleanup [path \| glob]`                                  | Audit a codebase for AI slop. Fixes obvious issues directly and flags anything that would change behavior. Runs as a background agent.                                      |
-| [**code-research**](.claude/skills/code-research/SKILL.md)            | `/code-research <repo-name \| github-url>`                 | Locate and explore a repository by name or GitHub URL. Finds it locally under `~/code` or clones it with `gh`.                                                              |
-| [**code-review**](.claude/skills/code-review/SKILL.md)                | `/code-review [PR_URL \| --diff \| --uncommitted \| path]` | Review code using five specialized agents working in parallel, each focused on a different dimension (consistency, idiomatic Go, data correctness, security, architecture). |
+| [**code-review**](.claude/skills/code-review/SKILL.md)                | `/code-review [PR_URL \| --diff \| --uncommitted \| path]` | Review code using six specialized agents working in parallel, each focused on a different dimension (consistency, idiomatic Go, data correctness, security, architecture, documentation). |
 | [**commit**](.claude/skills/commit/SKILL.md)                          | `/commit`                                                  | Create git commits with intelligent file grouping based on staged/unstaged changes.                                                                                         |
 | [**critique**](.claude/skills/critique/SKILL.md)                      | `/critique`                                                | Critique a document for logical fallacies and structural weaknesses. Every issue includes a recommended fix.                                                                |
 | [**delegate**](.claude/skills/delegate/SKILL.md)                      | `/delegate <task>`                                         | Spawn a named agent on a team to handle work in a parallel thread, preserving top-level context.                                                                            |
@@ -106,7 +104,7 @@ patterns, conventions, and preferences I want Claude to follow consistently.
 | [**markdown-to-skill**](.claude/skills/markdown-to-skill/SKILL.md)    | `/markdown-to-skill`                                       | Bulk-convert Markdown files from a directory into valid Claude Code Skills.                                                                                                 |
 | [**next-task**](.claude/skills/next-task/SKILL.md)                    | `/next-task [--skip-agents]`                               | Find the next unchecked task in a project plan and begin implementation. Delegates to an agent by default.                                                                  |
 | [**refactor**](.claude/skills/refactor/SKILL.md)                      | `/refactor <feature or area>`                              | Analyze an existing feature and produce a reimplementation plan focused on reducing complexity and fragmentation.                                                           |
-| [**research-plan**](.claude/skills/research-plan/SKILL.md)            | `/research-plan`                                           | Two-phase workflow: research topics deeply to produce reference docs, then create precise implementation plans.                                                             |
+| [**research-plan**](.claude/skills/research-plan/SKILL.md)            | `/research-plan`                                           | Two-phase workflow: research topics or repos deeply to produce reference docs, then create precise implementation plans. Also handles repo-by-name research (e.g. "check the spotless repo"). |
 | [**systematic-debugging**](.claude/skills/systematic-debugging/SKILL.md) | `/systematic-debugging`                                    | Four-phase debugging methodology emphasizing root cause analysis before any fix is attempted.                                                                               |
 | [**test-feedback**](.claude/skills/test-feedback/SKILL.md)            | `/test-feedback`                                           | Parse test failure output and spawn a background agent to fix the failing tests.                                                                                            |
 
@@ -131,8 +129,7 @@ go run main.go crawl
 
 I have the following workflow (you can skip items if they're not necessary):
 
-- code-research (creates `docs/research/{repo}.md` documents)
-- research-plan (creates `docs/research/{topic}.md` + `docs/plans/{project}.md` documents)
+- research-plan (creates `docs/research/{topic-or-repo}.md` + `docs/plans/{project}.md` documents)
 - critique (reviews plans and highlights issues)
 - next-task (finds latest plan and starts next task)
 - commit (commit code changes; or you can do at the end)

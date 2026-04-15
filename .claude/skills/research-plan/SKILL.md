@@ -4,8 +4,10 @@ description: >-
   Two-phase workflow: research topics deeply, then create
   implementation plans. Bootstraps CLAUDE.md, produces
   docs/research/ reference docs, and docs/plans/ implementation
-  guides. Use when the user wants to research a topic, create
-  a project plan, or says /research-plan.
+  guides. Also handles repo-by-name research — e.g. "check
+  the spotless repo", "look at github.com/fastly/spotless".
+  Use when the user wants to research a topic, explore a
+  repo, create a project plan, or says /research-plan.
 ---
 
 # Research & Plan
@@ -48,22 +50,196 @@ What do you want researched?
 
 ## Phase 1: Research
 
+### Detect research mode
+
+Determine which mode to use based on the user's input:
+
+| Input                                    | Mode            |
+| ---------------------------------------- | --------------- |
+| GitHub URL (`https://github.com/o/r`)    | **Code research** |
+| `org/repo` or bare repo name             | **Code research** |
+| Topic, concept, or question              | **Topic research** |
+
 ### Check for existing research
 
-Before starting new research, scan `docs/research/` for
-documents that already cover the topic or a closely related
-one. Match broadly — a request about "CI pipeline caching"
-is covered by an existing `ci.md` or
-`continuous-integration.md`.
+Before starting new research in either mode, scan
+`docs/research/` for documents that already cover the
+topic or repo. Match broadly — a request about "CI
+pipeline caching" is covered by an existing `ci.md` or
+`continuous-integration.md`; a request about the
+`fastly/spotless` repo is covered by `spotless.md`.
 
 - **Exact or near match found**: Read the document. If it
   already covers what the user needs, skip to the "After
   research completes" prompt. If it covers the topic
   partially, extend it — add new sections or deepen
   existing ones rather than creating a second file.
-- **No match found**: Proceed with new research below.
+- **No match found**: Proceed with the appropriate research
+  mode below.
 
-### Conduct research
+### Mode A: Code research (repo by name or URL)
+
+Use this mode when the user references a specific
+repository.
+
+#### Parse input
+
+Extract `{org}` and `{repo}` from the argument:
+
+1. **GitHub URL** — strip `https://github.com/` prefix,
+   split on `/` to get `{org}` and `{repo}`. Remove any
+   trailing `.git`.
+1. **`org/repo` form** — split on `/`.
+1. **Bare repo name** — no `/` present; `{org}` is unknown.
+
+#### Locate locally
+
+1. If `{org}` is known, check whether
+   `~/code/{org}/{repo}` exists.
+1. If only a bare name, search `~/code/*/{repo}` for a
+   matching directory.
+   - If exactly one match is found, use it.
+   - If multiple matches are found, list them and ask the
+     user which one to use.
+   - If no match is found, ask the user for the org (or
+     full URL) so you can clone it.
+
+#### Clone if missing
+
+If the repo is not found locally and `{org}` is known:
+
+```bash
+gh repo clone {org}/{repo} ~/code/{org}/{repo}
+```
+
+#### Gather project metadata
+
+Run the following git commands inside the repo directory to
+build a diagnostic snapshot. Capture the output and include
+it in the agent prompt as context.
+
+**Churn hotspots** — most-changed files in the last year:
+
+```bash
+git -C {repo_path} log --format=format: --name-only \
+  --since="1 year ago" \
+  | sort | uniq -c | sort -nr | head -20
+```
+
+**Bus factor** — contributors ranked by commit count:
+
+```bash
+git -C {repo_path} shortlog -sn --no-merges
+```
+
+Also check recent activity (last 6 months) to flag absent
+top contributors:
+
+```bash
+git -C {repo_path} shortlog -sn --no-merges \
+  --since="6 months ago"
+```
+
+**Bug clusters** — files most often touched in bug-fix
+commits:
+
+```bash
+git -C {repo_path} log -i -E --grep="fix|bug|broken" \
+  --name-only --format='' \
+  | sort | uniq -c | sort -nr | head -20
+```
+
+**Commit velocity** — commits per month:
+
+```bash
+git -C {repo_path} log --format='%ad' \
+  --date=format:'%Y-%m' | sort | uniq -c
+```
+
+**Crisis patterns** — reverts, hotfixes, and rollbacks:
+
+```bash
+git -C {repo_path} log --oneline --since="1 year ago" \
+  | grep -iE 'revert|hotfix|emergency|rollback'
+```
+
+**Cross-reference**: Files that appear in **both** churn
+hotspots and bug clusters are the highest-risk code. Flag
+these explicitly in the metadata passed to the agent.
+
+#### When in doubt, ask
+
+Do not guess. If any of the following are unclear, stop
+and ask the user before proceeding:
+
+- The input is ambiguous (e.g. a bare name that could
+  match multiple orgs).
+- You aren't sure what the user wants to know about the
+  repo.
+- The clone would go to an unexpected location.
+- The repo doesn't exist on GitHub (clone fails).
+
+Prefer a short clarifying question over a wrong assumption.
+
+#### Create team and spawn agent
+
+Create a team named `code-research-{repo}` with one task:
+
+1. **Research** — explore the repo and answer the user's
+   question
+
+Spawn a single `general-purpose` agent named
+`code-researcher` on the team, assigned to the **Research**
+task. The agent prompt must include:
+
+- The repo path (`~/code/{org}/{repo}`)
+- The user's question or research goal
+- The **project metadata** gathered above — instruct the
+  agent to use this metadata to prioritize which code to
+  read first
+- Instructions to use `Read`, `Glob`, `Grep`, and Explore
+  patterns to investigate the codebase
+- Instructions to use any relevant MCP servers available in
+  the session (e.g. `gopls` for Go projects — `go_search`,
+  `go_file_context`, `go_package_api`; `context7` for
+  library documentation lookups)
+- Instructions to note any stale `docs/**/*.md` or
+  `**/README.md` files discovered during research
+- **Send findings back to team-lead via `SendMessage` and
+  mark the task as completed when done**
+
+While `@code-researcher` runs, the main agent remains
+available (can answer other questions, do lightweight
+lookups, etc.).
+
+When `@code-researcher` reports back via `SendMessage`,
+acknowledge receipt and send a `shutdown_request`. Then
+delete the team.
+
+#### Save findings
+
+Write findings to `docs/research/{repo}.md` (new file) or
+extend the existing document identified during the
+"Check for existing research" step. The document must
+include a **Project Metadata** section at the top with the
+git diagnostic snapshot (churn hotspots, bus factor, bug
+clusters, commit velocity, crisis patterns, and high-risk
+files).
+
+Use the same research template shown in Mode B below.
+
+#### Present findings
+
+Summarize the research to the user, note where the full
+document was saved, then proceed to the "After research
+completes" prompt.
+
+### Mode B: Topic research
+
+Use this mode for concepts, technologies, patterns, or
+anything that isn't a specific repo.
+
+#### Conduct research
 
 Take the user's topic and study it deeply. Use every tool at
 your disposal: read source code, explore the codebase, fetch
