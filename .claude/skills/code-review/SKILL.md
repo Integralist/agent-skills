@@ -207,9 +207,9 @@ for awareness.
 
 ### Local mode output
 
-Create the output directory with `mkdir -p docs/plans`, then
-write the review to
-`docs/plans/code-review-<YYYY-MM-DD-HHMM>.md`:
+Present the consolidated review directly in the conversation
+using the same format as PR mode output above, with these
+additional metadata fields at the top:
 
 ```markdown
 ## Code Review: <branch-name or "uncommitted" or path>
@@ -221,16 +221,23 @@ write the review to
 **Files reviewed:** <count>
 
 ### Actionable Items
-
-[Same structure as PR mode — severity-ordered with file, line,
-snippet, rationale, suggestion]
+...
 
 ### Informational / No Action Needed
-
-[Same structure as PR mode]
+...
 ```
 
-Print a short summary and the file path in the conversation.
+After presenting the review, ask the user what they want to
+do next:
+
+```text
+What would you like to do with this review?
+
+1. Save to docs/plans/code-review-<date>.md
+2. Address the actionable items now
+3. Nothing — just wanted the review
+4. Something else?
+```
 
 Deduplicate findings across agents — if multiple agents flag the
 same issue, combine them into a single item citing all relevant
