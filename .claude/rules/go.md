@@ -753,6 +753,22 @@ key := cm.HierarchicalKeyFor(customerID, "config", configID)
 - `cache.go` for cache logic
 - `README.md` for every package (see below)
 
+### Package `doc.go`
+
+Every Go package must have a `doc.go` file containing only the package-level
+comment and the `package` declaration. When creating a new package, add one.
+When editing a file in an existing package, check for a missing `doc.go` and
+add one if absent. If the package's purpose has changed, update the comment.
+
+```go
+// Package redis provides a thin wrapper around go-redis with
+// connection pooling, health checks, and structured logging.
+package redis
+```
+
+Keep the comment to one or two sentences describing what the package does
+and why it exists. Do not put imports, constants, or code in `doc.go`.
+
 ### Package README
 
 Every Go package must have a `README.md` in its directory. When creating a
