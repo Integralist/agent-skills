@@ -10,4 +10,5 @@ install-agents:
 install: install-claude install-agents
 
 .PHONY: force-add
-force-add: git add -f .claude/
+force-add:
+	git add -f .claude/
