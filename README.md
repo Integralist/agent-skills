@@ -47,12 +47,12 @@ make install
     ├── go-api/
     ├── go-testing/
     ├── grepai/
-    ├── improve-docs/
     ├── markdown-to-skill/          # Claude-only (not in .agents/)
     ├── next-task/
     ├── refactor/
     ├── research-plan/
     ├── systematic-debugging/
+    ├── tech-docs/
     └── test-feedback/
 
 .agents/                            # Generic Agent Skills
@@ -68,12 +68,12 @@ make install
     ├── go-conventions/             # New: rule → skill
     ├── go-testing/
     ├── grepai/
-    ├── improve-docs/
     ├── markdown-conventions/       # New: rule → skill
     ├── next-task/                  # Rewritten: teams → subagents
     ├── refactor/                   # Rewritten: teams → subagents
     ├── research-plan/              # Rewritten: teams → subagents
     ├── systematic-debugging/
+    ├── tech-docs/
     └── test-feedback/              # Minor phrasing tweaks
 ```
 
@@ -115,37 +115,37 @@ auto-loading.
 
 ## Skill Reference
 
-| Skill | Description |
-| --- | --- |
-| **brevity** | Ultra-compressed communication with 3 intensity levels |
-| **cleanup** | Audit codebase for AI slop via background subagent |
-| **code-review** | Multi-dimensional review via parallel subagents |
-| **commit** | Git commits with intelligent file grouping |
-| **critique** | Critique a document for logical fallacies |
-| **delegate** | Spawn a subagent for a task |
-| **go-api** | Generate a production-ready Go API service |
-| **go-conventions** | Go coding conventions (.agents/ only) |
-| **go-testing** | Write Go tests — table-driven, fuzz, benchmarks |
-| **grepai** | Semantic code search by intent |
-| **improve-docs** | Improve technical document writing via five documentation pillars |
-| **markdown-conventions** | Markdown formatting conventions (.agents/ only) |
-| **markdown-to-skill** | Bulk-convert Markdown to skills (.claude/ only) |
-| **next-task** | Continue working through a project plan |
-| **refactor** | Analyze a feature and produce a reimplementation plan |
-| **research-plan** | Research topics deeply, then create implementation plans |
-| **systematic-debugging** | Four-phase debugging with root cause analysis |
-| **test-feedback** | Parse test failures and fix them in a background subagent |
+| Skill                    | Description                                                             |
+| ------------------------ | ----------------------------------------------------------------------- |
+| **brevity**              | Ultra-compressed communication with 3 intensity levels                  |
+| **cleanup**              | Audit codebase for AI slop via background subagent                      |
+| **code-review**          | Multi-dimensional review via parallel subagents                         |
+| **commit**               | Git commits with intelligent file grouping                              |
+| **critique**             | Critique a document for logical fallacies                               |
+| **delegate**             | Spawn a subagent for a task                                             |
+| **go-api**               | Generate a production-ready Go API service                              |
+| **go-conventions**       | Go coding conventions (.agents/ only)                                   |
+| **go-testing**           | Write Go tests — table-driven, fuzz, benchmarks                         |
+| **grepai**               | Semantic code search by intent                                          |
+| **markdown-conventions** | Markdown formatting conventions (.agents/ only)                         |
+| **markdown-to-skill**    | Bulk-convert Markdown to skills (.claude/ only)                         |
+| **next-task**            | Continue working through a project plan                                 |
+| **refactor**             | Analyze a feature and produce a reimplementation plan                   |
+| **research-plan**        | Research topics deeply, then create implementation plans                |
+| **systematic-debugging** | Four-phase debugging with root cause analysis                           |
+| **tech-docs**            | Write or improve technical documentation via five documentation pillars |
+| **test-feedback**        | Parse test failures and fix them in a background subagent               |
 
 ## Differences Between .claude/ and .agents/
 
-| Aspect | `.claude/` | `.agents/` |
-| --- | --- | --- |
-| Orchestration | TeamCreate, SendMessage, TaskCreate | "Spawn a subagent" with role descriptions |
-| Rules | Auto-loaded by file path glob | Converted to explicit skills |
-| Prompting | AskUserQuestion with options | "Present numbered options and wait" |
-| Frontmatter | user-invocable, argument-hint, allowed-tools | name, description only |
-| markdown-to-skill | Included | Omitted (uses Claude-only features) |
-| code-review dimensions | 6 (consistency, Go, data, security, arch, docs) | 4 (consistency, data, security, Go) |
+| Aspect                 | `.claude/`                                      | `.agents/`                                |
+| ---------------------- | ----------------------------------------------- | ----------------------------------------- |
+| Orchestration          | TeamCreate, SendMessage, TaskCreate             | "Spawn a subagent" with role descriptions |
+| Rules                  | Auto-loaded by file path glob                   | Converted to explicit skills              |
+| Prompting              | AskUserQuestion with options                    | "Present numbered options and wait"       |
+| Frontmatter            | user-invocable, argument-hint, allowed-tools    | name, description only                    |
+| markdown-to-skill      | Included                                        | Omitted (uses Claude-only features)       |
+| code-review dimensions | 6 (consistency, Go, data, security, arch, docs) | 4 (consistency, data, security, Go)       |
 
 ## Workflow
 

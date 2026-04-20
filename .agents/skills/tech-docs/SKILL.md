@@ -1,20 +1,23 @@
 ---
-name: improve-docs
+name: tech-docs
 description: >-
-  Improve the writing of a technical document. Applies
+  Write or improve technical documentation. Applies
   documentation best practices: brevity, eliminating
   assumptions, modularization, visualization, and reducing
-  stale code references. Use when the user wants a technical
-  document reviewed and rewritten for clarity and quality.
+  stale code references. Use when writing new documentation
+  from scratch or reviewing and rewriting existing documents
+  for clarity and quality.
 ---
 
 # Improve Technical Documentation
 
-Review a technical document and rewrite it to reduce friction
-for the reader. Apply the five documentation pillars below and
-produce a concrete, improved version of the document.
+Write new or improve existing technical documentation.
+Apply the five documentation pillars below to reduce
+friction for the reader and produce a concrete document.
 
 ## Process
+
+### When improving an existing document
 
 1. **Prompt for the file:**
 
@@ -36,6 +39,18 @@ produce a concrete, improved version of the document.
 
 1. **Present a change summary.** After the rewrite, list what
    changed and why, organized by pillar.
+
+### When writing a new document
+
+1. **Clarify scope.** Confirm the topic, audience, and purpose
+   of the document with the user.
+
+1. **Draft the document.** Apply all five pillars from the
+   start. Structure the content with a clear purpose, define
+   terms, keep sections focused, use diagrams where helpful,
+   and reference source files instead of pasting code.
+
+1. **Present the draft** for review.
 
 ## The Five Pillars
 
