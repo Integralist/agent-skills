@@ -214,6 +214,59 @@ The format is `"<layer>: <what failed>: %w"`. Omit the package/type name
 that is already implied by the prefix (e.g., `"redis: failed to ping: %w"`
 not `"redis: failed to ping redis: %w"`).
 
+### Error translation boundaries
+
+Error translation happens at exactly two boundaries:
+
+- **Repository**: storage errors → domain sentinels
+- **Handler**: domain sentinels → HTTP/wire format
+
+The service layer passes domain errors through unchanged (adding context
+with `%w`). Do not translate errors in the service layer unless the
+service itself produces a new domain condition (e.g., soft-delete →
+`ErrNotFound`).
+
+**Why this matters:**
+
+- **Decoupling** — without translation, handlers import storage packages
+  (`database/sql`, `redis`) to check for errors like `sql.ErrNoRows`.
+  Adding a cache layer or swapping databases forces changes in every
+  handler. Domain sentinels let handlers depend only on business concepts.
+- **Multi-transport consistency** — a service serving both HTTP and gRPC
+  maps domain errors to wire format once per transport (`ErrNotFound` →
+  404 or `codes.NotFound`), avoiding duplicated storage checks.
+- **Business logic gaps** — storage errors can't capture domain nuances.
+  A soft-deleted record exists in the database (no `sql.ErrNoRows`), but
+  the service treats it as missing. Only domain sentinels can express this.
+- **Observability vs. client safety** — `%w` on domain errors lets
+  handlers branch; `%v` on storage errors preserves the message for logs
+  but hides internals from clients. The client sees "not found"; the
+  on-call engineer sees "user 42 soft-deleted: not found".
+- **Idiomatic Go** — the standard library uses the same pattern: `os.Open`
+  translates platform-specific errors (`syscall.ENOENT`,
+  `ERROR_FILE_NOT_FOUND`) into the portable `fs.ErrNotExist`.
+
+### `%w` vs `%v` in the repository layer
+
+In the repository layer, use `%w` only when wrapping **domain sentinel
+errors** that callers should inspect with `errors.Is`. Use `%v` for raw
+storage/driver errors to sever the chain — callers get the message for
+logging but cannot match against storage-specific types:
+
+```go
+// Translated to domain error — wrap with %w (callers inspect this)
+if errors.Is(err, sql.ErrNoRows) {
+	return fmt.Errorf("repository: config %s not found: %w", id, errorsx.ErrNotFound)
+}
+
+// Raw storage error — sever with %v (callers should not inspect this)
+return fmt.Errorf("repository: failed to query config: %v", err)
+```
+
+The rule: `%w` for your own domain errors, `%v` for storage errors.
+
+### Error type utilities
+
 - Use `errors.AsType[T]` (Go 1.26+) instead of `errors.As`. It returns
   `(T, bool)` and avoids the need for a pre-declared target variable:
   ```go
