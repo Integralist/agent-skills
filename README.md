@@ -47,6 +47,7 @@ make install
     ├── go-api/
     ├── go-testing/
     ├── grepai/
+    ├── improve-docs/
     ├── markdown-to-skill/          # Claude-only (not in .agents/)
     ├── next-task/
     ├── refactor/
@@ -67,6 +68,7 @@ make install
     ├── go-conventions/             # New: rule → skill
     ├── go-testing/
     ├── grepai/
+    ├── improve-docs/
     ├── markdown-conventions/       # New: rule → skill
     ├── next-task/                  # Rewritten: teams → subagents
     ├── refactor/                   # Rewritten: teams → subagents
@@ -125,6 +127,7 @@ auto-loading.
 | **go-conventions** | Go coding conventions (.agents/ only) |
 | **go-testing** | Write Go tests — table-driven, fuzz, benchmarks |
 | **grepai** | Semantic code search by intent |
+| **improve-docs** | Improve technical document writing via five documentation pillars |
 | **markdown-conventions** | Markdown formatting conventions (.agents/ only) |
 | **markdown-to-skill** | Bulk-convert Markdown to skills (.claude/ only) |
 | **next-task** | Continue working through a project plan |
