@@ -62,6 +62,13 @@ allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 
 1. **If pre-commit hook modifies files:** review the changes. Only amend if they're mechanical (formatting, linting). If substantive or unclear, ask before amending.
 
+1. **Update project plan:** If you have been working against a
+   project plan (e.g. a plan file, task list, or checklist in the
+   conversation or filesystem), mark the task or item that
+   corresponds to the committed change as done. Match the plan's
+   existing format: `[x]` for Markdown checklists, ✅ for emoji
+   markers, or whatever convention the document uses.
+
 ## Grouping Examples
 
 **Clear single purpose (no prompt):**
