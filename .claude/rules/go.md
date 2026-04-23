@@ -7,6 +7,52 @@ We are peers writing Go. Prioritize correctness, clarity, and best practices.
 
 ## Tooling
 
+### Go LSP (gopls)
+
+Prefer the gopls MCP server over `sed`, `grep`, or manual edits for Go code
+navigation and refactoring. The LSP understands Go semantics — package
+qualifiers, method receivers, identifier shadowing — and will not miss
+references or corrupt similarly-named identifiers the way text-based tools
+can. Do not reach for `sed` to rename a Go symbol.
+
+Use these gopls tools:
+
+- `go_workspace` — run first in a Go session to detect the workspace
+  layout.
+- `go_vulncheck` — run immediately after `go_workspace` to surface known
+  security risks.
+- `go_rename_symbol` — rename a type, function, variable, method, or
+  field across the entire workspace. Updates every Go reference,
+  including qualified uses in other packages and import aliases. Always
+  prefer this over `sed` for an identifier rename.
+- `go_symbol_references` — locate every use of a symbol. Run before
+  deleting or changing the signature of anything exported.
+- `go_search` — fuzzy-find a symbol when the exact name or location is
+  unknown.
+- `go_file_context` — summarize the intra-package declarations a file
+  depends on. Use after reading a Go file for the first time.
+- `go_package_api` — list the exported surface of a package.
+- `go_diagnostics` — compile errors and vet findings on changed files.
+  Run after edits.
+
+#### Rename caveat: comments and docs
+
+`go_rename_symbol` rewrites Go references only. It does **not** touch
+code comments, godoc blocks, `README.md`, other markdown, or string
+literals — these keep the old name and become stale pointers.
+
+After an LSP rename:
+
+1. Run `rg <old-name>` across the repository to surface remaining
+   occurrences in comments, docs, and strings.
+2. Use `sed` or targeted Edit calls to update the remaining
+   occurrences.
+
+This is the one place `sed` is the right tool for a Go rename — not on
+source code, but on the non-source text the LSP leaves behind.
+
+### Linters
+
 After editing Go files, run the following linters to catch issues before
 committing:
 

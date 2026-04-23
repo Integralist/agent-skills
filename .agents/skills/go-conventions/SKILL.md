@@ -12,6 +12,35 @@ best practices.
 
 ## Tooling
 
+### Go LSP (gopls)
+
+Prefer the gopls MCP server over `sed`, `grep`, or manual edits
+for Go code navigation and refactoring. The LSP understands Go
+semantics and will not miss references or corrupt similarly-named
+identifiers the way text-based tools can.
+
+Use these gopls tools:
+
+- `go_workspace` — run first in a Go session.
+- `go_vulncheck` — run right after `go_workspace`.
+- `go_rename_symbol` — rename a type, function, variable, method,
+  or field across the workspace. Prefer this over `sed` for any
+  Go identifier rename.
+- `go_symbol_references` — find every use of a symbol.
+- `go_search` — fuzzy-find symbols.
+- `go_file_context` — summarize intra-package dependencies after
+  first reading a Go file.
+- `go_package_api` — list a package's exported surface.
+- `go_diagnostics` — compile errors and vet findings on changed
+  files. Run after edits.
+
+**Rename caveat:** `go_rename_symbol` rewrites Go references
+only. It does not touch comments, godoc, `README.md`, or string
+literals. After a rename, run `rg <old-name>` across the repo
+and use `sed` or Edit to clean up the remaining occurrences.
+
+### Linters
+
 After editing Go files, run the following linters to catch
 issues before committing:
 
