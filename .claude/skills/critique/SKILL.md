@@ -9,8 +9,8 @@ description: >-
 
 # Critique
 
-Analyze a document for logical fallacies and structural
-weaknesses. Every issue must include a recommended fix.
+Analyze a document for logical fallacies and structural weaknesses. Every issue
+must include a recommended fix.
 
 ## Process
 
@@ -27,51 +27,71 @@ weaknesses. Every issue must include a recommended fix.
 1. **Analyze for logical fallacies.** Scan for instances of:
 
    - Straw man — misrepresenting a position to attack it
-   - False dichotomy — presenting only two options when more
-     exist
-   - Appeal to authority — claiming truth because an authority
-     said so, without evidence
-   - Slippery slope — asserting an unlikely chain of
-     consequences without justification
+   - False dichotomy — presenting only two options when more exist
+   - Appeal to authority — claiming truth because an authority said so, without
+     evidence
+   - Slippery slope — asserting an unlikely chain of consequences without
+     justification
    - Circular reasoning — using the conclusion as a premise
    - Ad hominem — attacking the person instead of the argument
    - Red herring — introducing irrelevant points to distract
-   - Hasty generalization — drawing broad conclusions from
-     limited evidence
+   - Hasty generalization — drawing broad conclusions from limited evidence
    - False cause — assuming correlation implies causation
    - Moving the goalposts — changing criteria after the fact
    - Equivocation — using a term with shifting meaning
-   - Appeal to emotion — substituting emotional persuasion
-     for evidence
-   - Bandwagon — arguing something is true because many
-     believe it
-   - Begging the question — assuming the conclusion within the
-     premise
-   - Tu quoque — deflecting criticism by pointing to the
-     accuser's behavior
+   - Appeal to emotion — substituting emotional persuasion for evidence
+   - Bandwagon — arguing something is true because many believe it
+   - Begging the question — assuming the conclusion within the premise
+   - Tu quoque — deflecting criticism by pointing to the accuser's behavior
 
-   This is not exhaustive. Flag any fallacy you identify, even
-   if it is not listed here.
+   This is not exhaustive. Flag any fallacy you identify, even if it is not
+   listed here.
 
 1. **Critique the document.** Evaluate:
 
-   - **Argument structure** — Are claims supported? Are there
-     gaps in reasoning? Do conclusions follow from premises?
-   - **Evidence quality** — Are sources cited? Is evidence
-     relevant and sufficient? Are statistics used correctly?
-   - **Assumptions** — What unstated assumptions exist? Are
-     they reasonable?
-   - **Completeness** — Are counterarguments addressed? Are
-     important perspectives missing?
-   - **Clarity** — Are terms defined? Is the writing ambiguous
-     or vague where precision matters?
-   - **Consistency** — Does the document contradict itself?
-     Do later sections conflict with earlier claims?
+   - **Argument structure** — Are claims supported? Are there gaps in reasoning?
+     Do conclusions follow from premises?
+   - **Evidence quality** — Are sources cited? Is evidence relevant and
+     sufficient? Are statistics used correctly?
+   - **Assumptions** — What unstated assumptions exist? Are they reasonable?
+   - **Completeness** — Are counterarguments addressed? Are important
+     perspectives missing?
+   - **Clarity** — Are terms defined? Is the writing ambiguous or vague where
+     precision matters?
+   - **Consistency** — Does the document contradict itself? Do later sections
+     conflict with earlier claims?
+
+1. **If the document is an implementation plan** (e.g. under `docs/plans/`, or
+   structured with tasks, File Changes, and Verification sections), additionally
+   evaluate:
+
+   - **Scope integrity** — Is every task within the stated goal, or do some
+     drift into adjacent refactors, renames, or cleanup not required by the
+     plan's objective?
+   - **File enumeration** — Does the File Changes table list every file the
+     tasks imply touching? Flag tasks whose implementation requires unlisted
+     files.
+   - **Task testability** — Is each task independently verifiable? Flag tasks
+     phrased as "improve X", "clean up Y", or "refactor Z" with no concrete
+     pass/fail signal.
+   - **Verification concreteness** — Does the verification phase name actual
+     commands, test paths, or observable outcomes? Flag vague items like "run
+     the tests" or "confirm it works".
+   - **Unstated dependencies** — Are there tasks that implicitly depend on
+     another task (shared file, new type, upstream contract) without the
+     dependency being declared?
+   - **Edge cases** — What failure modes does the plan not address? Error paths,
+     partial failures, concurrent callers, rollback, data migration of existing
+     state.
+
+   These checks apply only when the document is a plan. Do not manufacture plan
+   issues on documents that are not plans (blog posts, research docs, design
+   notes).
 
 ## Output
 
-Present findings in two sections. For every issue, quote the
-relevant passage and provide a concrete fix.
+Present findings in two sections. For every issue, quote the relevant passage
+and provide a concrete fix.
 
 ### Logical Fallacies
 
@@ -106,18 +126,14 @@ restructure, etc.}
 
 ### Summary
 
-Close with a short summary: how many fallacies were found,
-the most significant weaknesses, and the single highest-impact
-improvement the author could make.
+Close with a short summary: how many fallacies were found, the most significant
+weaknesses, and the single highest-impact improvement the author could make.
 
 ## Guidelines
 
-- Be thorough but fair. Flag real issues, not stylistic
-  preferences.
+- Be thorough but fair. Flag real issues, not stylistic preferences.
 - Quote the source text so the author can locate each issue.
-- Fixes must be actionable — not "make this better" but a
-  specific rewrite or concrete next step.
-- If the document is well-constructed, say so. Do not
-  manufacture issues.
-- Do not rewrite the entire document. Focus on the weakest
-  points.
+- Fixes must be actionable — not "make this better" but a specific rewrite or
+  concrete next step.
+- If the document is well-constructed, say so. Do not manufacture issues.
+- Do not rewrite the entire document. Focus on the weakest points.
