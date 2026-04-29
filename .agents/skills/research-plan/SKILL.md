@@ -422,6 +422,10 @@ Notify the user that the plan is done, then present two options:
 
 - Use specific file paths and line numbers when referencing
   code.
+- Every factual claim in a research document must be cited
+  inline — `path/to/file.go:42` for code, URL for external
+  docs. Claims you cannot cite must be labelled "unverified
+  assumption" and include how to verify them.
 - Break work into logical phases (usually by component or
   layer).
 - Each task should be small enough to complete in one session.
