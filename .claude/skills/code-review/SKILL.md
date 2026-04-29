@@ -5,15 +5,16 @@ description: >-
   consistency, idiomatic Go, data correctness, security, and architecture.
   Works on PRs (/code-review <PR_URL>) or local code
   (/code-review, /code-review --diff, /code-review --uncommitted,
-  /code-review path/to/file.go).
+  /code-review path/to/file.go). Pass --plan or --plan=<path> to
+  additionally check the diff against an implementation plan.
 user-invocable: true
-argument-hint: '[PR_URL | --diff | --uncommitted | path]'
+argument-hint: '[PR_URL | --diff | --uncommitted | path] [--plan[=<path>]]'
 ---
 
 # Code Review Skill
 
-Review code using five specialized agents working in parallel.
-Each agent focuses on a different review dimension. Works against
+Review code using six specialized agents working in parallel (seven with
+`--plan`). Each agent focuses on a different review dimension. Works against
 GitHub PRs or local code changes.
 
 ## Input
@@ -27,21 +28,24 @@ The argument is available as `$ARGUMENTS`. Detect the mode:
 | `--uncommitted`               | **Local: uncommitted changes**        |
 | File path or glob pattern     | **Local: explicit paths**             |
 
+`--plan` (or `--plan=<path>`) is an orthogonal modifier that can be combined
+with any of the modes above. When present, an additional Plan Adherence agent is
+spawned. See "Plan mode" below.
+
 ## PR Mode: Fetch Context
 
-Use the GitHub MCP tools to fetch PR metadata and the full diff.
-If any MCP call fails (e.g., 403 SAML enforcement), fall back to the
-`gh` CLI equivalents shown below.
+Use the GitHub MCP tools to fetch PR metadata and the full diff. If any MCP call
+fails (e.g., 403 SAML enforcement), fall back to the `gh` CLI equivalents shown
+below.
 
 ### Primary: GitHub MCP
 
-1. `mcp__github__pull_request_read` with `method: "get"`, `owner`,
-   `repo`, `pullNumber` — returns title, body, base/head refs,
-   additions, deletions
-1. `mcp__github__pull_request_read` with `method: "get_files"`,
-   `owner`, `repo`, `pullNumber` — returns the list of changed files
-1. `mcp__github__pull_request_read` with `method: "get_diff"`,
-   `owner`, `repo`, `pullNumber` — returns the full diff
+1. `mcp__github__pull_request_read` with `method: "get"`, `owner`, `repo`,
+   `pullNumber` — returns title, body, base/head refs, additions, deletions
+1. `mcp__github__pull_request_read` with `method: "get_files"`, `owner`, `repo`,
+   `pullNumber` — returns the list of changed files
+1. `mcp__github__pull_request_read` with `method: "get_diff"`, `owner`, `repo`,
+   `pullNumber` — returns the full diff
 
 ### Fallback: `gh` CLI
 
@@ -57,8 +61,8 @@ Run these in order until one succeeds:
 
 1. `git rev-parse --verify main` — use `main`
 1. `git rev-parse --verify master` — use `master`
-1. `git symbolic-ref refs/remotes/origin/HEAD` — parse the branch
-   name from the output
+1. `git symbolic-ref refs/remotes/origin/HEAD` — parse the branch name from the
+   output
 
 Store the result as `DEFAULT_BRANCH`.
 
@@ -81,9 +85,8 @@ git diff --name-only HEAD
 git status --porcelain | sed -n 's/^?? //p'
 ```
 
-For any untracked files listed above, read each one with the `Read`
-tool and include its contents as additional context alongside the
-diff.
+For any untracked files listed above, read each one with the `Read` tool and
+include its contents as additional context alongside the diff.
 
 ### Explicit paths
 
@@ -95,19 +98,63 @@ For each provided path or glob pattern:
 
 ### No changes
 
-If the diff is empty and no files are found, report
-"No changes to review" and stop.
+If the diff is empty and no files are found, report "No changes to review" and
+stop.
 
 ### Large diffs
 
-If the diff exceeds ~3000 lines, pass only the file list to agents
-and instruct them to read files individually via `Read` rather than
-embedding the entire diff in the prompt.
+If the diff exceeds ~3000 lines, pass only the file list to agents and instruct
+them to read files individually via `Read` rather than embedding the entire diff
+in the prompt.
+
+## Plan mode (`--plan[=<path>]`)
+
+When `--plan` is present in `$ARGUMENTS`, spawn an additional Plan Adherence
+agent alongside the six standard agents. Do nothing extra when the flag is
+absent.
+
+### Locate the plan
+
+Resolve the plan path in this order:
+
+1. **Explicit** — `--plan=<path>` gives the plan path directly.
+1. **PR body link** (PR mode only) — scan the PR body for a link to a file under
+   `docs/plans/`. If found, use it.
+1. **Newest plan** — pick the newest `docs/plans/*.md` by mtime, excluding
+   `README.md` and anything under `docs/plans/completed/`.
+
+If no plan is found, do not spawn the Plan Adherence agent and note "no plan
+located, skipping plan adherence" in the summary.
+
+### Plan Adherence task
+
+Add a seventh task to the team:
+
+- **Plan Adherence Review** — compare the diff against the plan document. Report
+  (do not fail on):
+  - **Unplanned files** — files in the diff not listed in the plan's File
+    Changes table or referenced by a task
+  - **Missing implementation** — tasks marked or implied as done in the plan,
+    but not reflected in the diff
+  - **Scope excess** — changes that exceed the plan's stated goal (refactors of
+    adjacent code, rename sprees, unrelated fixes). Treat these as
+    informational; the user may commit them separately by design.
+  - **Plan drift** — changes that contradict the plan's stated approach
+    (different file structure, different API shape)
+
+The agent prompt must include:
+
+- The plan file contents (read via `Read`)
+- The diff and file list (same as other agents)
+- Instruction: "Report findings; do not make judgment calls about whether scope
+  excess is a problem. Let the user decide."
+- Instruction: "Send findings to team-lead via `SendMessage` and mark your task
+  completed."
 
 ## Create Team and Tasks
 
-Create a team named `code-review-<branch-or-context>` with six
-tasks:
+Create a team named `code-review-<branch-or-context>` with six tasks (seven if
+`--plan` is active):
 
 1. **Consistency Review** — naming patterns, code style consistency, error
    handling patterns, metric/label/logging consistency, structural consistency
@@ -116,23 +163,26 @@ tasks:
    https://go.dev/doc/effective_go
 1. **Data Consistency Review** — correctness of computations and state, race
    conditions in concurrent access, correct context/value propagation, resource
-   lifecycle (leaks, double-close), appropriate data structure choices, error path
-   completeness
+   lifecycle (leaks, double-close), appropriate data structure choices, error
+   path completeness
 1. **Security Review** — injection/cardinality attacks on labels or inputs,
    information leakage, unbounded reads or allocations, resource exhaustion,
    dependency security, timing side channels, authentication/authorization gaps
 1. **Architecture Review** — separation of concerns, dependency direction (no
-   circular or upward dependencies), interface design and abstraction boundaries,
-   package cohesion and coupling, adherence to existing architectural patterns in
-   the codebase, inappropriate layering violations, single-responsibility at the
-   package and type level, extensibility without over-engineering
+   circular or upward dependencies), interface design and abstraction
+   boundaries, package cohesion and coupling, adherence to existing
+   architectural patterns in the codebase, inappropriate layering violations,
+   single-responsibility at the package and type level, extensibility without
+   over-engineering
 1. **Documentation Review** — if the change alters behavior, public APIs, or
    usage patterns, verify that the corresponding `docs/**/*.md` or
    `**/README.md` files have been updated; flag missing documentation updates
+1. **Plan Adherence Review** *(only when `--plan` is active and a plan was
+   located)* — see "Plan mode" above
 
-## Spawn Six Agents in Parallel
+## Spawn Agents in Parallel
 
-Spawn six `general-purpose` agents on the team, one per task. Each
+Spawn one `general-purpose` agent per task (six, or seven with `--plan`). Each
 agent prompt must include:
 
 - The review dimension and what to focus on
@@ -140,46 +190,64 @@ agent prompt must include:
   https://go.dev/doc/effective_go for the full Effective Go guidelines before
   beginning the review
 - The list of changed files
-- **PR mode only:** `owner`, `repo`, `pullNumber`, the PR title,
-  and the PR description — agents need these to call the GitHub
-  MCP tools listed below
+- **PR mode only:** `owner`, `repo`, `pullNumber`, the PR title, and the PR
+  description — agents need these to call the GitHub MCP tools listed below
 
 ### PR mode agent instructions
 
 Primary (GitHub MCP):
 
-- Use `mcp__github__pull_request_read` with `method: "get_diff"`,
-  `owner`, `repo`, `pullNumber` for the full diff
-- Use `mcp__github__get_file_contents` with `owner`, `repo`, `path`,
-  and `ref: "refs/heads/<head-branch>"` to read full file context
+- Use `mcp__github__pull_request_read` with `method: "get_diff"`, `owner`,
+  `repo`, `pullNumber` for the full diff
+- Use `mcp__github__get_file_contents` with `owner`, `repo`, `path`, and
+  `ref: "refs/heads/<head-branch>"` to read full file context
 
 Fallback (`gh` CLI) — use if MCP calls fail:
 
 - `gh pr diff <number> --repo <owner>/<repo>` for the full diff
-- `gh api repos/<owner>/<repo>/contents/<path>?ref=<head-branch>`
-  to read full file context
+- `gh api repos/<owner>/<repo>/contents/<path>?ref=<head-branch>` to read full
+  file context
 
 ### Local mode agent instructions
 
-- The diff is included directly in the agent prompt (unless the
-  diff is too large — see "Large diffs" above)
-- Use `Read`, `Glob`, `Grep` for file access when full context
-  is needed beyond the diff
+- The diff is included directly in the agent prompt (unless the diff is too
+  large — see "Large diffs" above)
+- Use `Read`, `Glob`, `Grep` for file access when full context is needed beyond
+  the diff
 
 ### All agents
 
-- **DO NOT add comments to any PR. Send findings back to team-lead
-  via SendMessage.**
+- **DO NOT add comments to any PR. Send findings back to team-lead via
+  SendMessage.**
 - Mark their task as completed when done
 
 ## Collect Results
 
-As each agent reports back via SendMessage, acknowledge receipt and
-send a shutdown_request.
+As each agent reports back via SendMessage, acknowledge receipt and send a
+shutdown_request.
 
 ## Compile Summary
 
-After all six agents have reported, delete the team.
+After all agents have reported, delete the team.
+
+When `--plan` was active and findings were received, present the Plan Adherence
+findings as a distinct subsection under "Informational / No Action Needed" (or
+escalate items to "Actionable" only if the user clearly wants scope discipline
+on this PR — default is informational):
+
+```markdown
+### Plan Adherence
+
+**Plan:** `docs/plans/<slug>.md`
+
+- **Unplanned files**: ...
+- **Missing implementation**: ...
+- **Scope excess**: ...
+- **Plan drift**: ...
+```
+
+If no plan was located, state "Plan adherence: no plan located, skipped." once
+in the summary — do not repeat per-dimension.
 
 ### PR mode output
 
@@ -207,9 +275,9 @@ for awareness.
 
 ### Local mode output
 
-Present the consolidated review directly in the conversation
-using the same format as PR mode output above, with these
-additional metadata fields at the top:
+Present the consolidated review directly in the conversation using the same
+format as PR mode output above, with these additional metadata fields at the
+top:
 
 ```markdown
 ## Code Review: <branch-name or "uncommitted" or path>
@@ -227,8 +295,7 @@ additional metadata fields at the top:
 ...
 ```
 
-After presenting the review, ask the user what they want to
-do next:
+After presenting the review, ask the user what they want to do next:
 
 ```text
 What would you like to do with this review?
@@ -239,14 +306,14 @@ What would you like to do with this review?
 4. Something else?
 ```
 
-Deduplicate findings across agents — if multiple agents flag the
-same issue, combine them into a single item citing all relevant
-perspectives.
+Deduplicate findings across agents — if multiple agents flag the same issue,
+combine them into a single item citing all relevant perspectives.
 
 ## Notes
 
 - The review is language-aware but optimized for Go codebases. The idiomatic Go
-  agent uses the inlined Effective Go document at https://go.dev/doc/effective_go.
+  agent uses the inlined Effective Go document at
+  https://go.dev/doc/effective_go.
 - For non-Go PRs, the idiomatic Go agent should be replaced with
   language-appropriate idiom checking, or omitted.
 - All agents should read full file context (not just the diff) when needed to
@@ -263,8 +330,8 @@ perspectives.
 
 ### GitHub access (PR mode only)
 
-Local mode needs no extra setup. PR mode needs one of the following
-(tried in order):
+Local mode needs no extra setup. PR mode needs one of the following (tried in
+order):
 
 #### Option 1: GitHub MCP server (preferred)
 
@@ -278,10 +345,10 @@ Install it:
 go install github.com/github/github-mcp-server/cmd/github-mcp-server@latest
 ```
 
-Then add it to Claude Code with at least the `repos` and
-`pull_requests` toolsets enabled and a
-[GitHub personal access token](https://github.com/settings/tokens)
-with `repo` scope:
+Then add it to Claude Code with at least the `repos` and `pull_requests`
+toolsets enabled and a
+[GitHub personal access token](https://github.com/settings/tokens) with `repo`
+scope:
 
 ```bash
 claude mcp add github \
@@ -290,32 +357,30 @@ claude mcp add github \
   -- github-mcp-server stdio
 ```
 
-**SAML SSO orgs:** If you get a 403 "Resource protected by
-organization SAML enforcement" error, go to
-[github.com/settings/tokens](https://github.com/settings/tokens),
-click **Configure SSO** next to your token, and **Authorize** it for
-the org. Alternatively the `gh` CLI fallback (below) will be used
-automatically.
+**SAML SSO orgs:** If you get a 403 "Resource protected by organization SAML
+enforcement" error, go to
+[github.com/settings/tokens](https://github.com/settings/tokens), click
+**Configure SSO** next to your token, and **Authorize** it for the org.
+Alternatively the `gh` CLI fallback (below) will be used automatically.
 
 #### Option 2: `gh` CLI (fallback)
 
-If the GitHub MCP server is unavailable or returns errors, the skill
-falls back to the
-[GitHub CLI](https://cli.github.com/) (`gh`). Authenticate with:
+If the GitHub MCP server is unavailable or returns errors, the skill falls back
+to the [GitHub CLI](https://cli.github.com/) (`gh`). Authenticate with:
 
 ```bash
 gh auth login
 ```
 
-The `gh` CLI uses browser-based OAuth which inherits your SSO
-sessions, so it works with SAML-enforced orgs out of the box.
+The `gh` CLI uses browser-based OAuth which inherits your SSO sessions, so it
+works with SAML-enforced orgs out of the box.
 
 ### Claude Code agent teams (experimental)
 
 The skill uses [agent teams](https://code.claude.com/docs/en/agent-teams)
-(`TeamCreate`, `SendMessage`, `Task` with `team_name`) to run six
-review agents in parallel. Enable the feature by adding the
-following to `.claude/settings.json`:
+(`TeamCreate`, `SendMessage`, `Task` with `team_name`) to run the review agents
+in parallel. Enable the feature by adding the following to
+`.claude/settings.json`:
 
 ```json
 {
