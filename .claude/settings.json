@@ -1,10 +1,6 @@
 {
   "awsAuthRefresh": "aws sso login --profile bedrock",
   "env": {
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "global.anthropic.claude-opus-4-7",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "global.anthropic.claude-sonnet-4-6",
-    "ANTHROPIC_MODEL": "global.anthropic.claude-opus-4-7",
     "AWS_PROFILE": "bedrock",
     "AWS_REGION": "us-east-2",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
@@ -16,6 +12,19 @@
   },
   "permissions": {
     "defaultMode": "plan"
+  },
+  "model": "claude-opus-4-7",
+  "modelOverrides": {
+    "claude-opus-4-7": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-7",
+    "claude-opus-4-6-1m": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-6-v1[1m]",
+    "claude-opus-4-6": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-6-v1",
+    "claude-opus-4-5": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-5-20251101-v1:0",
+    "claude-opus-4-1": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-1-20250805-v1:0",
+    "claude-sonnet-4-6": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-sonnet-4-6",
+    "claude-sonnet-4-5": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "claude-sonnet-4": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-sonnet-4-20250514-v1:0",
+    "claude-haiku-4-5": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "claude-3-5-haiku": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-3-5-haiku-20241022-v1:0"
   },
   "hooks": {
     "Notification": [
