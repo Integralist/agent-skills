@@ -217,6 +217,50 @@ import (
 )
 ```
 
+## Comments
+
+The "default to no comments" guidance is about *writing* new comments, not
+*removing* existing ones. Assume every inherited comment was placed
+deliberately until you can prove otherwise.
+
+### Always preserve
+
+- **Function-level doc comments** — the sentence(s) above a type,
+  function, method, var, or const describing what it does at a high
+  level. Keep these on unexported identifiers too, not just exported
+  ones. On exported identifiers they also form the package's godoc.
+- **Marker comments** — `// TODO:`, `// FIXME:`, `// NOTE:`, `// HACK:`,
+  `// XXX:`. They flag unresolved work or hidden context the author
+  wanted a future reader to see.
+- **Directive comments** — `//go:build`, `//go:embed`, `//go:generate`,
+  `// Deprecated:`, `//nolint:...`. These are machine-read; removing
+  them changes build or tool behavior.
+- **WHY comments** — explanations of a hidden constraint, a workaround
+  for a specific bug, a non-obvious invariant, or behavior that would
+  surprise a reader.
+
+### Safe to remove
+
+- Comments that restate the name of the identifier immediately below
+  them (e.g., `// Create metrics server` above `createMetricsServer()`).
+- Stale comments describing code that no longer exists.
+- Commented-out code left behind from a previous change.
+
+### Before removing any comment
+
+When an edit would delete one or more comments, first list each one
+with a one-line reason for removal, then make the edit. For example:
+
+```txt
+- handler.go:42  `// TODO: retry on 503` — keep (marker comment)
+- handler.go:58  `// create the client` — remove (restates name)
+- handler.go:71  `// NOTE: must run before auth` — keep (WHY)
+```
+
+This forces you to classify each comment against the rules above
+rather than sweeping them all out together. If you cannot articulate
+why a comment is redundant, keep it.
+
 ## Error Handling
 
 Choose the error form based on how callers need to react:
