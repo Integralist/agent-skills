@@ -13,7 +13,7 @@
   "permissions": {
     "defaultMode": "plan"
   },
-  "model": "claude-opus-4-7",
+  "model": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-6-v1[1m]",
   "modelOverrides": {
     "claude-opus-4-7": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-7",
     "claude-opus-4-6-1m": "arn:aws:bedrock:us-east-2:635784355978:inference-profile/global.anthropic.claude-opus-4-6-v1[1m]",
