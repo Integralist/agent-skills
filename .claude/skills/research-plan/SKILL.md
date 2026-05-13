@@ -16,33 +16,15 @@ Two-phase skill: **research** first, then **plan**. Research
 produces deep reference documents; plans consume those documents
 to produce precise implementation guides.
 
-## Phase 0: Bootstrap CLAUDE.md
+## Phase 0: Bootstrap project instructions
 
-Before anything else, check the project root for a `CLAUDE.md`.
+Before anything else, delegate to the [`agents-md`](../agents-md/SKILL.md)
+skill. It reconciles `AGENTS.md`, `CLAUDE.md`, and
+`GEMINI.md` so `AGENTS.md` is canonical and the other two
+are thin `@AGENTS.md` pointers — bootstrapping any that
+are missing.
 
-### If CLAUDE.md does not exist
-
-Analyze the project and create an orientation-focused `CLAUDE.md`.
-Focus on three things:
-
-1. **WHY** — What is this project and what problem does it solve?
-1. **WHAT** — Repo structure, language boundaries, key entry
-   points.
-1. **HOW** — Commands to build/test/lint, plus gotchas that
-   cannot be discovered from code alone.
-
-Point to docs; don't repeat them. Everything else (architecture,
-API surfaces, coding style) is discoverable via tools, MCPs,
-skills, and reading the code.
-
-### If CLAUDE.md already exists
-
-Review it. If it is stale or missing any of the three sections
-above, update it. Otherwise, leave it alone.
-
-### Then prompt
-
-Ask the user:
+Run that skill to completion, then prompt the user:
 
 ```text
 What do you want researched?

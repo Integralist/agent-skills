@@ -17,32 +17,13 @@ to produce precise implementation guides.
 
 ## Phase 0: Bootstrap project instructions
 
-Before anything else, check the project root for a project
-instructions file (e.g. `CLAUDE.md`, `AGENTS.md`, or
-equivalent).
+Before anything else, delegate to the [`agents-md`](../agents-md/SKILL.md)
+skill. It reconciles `AGENTS.md`, `CLAUDE.md`, and
+`GEMINI.md` so `AGENTS.md` is canonical and the other two
+are thin `@AGENTS.md` pointers — bootstrapping any that
+are missing.
 
-### If none exists
-
-Analyze the project and create an orientation-focused
-instructions file. Focus on three things:
-
-1. **WHY** — What is this project and what problem does it
-   solve?
-1. **WHAT** — Repo structure, language boundaries, key entry
-   points.
-1. **HOW** — Commands to build/test/lint, plus gotchas that
-   cannot be discovered from code alone.
-
-Point to docs; don't repeat them.
-
-### If one already exists
-
-Review it. If it is stale or missing any of the three sections
-above, update it. Otherwise, leave it alone.
-
-### Then prompt
-
-Ask the user:
+Run that skill to completion, then prompt the user:
 
 ```txt
 What do you want researched?
