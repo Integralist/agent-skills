@@ -44,6 +44,7 @@ make install
     ├── code-review/
     ├── commit/
     ├── critique/
+    ├── decide/
     ├── delegate/
     ├── go-api/
     ├── go-testing/
@@ -67,6 +68,7 @@ make install
     ├── code-review/                # Rewritten: teams → subagents
     ├── commit/                     # Minor phrasing tweaks
     ├── critique/
+    ├── decide/
     ├── delegate/                   # Rewritten: generic roles
     ├── go-api/
     ├── go-conventions/             # New: rule → skill
@@ -129,6 +131,7 @@ auto-loading.
 | **code-review**          | Multi-dimensional review via parallel subagents                         |
 | **commit**               | Git commits with intelligent file grouping                              |
 | **critique**             | Critique a document for logical fallacies                               |
+| **decide**               | Decision memo with structurer, contrarian, and synthesizer passes       |
 | **delegate**             | Spawn a subagent for a task                                             |
 | **go-api**               | Generate a production-ready Go API service                              |
 | **go-conventions**       | Go coding conventions (.agents/ only)                                   |
