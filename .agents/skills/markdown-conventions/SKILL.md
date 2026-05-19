@@ -38,6 +38,21 @@ This is a plain text block.
 ```
 ````
 
+## Callouts
+
+Use GitHub-flavored alert blockquotes for callouts. Do not use
+plain prose prefixes like `Note:`, `Warning:`, or `Tip:`.
+
+Supported types: `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`.
+
+```md
+> [!NOTE]
+> Useful information that users should know, even when skimming.
+
+> [!WARNING]
+> Urgent info that needs immediate user attention to avoid problems.
+```
+
 ## Linting
 
 Use the following linters to ensure quality, style consistency,
