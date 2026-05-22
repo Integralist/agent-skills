@@ -49,7 +49,18 @@ If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The ma
 │       └── docs/adr/
 ```
 
-Create files lazily — only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
+Create files lazily — only when you have something to write. If no `docs/adr/` exists, create it when the first ADR is needed.
+
+### Bootstrap CONTEXT.md if missing
+
+If no `CONTEXT.md` exists at the relevant scope (repo root for single-context repos, or the appropriate sub-directory for multi-context repos), bootstrap one before starting the interview:
+
+1. Explore the codebase to surface domain terms — entity names, recurring nouns in package/module names, types, table names, and terminology that appears in existing READMEs or docs.
+2. Draft an initial glossary of those terms with proposed definitions, using the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
+3. Present the draft terms to the user **before writing the file**. Ask them to confirm, correct, or drop each term. Do not assume your reading of the code is right — the same word can mean different things to the team than it does in the code.
+4. Only after the user signs off, write `CONTEXT.md` with the agreed terms. Then begin the interview.
+
+If the repo is plainly multi-context (e.g. monorepo with clear bounded contexts) but no `CONTEXT-MAP.md` exists, surface that observation to the user and ask whether to bootstrap per-context glossaries or a single root one.
 
 ## During the session
 
