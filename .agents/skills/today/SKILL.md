@@ -67,11 +67,19 @@ If the day has zero events, render `_(no meetings today 🎉)_`.
 Call `mcp__plugin_google-workspace_google-workspace__gmail_search` with
 query `is:starred in:inbox`.
 
+For each result, call
+`mcp__plugin_google-workspace_google-workspace__gmail_get` with
+`format: "metadata"` to get sender, subject, date, and `threadId`.
+
 Render under a `## ⭐ Starred mail` heading as a list. Each row:
 
 - 📧 prefix.
 - Sender name only (strip the address).
-- Subject.
+- Subject **as a markdown link** to the Gmail thread, using the URL
+  pattern `https://mail.google.com/mail/u/0/#inbox/<threadId>`. Note:
+  the `u/0` account-index segment is correct only if the user has a
+  single Gmail signed in or this is their primary account. There is
+  no API to discover the right index — this is best-effort.
 - Short relative age — `🕐 2d`, `🕐 5h`.
 
 If zero results, render `_(no starred mail in inbox)_`.
