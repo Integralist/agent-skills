@@ -28,3 +28,9 @@
 - When editing Go files, activate the go-conventions skill.
 - When editing Markdown files, activate the markdown-conventions
   skill.
+
+# Skills
+
+- When creating or modifying a skill, the change must land in
+  **both** `.claude/skills/<name>/` and `.agents/skills/<name>/`. The
+  two `SKILL.md` files must be byte-identical. Verify with `diff`.

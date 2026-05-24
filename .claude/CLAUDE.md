@@ -16,3 +16,7 @@
 
 - Verify before asserting: grep/read the source, fetch authoritative docs, check adjacent repos in the parent directory. Don't rely on general knowledge for specifics (header behavior, pricing, API contracts).
 - Cite the source — `path/to/file.go:42` for code, URL for docs. If you can't cite, label it "unverified assumption" and say how to verify.
+
+# Skills
+
+- When creating or modifying a skill, the change must land in **both** `.claude/skills/<name>/` and `.agents/skills/<name>/`. The two `SKILL.md` files must be byte-identical. Verify with `diff`.
