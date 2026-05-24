@@ -46,6 +46,7 @@ make install
     ├── critique/
     ├── decide/
     ├── delegate/
+    ├── find-todo-doc/
     ├── go-api/
     ├── go-testing/
     ├── grepai/
@@ -56,9 +57,11 @@ make install
     ├── next-task/
     ├── refactor/
     ├── research-plan/
+    ├── slack-to-todo/
     ├── systematic-debugging/
     ├── tech-docs/
-    └── test-feedback/
+    ├── test-feedback/
+    └── today/
 
 .agents/                            # Generic Agent Skills
 ├── AGENTS.md                       # Shared conventions
@@ -71,6 +74,7 @@ make install
     ├── critique/
     ├── decide/
     ├── delegate/                   # Rewritten: generic roles
+    ├── find-todo-doc/
     ├── go-api/
     ├── go-conventions/             # New: rule → skill
     ├── go-testing/
@@ -82,9 +86,11 @@ make install
     ├── next-task/                  # Rewritten: teams → subagents
     ├── refactor/                   # Rewritten: teams → subagents
     ├── research-plan/              # Rewritten: teams → subagents
+    ├── slack-to-todo/
     ├── systematic-debugging/
     ├── tech-docs/
-    └── test-feedback/              # Minor phrasing tweaks
+    ├── test-feedback/              # Minor phrasing tweaks
+    └── today/
 ```
 
 ## Components
@@ -135,6 +141,7 @@ auto-loading.
 | **critique**             | Critique a document for logical fallacies                               |
 | **decide**               | Decision memo with structurer, contrarian, and synthesizer passes       |
 | **delegate**             | Spawn a subagent for a task                                             |
+| **find-todo-doc**        | Locate the user's personal "TODO" Google Doc; read-only helper          |
 | **go-api**               | Generate a production-ready Go API service                              |
 | **go-conventions**       | Go coding conventions (.agents/ only)                                   |
 | **go-testing**           | Write Go tests — table-driven, fuzz, benchmarks                         |
@@ -147,9 +154,11 @@ auto-loading.
 | **next-task**            | Continue working through a project plan                                 |
 | **refactor**             | Analyze a feature and produce a reimplementation plan                   |
 | **research-plan**        | Research topics deeply, then create implementation plans                |
+| **slack-to-todo**        | Parse a pasted Slack message into the personal "TODO" Google Doc        |
 | **systematic-debugging** | Four-phase debugging with root cause analysis                           |
 | **tech-docs**            | Write or improve technical documentation via five documentation pillars |
 | **test-feedback**        | Parse test failures and fix them in a background subagent               |
+| **today**                | Emoji-rich daily briefing — TODO doc, calendar, starred mail            |
 
 ## Differences Between .claude/ and .agents/
 
@@ -175,7 +184,9 @@ When adding to this repository:
 1. Write clear, concise descriptions to ensure accurate interpretation
 1. Include examples where helpful
 1. Avoid project-specific details or configurations
-1. Create both `.claude/` and `.agents/` versions for new skills
+1. Create both `.claude/` and `.agents/` versions for new skills — the
+   two `SKILL.md` files must be byte-identical unless the skill genuinely
+   needs Claude-only or generic-only language; verify with `diff`
 1. Test with Claude to ensure the desired behavior
 
 ## License
