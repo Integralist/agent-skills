@@ -1,14 +1,15 @@
 ---
 name: slack-to-todo
-description: Parse a pasted Slack message and replace the contents of a personal "TODO" Google Doc with its :to-do: items as nested plain-text bullets, creating the doc if it doesn't exist.
+description: Parse a pasted Slack message of section-grouped tasks and replace the contents of a personal "TODO" Google Doc with them as plain-text bullets, skipping items marked :checkm: (done) and creating the doc if it doesn't exist.
 argument-hint: The Slack message text to extract TODOs from
 ---
 
 # slack-to-todo
 
-Capture `:to-do:` lines from a pasted Slack message and **replace** the
-full contents of the user's personal `TODO` Google Doc with them as
-nested bullets.
+Capture task lines from a pasted Slack message — where every non-header
+line is a task except those marked done with `:checkm:` — and
+**replace** the full contents of the user's personal `TODO` Google Doc
+with them as section-grouped bullets.
 
 > [!IMPORTANT]
 > Storage is a Google **Doc**, not Google Keep or Google Tasks — neither
@@ -29,23 +30,50 @@ to paste it before doing anything else.
 
 ## Parsing rule
 
-Build a section → TODO tree from the pasted text.
+The pasted message is structured as section groups. Within each group,
+the **first line is the section header** and every following line is a
+task — except that:
 
-1. Split into lines, trim each, drop blank lines.
-1. A line is a **TODO** if it begins with `:to-do:`. Strip that prefix
-   plus surrounding whitespace; the remainder is the TODO content. Keep
-   any other emojis (`:ahh:`, `:white_check_mark:`, etc.) verbatim.
-1. A line is a **section header** if it is not a TODO *and* the next
-   non-blank line is a TODO. Keep trailing punctuation as written
-   (`Miscellaneous.` stays `Miscellaneous.`).
-1. Discard everything else — context, narrative, links, banners like
-   `:white_check_mark: TODAY`, meeting times. The user wants TODOs only.
-1. TODOs that appear before any header become top-level bullets with no
-   parent.
-1. Drop sections that end up with zero TODOs.
+- A line beginning with `:checkm:` is a completed task and is **skipped
+  entirely** (it represents work already done).
+- A line beginning with a **lowercase letter** is treated as a
+  continuation of the prior line (Slack's plain-text paste flattens
+  nesting, so we can't reliably attach these as children). It is
+  **skipped**, regardless of whether the prior line was kept or skipped.
 
-If no `:to-do:` lines are found, tell the user nothing was parseable and
-stop — do not call any Drive or Docs tool.
+Discard banners and unrelated content above the task list (e.g. a
+`MEETINGS` block, meeting times, `TODAY` headers). The skill operates
+only on the section-grouped task region of the paste.
+
+Algorithm:
+
+1. Identify the task region. If the paste contains a banner like
+   `TODO` on its own line, treat everything after it as the task
+   region; otherwise treat the entire paste as the task region.
+1. Split the task region into **groups** separated by one or more blank
+   lines. (Slack copy-paste sometimes produces single or double blank
+   lines between groups; both are treated the same.)
+1. For each group:
+   - The first non-blank line is the **section header**. Keep trailing
+     punctuation as written (`Miscellaneous.` stays `Miscellaneous.`).
+   - Each subsequent line is a candidate task. Skip it if it begins
+     with `:checkm:` or with a lowercase letter. Otherwise keep it
+     verbatim as a task under that section.
+1. Drop sections that end up with zero kept tasks.
+
+Tasks may contain other emojis (`:ahh:`, `:white_check_mark:`, etc.) —
+keep them verbatim.
+
+If no kept tasks remain after parsing, tell the user nothing was
+parseable and stop — do not call any Drive or Docs tool.
+
+### Known fidelity loss
+
+Plain-text paste from Slack does not preserve indentation, so tasks
+that were originally nested under another task in Slack will appear as
+siblings, not children, in the doc. This is accepted: a flat list is
+preferable to a wrong tree. If true nesting matters, the user must mark
+it manually before pasting.
 
 ## Confirmation step (mandatory)
 
@@ -60,16 +88,16 @@ write is destructive — the user must be able to abort.
 Format:
 
 ```txt
-- Domainr
-  - Re-review a couple of Eric's PRs.
-- Ascerta
-  - Review and possibly implement PKI Validation 01 (PR).
-- Blue Ribbon
-  - Add state filter + update docs/schemas (thread).
-  - Continue implementing.
+- Category
+  - Task.
+- Category
+  - Task.
+- Category
+  - Task.
 ```
 
-Two-space indent per nesting level.
+Two-space indent. Tasks always sit one level under their section
+header — no deeper nesting (see "Known fidelity loss" above).
 
 ## Locate the TODO doc
 
@@ -100,8 +128,7 @@ approach to preserve the `documentId`:
      only): call
      `mcp__plugin_google-workspace_google-workspace__docs_writeText`
      with `position: "beginning"` and the bullet block as `text`.
-     `position: "end"` fails on empty docs with `"No insertion location
-     set."` — always use `"beginning"` here.
+     `position: "end"` fails on empty docs with `"No insertion location set."` — always use `"beginning"` here.
    - **Non-empty doc**: call
      `mcp__plugin_google-workspace_google-workspace__docs_replaceText`
      with `findText` set to the entire current text returned by
