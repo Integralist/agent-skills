@@ -1,15 +1,16 @@
 ---
 name: slack-to-todo
-description: Parse a pasted Slack message of section-grouped tasks and replace the contents of a personal "TODO" Google Doc with them as plain-text bullets, skipping items marked :checkm: (done) and creating the doc if it doesn't exist.
+description: Parse a pasted Slack message of section-grouped tasks and replace the contents of a personal "TODO" Google Doc with them as plain-text bullets, skipping items marked done (:checkm:, :white_check_mark:, :white_tick:) and creating the doc if it doesn't exist.
 argument-hint: The Slack message text to extract TODOs from
 ---
 
 # slack-to-todo
 
 Capture task lines from a pasted Slack message — where every non-header
-line is a task except those marked done with `:checkm:` — and
-**replace** the full contents of the user's personal `TODO` Google Doc
-with them as section-grouped bullets.
+line is a task except those marked done with a done-emoji (`:checkm:`,
+`:white_check_mark:`, or `:white_tick:`) — and **replace** the full
+contents of the user's personal `TODO` Google Doc with them as
+section-grouped bullets.
 
 > [!IMPORTANT]
 > Storage is a Google **Doc**, not Google Keep or Google Tasks — neither
@@ -34,8 +35,11 @@ The pasted message is structured as section groups. Within each group,
 the **first line is the section header** and every following line is a
 task — except that:
 
-- A line beginning with `:checkm:` is a completed task and is **skipped
-  entirely** (it represents work already done).
+- A line beginning with a **done-emoji** — `:checkm:`,
+  `:white_check_mark:`, or `:white_tick:` — is a completed task and is
+  **skipped entirely** (it represents work already done). Slack users
+  vary in which checkmark emoji they pick; treat all three as
+  equivalent.
 - A line beginning with a **lowercase letter** is treated as a
   continuation of the prior line (Slack's plain-text paste flattens
   nesting, so we can't reliably attach these as children). It is
@@ -57,12 +61,14 @@ Algorithm:
    - The first non-blank line is the **section header**. Keep trailing
      punctuation as written (`Miscellaneous.` stays `Miscellaneous.`).
    - Each subsequent line is a candidate task. Skip it if it begins
-     with `:checkm:` or with a lowercase letter. Otherwise keep it
+     with a done-emoji (`:checkm:`, `:white_check_mark:`, or
+     `:white_tick:`) or with a lowercase letter. Otherwise keep it
      verbatim as a task under that section.
 1. Drop sections that end up with zero kept tasks.
 
-Tasks may contain other emojis (`:ahh:`, `:white_check_mark:`, etc.) —
-keep them verbatim.
+Tasks may contain other emojis (`:ahh:`, etc.) — keep them verbatim.
+Done-emojis only mark a task as done when they appear at the **start**
+of the line; mid-line occurrences are kept as part of the task text.
 
 If no kept tasks remain after parsing, tell the user nothing was
 parseable and stop — do not call any Drive or Docs tool.
