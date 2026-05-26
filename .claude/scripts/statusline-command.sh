@@ -136,7 +136,18 @@ if [[ "${usage}" != "null" ]]; then
     for ((i=0; i<filled; i++)); do filled_bar+="█"; done
     for ((i=0; i<empty; i++)); do empty_bar+="░"; done
 
-    context_info=" │ Context: [${filled_bar}${empty_bar}] ${pct}%"
+    if (( pct >= 70 )); then
+        color_start=$'\033[31m'  # red
+        color_end=$'\033[0m'
+    elif (( pct >= 50 )); then
+        color_start=$'\033[33m'  # yellow
+        color_end=$'\033[0m'
+    else
+        color_start=""
+        color_end=""
+    fi
+
+    context_info=" │ Context: ${color_start}[${filled_bar}${empty_bar}] ${pct}%${color_end}"
 fi
 
 # Session cost
