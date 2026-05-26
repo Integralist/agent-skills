@@ -39,7 +39,7 @@ make install
 │   └── markdown.md                 # Markdown conventions (auto-loaded for *.md)
 └── skills/
     ├── agents-md/
-    ├── brevity/
+    ├── caveman/
     ├── cleanup/
     ├── code-review/
     ├── commit/
@@ -67,7 +67,7 @@ make install
 ├── AGENTS.md                       # Shared conventions
 └── skills/
     ├── agents-md/
-    ├── brevity/
+    ├── caveman/
     ├── cleanup/                    # Rewritten: teams → subagents
     ├── code-review/                # Rewritten: teams → subagents
     ├── commit/                     # Minor phrasing tweaks
@@ -134,7 +134,7 @@ auto-loading.
 | Skill                    | Description                                                             |
 | ------------------------ | ----------------------------------------------------------------------- |
 | **agents-md**            | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers |
-| **brevity**              | Ultra-compressed communication with 3 intensity levels                  |
+| **caveman**              | Ultra-compressed caveman-speak mode; ~75% token reduction               |
 | **cleanup**              | Audit codebase for AI slop via background subagent                      |
 | **code-review**          | Multi-dimensional review via parallel subagents                         |
 | **commit**               | Git commits with intelligent file grouping                              |
