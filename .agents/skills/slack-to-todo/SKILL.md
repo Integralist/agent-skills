@@ -1,7 +1,6 @@
 ---
 name: slack-to-todo
 description: Parse a pasted Slack message of section-grouped tasks and replace the contents of a personal "TODO" Google Doc with them as plain-text bullets, skipping items marked done (:checkm:, :white_check_mark:, :white_tick:) and creating the doc if it doesn't exist.
-argument-hint: The Slack message text to extract TODOs from
 ---
 
 # slack-to-todo

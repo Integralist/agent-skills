@@ -2,7 +2,7 @@
 name: research-plan
 description: >-
   Two-phase workflow: research topics deeply, then create
-  implementation plans. Bootstraps CLAUDE.md, produces
+  implementation plans. Bootstraps AGENTS.md, produces
   docs/research/ reference docs, and docs/plans/
   implementation guides. Also handles repo-by-name research.
   Use when the user wants to research a topic, explore a

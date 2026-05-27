@@ -61,7 +61,7 @@ Generate the following structure:
 ├── go.mod
 ├── go.sum
 ├── Makefile
-├── CLAUDE.md
+├── AGENTS.md
 └── README.md
 ```
 

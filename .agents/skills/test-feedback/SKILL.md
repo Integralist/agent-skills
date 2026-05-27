@@ -43,7 +43,7 @@ The user may provide a file path to test output. Default:
    - Instruction to NOT commit — leave that to the user
    - If the output contains `e2e` or integration test failures,
      note that `make test-integration` requires a running stack
-   - The project's CLAUDE.md path for conventions
+   - The project's AGENTS.md path for conventions
 
 4. **Return control** to the user immediately with a brief
    confirmation:
