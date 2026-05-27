@@ -58,6 +58,7 @@ make install
     ├── next-task/
     ├── refactor/
     ├── research-plan/
+    ├── slack-search/
     ├── slack-to-todo/
     ├── summarize-for-product/
     ├── systematic-debugging/
@@ -89,6 +90,7 @@ make install
     ├── next-task/                  # Rewritten: teams → subagents
     ├── refactor/                   # Rewritten: teams → subagents
     ├── research-plan/              # Rewritten: teams → subagents
+    ├── slack-search/
     ├── slack-to-todo/
     ├── summarize-for-product/
     ├── systematic-debugging/
@@ -159,6 +161,7 @@ auto-loading.
 | **next-task**            | Continue working through a project plan                                 |
 | **refactor**             | Analyze a feature and produce a reimplementation plan                   |
 | **research-plan**        | Research topics deeply, then create implementation plans                |
+| **slack-search**         | Drive Slack via Playwright MCP to run searches or Slackbot prompts      |
 | **slack-to-todo**        | Parse a pasted Slack message into the personal "TODO" Google Doc        |
 | **summarize-for-product** | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email) |
 | **systematic-debugging** | Four-phase debugging with root cause analysis                           |
