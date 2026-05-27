@@ -43,6 +43,7 @@ make install
     ├── cleanup/
     ├── code-review/
     ├── commit/
+    ├── consensus/
     ├── critique/
     ├── decide/
     ├── delegate/
@@ -71,6 +72,7 @@ make install
     ├── cleanup/                    # Rewritten: teams → subagents
     ├── code-review/                # Rewritten: teams → subagents
     ├── commit/                     # Minor phrasing tweaks
+    ├── consensus/
     ├── critique/
     ├── decide/
     ├── delegate/                   # Rewritten: generic roles
@@ -138,6 +140,7 @@ auto-loading.
 | **cleanup**              | Audit codebase for AI slop via background subagent                      |
 | **code-review**          | Multi-dimensional review via parallel subagents                         |
 | **commit**               | Git commits with intelligent file grouping                              |
+| **consensus**            | Cross-model second-opinion workflow with discussion rounds and user gates |
 | **critique**             | Critique a document for logical fallacies                               |
 | **decide**               | Decision memo with structurer, contrarian, and synthesizer passes       |
 | **delegate**             | Spawn a subagent for a task                                             |
