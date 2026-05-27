@@ -18,7 +18,7 @@ must include a recommended fix.
 
    If the user did not provide a file path, ask:
 
-   ```text
+   ```txt
    Which file do you want me to critique?
    ```
 
@@ -97,7 +97,7 @@ and provide a concrete fix.
 
 For each fallacy found:
 
-```text
+```txt
 **{Fallacy Name}**
 
 > {Quoted passage from the document}
@@ -113,7 +113,7 @@ If no fallacies are found, state that explicitly.
 
 For each weakness found:
 
-```text
+```txt
 **{Category}** — {Brief title}
 
 > {Quoted passage from the document}

@@ -12,12 +12,10 @@ description: >-
 
 - Searching by concept or intent ("authentication flow",
   "error recovery logic") when you don't know the exact names
-- Exploring unfamiliar codebases where naming conventions are
-  unknown
+- Exploring unfamiliar codebases where naming conventions are unknown
 - Tracing callers of a function across a large codebase
 
-For exact text or regex pattern matching, use `rg` (ripgrep)
-instead.
+For exact text or regex pattern matching, use `rg` (ripgrep) instead.
 
 ## Install (if not present)
 

@@ -17,52 +17,53 @@ Never apply symptom-focused patches that mask underlying problems. Understand WH
 
 Before touching any code:
 
-1. **Read error messages thoroughly** - Every word matters
-2. **Reproduce the issue consistently** - If you can't reproduce it, you can't verify a fix
-3. **Examine recent changes** - What changed before this started failing?
-4. **Gather diagnostic evidence** - Logs, stack traces, state dumps
-5. **Trace data flow** - Follow the call chain to find where bad values originate
+1. **Read error messages thoroughly** — Every word matters
+2. **Reproduce the issue consistently** — If you can't reproduce it, you can't verify a fix
+3. **Examine recent changes** — What changed before this started failing?
+4. **Gather diagnostic evidence** — Logs, stack traces, state dumps
+5. **Trace data flow** — Follow the call chain to find where bad values originate
 
 **Root Cause Tracing Technique:**
-```
-1. Observe the symptom - Where does the error manifest?
-2. Find immediate cause - Which code directly produces the error?
-3. Ask "What called this?" - Map the call chain upward
-4. Keep tracing up - Follow invalid data backward through the stack
-5. Find original trigger - Where did the problem actually start?
+
+```txt
+1. Observe the symptom — Where does the error manifest?
+2. Find immediate cause — Which code directly produces the error?
+3. Ask "What called this?" — Map the call chain upward
+4. Keep tracing up — Follow invalid data backward through the stack
+5. Find original trigger — Where did the problem actually start?
 ```
 
-**Key principle:** Never fix problems solely where errors appear—always trace to the original trigger.
+**Key principle:** Never fix problems solely where errors appear — always trace to the original trigger.
 
 ### Phase 2: Pattern Analysis
 
-1. **Locate working examples** - Find similar code that works correctly
-2. **Compare implementations completely** - Don't just skim
-3. **Identify differences** - What's different between working and broken?
-4. **Understand dependencies** - What does this code depend on?
+1. **Locate working examples** — Find similar code that works correctly
+2. **Compare implementations completely** — Don't just skim
+3. **Identify differences** — What's different between working and broken?
+4. **Understand dependencies** — What does this code depend on?
 
 ### Phase 3: Hypothesis and Testing
 
 Apply the scientific method:
 
-1. **Formulate ONE clear hypothesis** - "The error occurs because X"
-2. **Design minimal test** - Change ONE variable at a time
-3. **Predict the outcome** - What should happen if hypothesis is correct?
-4. **Run the test** - Execute and observe
-5. **Verify results** - Did it behave as predicted?
-6. **Iterate or proceed** - Refine hypothesis if wrong, implement if right
+1. **Formulate ONE clear hypothesis** — "The error occurs because X"
+2. **Design minimal test** — Change ONE variable at a time
+3. **Predict the outcome** — What should happen if hypothesis is correct?
+4. **Run the test** — Execute and observe
+5. **Verify results** — Did it behave as predicted?
+6. **Iterate or proceed** — Refine hypothesis if wrong, implement if right
 
 ### Phase 4: Implementation
 
-1. **Create failing test case** - Captures the bug behavior
-2. **Implement single fix** - Address root cause, not symptoms
-3. **Verify test passes** - Confirms fix works
-4. **Run full test suite** - Ensure no regressions
-5. **If fix fails, STOP** - Re-evaluate hypothesis
+1. **Create failing test case** — Captures the bug behavior
+2. **Implement single fix** — Address root cause, not symptoms
+3. **Verify test passes** — Confirms fix works
+4. **Run full test suite** — Ensure no regressions
+5. **If fix fails, STOP** — Re-evaluate hypothesis
 
 **Critical rule:** If THREE or more fixes fail consecutively, STOP. This signals architectural problems requiring discussion, not more patches.
 
-## Red Flags - Process Violations
+## Red Flags — Process Violations
 
 Stop immediately if you catch yourself thinking:
 
@@ -85,17 +86,17 @@ Stop immediately if you catch yourself thinking:
 
 ### Test Failures
 
-```
+```txt
 1. Read the FULL error message and stack trace
 2. Identify which assertion failed and why
-3. Check test setup - is the test environment correct?
-4. Check test data - are mocks/fixtures correct?
+3. Check test setup — is the test environment correct?
+4. Check test data — are mocks/fixtures correct?
 5. Trace to the source of unexpected value
 ```
 
 ### Runtime Errors
 
-```
+```txt
 1. Capture the full stack trace
 2. Identify the line that throws
 3. Check what values are undefined/null
@@ -105,7 +106,7 @@ Stop immediately if you catch yourself thinking:
 
 ### "It worked before"
 
-```
+```txt
 1. Use git bisect to find the breaking commit
 2. Compare the change with previous working version
 3. Identify what assumption changed
@@ -114,7 +115,7 @@ Stop immediately if you catch yourself thinking:
 
 ### Intermittent Failures
 
-```
+```txt
 1. Look for race conditions
 2. Check for shared mutable state
 3. Examine async operation ordering
@@ -134,14 +135,14 @@ Before claiming a bug is fixed:
 - [ ] Full test suite passes
 - [ ] No "quick fix" rationalization used
 - [ ] Fix is minimal and focused
-- [ ] Documentation updated if behavior changed (`docs/**/*.md`,
-  `**/README.md`)
+- [ ] Documentation updated if behavior changed (`docs/**/*.md`, `**/README.md`)
 
 ## Success Metrics
 
 Systematic debugging achieves ~95% first-time fix rate vs ~40% with ad-hoc approaches.
 
 Signs you're doing it right:
+
 - Fixes don't create new bugs
 - You can explain WHY the bug occurred
 - Similar bugs don't recur

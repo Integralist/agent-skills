@@ -28,9 +28,9 @@ shared into your Drive owned by other people. Only return docs you own.
 
 - **Zero matches** → report `not found`. Do not create the doc. Stop.
 - **One match** → report it (see output format below).
-- **Multiple matches** → use `AskUserQuestion` to disambiguate, listing
-  each candidate by title and last-modified time. Once the user picks,
-  report the chosen one.
+- **Multiple matches** → present the candidates as a numbered list with
+  title and last-modified time, then wait for the user to pick. Once
+  the user picks, report the chosen one.
 
 ## Output format
 
