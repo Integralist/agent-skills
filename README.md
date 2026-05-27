@@ -59,6 +59,7 @@ make install
     ├── refactor/
     ├── research-plan/
     ├── slack-to-todo/
+    ├── summarize-for-product/
     ├── systematic-debugging/
     ├── tech-docs/
     ├── test-feedback/
@@ -89,6 +90,7 @@ make install
     ├── refactor/                   # Rewritten: teams → subagents
     ├── research-plan/              # Rewritten: teams → subagents
     ├── slack-to-todo/
+    ├── summarize-for-product/
     ├── systematic-debugging/
     ├── tech-docs/
     ├── test-feedback/              # Minor phrasing tweaks
@@ -158,6 +160,7 @@ auto-loading.
 | **refactor**             | Analyze a feature and produce a reimplementation plan                   |
 | **research-plan**        | Research topics deeply, then create implementation plans                |
 | **slack-to-todo**        | Parse a pasted Slack message into the personal "TODO" Google Doc        |
+| **summarize-for-product** | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email) |
 | **systematic-debugging** | Four-phase debugging with root cause analysis                           |
 | **tech-docs**            | Write or improve technical documentation via five documentation pillars |
 | **test-feedback**        | Parse test failures and fix them in a background subagent               |
