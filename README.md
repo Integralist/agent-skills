@@ -56,6 +56,7 @@ make install
     ├── handoff/
     ├── markdown-to-skill/          # Claude-only (not in .agents/)
     ├── next-task/
+    ├── redesign/
     ├── refactor/
     ├── research-plan/
     ├── slack-search/
@@ -88,6 +89,7 @@ make install
     ├── handoff/
     ├── markdown-conventions/       # New: rule → skill
     ├── next-task/                  # Rewritten: teams → subagents
+    ├── redesign/
     ├── refactor/                   # Rewritten: teams → subagents
     ├── research-plan/              # Rewritten: teams → subagents
     ├── slack-search/
@@ -159,6 +161,7 @@ auto-loading.
 | **markdown-conventions** | Markdown formatting conventions (.agents/ only)                         |
 | **markdown-to-skill**    | Bulk-convert Markdown to skills (.claude/ only)                         |
 | **next-task**            | Continue working through a project plan                                 |
+| **redesign**             | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning |
 | **refactor**             | Analyze a feature and produce a reimplementation plan                   |
 | **research-plan**        | Research topics deeply, then create implementation plans                |
 | **slack-search**         | Drive Slack via Playwright MCP to run searches or Slackbot prompts      |
@@ -183,7 +186,7 @@ auto-loading.
 ## Workflow
 
 - research-plan → critique → next-task → commit → code-review → cleanup →
-  refactor
+  refactor → redesign
 
 ## Contributing
 
