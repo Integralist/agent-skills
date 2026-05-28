@@ -12,9 +12,9 @@ Progress through phases only when (a) every consulting agent has reviewed, (b) d
 
 **Select consultants** in this order:
 
-1. User-specified ("use gemini" / "use gemini and codex").
-2. Detected on PATH: `command -v gemini codex claude`. Exclude the host itself from the candidates.
-3. If multiple detected and no preference stated, ask the user. Default: all detected.
+1. User-specified ("use agy" / "use agy and codex").
+2. Detected on PATH: `command -v agy gemini codex claude`. Exclude the host itself from the candidates. **Prefer `agy` over `gemini`** — Google Antigravity (`agy`) is the successor to the Gemini CLI; if both are installed, use `agy` and skip `gemini` to avoid duplicate Google-model coverage. Fall back to `gemini` only when `agy` is absent.
+3. If multiple detected and no preference stated, ask the user. Default: all detected (after the agy/gemini dedupe above).
 
 If zero CLIs resolve, tell the user and ask whether to install one or proceed without consensus. Never silently skip consultation.
 
@@ -22,7 +22,8 @@ If zero CLIs resolve, tell the user and ask whether to install one or proceed wi
 
 | CLI      | Headless invocation                          | Reads stdin?   | Notes                                                                                            |
 |----------|----------------------------------------------|----------------|--------------------------------------------------------------------------------------------------|
-| `gemini` | `gemini -p "<prompt>" --output-format text`  | Yes (appended) | Google's Gemini CLI. Use single-quoted heredoc for the prompt body.                              |
+| `agy`    | `agy -p "<prompt>"`                          | Yes (appended) | Google Antigravity CLI — successor to `gemini`. Prefer over `gemini` when both are installed.    |
+| `gemini` | `gemini -p "<prompt>" --output-format text`  | Yes (appended) | Google's Gemini CLI. Use single-quoted heredoc for the prompt body. Skip if `agy` is present.    |
 | `codex`  | Verify with `codex --help` before first use  | Verify         | OpenAI's Codex CLI.                                                                              |
 | `claude` | `claude -p "<prompt>"`                       | Yes            | Claude Code in headless mode. Useful as an independent-context reviewer regardless of the host.  |
 
@@ -122,15 +123,17 @@ My response per finding:
 For each finding I rejected, do you accept my reasoning, or still disagree? If still disagreeing, give your strongest counter-argument grounded in a specific fact (file, behavior, constraint). If you accept all my reasoning, say so explicitly.
 ```
 
-**Canonical invocation** (gemini, B2 — diff on stdin):
+**Canonical invocation** (agy, B2 — diff on stdin):
 
 ```bash
 MERGE_BASE=$(git merge-base main HEAD)
-git diff "$MERGE_BASE"...HEAD | gemini -p "$(cat <<'PROMPT'
+git diff "$MERGE_BASE"...HEAD | agy -p "$(cat <<'PROMPT'
 <the review prompt above, with {focus} and {artifact} substituted>
 PROMPT
-)" --output-format text
+)"
 ```
+
+For `gemini` (when `agy` is not installed), append `--output-format text` to the invocation above.
 
 Replace `main` with the actual base branch. For other CLIs, adapt per the Setup table; if a CLI doesn't read stdin, substitute the diff into the prompt body (mind quoting and size limits).
 
