@@ -47,7 +47,6 @@ make install
     ├── critique/
     ├── decide/
     ├── delegate/
-    ├── find-todo-doc/
     ├── go-api/
     ├── go-testing/
     ├── grepai/
@@ -60,12 +59,10 @@ make install
     ├── refactor/
     ├── research-plan/
     ├── slack-search/
-    ├── slack-to-todo/
     ├── summarize-for-product/
     ├── systematic-debugging/
     ├── tech-docs/
     ├── test-feedback/
-    └── today/
 
 .agents/                            # Generic Agent Skills
 ├── AGENTS.md                       # Shared conventions
@@ -79,7 +76,6 @@ make install
     ├── critique/
     ├── decide/
     ├── delegate/                   # Rewritten: generic roles
-    ├── find-todo-doc/
     ├── go-api/
     ├── go-conventions/             # New: rule → skill
     ├── go-testing/
@@ -93,12 +89,10 @@ make install
     ├── refactor/                   # Rewritten: teams → subagents
     ├── research-plan/              # Rewritten: teams → subagents
     ├── slack-search/
-    ├── slack-to-todo/
     ├── summarize-for-product/
     ├── systematic-debugging/
     ├── tech-docs/
     ├── test-feedback/              # Minor phrasing tweaks
-    └── today/
 ```
 
 ## Components
@@ -139,38 +133,35 @@ auto-loading.
 
 ## Skill Reference
 
-| Skill                    | Description                                                             |
-| ------------------------ | ----------------------------------------------------------------------- |
-| **agents-md**            | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers |
-| **caveman**              | Ultra-compressed caveman-speak mode; ~75% token reduction               |
-| **cleanup**              | Audit codebase for AI slop via background subagent                      |
-| **code-review**          | Multi-dimensional review via parallel subagents                         |
-| **commit**               | Git commits with intelligent file grouping                              |
-| **consensus**            | Cross-model second-opinion workflow with discussion rounds and user gates |
-| **critique**             | Critique a document for logical fallacies                               |
-| **decide**               | Decision memo with structurer, contrarian, and synthesizer passes       |
-| **delegate**             | Spawn a subagent for a task                                             |
-| **find-todo-doc**        | Locate the user's personal "TODO" Google Doc; read-only helper          |
-| **go-api**               | Generate a production-ready Go API service                              |
-| **go-conventions**       | Go coding conventions (.agents/ only)                                   |
-| **go-testing**           | Write Go tests — table-driven, fuzz, benchmarks                         |
-| **grepai**               | Semantic code search by intent                                          |
-| **grill-me**             | Interview the user relentlessly to stress-test a plan or design         |
-| **grill-with-docs**      | Stress-test a plan against project domain model and update CONTEXT/ADRs |
-| **handoff**              | Compact the current conversation into a handoff document for another agent |
-| **markdown-conventions** | Markdown formatting conventions (.agents/ only)                         |
-| **markdown-to-skill**    | Bulk-convert Markdown to skills (.claude/ only)                         |
-| **next-task**            | Continue working through a project plan                                 |
-| **redesign**             | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning |
-| **refactor**             | Analyze a feature and produce a reimplementation plan                   |
-| **research-plan**        | Research topics deeply, then create implementation plans                |
-| **slack-search**         | Drive Slack via Playwright MCP to run searches or Slackbot prompts      |
-| **slack-to-todo**        | Parse a pasted Slack message into the personal "TODO" Google Doc        |
-| **summarize-for-product** | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email) |
-| **systematic-debugging** | Four-phase debugging with root cause analysis                           |
-| **tech-docs**            | Write or improve technical documentation via five documentation pillars |
-| **test-feedback**        | Parse test failures and fix them in a background subagent               |
-| **today**                | Emoji-rich daily briefing — TODO doc, calendar, starred mail            |
+| Skill                     | Description                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------- |
+| **agents-md**             | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                     |
+| **caveman**               | Ultra-compressed caveman-speak mode; ~75% token reduction                                   |
+| **cleanup**               | Audit codebase for AI slop via background subagent                                          |
+| **code-review**           | Multi-dimensional review via parallel subagents                                             |
+| **commit**                | Git commits with intelligent file grouping                                                  |
+| **consensus**             | Cross-model second-opinion workflow with discussion rounds and user gates                   |
+| **critique**              | Critique a document for logical fallacies                                                   |
+| **decide**                | Decision memo with structurer, contrarian, and synthesizer passes                           |
+| **delegate**              | Spawn a subagent for a task                                                                 |
+| **go-api**                | Generate a production-ready Go API service                                                  |
+| **go-conventions**        | Go coding conventions (.agents/ only)                                                       |
+| **go-testing**            | Write Go tests — table-driven, fuzz, benchmarks                                             |
+| **grepai**                | Semantic code search by intent                                                              |
+| **grill-me**              | Interview the user relentlessly to stress-test a plan or design                             |
+| **grill-with-docs**       | Stress-test a plan against project domain model and update CONTEXT/ADRs                     |
+| **handoff**               | Compact the current conversation into a handoff document for another agent                  |
+| **markdown-conventions**  | Markdown formatting conventions (.agents/ only)                                             |
+| **markdown-to-skill**     | Bulk-convert Markdown to skills (.claude/ only)                                             |
+| **next-task**             | Continue working through a project plan                                                     |
+| **redesign**              | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning |
+| **refactor**              | Analyze a feature and produce a reimplementation plan                                       |
+| **research-plan**         | Research topics deeply, then create implementation plans                                    |
+| **slack-search**          | Drive Slack via Playwright MCP to run searches or Slackbot prompts                          |
+| **summarize-for-product** | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)            |
+| **systematic-debugging**  | Four-phase debugging with root cause analysis                                               |
+| **tech-docs**             | Write or improve technical documentation via five documentation pillars                     |
+| **test-feedback**         | Parse test failures and fix them in a background subagent                                   |
 
 ## Differences Between .claude/ and .agents/
 
