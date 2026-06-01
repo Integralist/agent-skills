@@ -40,6 +40,7 @@ make install
 └── skills/
     ├── agents-md/
     ├── caveman/
+    ├── changelog/
     ├── cleanup/
     ├── code-review/
     ├── commit/
@@ -70,6 +71,7 @@ make install
 └── skills/
     ├── agents-md/
     ├── caveman/
+    ├── changelog/
     ├── cleanup/                    # Rewritten: teams → subagents
     ├── code-review/                # Rewritten: teams → subagents
     ├── commit/                     # Minor phrasing tweaks
@@ -139,6 +141,7 @@ auto-loading.
 | ------------------------- | -------------------------------------------------------------------------------------------- |
 | **agents-md**             | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                      |
 | **caveman**               | Ultra-compressed caveman-speak mode; ~75% token reduction                                    |
+| **changelog**             | Add a Keep a Changelog entry from the working diff or branch-vs-main                         |
 | **cleanup**               | Audit codebase for AI slop via background subagent                                           |
 | **code-review**           | Multi-dimensional review via parallel subagents                                              |
 | **commit**                | Git commits with intelligent file grouping                                                   |
