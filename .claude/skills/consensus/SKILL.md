@@ -13,7 +13,7 @@ Progress through phases only when (a) every consulting agent has reviewed, (b) d
 **Select consultants** in this order:
 
 1. User-specified ("use agy" / "use agy and codex").
-2. Detected on PATH: `command -v agy gemini codex claude`. Exclude the host itself from the candidates. **Prefer `agy` over `gemini`** — Google Antigravity (`agy`) is the successor to the Gemini CLI; if both are installed, use `agy` and skip `gemini` to avoid duplicate Google-model coverage. Fall back to `gemini` only when `agy` is absent.
+2. Detected on PATH: `command -v agy gemini codex claude copilot`. Exclude the host itself from the candidates. **Prefer `agy` over `gemini`** — Google Antigravity (`agy`) is the successor to the Gemini CLI; if both are installed, use `agy` and skip `gemini` to avoid duplicate Google-model coverage. Fall back to `gemini` only when `agy` is absent.
 3. If multiple detected and no preference stated, ask the user. Default: all detected (after the agy/gemini dedupe above).
 
 If zero CLIs resolve, tell the user and ask whether to install one or proceed without consensus. Never silently skip consultation.
@@ -26,6 +26,7 @@ If zero CLIs resolve, tell the user and ask whether to install one or proceed wi
 | `gemini` | `gemini -p "<prompt>" --output-format text`  | Yes (appended) | Google's Gemini CLI. Use single-quoted heredoc for the prompt body. Skip if `agy` is present.    |
 | `codex`  | Verify with `codex --help` before first use  | Verify         | OpenAI's Codex CLI.                                                                              |
 | `claude` | `claude -p "<prompt>"`                       | Yes            | Claude Code in headless mode. Useful as an independent-context reviewer regardless of the host.  |
+| `copilot`| `copilot -p "<prompt>" --allow-all-tools`    | No             | GitHub Copilot CLI (ChatGPT models). `--allow-all-tools` required for non-interactive mode; substitute the diff into the prompt body — `-p` does not read stdin. Use `--model <id>` to pin a specific model. |
 
 For any CLI not listed, run `<cli> --help` and look for a non-interactive/prompt flag. Do not guess flags.
 
