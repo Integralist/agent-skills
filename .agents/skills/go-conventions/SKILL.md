@@ -106,6 +106,25 @@ The host greets each guest at the door.
 Reference: revive directive docs —
 https://github.com/mgechev/revive?tab=readme-ov-file#comment-directives
 
+### Reference sources
+
+When uncertain about Go behavior, pick the source that matches the
+question:
+
+- **Language semantics** (operator precedence, conversion rules,
+  `range` semantics, method-set rules, type identity, addressability)
+  — the Go specification at https://go.dev/ref/spec.
+- **Standard library API surface and behavior** — `go doc
+  <pkg>[.Symbol]` or pkg.go.dev. Faster and more accurate than the
+  spec for stdlib questions.
+- **Version availability** (e.g. "does `wg.Go` exist?", "when was
+  `errors.AsType` added?") — Go release notes at
+  https://go.dev/doc/devel/release.
+- **Tooling, modules, build behavior** — https://go.dev/ref/mod and
+  the relevant command's `go help` output.
+
+Do not guess from training data — cite the source.
+
 ## Formatting
 
 After editing Go files, run `gofumpt` to format all changed
