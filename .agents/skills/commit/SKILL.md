@@ -3,6 +3,7 @@ name: commit
 description: >-
   Create git commits with intelligent file grouping. Use when
   committing changes.
+allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 ---
 
 # Commit

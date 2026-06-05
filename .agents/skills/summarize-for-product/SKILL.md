@@ -1,6 +1,7 @@
 ---
 name: summarize-for-product
 description: Translate an engineering plan doc or branch diff into a non-engineer-friendly summary for a PR description, Slack update, or email. Output is copy-paste only — nothing is written to the repo.
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(ls:*)
 ---
 
 # Summarize for Product

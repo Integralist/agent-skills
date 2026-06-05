@@ -4,6 +4,8 @@ description: >-
   Analyze an existing feature and produce a reimplementation
   plan focused on reducing complexity and fragmentation. Asks:
   "If we started over, what would we do differently?"
+user-invocable: true
+argument-hint: <feature or area to refactor>
 ---
 
 # Refactor
@@ -274,3 +276,21 @@ specific refactor.
   "what's the minimal diff."
 - Include a verification phase with concrete test commands.
 - Wrap all Markdown output at 80 columns.
+
+## Agent teams (if your harness supports it)
+
+If your harness supports named, parallel agent teams (e.g. Claude
+Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
+run the investigation agent as a teammate in parallel rather than
+inline, then build the plan from its report.
+
+On Claude Code, enable agent teams by adding the following to
+`.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```

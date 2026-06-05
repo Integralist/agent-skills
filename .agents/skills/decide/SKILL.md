@@ -12,6 +12,8 @@ description: >-
   when the user doesn't say "/decide" explicitly, whenever
   they're wrestling with a course of action and would benefit
   from a structured think rather than a Slack debate.
+user-invocable: true
+argument-hint: '[short description of the decision]'
 ---
 
 # /decide — Decision Memo + Contrarian Check

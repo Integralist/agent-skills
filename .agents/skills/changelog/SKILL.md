@@ -50,7 +50,7 @@ entry in the project's `CHANGELOG.md`.
      - Breaking `Changed` / `Removed` → major bump
    - If the project is pre-1.0 (`0.x.y`), bump the patch for everything
      unless the user says otherwise.
-   - If unsure, ask the user with `AskUserQuestion`.
+   - If unsure, prompt the user.
 
 1. **Categorise changes** under Keep a Changelog sections, in this order,
    omitting empty ones:

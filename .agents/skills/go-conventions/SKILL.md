@@ -7,42 +7,58 @@ description: >-
   observability.
 ---
 
-We are peers writing Go. Prioritize correctness, clarity, and
-best practices.
+We are peers writing Go. Prioritize correctness, clarity, and best practices.
 
 ## Tooling
 
 ### Go LSP (gopls)
 
-Prefer the gopls MCP server over `sed`, `grep`, or manual edits
-for Go code navigation and refactoring. The LSP understands Go
-semantics and will not miss references or corrupt similarly-named
-identifiers the way text-based tools can.
+Prefer the gopls MCP server over `sed`, `grep`, or manual edits for Go code
+navigation and refactoring. The LSP understands Go semantics — package
+qualifiers, method receivers, identifier shadowing — and will not miss
+references or corrupt similarly-named identifiers the way text-based tools
+can. Do not reach for `sed` to rename a Go symbol.
 
 Use these gopls tools:
 
-- `go_workspace` — run first in a Go session.
-- `go_vulncheck` — run right after `go_workspace`.
-- `go_rename_symbol` — rename a type, function, variable, method,
-  or field across the workspace. Prefer this over `sed` for any
-  Go identifier rename.
-- `go_symbol_references` — find every use of a symbol.
-- `go_search` — fuzzy-find symbols.
-- `go_file_context` — summarize intra-package dependencies after
-  first reading a Go file.
-- `go_package_api` — list a package's exported surface.
-- `go_diagnostics` — compile errors and vet findings on changed
-  files. Run after edits.
+- `go_workspace` — run first in a Go session to detect the workspace
+  layout.
+- `go_vulncheck` — run immediately after `go_workspace` to surface known
+  security risks.
+- `go_rename_symbol` — rename a type, function, variable, method, or
+  field across the entire workspace. Updates every Go reference,
+  including qualified uses in other packages and import aliases. Always
+  prefer this over `sed` for an identifier rename.
+- `go_symbol_references` — locate every use of a symbol. Run before
+  deleting or changing the signature of anything exported.
+- `go_search` — fuzzy-find a symbol when the exact name or location is
+  unknown.
+- `go_file_context` — summarize the intra-package declarations a file
+  depends on. Use after reading a Go file for the first time.
+- `go_package_api` — list the exported surface of a package.
+- `go_diagnostics` — compile errors and vet findings on changed files.
+  Run after edits.
 
-**Rename caveat:** `go_rename_symbol` rewrites Go references
-only. It does not touch comments, godoc, `README.md`, or string
-literals. After a rename, run `rg <old-name>` across the repo
-and use `sed` or Edit to clean up the remaining occurrences.
+#### Rename caveat: comments and docs
+
+`go_rename_symbol` rewrites Go references only. It does **not** touch
+code comments, godoc blocks, `README.md`, other markdown, or string
+literals — these keep the old name and become stale pointers.
+
+After an LSP rename:
+
+1. Run `rg <old-name>` across the repository to surface remaining
+   occurrences in comments, docs, and strings.
+2. Use `sed` or targeted Edit calls to update the remaining
+   occurrences.
+
+This is the one place `sed` is the right tool for a Go rename — not on
+source code, but on the non-source text the LSP leaves behind.
 
 ### Linters
 
-After editing Go files, run the following linters to catch
-issues before committing:
+After editing Go files, run the following linters to catch issues before
+committing:
 
 - `go vet ./...`
 - `go-critic check ./...` (if not installed:
@@ -54,22 +70,22 @@ Fix any reported issues before considering the task complete.
 
 ### Suppressing linter warnings
 
-Prefer fixing the underlying issue. When a suppression is genuinely
-warranted, use the exact directive syntax each tool expects — the
-wrong form is silently ignored, leaving the warning in place.
+Prefer fixing the underlying issue. When a suppression is genuinely warranted,
+use the exact directive syntax each tool expects — the wrong form is silently
+ignored, leaving the warning in place.
 
-| Tool          | Directive                                              | Scope                                     |
-| ------------- | ------------------------------------------------------ | ----------------------------------------- |
-| golangci-lint | `//nolint:<linter>[,<linter>] // <reason>`             | same line (reason after `//` is required) |
-| staticcheck   | `//lint:ignore <check> <reason>`                       | same line                                 |
-| gosec         | `// #nosec G<code> <reason>`                           | same line or line above                   |
-| contextcheck  | `//nolint:contextcheck`                                | function doc comment above `func`         |
-| revive        | `//revive:disable:<rule>` ... `//revive:enable:<rule>` | from directive until re-enabled           |
-| codespell     | `//codespell:ignore` or `// codespell:ignore <word>`   | same line                                 |
-| yamllint      | `# yamllint disable-line rule:<rule>`                  | same line                                 |
-| yamllint      | `# yamllint disable rule:<rule>`                       | rest of file (or until `enable`)          |
-| alex          | `<!--alex ignore <word>-->`                            | following text                            |
-| alex          | `<!--alex disable <rule> <rule>-->`                    | following text                            |
+| Tool          | Directive                                                | Scope                                     |
+| ------------- | -------------------------------------------------------- | ----------------------------------------- |
+| golangci-lint | `//nolint:<linter>[,<linter>] // <reason>`               | same line (reason after `//` is required) |
+| staticcheck   | `//lint:ignore <check> <reason>`                         | same line                                 |
+| gosec         | `// #nosec G<code> <reason>`                             | same line or line above                   |
+| contextcheck  | `//nolint:contextcheck`                                  | function doc comment above `func`         |
+| revive        | `//revive:disable:<rule>` ... `//revive:enable:<rule>`   | from directive until re-enabled           |
+| codespell     | `//codespell:ignore` or `// codespell:ignore <word>`     | same line                                 |
+| yamllint      | `# yamllint disable-line rule:<rule>`                    | same line                                 |
+| yamllint      | `# yamllint disable rule:<rule>`                         | rest of file (or until `enable`)          |
+| alex          | `<!--alex ignore <word>-->`                              | following text                            |
+| alex          | `<!--alex disable <rule> <rule>-->`                      | following text                            |
 
 Examples:
 
@@ -83,8 +99,8 @@ func internalBuilder() *unexportedThing { ... }
 // codespell:ignore deatil
 ```
 
-contextcheck false positives — place the directive on the function's
-doc comment, not on the inner call:
+contextcheck false positives — place the directive on the function's doc
+comment, not on the inner call:
 
 ```go
 //nolint:contextcheck
@@ -108,27 +124,24 @@ https://github.com/mgechev/revive?tab=readme-ov-file#comment-directives
 
 ### Reference sources
 
-When uncertain about Go behavior, pick the source that matches the
-question:
+When uncertain about Go behavior, pick the source that matches the question:
 
-- **Language semantics** (operator precedence, conversion rules,
-  `range` semantics, method-set rules, type identity, addressability)
-  — the Go specification at https://go.dev/ref/spec.
-- **Standard library API surface and behavior** — `go doc
-  <pkg>[.Symbol]` or pkg.go.dev. Faster and more accurate than the
-  spec for stdlib questions.
+- **Language semantics** (operator precedence, conversion rules, `range`
+  semantics, method-set rules, type identity, addressability) — the Go
+  specification at https://go.dev/ref/spec.
+- **Standard library API surface and behavior** — `go doc <pkg>[.Symbol]` or
+  pkg.go.dev. Faster and more accurate than the spec for stdlib questions.
 - **Version availability** (e.g. "does `wg.Go` exist?", "when was
   `errors.AsType` added?") — Go release notes at
   https://go.dev/doc/devel/release.
-- **Tooling, modules, build behavior** — https://go.dev/ref/mod and
-  the relevant command's `go help` output.
+- **Tooling, modules, build behavior** — https://go.dev/ref/mod and the
+  relevant command's `go help` output.
 
 Do not guess from training data — cite the source.
 
 ## Formatting
 
-After editing Go files, run `gofumpt` to format all changed
-files:
+After editing Go files, run `gofumpt` to format all changed files:
 
 ```bash
 gofumpt -l -w .
@@ -147,18 +160,16 @@ If not installed: `go install github.com/incu6us/goimports-reviser/v3`
 ## Structs
 
 - Fields sorted alphabetically; embedded structs first.
-- JSON tags on exported fields; `json:"-"` for internal-only
-  fields.
-- Pointer fields when nil means "not provided" (partial
-  updates).
+- JSON tags on exported fields; `json:"-"` for internal-only fields.
+- Pointer fields when nil means "not provided" (partial updates).
 
 ```go
 type Service struct {
-    cacheManager *CacheManager
-    logger       *slog.Logger
-    metrics      *metrics.Metrics
-    repo         *MySQLRepository
-    tracer       trace.Tracer
+	cacheManager *CacheManager
+	logger       *slog.Logger
+	metrics      *metrics.Metrics
+	repo         *MySQLRepository
+	tracer       trace.Tracer
 }
 ```
 
@@ -169,8 +180,8 @@ Group consecutive `var` declarations into a single block:
 ```go
 // Good
 var (
-    direction    string
-    cursorValues []string
+	direction    string
+	cursorValues []string
 )
 
 // Bad
@@ -184,15 +195,15 @@ Only: `ctx`, `err`, `req`, `resp`, `cfg`.
 
 ## Naming
 
-Names must be unambiguous without type annotations. Apply the
-**"delete the type" test**: if you removed the type from a
-declaration, could a reader still tell what it refers to? If
-not, the name is too generic.
+Names must be unambiguous without type annotations. Apply the **"delete the
+type" test**: if you removed the type from a declaration, could a reader still
+tell what it refers to? If not, the name is too generic.
 
 ### Struct names
 
-Prefix with the domain or purpose when the bare name is
-generic:
+Prefix with the domain or purpose when the bare name is generic. A package
+may contain multiple things that could be called "Client" or "Store" — the
+name must distinguish which one:
 
 ```go
 // Bad — "Client" could be anything.
@@ -204,119 +215,177 @@ type VaultClient struct { ... }
 type PurgeClient struct { ... }
 ```
 
+The exception is when the package itself already narrows the scope
+unambiguously (e.g., a `redis` package exporting `redis.Client` is clear).
+
 ### Field and variable names
 
-Name by **role or target**, not by the Go type:
+Name by **role or target**, not by the Go type. When a struct holds a
+dependency, the field name should say what it connects to or what it does:
 
 ```go
-// Bad
+// Bad — "client" mirrors the type, ambiguous if more are added.
 type PurgeService struct {
-    client *http.Client
+	client *http.Client
 }
 
-// Good
+// Good — says what the HTTP client is for.
 type PurgeService struct {
-    purgeAPI *http.Client
+	purgeAPI *http.Client
 }
+
+// Good — distinguishes when multiple clients exist.
+type Service struct {
+	dnsAPI   *http.Client
+	purgeAPI *http.Client
+	storage  ObjectStore
+}
+```
+
+The same applies to local variables:
+
+```go
+// Bad — two "client" variables distinguished only by type.
+client := newDNSClient()
+client2 := newPurgeClient()
+
+// Good — each name stands alone.
+dnsClient := newDNSClient()
+purgeClient := newPurgeClient()
 ```
 
 ### When generic names are acceptable
 
-A generic name is fine when there is exactly one of that
-concept in scope and the context makes it obvious:
+A generic name is fine when there is exactly one of that concept in scope
+and the context makes it obvious:
 
 ```go
+// Fine — only one logger, one tracer, one repo in this struct.
 type Service struct {
-    logger *slog.Logger
-    repo   *MySQLRepository
-    tracer trace.Tracer
+	logger *slog.Logger
+	repo   *MySQLRepository
+	tracer trace.Tracer
 }
 ```
 
-If a second instance appears, rename **both** to be specific.
+If a second instance of the same concept appears, rename **both** to be
+specific — don't leave one generic and suffix the other:
+
+```go
+// Bad — asymmetric, implies "repo" is the "real" one.
+type Service struct {
+	repo       *MySQLRepository
+	legacyRepo *PostgresRepository
+}
+
+// Good — both names explain what they hold.
+type Service struct {
+	configRepo *MySQLRepository
+	auditRepo  *PostgresRepository
+}
+```
 
 ## Imports
 
-Three groups separated by blank lines: stdlib, third-party,
-internal.
+Three groups separated by blank lines: stdlib, third-party, internal.
 
 ```go
 import (
-    "context"
-    "fmt"
+	"context"
+	"fmt"
 
-    "go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace"
 
-    "github.com/fastly/blue-ribbon/internal/metrics"
+	"github.com/fastly/blue-ribbon/internal/metrics"
 )
 ```
 
 ## Comments
 
-The "default to no comments" guidance is about *writing* new
-comments, not *removing* existing ones. Assume every inherited
-comment was placed deliberately until you can prove otherwise.
+The "default to no comments" guidance is about *writing* new comments, not
+*removing* existing ones. Assume every inherited comment was placed
+deliberately until you can prove otherwise.
 
 ### Always preserve
 
 - **Function-level doc comments** — the sentence(s) above a type,
-  function, method, var, or const describing what it does at a
-  high level. Keep these on unexported identifiers too.
-- **Marker comments** — `// TODO:`, `// FIXME:`, `// NOTE:`,
-  `// HACK:`, `// XXX:`. They flag unresolved work or hidden
-  context the author wanted a future reader to see.
-- **Directive comments** — `//go:build`, `//go:embed`,
-  `//go:generate`, `// Deprecated:`, `//nolint:...`. These are
-  machine-read; removing them changes build or tool behavior.
-- **WHY comments** — explanations of a hidden constraint, a
-  workaround for a specific bug, a non-obvious invariant, or
-  behavior that would surprise a reader.
+  function, method, var, or const describing what it does at a high
+  level. Keep these on unexported identifiers too, not just exported
+  ones. On exported identifiers they also form the package's godoc.
+- **Marker comments** — `// TODO:`, `// FIXME:`, `// NOTE:`, `// HACK:`,
+  `// XXX:`. They flag unresolved work or hidden context the author
+  wanted a future reader to see.
+- **Directive comments** — `//go:build`, `//go:embed`, `//go:generate`,
+  `// Deprecated:`, `//nolint:...`. These are machine-read; removing
+  them changes build or tool behavior.
+- **WHY comments** — explanations of a hidden constraint, a workaround
+  for a specific bug, a non-obvious invariant, or behavior that would
+  surprise a reader.
 
 ### Safe to remove
 
-- Comments that restate the name of the identifier below them.
+- Comments that restate the name of the identifier immediately below
+  them (e.g., `// Create metrics server` above `createMetricsServer()`).
 - Stale comments describing code that no longer exists.
 - Commented-out code left behind from a previous change.
 
 ### Before removing any comment
 
-When an edit would delete one or more comments, first list each
-one with a one-line reason for removal, then make the edit. For
-example:
+When an edit would delete one or more comments, first list each one
+with a one-line reason for removal, then make the edit. For example:
 
 ```txt
-- handler.go:42  `// TODO: retry on 503` — keep (marker)
+- handler.go:42  `// TODO: retry on 503` — keep (marker comment)
 - handler.go:58  `// create the client` — remove (restates name)
 - handler.go:71  `// NOTE: must run before auth` — keep (WHY)
 ```
 
 This forces you to classify each comment against the rules above
-rather than sweeping them all out together. If you cannot
-articulate why a comment is redundant, keep it.
+rather than sweeping them all out together. If you cannot articulate
+why a comment is redundant, keep it.
 
 ## Error Handling
 
 Choose the error form based on how callers need to react:
 
-- **Sentinel errors** (`var ErrNotFound = ...`) — use when
-  callers across package boundaries need `errors.Is` checks.
-- **Wrapped errors** (`fmt.Errorf` with `%w`) — the default.
-- **Custom error types** — use when callers need to extract
-  structured data from the error.
-- Classify errors for retry decisions (`errors.Is`,
-  `errors.AsType`).
+- **Sentinel errors** (`var ErrNotFound = ...`) — use when callers across
+  package boundaries need `errors.Is` checks to branch on the error. Don't
+  create sentinels for errors that only propagate up without inspection.
+  ```go
+  var ErrNotFound = errors.New("not found")
+  ```
+- **Wrapped errors** (`fmt.Errorf` with `%w`) — the default for most errors.
+  Adds context while preserving the chain.
+- **Custom error types** — use when callers need to extract structured data
+  from the error (e.g., HTTP status code, retry-after duration). Must
+  implement `Error()` and `Unwrap()`.
+- Classify errors for retry decisions (`errors.Is`, `errors.AsType`).
 
 ### Error message prefixes
 
-Every wrapped error must start with a layer prefix:
+Every wrapped error must start with a layer prefix so the origin is
+immediately obvious in logs. The prefix is the package or logical layer name,
+not the function name:
 
 ```go
+// handler layer
 fmt.Errorf("handler: failed to decode request: %w", err)
+
+// service layer
 fmt.Errorf("service: failed to create config: %w", err)
+
+// repository layer
 fmt.Errorf("repository: failed to begin transaction: %w", err)
+
+// other packages use their package name
+fmt.Errorf("redis: transient error: %w", err)
+fmt.Errorf("cache: failed to marshal result: %w", err)
+fmt.Errorf("middleware: authentication failed: %w", err)
 ```
 
-The format is `"<layer>: <what failed>: %w"`.
+The format is `"<layer>: <what failed>: %w"`. Omit the package/type name
+that is already implied by the prefix (e.g., `"redis: failed to ping: %w"`
+not `"redis: failed to ping redis: %w"`).
 
 ### Error translation boundaries
 
@@ -325,76 +394,222 @@ Error translation happens at exactly two boundaries:
 - **Repository**: storage errors → domain sentinels
 - **Handler**: domain sentinels → HTTP/wire format
 
-The service layer passes domain errors through unchanged
-(adding context with `%w`). Do not translate in the service
-layer unless it produces a new domain condition (e.g.,
-soft-delete → `ErrNotFound`).
+The service layer passes domain errors through unchanged (adding context
+with `%w`). Do not translate errors in the service layer unless the
+service itself produces a new domain condition (e.g., soft-delete →
+`ErrNotFound`).
 
 **Why this matters:**
 
-- **Decoupling** — without translation, handlers import
-  storage packages to check for `sql.ErrNoRows` etc. Domain
-  sentinels let handlers depend only on business concepts.
-- **Multi-transport consistency** — map domain errors to wire
-  format once per transport (HTTP 404 / gRPC `codes.NotFound`).
-- **Business logic gaps** — a soft-deleted record exists in
-  the DB but the service treats it as missing. Only domain
-  sentinels can express this.
-- **Observability vs. client safety** — `%w` on domain errors
-  lets handlers branch; `%v` on storage errors preserves the
-  message for logs but hides internals from clients.
-- **Idiomatic Go** — the stdlib uses the same pattern:
-  `os.Open` translates `syscall.ENOENT` into `fs.ErrNotExist`.
+- **Decoupling** — without translation, handlers import storage packages
+  (`database/sql`, `redis`) to check for errors like `sql.ErrNoRows`.
+  Adding a cache layer or swapping databases forces changes in every
+  handler. Domain sentinels let handlers depend only on business concepts.
+- **Multi-transport consistency** — a service serving both HTTP and gRPC
+  maps domain errors to wire format once per transport (`ErrNotFound` →
+  404 or `codes.NotFound`), avoiding duplicated storage checks.
+- **Business logic gaps** — storage errors can't capture domain nuances.
+  A soft-deleted record exists in the database (no `sql.ErrNoRows`), but
+  the service treats it as missing. Only domain sentinels can express this.
+- **Observability vs. client safety** — `%w` on domain errors lets
+  handlers branch; `%v` on storage errors preserves the message for logs
+  but hides internals from clients. The client sees "not found"; the
+  on-call engineer sees "user 42 soft-deleted: not found".
+- **Idiomatic Go** — the standard library uses the same pattern: `os.Open`
+  translates platform-specific errors (`syscall.ENOENT`,
+  `ERROR_FILE_NOT_FOUND`) into the portable `fs.ErrNotExist`.
 
 ### `%w` vs `%v` in the repository layer
 
-Use `%w` only for **domain sentinel errors** callers should
-inspect. Use `%v` for raw storage/driver errors to sever the
-chain:
+In the repository layer, use `%w` only when wrapping **domain sentinel
+errors** that callers should inspect with `errors.Is`. Use `%v` for raw
+storage/driver errors to sever the chain — callers get the message for
+logging but cannot match against storage-specific types:
 
 ```go
-// Domain error — wrap with %w
+// Translated to domain error — wrap with %w (callers inspect this)
 if errors.Is(err, sql.ErrNoRows) {
-    return fmt.Errorf("repository: config %s not found: %w",
-        id, errorsx.ErrNotFound)
+	return fmt.Errorf("repository: config %s not found: %w", id, errorsx.ErrNotFound)
 }
 
-// Raw storage error — sever with %v
-return fmt.Errorf("repository: failed to query config: %v",
-    err)
+// Raw storage error — sever with %v (callers should not inspect this)
+return fmt.Errorf("repository: failed to query config: %v", err)
 ```
+
+The rule: `%w` for your own domain errors, `%v` for storage errors.
 
 ### Error type utilities
 
-- Use `errors.AsType[T]` (Go 1.26+) instead of `errors.As`.
+- Use `errors.AsType[T]` (Go 1.26+) instead of `errors.As`. It returns
+  `(T, bool)` and avoids the need for a pre-declared target variable:
+  ```go
+  if dnsErr, ok := errors.AsType[*net.DNSError](err); ok {
+      // use dnsErr
+  }
+  ```
 - Never panic; return errors.
 
 ## Constructors
 
-NewX factories with dependency injection. Fields assigned
-alphabetically.
+NewX factories with dependency injection. Fields assigned alphabetically.
 
-When a constructor has more than 4 parameters, use a params
-struct instead.
+```go
+func NewService(repo *MySQLRepository, tracer trace.Tracer, logger *slog.Logger) *Service {
+	return &Service{
+		logger: logger,
+		repo:   repo,
+		tracer: tracer,
+	}
+}
+```
 
-For types with required parameters plus optional configuration
-with sensible defaults, use `WithXxx` method chaining.
+When a constructor has more than 4 parameters, use a params struct instead
+(`ctx` counts toward the total):
+
+```go
+type ServiceParams struct {
+	Logger  *slog.Logger
+	Metrics *metrics.Metrics
+	Repo    *MySQLRepository
+	Tracer  trace.Tracer
+}
+
+func NewService(p ServiceParams) *Service {
+	return &Service{
+		logger:  p.Logger,
+		metrics: p.Metrics,
+		repo:    p.Repo,
+		tracer:  p.Tracer,
+	}
+}
+```
+
+For types with required parameters plus optional configuration with sensible
+defaults, use `WithXxx` method chaining. `NewX` takes only required params;
+`WithXxx` methods set optional fields and return the receiver:
+
+```go
+func NewClient(baseURL string) *Client {
+	return &Client{
+		baseURL:    baseURL,
+		httpClient: http.DefaultClient,
+		timeout:    30 * time.Second,
+	}
+}
+
+func (c *Client) WithHTTPClient(h *http.Client) *Client {
+	c.httpClient = h
+	return c
+}
+
+func (c *Client) WithTimeout(d time.Duration) *Client {
+	c.timeout = d
+	return c
+}
+```
 
 ### When to skip a constructor
 
-If `NewX` only assigns parameters to fields with no defaults,
-validation, or derived state, it is pointless indirection.
-Instantiate the struct directly at the call site instead.
+If `NewX` only assigns parameters to fields with no defaults, validation, or
+derived state, it is pointless indirection. Instantiate the struct directly at
+the call site instead:
 
-A constructor earns its keep when it does something the caller
-cannot: setting defaults, validating inputs, deriving internal
-state, providing access to unexported fields across public
-package boundaries, or providing access to an unexported type.
+```go
+// Bad — constructor adds nothing (same-package caller).
+func NewRepository(db mysqlwrapper.Querier, r *redis.Client, l *slog.Logger, m *Metrics, tracer trace.Tracer) *MySQLRepository {
+	return &MySQLRepository{
+		db:     db,
+		logger: l,
+		metric: m,
+		redis:  r,
+		tracer: tracer,
+	}
+}
+
+// Good — direct instantiation (same-package caller).
+r := &MySQLRepository{
+	db:     db,
+	logger: logger,
+	metric: metrics,
+	redis:  redisClient,
+	tracer: tracer,
+}
+```
+
+**Cross-package boundary exceptions**: direct instantiation from another package
+requires both an exported struct name *and* exported fields. Two cases force a
+constructor:
+
+- **Unexported fields** — exporting them to dodge the constructor leaks internal
+  state. For `internal/` packages this is acceptable (no public API risk), so
+  consider exporting fields and inlining instead.
+- **Unexported struct** — when the struct is intentionally unexported (e.g.,
+  `authzService` backing an `AuthzService` interface), external callers cannot
+  name the type at all. A constructor is structurally required.
+
+```go
+// Justified — unexported struct, cross-package callers cannot name the type.
+func NewAuthzService(repo *MySQLRepository, logger *slog.Logger) AuthzService {
+	return &authzService{
+		logger: logger,
+		repo:   repo,
+	}
+}
+```
+
+### Decision flow
+
+```txt
+Does NewX set defaults, validate, or derive state?
+├─ YES → keep constructor
+└─ NO
+   └─ Is the struct itself unexported?
+      ├─ YES → keep constructor (callers can't name the type)
+      └─ NO
+         └─ Are all call sites in the same package?
+            ├─ YES → skip constructor, instantiate directly
+            └─ NO  → are the fields unexported?
+               ├─ YES, internal/ package → export fields, instantiate directly
+               ├─ YES, public package   → keep constructor (don't leak state)
+               └─ NO  → skip constructor, instantiate directly
+```
+
+A constructor earns its keep when it does something the caller cannot: setting
+defaults, validating inputs, deriving internal state, providing access to
+unexported fields across public package boundaries, or providing access to an
+unexported type.
+
+### When to use each pattern
+
+- **Direct instantiation** — constructor would only assign params to fields
+  *and* either: all callers are in the same package, or fields are exported
+  (safe in `internal/`). No indirection needed.
+- **Trivial constructor (unexported type)** — struct is intentionally
+  unexported (e.g., backing an interface). Constructor is the only way for
+  external callers to obtain an instance.
+- **Trivial constructor (public package)** — constructor only assigns params
+  to fields, but fields are unexported in a non-`internal/` package.
+  Justified by Go's visibility rules, not by logic in the constructor.
+- **Params struct** — constructor has >4 args (any kind, including `ctx`).
+  Solves "too many arguments".
+- **`WithXxx` methods** — type has optional configuration with sensible
+  defaults. Solves "optional config with discoverable defaults". `NewX` takes
+  only required params; `WithXxx` methods set optional fields.
+- The patterns are orthogonal — a type could use more than one if needed.
+
+Tracer initialization at package or constructor level:
+
+```go
+var tracer = otel.Tracer("internal.contextx")
+// or
+tracer: otel.Tracer("internal.routeconfig.handlers"),
+```
 
 ## Interfaces
 
-Define an interface when you need to swap implementations —
-typically for testing or when multiple concrete backends exist.
+Define an interface when you need to swap implementations — typically for
+testing (mocks) or when multiple concrete backends exist. Do not introduce an
+interface to abstract a single concrete type that has no reason to vary.
 
 - Define at consumer side, not provider.
 - Place in `interface.go` when shared across packages.
@@ -405,32 +620,59 @@ typically for testing or when multiple concrete backends exist.
 
 ## Logging
 
-Log at layer boundaries and error paths — not inside every
-function. Use `slog.LogAttrs`; snake_case event names.
+Log at layer boundaries (handlers, service, repository) and error paths — not
+inside every function. Don't log what a caller already logs; if a service method
+logs an error before returning it, the handler should not log it again.
+
+Use `slog.LogAttrs`; snake_case event names; same event name for success and
+error (level distinguishes).
 
 ```go
 logger.LogAttrs(ctx, slog.LevelError, "create_config",
-    slog.String("config_id", configID),
-    slog.Any("err", err),
+	slog.String("config_id", configID),
+	slog.Any("err", err),
+)
+```
+
+Group related attributes:
+
+```go
+slog.Group("redis",
+	slog.String("key", key),
+	slog.Duration("ttl", ttl),
 )
 ```
 
 ## Observability
 
-Add trace spans and metrics at layer boundaries — handler,
-service, and repository methods. Do not instrument internal
-helpers.
+Add trace spans and metrics at layer boundaries — handler, service, and
+repository methods. Do not instrument internal helpers, pure functions, or
+methods that are already wrapped by their caller (e.g., a private
+`insertConfigInTx` called inside a repository method that already has a span
+via `withDBMetrics`).
+
+Wrap operations with trace spans using `layer.Operation` naming:
 
 ```go
-err := traces.WithSpan(ctx, s.tracer, "service.CreatePath",
-    func(ctx context.Context) error {
-        traces.AddAttributesToCurrentSpan(ctx,
-            attribute.String("config_id", configID))
-        return nil
-    })
+err := traces.WithSpan(ctx, s.tracer, "service.CreatePath", func(ctx context.Context) error {
+	traces.AddAttributesToCurrentSpan(ctx, attribute.String("config_id", configID))
+	// ... operation
+})
+```
+
+Record both count and duration metrics via typed struct fields:
+
+```go
+s.metrics.pathOpsTotal.WithLabelValues("create", result).Inc()
+s.metrics.serviceOpDuration.WithLabelValues("create_path", result).Observe(time.Since(start).Seconds())
 ```
 
 ## Concurrency
+
+Use goroutines for independent I/O-bound work where parallelism reduces
+latency (e.g., fanning out to multiple services). Do not parallelize
+CPU-bound sequential logic, operations that are already fast, or work with
+ordering dependencies.
 
 Prefer `wg.Go` (Go 1.25+) over manual `wg.Add`/`go`/`wg.Done`:
 
@@ -441,37 +683,180 @@ wg.Go(func() { /* task */ })
 wg.Wait()
 ```
 
-## Context
+`wg.Go` handles Add/Done internally; the func must not panic.
 
-- Only create derived contexts when you have a concrete reason
-  (cancel goroutines, tighter deadlines).
-- Prefer `*Cause` variants (`WithCancelCause`,
-  `WithTimeoutCause`, `WithDeadlineCause`).
-- Use context values for request-scoped metadata only.
+## Context Cancellation
+
+Parent cancellation propagates automatically — only create a derived context
+when you have a concrete reason:
+
+- **`WithCancelCause`** — you spawn goroutines or fan-out work that must be
+  cancelled independently of the parent (e.g., cancel remaining goroutines on
+  first error).
+- **`WithTimeoutCause` / `WithDeadlineCause`** — you need a tighter deadline
+  than the parent provides (e.g., an RPC call that should fail faster than the
+  overall request).
+
+Do **not** wrap with `WithCancelCause` when you are simply passing context
+through a call chain — the parent's cancellation already reaches every child.
+
+When you do create a derived context, prefer the `*Cause` variants so every
+cancellation carries a reason:
+
+- `context.WithCancelCause` instead of `context.WithCancel`
+- `context.WithTimeoutCause` instead of `context.WithTimeout`
+- `context.WithDeadlineCause` instead of `context.WithDeadline`
+- `context.AfterFunc` callbacks should pass causes via `context.Cause(ctx)`
+
+```go
+ctx, cancel := context.WithTimeoutCause(ctx, 5*time.Second, errors.New("service: timed out fetching config"))
+defer cancel()
+```
+
+Retrieve the cause with `context.Cause(ctx)` rather than checking `ctx.Err()`
+alone.
+
+## Context Values
+
+Use context values for request-scoped metadata that crosses API boundaries
+(request ID, customer ID, auth claims). Do not use context values to pass
+function arguments or application configuration — those belong in function
+signatures or struct fields.
+
+Unexported struct keys; generic `WithValue`/`FromContext` helpers instead of
+per-type wrappers.
+
+Define the generic helpers once in a `contextx` (or similar) package:
+
+```go
+// WithValue sets a typed value into the context under the given key.
+func WithValue[T any](ctx context.Context, key any, val T) context.Context {
+	return context.WithValue(ctx, key, val)
+}
+
+// FromContext retrieves a typed value from the context.
+func FromContext[T any](ctx context.Context, key any) (T, bool) {
+	if v, ok := ctx.Value(key).(T); ok {
+		return v, true
+	}
+	var zero T
+	return zero, false
+}
+```
+
+Each context key is still an unexported struct type with an exported variable:
+
+```go
+type customerIDCtxKey struct{}
+
+var CustomerIDContextKey = customerIDCtxKey{}
+```
+
+Usage:
+
+```go
+ctx = contextx.WithValue(ctx, CustomerIDContextKey, "cust-123")
+id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
+```
 
 ## Testing
 
-Table-driven tests with `testCases` slice and `t.Run`. Use
-`testify/mock` for mock implementations. Build tag `e2e` for
-integration tests.
+Table-driven tests with `testCases` slice and `t.Run`:
+
+```go
+testCases := []struct {
+	name    string
+	input   string
+	isValid bool
+}{
+	{"Valid input", "good", true},
+	{"Empty input", "", false},
+}
+
+for _, tc := range testCases {
+	t.Run(tc.name, func(t *testing.T) {
+		// ...
+	})
+}
+```
+
+- Use `testify/mock` for mock implementations.
+- Build tag `e2e` for integration tests; unit tests have no build tags.
+- Compile-time interface compliance in test utility packages.
+- Always add code comments above the test function to explain what it validates.
+- Use `httptest.NewRequestWithContext` instead of `httptest.NewRequest` to
+  satisfy the `noctx` linter:
+  ```go
+  // Bad — noctx warns.
+  req := httptest.NewRequest(http.MethodGet, "/path", nil)
+
+  // Good — context is explicit.
+  req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/path", nil)
+  ```
+- Similarly, use `http.NewRequestWithContext` instead of `http.NewRequest` in
+  production code:
+  ```go
+  // Bad — noctx warns.
+  req, err := http.NewRequest(http.MethodGet, url, body)
+
+  // Good — context is explicit.
+  req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, body)
+  ```
+- Narrow variable scope to satisfy the `scopeguard` linter. When a variable is
+  only used inside an `if` block, fold the assignment into the `if` init
+  statement:
+  ```go
+  // Good — result scoped to the if block.
+  if result := cm.extractCustomerID(tt.cacheKey); result != tt.expected {
+      t.Errorf("extractCustomerID(%q) = %q, expected %q", tt.cacheKey, result, tt.expected)
+  }
+  ```
+  When folding into an `if` init statement would hurt readability (e.g. multiple
+  short assignments that compare against each other), suppress with
+  `//nolint:scopeguard` instead:
+  ```go
+  result := cm.customerKeySetName("customer123") //nolint:scopeguard
+  expected := "br:customer123:_keys"             //nolint:scopeguard
+  if result != expected {
+      t.Errorf("customerKeySetName(%q) = %q, expected %q", "customer123", result, expected)
+  }
+  ```
 
 ## HTTP Handlers
 
-Struct with logger, metrics, service. Factory `NewHandlers`.
-Routes registered via `RegisterRoutes(mux, pipeline, cfg)`.
-Errors as RFC 7807 Problem Details.
+Struct with logger, metrics, service. Factory `NewHandlers`. Routes registered via `RegisterRoutes(mux, pipeline, cfg)`.
+
+```go
+type Handlers struct {
+	logger  *slog.Logger
+	metrics *metrics.Metrics
+	service *Service
+	tracer  trace.Tracer
+}
+
+func (h *Handlers) RegisterRoutes(mux *http.ServeMux, p *middleware.Pipeline, cfg *config.Config) {
+	mux.Handle("POST /v1/things", p.Decorate(http.HandlerFunc(h.createThing)))
+}
+```
+
+Errors as RFC 7807 Problem Details:
+
+```go
+problem := errorsx.NewProblem("Not Found", "Resource not found.")
+httpx.WriteJSON(ctx, logger, w, http.StatusNotFound, problem)
+```
 
 ## Service Layer
 
-- Service methods take `(ctx, In)` and return `(Out, error)`
-  where `In` and `Out` are plain domain structs with no
-  transport-specific tags (no `json:`, no protobuf, no HTTP
-  types). Keeps the service reusable across transports and
-  test harnesses.
-- Put input validation on the input struct as a `Validate()
-  error` method, not inline in the service method body. The
-  service calls `in.Validate()` as the first step inside the
-  trace span.
+- Service methods take `(ctx, In)` and return `(Out, error)` where `In` and
+  `Out` are plain domain structs with no transport-specific tags (no `json:`,
+  no protobuf, no HTTP types). This keeps the service reusable across
+  transports and test harnesses, and makes the signature uniform so future
+  adapters (e.g. a second transport) can wrap every method the same way.
+- Put input validation on the input struct as a `Validate() error` method,
+  not inline in the service method body. The service calls `in.Validate()`
+  as the first step inside the trace span. Handlers may also invoke it
+  between decode and the service call to fail fast on wire-level errors.
   ```go
   type CreateConfigIn struct {
       CustomerID string
@@ -486,20 +871,206 @@ Errors as RFC 7807 Problem Details.
   }
   ```
 - Trace-wrap the operation; metrics outside the span.
+- Validate at service boundary; return validation errors.
+
+```go
+func (s *Service) CreateThing(ctx context.Context, params ServiceParams) (*Thing, error) {
+	start := time.Now()
+	var (
+		thing *Thing
+		err   error
+	)
+	spanFunc := func(ctx context.Context) error {
+		// ... business logic
+		return nil
+	}
+	err = traces.WithSpan(ctx, s.tracer, "service.CreateThing", spanFunc)
+
+	result := "success"
+	if err != nil {
+		result = "error"
+	}
+	s.metrics.thingOpsTotal.WithLabelValues("create", result).Inc()
+	s.metrics.serviceOpDuration.WithLabelValues("create_thing", result).Observe(time.Since(start).Seconds())
+
+	if err != nil {
+		return nil, err
+	}
+	return thing, nil
+}
+```
+
+## Repository Layer
+
+Wrap every repository method with `withDBMetrics` to get tracing, count, and
+duration metrics for free. The helper times the operation, records `dbOpsTotal`
+and `dbOpDuration` with operation/table/result labels, and derives the result
+from the returned error:
+
+```go
+// withDBMetrics wraps a repository operation with tracing and DB metrics.
+func (r *MySQLRepository) withDBMetrics(ctx context.Context, span, operation, table string, fn func(ctx context.Context) error) error {
+	start := time.Now()
+	err := traces.WithSpan(ctx, r.Tracer, span, fn)
+
+	result := resultSuccess
+	if err != nil {
+		result = resultError
+	}
+	r.Metric.dbOpsTotal.WithLabelValues(operation, table, result).Inc()
+	r.Metric.dbOpDuration.WithLabelValues(operation, table, result).Observe(time.Since(start).Seconds())
+
+	return err //nolint:wrapcheck
+}
+```
+
+Repository methods pass a closure to `withDBMetrics`. Transactions use deferred
+rollback with rollback-error metrics:
+
+```go
+func (r *MySQLRepository) CreateConfig(ctx context.Context, config *Config) error {
+	return r.withDBMetrics(ctx, "repository.CreateConfig", "insert", "routing_configs",
+		func(ctx context.Context) error {
+			tx, err := r.DB.BeginTx(ctx, nil)
+			if err != nil {
+				return fmt.Errorf("repository: failed to begin transaction: %w", err)
+			}
+			defer func() {
+				if err = tx.Rollback(); err != nil && !errors.Is(err, sql.ErrTxDone) {
+					r.Logger.LogAttrs(ctx, slog.LevelError, "transaction_rollback",
+						slog.String("operation", "create_config"),
+						slog.String("config_id", config.ID),
+						slog.Any("err", err))
+					r.Metric.txErrors.WithLabelValues("create", "config").Inc()
+				}
+			}()
+
+			if err := r.insertConfigInTx(ctx, tx, config); err != nil {
+				return err
+			}
+			if err := r.insertConfigOwnershipInTx(ctx, tx, config); err != nil {
+				return err
+			}
+
+			return tx.Commit()
+		},
+	)
+}
+```
+
+## Middleware
+
+`Decorator` type wrapping `http.Handler`. `Pipeline` for composition.
+
+```go
+type Decorator func(http.Handler) http.Handler
+
+type Pipeline struct {
+	middleware []Decorator
+}
+
+func (p *Pipeline) Decorate(next http.Handler) http.Handler {
+	for _, mw := range slices.Backward(p.middleware) {
+		next = mw(next)
+	}
+	return next
+}
+```
+
+## Caching
+
+Cache read-heavy, stable data that is accessed across multiple requests (e.g.,
+routing configs, feature flags). Do not cache request-scoped data,
+frequently-mutated data, or results that are cheap to recompute.
+
+Cache-aside with `CacheManager.CacheOrFetch()`. Use `singleflight.Group` to
+deduplicate concurrent fetches. Hierarchical keys:
+`prefix:customerID:resource:id`.
+
+```go
+key := cm.HierarchicalKeyFor(customerID, "config", configID)
+```
+
+## File Naming
+
+- `handlers.go` + `handlers_*.go` (by resource: `handlers_config.go`, `handlers_errors.go`)
+- `service.go` + `service_*.go`
+- `repository.go` + `repository_*.go`
+- `model.go` for domain types
+- `interface.go` for shared interfaces
+- `cache.go` for cache logic
+- `README.md` for every package (see below)
+
+### Package `doc.go`
+
+Every Go package must have a `doc.go` file containing only the package-level
+comment and the `package` declaration. When creating a new package, add one.
+When editing a file in an existing package, check for a missing `doc.go` and
+add one if absent. If the package's purpose has changed, update the comment.
+
+```go
+// Package redis provides a thin wrapper around go-redis with
+// connection pooling, health checks, and structured logging.
+package redis
+```
+
+Keep the comment to one or two sentences describing what the package does
+and why it exists. Do not put imports, constants, or code in `doc.go`.
+
+### Package README
+
+Every Go package must have a `README.md` in its directory. When creating a
+new package, add one. When editing a file in an existing package, check for
+a missing `README.md` and add one if absent.
+
+Contents — keep it short and factual:
+
+1. **Purpose** — one or two sentences on what the package does and why it
+   exists.
+2. **Responsibilities** — bullet list of what this package owns.
+3. **Usage** — a brief code snippet showing the primary entry point or
+   typical call pattern.
+
+Do not duplicate godoc. The README orients a reader who is browsing the
+directory tree; godoc covers the API surface.
+
+## Type Definitions
+
+String enums with `All*` validation slice:
+
+```go
+type ConditionType string
+
+const (
+	HeaderCondition ConditionType = "header"
+	GeoCondition    ConditionType = "geo"
+)
+
+var AllConditionTypes = []ConditionType{HeaderCondition, GeoCondition}
+```
 
 ## Standard Library Preferences
 
-Prefer newer stdlib packages over their older equivalents in
-new code. When editing existing code that uses an older API
-listed below, ask the user whether they want to migrate it to
-the newer equivalent before proceeding.
+Prefer newer stdlib packages over their older equivalents in new code. When
+editing existing code that uses an older API listed below, ask the user
+whether they want to migrate it to the newer equivalent before proceeding.
 
 ### Use stdlib constants over magic literals
 
-When the stdlib defines a named constant, use it instead of a
-string or numeric literal. The constant documents intent and
-catches typos at compile time — `http.MethodGot` is a compile
-error; `"GOT"` is a bug.
+When the standard library defines a named constant for a value, use it
+instead of a string or numeric literal. The constant documents intent,
+survives refactors, and catches typos at compile time — `"GOT"` compiles;
+`http.MethodGot` does not.
+
+Common cases:
+
+| Magic literal                       | Stdlib constant                                                               |
+| ----------------------------------- | ----------------------------------------------------------------------------- |
+| `"GET"`, `"POST"`, `"DELETE"`, ...  | `http.MethodGet`, `http.MethodPost`, `http.MethodDelete`, ...                 |
+| `200`, `404`, `500`, ...            | `http.StatusOK`, `http.StatusNotFound`, `http.StatusInternalServerError`, ... |
+| Signals (`SIGINT`, `SIGTERM`, ...)  | `os.Interrupt`, `syscall.SIGTERM`, ...                                        |
+| File modes (`0644`, `0755`)         | `fs.FileMode` values; `os.ModePerm`                                           |
+| Time units as `time.Duration` ints  | `time.Second`, `time.Millisecond`, ...                                        |
 
 ```go
 // Bad
@@ -511,16 +1082,14 @@ req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 if resp.StatusCode == http.StatusOK { ... }
 ```
 
-Common constants to reach for: `http.Method*`, `http.Status*`,
-`os.Interrupt`/`syscall.SIG*`, `os.ModePerm`, `time.Second` et
-al. When a repeated literal has no stdlib constant (e.g.
-`"application/json"`), define a package-level `const`.
+When a repeated literal has no stdlib constant (e.g. `"application/json"`,
+a custom header name, `"tcp"`/`"udp"`), define a package-level `const` so
+the value has one source of truth.
 
 ### `net/netip` over `net` for IP types (Go 1.18+)
 
-The `net/netip` package provides value-typed, comparable,
-allocation-free replacements for the pointer-heavy types in
-`net`:
+The `net/netip` package provides value-typed, comparable, allocation-free
+replacements for the pointer-heavy types in `net`:
 
 | Old (`net`)  | New (`net/netip`) | Benefit                           |
 | ------------ | ----------------- | --------------------------------- |
@@ -536,27 +1105,15 @@ var cidr *net.IPNet
 var prefix netip.Prefix
 ```
 
-Convert at boundaries when interacting with APIs that still
-use `net` types:
+Convert at boundaries when interacting with APIs that still use `net` types:
 
 ```go
 addr := netip.MustParseAddr("10.0.0.1")
 stdIP := addr.AsSlice() // -> net.IP for legacy APIs
 
-stdAddr, ok := netip.AddrFromSlice(legacyIP)
+stdAddr, ok := netip.AddrFromSlice(legacyIP) // net.IP -> netip.Addr
 ```
 
 ## Layer Separation
 
-handlers -> service -> repository. Business logic in service,
-data access in repository. Never skip layers.
-
-## File Naming
-
-- `handlers.go` + `handlers_*.go`
-- `service.go` + `service_*.go`
-- `repository.go` + `repository_*.go`
-- `model.go` for domain types
-- `interface.go` for shared interfaces
-- `doc.go` for package-level comment
-- `README.md` for every package
+handlers -> service -> repository. Business logic in service, data access in repository. Never skip layers.

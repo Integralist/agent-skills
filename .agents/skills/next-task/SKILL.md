@@ -5,6 +5,11 @@ description: >-
   unchecked task and begins implementation. Use when the user
   says "next task", "continue", or wants to resume project
   plan work.
+argument-hint: '[--skip-agents]'
+arguments:
+  - name: --skip-agents
+    description: Skip subagent delegation and do the work directly in the main thread
+    required: false
 ---
 
 # Next Task
@@ -92,3 +97,24 @@ the same rules the subagent would follow:
   the implementation work yourself.
 - When using `--skip-agents`, you MUST do the work directly —
   do not spawn subagents.
+
+## Agent teams (if your harness supports it)
+
+If your harness supports named, parallel agent teams (e.g. Claude
+Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
+the default delegation mode can run the implementation as a tracked
+teammate task instead of a one-shot subagent: create a team named
+`next-task-<plan-slug>`, create a task for the work item, spawn an
+agent assigned to it, and have the agent report back and mark the
+task completed when done.
+
+On Claude Code, enable agent teams by adding the following to
+`.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```

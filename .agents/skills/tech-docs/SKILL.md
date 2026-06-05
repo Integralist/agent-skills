@@ -7,6 +7,8 @@ description: >-
   stale code references. Use when writing new documentation
   from scratch or reviewing and rewriting existing documents
   for clarity and quality.
+user-invocable: true
+argument-hint: '--new <topic> | --improve <file>'
 ---
 
 # Technical Documentation

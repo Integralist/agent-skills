@@ -29,6 +29,10 @@
 
 # Skills
 
-- When creating or modifying a skill, the change must land in **both**
-  `.claude/skills/<name>/` and `.agents/skills/<name>/`. The two `SKILL.md` files
-  must be byte-identical. Verify with `diff`.
+- Skills live only in `.agents/skills/<name>/`. `.claude/skills` is a symlink to
+  `.agents/skills`, so editing once covers both harnesses — do not create a
+  separate copy under `.claude/`.
+- Keep skill content harness-agnostic. Use generic language ("prompt the user",
+  "spawn a subagent") rather than harness-specific tool names. Confine any
+  Claude-specific guidance (e.g. agent teams) to a clearly-labeled optional
+  "Agent teams (if your harness supports it)" section.

@@ -118,9 +118,9 @@ with 1Password and Duo, so `--headless` must be **absent**.
 `--user-data-dir` makes the Chromium profile persistent so cookies
 survive across MCP restarts.
 
-If the Playwright MCP tools are not available (`/mcp` shows no
-`playwright` entry), tell the user to restart Claude Code and stop —
-this skill cannot proceed without them.
+If the Playwright MCP tools are not available (no `playwright`
+entry among the connected MCP servers), tell the user to restart
+their agent / CLI and stop — this skill cannot proceed without them.
 
 ## Tool names
 

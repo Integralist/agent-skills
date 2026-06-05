@@ -5,6 +5,8 @@ description: >-
   idiomatic Go, data correctness, and security. Works on PRs
   or local code. Pass --plan or --plan=<path> to additionally
   check the diff against an implementation plan.
+user-invocable: true
+argument-hint: '[PR_URL | --diff | --uncommitted | path] [--plan[=<path>]]'
 ---
 
 # Code Review Skill
@@ -245,6 +247,26 @@ in the summary.
   understand surrounding code patterns.
 - The skill does not post any comments to the PR — all output stays in the
   conversation or in the local review file.
+
+## Agent teams (if your harness supports it)
+
+If your harness supports named, parallel agent teams (e.g. Claude
+Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
+run the review subagents as parallel teammates: spawn one per
+review dimension, have each report findings back to the team lead,
+then synthesize. This is faster than sequential subagent calls when
+the harness can run them concurrently.
+
+On Claude Code, enable agent teams by adding the following to
+`.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
 
 ## References
 
