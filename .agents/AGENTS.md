@@ -11,6 +11,8 @@
 - Don’t include timeline estimates in plans.
 - No code without a failing test; write the minimum code to pass and clean up
   dead code immediately.
+- Always propose code changes/diffs in chat and obtain explicit user approval
+  before calling any code-editing tools.
 
 # Tooling
 
