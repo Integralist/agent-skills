@@ -11,8 +11,8 @@ inclusive language.
 
 ## Formatting
 
-- Wrap text at 80 columns.
 - Use the formatter tool `mdformat` to automatically format Markdown files.
+- Wrap text at 80 columns (`mdformat --wrap 80`).
 
 To install and configure the formatter with the necessary plugins (GitHub
 Flavored Markdown and Frontmatter support):
