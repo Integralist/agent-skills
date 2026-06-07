@@ -1,9 +1,9 @@
 ---
 name: markdown-conventions
 description: >-
-  Markdown formatting and linting conventions. Use whenever
-  editing or creating Markdown files (*.md). Covers wrapping,
-  code blocks, and linting tools.
+  MANDATORY for any work on Markdown files (*.md). Load this before
+  editing or creating any *.md file. Markdown formatting and linting
+  conventions covering wrapping, code blocks, and linting tools.
 ---
 
 We are peers writing Markdown. Prioritize readability, consistency, and

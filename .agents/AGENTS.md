@@ -38,3 +38,10 @@
   "spawn a subagent") rather than harness-specific tool names. Confine any
   Claude-specific guidance (e.g. agent teams) to a clearly-labeled optional
   "Agent teams (if your harness supports it)" section.
+- Convention skills are mandatory, not optional. Load them before touching the
+  files they govern. Claude Code auto-loads these via path-scoped rules, but
+  other harnesses must invoke them explicitly:
+  - Before editing, reviewing, or creating Go (`*.go`) files: load
+    `go-conventions`.
+  - Before editing, reviewing, or creating Markdown (`*.md`) files: load
+    `markdown-conventions`.

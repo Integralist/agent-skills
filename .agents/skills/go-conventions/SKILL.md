@@ -1,10 +1,10 @@
 ---
 name: go-conventions
 description: >-
-  Go coding conventions and style guide. Use whenever editing,
-  reviewing, or creating Go files (*.go). Covers naming, error
-  handling, testing, HTTP handlers, caching, concurrency, and
-  observability.
+  MANDATORY for any work on Go files (*.go). Load this before editing,
+  reviewing, or creating any *.go file. Go coding conventions and style
+  guide covering naming, error handling, testing, HTTP handlers, caching,
+  concurrency, and observability.
 ---
 
 We are peers writing Go. Prioritize correctness, clarity, and best practices.
