@@ -67,6 +67,7 @@ make install
     ├── handoff/
     ├── markdown-conventions/       # rule → skill (generic harnesses)
     ├── markdown-to-skill/
+    ├── mysql-index-audit/
     ├── next-task/
     ├── redesign/
     ├── refactor/
@@ -131,14 +132,15 @@ auto-loading.
 | **decide**                | Decision memo with structurer, contrarian, and synthesizer passes                            |
 | **delegate**              | Spawn a subagent for a task                                                                  |
 | **go-api**                | Generate a production-ready Go API service                                                   |
-| **go-conventions**        | Go coding conventions (mirrors `.claude/rules/go.md`)                                       |
+| **go-conventions**        | Go coding conventions (mirrors `.claude/rules/go.md`)                                        |
 | **go-testing**            | Write Go tests — table-driven, fuzz, benchmarks                                              |
 | **grepai**                | Semantic code search by intent                                                               |
 | **grill-me**              | Interview the user relentlessly to stress-test a plan or design                              |
 | **grill-with-docs**       | Stress-test a plan against project domain model and update CONTEXT/ADRs                      |
 | **handoff**               | Compact the current conversation into a handoff document for another agent                   |
-| **markdown-conventions**  | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                       |
+| **markdown-conventions**  | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                        |
 | **markdown-to-skill**     | Bulk-convert Markdown files into agent skills                                                |
+| **mysql-index-audit**     | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)          |
 | **next-task**             | Continue working through a project plan                                                      |
 | **redesign**              | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning  |
 | **refactor**              | Analyze a feature and produce a reimplementation plan                                        |
@@ -156,12 +158,12 @@ Skills are no longer duplicated. `.agents/skills/` is the single source; the
 `.claude/skills` symlink points at it. The only things unique to `.claude/` are
 Claude-specific assets that have no generic equivalent:
 
-| Asset              | Purpose                                                          |
-| ------------------ | ---------------------------------------------------------------- |
-| `CLAUDE.md`        | One-line `@~/.agents/AGENTS.md` import — same conventions        |
-| `rules/`           | Path-glob auto-loaded conventions (generic harnesses use skills) |
-| `agents/`          | Custom sub-agent definitions spawned via the Task tool           |
-| `scripts/`         | Statusline and session-cost helpers                              |
+| Asset       | Purpose                                                          |
+| ----------- | ---------------------------------------------------------------- |
+| `CLAUDE.md` | One-line `@~/.agents/AGENTS.md` import — same conventions        |
+| `rules/`    | Path-glob auto-loaded conventions (generic harnesses use skills) |
+| `agents/`   | Custom sub-agent definitions spawned via the Task tool           |
+| `scripts/`  | Statusline and session-cost helpers                              |
 
 Inside skill bodies, harness-agnostic language is the default. Optional
 Claude-only behavior (agent teams, `allowed-tools`/`argument-hint` frontmatter)
@@ -173,14 +175,14 @@ Skill bodies are harness-agnostic, but some YAML frontmatter keys are read only
 by Claude Code. They're safe to leave in shared skills — other harnesses ignore
 unknown keys.
 
-| Field                      | Where     | Purpose                                                                |
-| -------------------------- | --------- | ---------------------------------------------------------------------- |
-| `user-invocable`           | `SKILL.md` | Exposes the skill as a `/skill-name` slash command                     |
-| `argument-hint`            | `SKILL.md` | Placeholder text shown after the slash command in the prompt           |
-| `allowed-tools`            | `SKILL.md` | Pre-approves specific tool calls (e.g. `Bash(git diff:*)`)             |
-| `disable-model-invocation` | `SKILL.md` | Prevents the model from auto-invoking; user must call it explicitly    |
-| `arguments`                | `SKILL.md` | Structured argument definitions for a slash command                    |
-| `paths`                    | `rules/*.md` | Glob patterns that auto-load a rule when matching files are touched  |
+| Field                      | Where        | Purpose                                                             |
+| -------------------------- | ------------ | ------------------------------------------------------------------- |
+| `user-invocable`           | `SKILL.md`   | Exposes the skill as a `/skill-name` slash command                  |
+| `argument-hint`            | `SKILL.md`   | Placeholder text shown after the slash command in the prompt        |
+| `allowed-tools`            | `SKILL.md`   | Pre-approves specific tool calls (e.g. `Bash(git diff:*)`)          |
+| `disable-model-invocation` | `SKILL.md`   | Prevents the model from auto-invoking; user must call it explicitly |
+| `arguments`                | `SKILL.md`   | Structured argument definitions for a slash command                 |
+| `paths`                    | `rules/*.md` | Glob patterns that auto-load a rule when matching files are touched |
 
 ### Generating rules from skills
 
@@ -189,9 +191,7 @@ unknown keys.
 single source of truth, and the rule differs only by frontmatter (`paths:` globs
 in place of `name:`/`description:`). Bodies stay byte-identical.
 
-Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`). `make
-install` runs it automatically. After editing a `*-conventions` skill, run `make
-rules` before committing, since the generated rules are committed.
+Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`). `make install` runs it automatically. After editing a `*-conventions` skill, run `make rules` before committing, since the generated rules are committed.
 
 ## Workflow
 
