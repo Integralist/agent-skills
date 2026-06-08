@@ -144,18 +144,33 @@ SELECT * FROM users WHERE last_name = 'Smith' AND state = 'California';
 Fix: include the skipped column in the query, or add a composite index matching
 the query's actual column set.
 
-### RANGE-then-equality ordering
+### RANGE-then-equality ordering (equality before range)
 
-A range predicate (`>`, `<`, `BETWEEN`, `LIKE 'x%'`) on an index column stops
-the index from being used for columns **to its right**. Optimal composite order
-is **equality columns first, range column last**.
+When designing a composite index, place **equality** columns (`=`, `IN`)
+*before* **range** columns (`>`, `<`, `>=`, `<=`, `BETWEEN`, `LIKE 'x%'`). A
+range predicate on an index column stops the index from being used for any
+column **to its right** — MySQL evaluates **one** range per index lookup, then
+filter-scans the remaining matched rows.
 
 ```sql
--- Index:  (status, created_at)  <- good: equality then range
-SELECT * FROM orders WHERE status = 'active' AND created_at > '2026-01-01';
+-- BAD: range column first -> only `created_at` is seekable
+CREATE INDEX idx_users_created_country ON users (created_at, country);
 
--- Index:  (created_at, status)  <- bad: range first kills `status` seeking
+-- The `>=` range halts index traversal at `created_at`; every matched row is
+-- then scanned to filter `country`.
+SELECT * FROM users WHERE country = 'UK' AND created_at >= '2026-01-01';
+
+-- GOOD: equality first, range last -> both columns used
+CREATE INDEX idx_users_country_created ON users (country, created_at);
+
+-- Seeks `country = 'UK'`, then range-scans `created_at` within it.
+SELECT * FROM users WHERE country = 'UK' AND created_at >= '2026-01-01';
 ```
+
+> [!NOTE]
+> The same applies when the query has multiple range predicates: only one
+> range column benefits from the index. Order the index so the most selective
+> range comes last and the rest are filtered.
 
 ### Index killers
 
