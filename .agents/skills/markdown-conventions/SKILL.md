@@ -12,7 +12,8 @@ inclusive language.
 ## Formatting
 
 - Use the formatter tool `mdformat` to automatically format Markdown files.
-- Wrap text at 80 columns (`mdformat --wrap 80`).
+- Wrap text at 80 columns manually, do not use `mdformat --wrap 80` as it breaks
+  GitHub flavoured quote blocks (e.g. `> [!NOTE]`).
 
 To install and configure the formatter with the necessary plugins (GitHub
 Flavored Markdown and Frontmatter support):
