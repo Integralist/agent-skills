@@ -76,6 +76,7 @@ make install
     ├── slack-search/
     ├── summarize-for-product/
     ├── systematic-debugging/
+    ├── teach/
     ├── tech-docs/
     ├── test-feedback/
 ```
@@ -149,6 +150,7 @@ auto-loading.
 | **slack-search**          | Drive Slack via Playwright MCP to run searches or Slackbot prompts                           |
 | **summarize-for-product** | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)             |
 | **systematic-debugging**  | Four-phase debugging with root cause analysis                                                |
+| **teach**                 | Stateful tutor workspace — missions, lessons, learning records, reference docs               |
 | **tech-docs**             | Write or improve technical documentation via five documentation pillars                      |
 | **test-feedback**         | Parse test failures and fix them in a background subagent                                    |
 
