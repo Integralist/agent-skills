@@ -40,6 +40,15 @@ using the same inventory the Decision table needs (see
   `content | stub | stub` state). Instead of bailing, run
   the "Update mode" flow. This is the re-runnable path.
 
+## Flags
+
+- `--learn` — skip straight to the session-lessons harvest. Bypass
+  mode determination, the Decision table, and the structure/freshness
+  jobs; run only job 3 of Update mode against the existing AGENTS.md.
+  Use this at the end of a session when you only want to record durable
+  lessons learned, not a full audit. If AGENTS.md does not yet exist,
+  report that and fall back to normal mode determination instead.
+
 ## Why this works
 
 - Claude Code reads `CLAUDE.md`, not `AGENTS.md`, but
@@ -179,10 +188,14 @@ With Gemini-specific additions:
 
 ## Update mode
 
-The file is already canonical. Run these three jobs in
+The file is already canonical. Run all three jobs below in
 sequence, then gate all proposed changes behind a single
 confirmation. Do not write anything before the user
 approves.
+
+When invoked with `--learn`, run **only** job 3
+(Session-lessons harvest) and skip jobs 1 and 2; still gate
+the proposed changes behind a single confirmation.
 
 1. **Structure audit** — score the existing AGENTS.md
    against the Bootstrap rubric ("Bootstrap template" and
