@@ -7,9 +7,14 @@ description: >-
   into AGENTS.md when AGENTS.md is missing or weaker,
   creates stub CLAUDE.md and GEMINI.md when absent, and
   bootstraps a fresh AGENTS.md when the project has no
-  instructions file at all. Use when the user wants to
-  tidy up agent instructions, onboard a project, or says
-  /agents-md.
+  instructions file at all. Once canonical, also audits an
+  existing AGENTS.md for structure drift, verifies its
+  build/test/lint commands and gotchas are still accurate,
+  and harvests durable lessons from the current session.
+  Use when the user wants to tidy up agent instructions,
+  onboard a project, check whether AGENTS.md is up to date,
+  audit its structure, add what was learned this session,
+  or says /agents-md.
 ---
 
 # Agents-MD
@@ -19,6 +24,21 @@ canonical** and `CLAUDE.md` / `GEMINI.md` are thin stubs
 that `@`-import it. This way the same project is usable
 from Claude Code, Gemini CLI, or any other agent that
 honours `AGENTS.md`, with no duplicated content.
+
+## Two modes
+
+Determine which mode applies before doing anything else,
+using the same inventory the Decision table needs (see
+"Inputs").
+
+- **Reconcile/Bootstrap mode** — the default. AGENTS.md is
+  missing, is weaker than an existing CLAUDE.md/GEMINI.md,
+  or the stubs do not yet import it. Run the Decision table
+  below. This is a one-shot operation.
+- **Update/Audit mode** — AGENTS.md already exists, is
+  canonical, and both stubs already import it (the
+  `content | stub | stub` state). Instead of bailing, run
+  the "Update mode" flow. This is the re-runnable path.
 
 ## Why this works
 
@@ -76,15 +96,15 @@ content.
 Inventory what is present and substantive, then follow the
 matching row.
 
-| AGENTS.md | CLAUDE.md | GEMINI.md | Action                             |
-| --------- | --------- | --------- | ---------------------------------- |
-| none      | none      | none      | **Bootstrap** — create AGENTS.md from scratch using the rubric, then stub both pointers |
-| content   | none      | none      | Create stub CLAUDE.md and GEMINI.md that import AGENTS.md |
-| content   | stub      | stub      | Leave everything alone; report "already reconciled" |
-| content   | content   | any       | **Score and merge** — see "Picking the canonical source" below |
-| content   | any       | content   | **Score and merge** — see "Picking the canonical source" below |
-| none      | content   | none      | **Score** CLAUDE.md against the rubric; promote (or rewrite to match) → AGENTS.md, then stub both pointers |
-| none      | none      | content   | **Score** GEMINI.md against the rubric; promote (or rewrite to match) → AGENTS.md, then stub both pointers |
+| AGENTS.md | CLAUDE.md | GEMINI.md | Action                                                                                                                                   |
+| --------- | --------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| none      | none      | none      | **Bootstrap** — create AGENTS.md from scratch using the rubric, then stub both pointers                                                  |
+| content   | none      | none      | Create stub CLAUDE.md and GEMINI.md that import AGENTS.md                                                                                |
+| content   | stub      | stub      | **Update/Audit** — already canonical; run "Update mode" below                                                                            |
+| content   | content   | any       | **Score and merge** — see "Picking the canonical source" below                                                                           |
+| content   | any       | content   | **Score and merge** — see "Picking the canonical source" below                                                                           |
+| none      | content   | none      | **Score** CLAUDE.md against the rubric; promote (or rewrite to match) → AGENTS.md, then stub both pointers                               |
+| none      | none      | content   | **Score** GEMINI.md against the rubric; promote (or rewrite to match) → AGENTS.md, then stub both pointers                               |
 | none      | content   | content   | **Score both** against the rubric; pick the one that scores higher as the base, backfill missing sections from the other, then stub both |
 
 ## Picking the canonical source
@@ -157,6 +177,42 @@ With Gemini-specific additions:
 <Gemini-specific notes here>
 ```
 
+## Update mode
+
+The file is already canonical. Run these three jobs in
+sequence, then gate all proposed changes behind a single
+confirmation. Do not write anything before the user
+approves.
+
+1. **Structure audit** — score the existing AGENTS.md
+   against the Bootstrap rubric ("Bootstrap template" and
+   "Picking the canonical source" above); do not restate
+   the rubric. Flag missing or malformed WHY/WHAT/HOW
+   sections, length creeping past ~200 lines, and any
+   tool-specific content that has leaked in from a stub
+   (it belongs under `## Claude Code` / `## Gemini CLI`,
+   not here). Propose concrete fixes.
+1. **Freshness check** — verify the WHAT/HOW claims against
+   the actual repo using read-only tools. Confirm the
+   build/test/lint commands exist (cross-check `Makefile`,
+   `package.json` scripts, or equivalent), that documented
+   entry points and structure still match, and that listed
+   gotchas still apply. Flag anything stale or wrong, and
+   cite what you checked.
+1. **Session-lessons harvest** — review the current session
+   for durable, non-obvious facts that fit WHY/WHAT/HOW: a
+   gotcha that cost time, a non-obvious command, a
+   constraint that is not discoverable from the code.
+   Exclude anything a reader could learn by reading the
+   code. If nothing qualifies, skip this job — do not force
+   it.
+
+Then present the combined diff or a short summary of all
+proposed changes and **write only after the user confirms**.
+Keep AGENTS.md under ~200 lines and tool-agnostic. After
+writing, run the Verification checklist below to confirm
+the stubs still import correctly.
+
 ## Verification
 
 After writing, confirm:
@@ -175,10 +231,12 @@ which file is canonical, what was moved, what was created.
 
 ## Guidelines
 
-- Don't re-run this skill on every session. It is a
-  one-shot reconciliation. Once the three files are in the
-  canonical shape, leave them alone until their content
-  drifts.
+- Reconcile/Bootstrap is a one-shot operation — don't
+  re-run it once the three files are in canonical shape.
+  Update mode is the re-runnable path: invoke it when you
+  suspect the canonical AGENTS.md has drifted from the
+  repo, or at the end of a session that surfaced durable
+  lessons worth recording.
 - Preserve the user's voice. When merging, keep original
   wording rather than rewriting for style.
 - Never delete content without confirming the user is okay
