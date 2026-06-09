@@ -223,7 +223,7 @@ selected columns.
 When a query repeatedly filters or sorts on the **result of a function**
 (`JSON_EXTRACT(...)`, `LENGTH(...)`, a concatenation), MySQL cannot index the
 raw expression in a `WHERE`. Recommend a **generated column** plus an index on
-it. Prefer `STORED` when the value is read often and the table is read-heavy.
+it, then pick the storage type per the guide below.
 
 ```sql
 -- Slow: full scan, the JSON path is computed per row
@@ -249,6 +249,31 @@ CREATE INDEX idx_version_matchtype_length
 -- The DESC index lets MySQL read longest-first from the start of the index,
 -- eliminating "Using filesort".
 ```
+
+#### VIRTUAL vs STORED
+
+Both store the *definition*; they differ in when the value is computed and
+whether it is materialized on disk.
+
+| Type      | On disk | Computed                     | Choose when                                                              |
+| --------- | :-----: | ---------------------------- | ------------------------------------------------------------------------ |
+| `VIRTUAL` |   No    | On read (`SELECT`)           | Default. Cheap expressions; write-heavy / read-light tables; saves space |
+| `STORED`  |   Yes   | On write (`INSERT`/`UPDATE`) | Expensive expressions; read-heavy tables; sorting on the value           |
+
+- `VIRTUAL` is the default — zero extra storage and no write amplification, and
+  the on-the-fly cost is negligible for cheap expressions (concatenation, basic
+  math).
+- `STORED` moves heavy computation to write time so reads stay instant — pick it
+  for expensive expressions and tables read far more than written.
+- `STORED` gives a static, physical value that indexes (and `ORDER BY ... DESC`)
+  can scan cleanly, so prefer it when sorting or aggregating on the generated
+  value — as the `path_pattern_length` example above does.
+
+> [!NOTE]
+> MySQL can index a `VIRTUAL` column too (it builds a hidden index structure
+> behind the scenes), but `STORED` materializes the value in the row itself —
+> the more reliable choice for turning an un-indexable function result into
+> static, searchable data.
 
 ## Step 4 — Report
 
