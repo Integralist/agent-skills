@@ -102,6 +102,19 @@ Grep for:
 > report under "Needs manual EXPLAIN" with the file:line, so the user can run
 > `EXPLAIN` against the actual generated SQL.
 
+> [!NOTE]
+> A **CTE or derived table** is either *merged* into the outer query or
+> *materialized* into an internal temp table. When **merged** (the default —
+> `derived_merge` optimizer switch on), predicates against it use the base
+> table's indexes, so inventory those queries normally. But a CTE body
+> containing `GROUP BY`, `DISTINCT`, `HAVING`, `LIMIT`, `UNION`, or an
+> aggregate/window function forces **materialization** (recursive CTEs always
+> materialize). A materialized CTE is an unindexed temp table — `EXPLAIN` shows
+> `<derivedN>` and base-table indexes no longer serve outer predicates against
+> it, though the optimizer may add an auto-generated key (`auto_key0`) for `ref`
+> access. Flag a CTE that is filtered or joined after a materialization-forcing
+> construct under "Needs manual EXPLAIN".
+
 ## Step 3 — Correlate and classify
 
 For each query, match it against the indexes on the same table and classify it.
