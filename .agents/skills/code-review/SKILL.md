@@ -37,13 +37,28 @@ The argument follows the skill invocation. Detect the mode:
 with any of the modes above. When present, an additional Plan Adherence subagent
 is spawned. See "Plan mode" below.
 
+## Gather the diff once
+
+Gather the full diff **once** and write it to a single temp file (e.g.
+`${TMPDIR:-/tmp}/code-review.diff`). Subagents read the diff from that path — do
+not embed the full diff in each subagent prompt, and do not have any subagent
+re-fetch or re-compute it. This keeps the diff from being re-tokenized once per
+subagent.
+
+Record these for the subagent prompts:
+
+- `DIFF_PATH` — absolute path to the diff file just written
+- `FILE_LIST` — the changed files (one per line)
+- `HAS_GO` — true if any changed file ends in `.go`
+- `LARGE_DIFF` — true if the diff exceeds ~3000 lines (see "Large diffs" below)
+
 ## PR Mode: Fetch Context
 
 Use the GitHub CLI (`gh`) or equivalent to fetch PR metadata and the full diff:
 
 1. `gh pr view <number> --repo <owner>/<repo> --json title,body,baseRefName,headRefName,additions,deletions`
 1. `gh pr diff <number> --repo <owner>/<repo> --name-only`
-1. `gh pr diff <number> --repo <owner>/<repo>`
+1. `gh pr diff <number> --repo <owner>/<repo> > "$DIFF_PATH"`
 
 ## Local Mode: Gather Context
 
@@ -62,14 +77,14 @@ Store the result as `DEFAULT_BRANCH`.
 
 ```bash
 BASE=$(git merge-base HEAD "$DEFAULT_BRANCH")
-git diff "$BASE"...HEAD
+git diff "$BASE"...HEAD > "$DIFF_PATH"
 git diff --name-only "$BASE"...HEAD
 ```
 
 ### Uncommitted (`--uncommitted`)
 
 ```bash
-git diff HEAD
+git diff HEAD > "$DIFF_PATH"
 git diff --name-only HEAD
 git status --porcelain | sed -n 's/^?? //p'
 ```
@@ -80,7 +95,7 @@ additional context alongside the diff.
 ### Explicit paths
 
 For each provided path or glob pattern: expand globs, read file contents, and if
-tracked, get the diff: `git diff HEAD -- <paths>`
+tracked, write the diff to the temp file: `git diff HEAD -- <paths> > "$DIFF_PATH"`
 
 ### No changes
 
@@ -89,9 +104,10 @@ stop.
 
 ### Large diffs
 
-If the diff exceeds ~3000 lines, pass only the file list to subagents and
-instruct them to read files individually rather than embedding the entire diff
-in the prompt.
+The default flow already passes a file path, not an embedded diff, so subagents
+read the diff file themselves. If the diff exceeds ~3000 lines, write the **file
+list** (not the diff) to `DIFF_PATH`, set `LARGE_DIFF` true, and instruct
+subagents to read each changed file individually rather than the diff file.
 
 ## Plan mode (`--plan[=<path>]`)
 
@@ -134,9 +150,32 @@ agent names — use your platform's actual agent/subagent primitives.
 Each subagent prompt must include:
 
 - The review dimension and focus area
-- The list of changed files
-- The diff (or instruction to read files if diff is too large)
-- **Do NOT add comments to any PR. Report findings back when complete.**
+- `DIFF_PATH` (with the instruction to read the diff from it) and `FILE_LIST`
+- For `LARGE_DIFF`: the instruction to read each changed file individually
+- **Do NOT add comments to any PR. Return findings as structured JSON (schema
+  below) when complete.**
+
+### Findings schema
+
+Each subagent returns:
+
+```json
+{
+  "findings": [
+    {
+      "severity": "High | Medium | Low",
+      "file": "path/to/file",
+      "line": "approx line or range",
+      "snippet": "short relevant code excerpt",
+      "why": "why it matters",
+      "suggestion": "concrete improvement"
+    }
+  ]
+}
+```
+
+Return `{"findings": []}` when nothing is worth raising. Structured output makes
+the verify and dedupe steps deterministic.
 
 ### Review Dimensions
 
@@ -152,7 +191,9 @@ Each subagent prompt must include:
 1. **Security Review** (general-purpose role) — injection/cardinality attacks on
    labels or inputs, information leakage, unbounded reads or allocations,
    resource exhaustion, dependency security, timing side channels,
-   authentication/authorization gaps
+   authentication/authorization gaps. **Use the most capable model available**
+   for this dimension — security findings are the highest-stakes and least
+   tolerant of a weaker model's misses.
 
 1. **Idiomatic Go Review** (general-purpose role) — idiomatic Go as detailed in
    https://go.dev/doc/effective_go. This subagent MUST read
@@ -163,6 +204,37 @@ Each subagent prompt must include:
    include the plan file contents.
 
 Collect all results before compiling the summary.
+
+## Verify Findings
+
+Before compiling, run an adversarial verification pass to drop false positives.
+For each finding returned by the dimension subagents, spawn a verifier subagent
+(or batch findings per verifier if your platform caps concurrency — this stage
+runs *after* the dimension reviewers, so it does not compete with them for the
+cap). Instruct each verifier to **try to refute** the finding, not confirm it:
+
+- Read the cited `file`/`line` and enough surrounding context from `DIFF_PATH`
+  and the working tree (or `gh`/MCP file reads in PR mode).
+- Look for reasons the finding is wrong or moot: code not actually changed by
+  the diff; a guard/caller/invariant already prevents it; the behavior is
+  intended; the claim misreads language/library semantics; the line reference
+  doesn't match real code.
+- **Default to refuted** when the finding cannot be positively confirmed from
+  the code. The bar is "demonstrably real," not "plausible."
+
+Each verifier returns:
+
+```json
+{
+  "isReal": true,
+  "confidence": "high | medium | low",
+  "reason": "what confirms or refutes it",
+  "correctedSeverity": "High | Medium | Low (omit if unchanged)"
+}
+```
+
+Keep only findings with `isReal: true`; apply any `correctedSeverity`. Note the
+dropped count in the summary.
 
 ## Compile Summary
 
@@ -216,8 +288,10 @@ What would you like to do with this review?
 4. Something else?
 ```
 
-Deduplicate findings across subagents — if multiple subagents flag the same
-issue, combine them into a single item citing all relevant perspectives.
+Deduplicate the confirmed findings — if multiple subagents flag the same
+file/line issue, combine them into a single item citing all relevant
+perspectives. Sort by severity (High → Medium → Low). Optionally note how many
+findings were dropped by verification.
 
 When `--plan` was active and findings were received, present the Plan Adherence
 findings as a distinct subsection under "Informational / No Action Needed" (or
