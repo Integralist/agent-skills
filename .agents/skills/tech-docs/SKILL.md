@@ -71,6 +71,13 @@ ambiguous, ask the user which mode they want.
 - Maintain a neutral-expert voice throughout. Strip out
   frustration, over-enthusiasm, humor that obscures meaning,
   and first-person asides that do not serve the reader.
+- Evaluate at the section level, not just sentence level: is
+  this section earning its length? If a diagram or table
+  already communicates the same information, cut the prose
+  that restates it.
+- Kill historical/legacy sections that serve no current
+  reader. That context belongs in git history or a linked
+  ADR, not in an active reference doc.
 
 ### 2. Eliminate Assumptions
 
@@ -91,7 +98,16 @@ ambiguous, ask the user which mode they want.
 ### 4. Visualize Simply
 
 - Where architecture or workflows are described in prose,
-  suggest or add a Mermaid diagram.
+  suggest or add a Mermaid diagram. Diagrams and tables can
+  replace prose, not just supplement it — delete paragraphs
+  that a visual already communicates.
+- Use tables for "multiple dimensions × multiple cases"
+  information (e.g., environment matrices, permission
+  grids). A table that replaces four paragraphs is a net
+  win for the reader.
+- Use indented structured text for linear chains or
+  hierarchies that are too simple for a diagram but too
+  structured for prose.
 - Diagrams must be high-level and clean. Complexity in a
   diagram defeats its purpose.
 
@@ -99,6 +115,9 @@ ambiguous, ask the user which mode they want.
 
 - Flag inline code blocks that will become outdated as the
   codebase evolves.
+- Cut code snippets that restate what a diagram, table, or
+  structured text block already shows. Redundancy is reason
+  enough to remove a snippet — staleness risk is secondary.
 - Prefer describing the logic or pointing to source files
   over pasting code snippets.
 - If a code example is essential, note the risk of staleness
