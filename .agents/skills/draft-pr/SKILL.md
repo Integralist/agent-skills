@@ -14,10 +14,9 @@ around a clear **Problem** and **Solution**.
 If the fields below show commands rather than output, run each one first.
 
 - Branch: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
-- Base: !`git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' || echo main`
+- Default branch: !`git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo "(unknown — detect in step 2)"`
 - Status: !`git status --short 2>/dev/null`
-- Branch commits: !`git log --oneline $(git merge-base HEAD $(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' || echo main) 2>/dev/null)..HEAD 2>/dev/null`
-- Branch vs base diffstat: !`git diff --stat $(git merge-base HEAD $(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p' || echo main) 2>/dev/null)...HEAD 2>/dev/null`
+- Recent commits: !`git log --oneline -15 2>/dev/null`
 - Existing PR: !`gh pr view --json url,state,isDraft 2>/dev/null || echo "(none)"`
 
 ## Process
@@ -29,14 +28,21 @@ If the fields below show commands rather than output, run each one first.
    - If an open PR already exists for this branch, stop and ask whether to
      update its description instead of opening a new one.
 
-1. **Read the full branch diff** —
-   `git diff $(git merge-base HEAD <base>)...HEAD`. Don't rely on the
-   diffstat; the Problem/Solution must reflect actual hunks. Read commit
-   messages for intent the diff alone doesn't reveal.
+1. **Determine the base branch.** Use the default branch from Context. If
+   it's unknown, run `git symbolic-ref --short refs/remotes/origin/HEAD`,
+   falling back to `main`, then `master`. Confirm with the user if still
+   ambiguous (e.g. the branch was cut from something else).
 
-1. **Confirm the base branch** if ambiguous (e.g. no `origin` HEAD, or the
-   branch was cut from something other than main). Otherwise use the
-   detected base.
+1. **Read the full branch diff** against the base:
+
+   ```bash
+   base=$(git merge-base HEAD origin/<base>)
+   git log --oneline "$base"..HEAD   # commits + intent
+   git diff "$base"...HEAD           # actual hunks
+   ```
+
+   Don't rely on diffstat alone; the Problem/Solution must reflect the
+   actual hunks. Read commit messages for intent the diff doesn't reveal.
 
 1. **Write the description** using the Template below.
 
