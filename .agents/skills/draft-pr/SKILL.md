@@ -68,7 +68,8 @@ If the fields below show commands rather than output, run each one first.
 
    - `git push -u origin <branch>` if the branch has no upstream.
    - `gh pr create --base <base> --title <title> --body-file -` piping the
-     approved body via heredoc.
+     approved body via heredoc. Write paragraphs as single unwrapped
+     lines — do not hard-wrap at 80 columns (see Style).
    - Open ready-for-review by default. Add `--draft` only if the user
      asked for a draft.
 
@@ -96,6 +97,11 @@ the key change; note trade-offs.>
 
 - Direct and concise. No marketing tone, no restating the diff line by
   line, no boilerplate checklists.
+- **Don't hard-wrap the PR body.** GitHub soft-wraps prose, so manual
+  line breaks at 80 columns render as ragged text. Write each paragraph
+  as one continuous line; use real blank lines between paragraphs and
+  list items for structure. (The 80-column markdown convention applies
+  to source files, not to text submitted to GitHub.)
 - Use backticks for identifiers, paths, flags, env vars.
 - Describe behaviour and intent, not a file-by-file walkthrough.
 - Don't invent testing or context that isn't in the diff or supplied by
