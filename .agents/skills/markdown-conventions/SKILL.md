@@ -24,6 +24,31 @@ pipx inject mdformat mdformat-gfm
 pipx inject mdformat mdformat-frontmatter
 ```
 
+## Metadata / label lines
+
+Consecutive lines that aren't separated by a blank line collapse onto a single
+line when rendered (GitHub treats them as one paragraph). So a block of
+`**Label:** value` lines renders as one run-on line.
+
+Use a bullet list instead:
+
+```md
+- **Date:** 2026-06-16
+- **Reporter:** Jane Doe
+- **Config under test:** `foo`
+```
+
+Not this (renders on one line):
+
+```md
+**Date:** 2026-06-16
+**Reporter:** Jane Doe
+**Config under test:** `foo`
+```
+
+A bullet list is preferred over forcing breaks with a trailing `\` or two
+trailing spaces — it's clearer and survives reformatting.
+
 ## Code Blocks
 
 - Always apply a language identifier to code blocks.
