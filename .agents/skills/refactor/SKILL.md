@@ -170,7 +170,8 @@ reimplementation strategy. Focus on:
 ## Plan Output
 
 Create the output directory with `mkdir -p docs/plans`, then
-write the plan to `docs/plans/refactor-<slug>.md`:
+write the plan to `docs/plans/<yyyy-mm-dd>-refactor-<slug>.md`
+(date prefix from today's date):
 
 ````markdown
 # Refactor: {Feature Name}

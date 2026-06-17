@@ -282,7 +282,7 @@ After presenting the review, ask the user what they want to do next:
 ```txt
 What would you like to do with this review?
 
-1. Save to docs/plans/code-review-<date>.md
+1. Save to docs/plans/<yyyy-mm-dd>-code-review.md
 2. Address the actionable items now
 3. Nothing — just wanted the review
 4. Something else?

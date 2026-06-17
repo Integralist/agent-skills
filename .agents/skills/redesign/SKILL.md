@@ -303,7 +303,8 @@ reject Phase 0.
 ## Output
 
 Create the output directory with `mkdir -p docs/plans`, then write the
-plan to `docs/plans/redesign-<slug>.md`:
+plan to `docs/plans/<yyyy-mm-dd>-redesign-<slug>.md` (date
+prefix from today's date):
 
 ````markdown
 # Redesign: {Scope Name}

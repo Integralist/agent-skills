@@ -1,6 +1,6 @@
 # ADR Format
 
-ADRs live in `docs/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
+ADRs live in `docs/adr/` and use a date prefix: `<yyyy-mm-dd>-<slug>.md` (matching the convention used by the `extract-doc` and `decide` skills). Get today's date with `date +%F`.
 
 Create the `docs/adr/` directory lazily — only when the first ADR is needed.
 
@@ -18,13 +18,13 @@ That's it. An ADR can be a single paragraph. The value is in recording *that* a 
 
 Only include these when they add genuine value. Most ADRs won't need them.
 
-- **Status** frontmatter (`proposed | accepted | deprecated | superseded by ADR-NNNN`) — useful when decisions are revisited
+- **Status** frontmatter (`proposed | accepted | deprecated | superseded by <yyyy-mm-dd>-<slug>`) — useful when decisions are revisited
 - **Considered Options** — only when the rejected alternatives are worth remembering
 - **Consequences** — only when non-obvious downstream effects need to be called out
 
-## Numbering
+## Filenames
 
-Scan `docs/adr/` for the highest existing number and increment by one.
+Name each ADR `<yyyy-mm-dd>-<slug>.md`, where the slug is a kebab-case summary of the decision (e.g. `2026-06-17-event-sourced-orders.md`).
 
 ## When to offer an ADR
 

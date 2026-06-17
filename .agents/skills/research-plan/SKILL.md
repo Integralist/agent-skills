@@ -35,7 +35,7 @@ Delegate to the [`research`](../research/SKILL.md) skill. It
 detects whether the input is a repo or a topic, gathers
 project metadata for repos, spawns a subagent (for code
 research) or runs the research inline (for topic research),
-and writes findings to `docs/research/<slug>.md`.
+and writes findings to `docs/research/<yyyy-mm-dd>-<slug>.md`.
 
 Run that skill to completion before continuing.
 
@@ -70,7 +70,8 @@ foundation for the plan.
 ### Plan document
 
 Write a detailed implementation guide to
-`docs/plans/<plan-slug>.md`.
+`docs/plans/<yyyy-mm-dd>-<plan-slug>.md` (date prefix from
+today's date).
 
 Use this template:
 
@@ -90,8 +91,8 @@ Use this template:
 
 This plan draws from the following research documents:
 
-- [topic-a](../research/topic-a.md)
-- [topic-b](../research/topic-b.md)
+- [topic-a](../research/2026-06-17-topic-a.md)
+- [topic-b](../research/2026-06-17-topic-b.md)
 
 ## Prerequisites & Dependencies
 

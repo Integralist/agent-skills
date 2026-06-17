@@ -168,7 +168,7 @@ Include this checklist verbatim in the subagent prompt:
 
 After the subagent has reported, create the output directory
 with `mkdir -p docs/plans`, then write the report to
-`docs/plans/cleanup-<YYYY-MM-DD-HHMM>.md`:
+`docs/plans/<YYYY-MM-DD-HHMM>-cleanup.md`:
 
 ```markdown
 ## Cleanup Report

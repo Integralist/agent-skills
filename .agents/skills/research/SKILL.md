@@ -13,8 +13,9 @@ description: >-
 # Research
 
 Produce a deep reference document for a topic or repository.
-Output goes to `docs/research/<slug>.md` and serves as the
-foundation for later planning or implementation work.
+Output goes to `docs/research/<yyyy-mm-dd>-<slug>.md` (date
+prefix from today's date) and serves as the foundation for
+later planning or implementation work.
 
 ## Detect research mode
 
@@ -30,10 +31,11 @@ Determine which mode to use based on the user's input:
 
 Before starting new research in either mode, scan
 `docs/research/` for documents that already cover the topic or
-repo. Match broadly — a request about "CI pipeline caching" is
-covered by an existing `ci.md` or `continuous-integration.md`;
-a request about the `fastly/spotless` repo is covered by
-`spotless.md`.
+repo. Filenames carry a `yyyy-mm-dd-` date prefix, so match on
+the slug portion and ignore the date — a request about "CI
+pipeline caching" is covered by an existing `*-ci.md` or
+`*-continuous-integration.md`; a request about the
+`fastly/spotless` repo is covered by `*-spotless.md`.
 
 - **Exact or near match found**: Read the document. If it
   already covers what the user needs, summarize and stop. If it
@@ -164,9 +166,10 @@ include:
 
 ### Save findings
 
-Write findings to `docs/research/{repo}.md` (new file) or
-extend the existing document identified during the "Check for
-existing research" step. The document must include a **Project
+Write findings to `docs/research/<yyyy-mm-dd>-{repo}.md` (new
+file, date prefix from today's date) or extend the existing
+document identified during the "Check for existing research"
+step. The document must include a **Project
 Metadata** section at the top with the git diagnostic snapshot
 (churn hotspots, bus factor, bug clusters, commit velocity,
 crisis patterns, and high-risk files).
@@ -193,8 +196,9 @@ reference implementations or prior art.
 
 ### Output
 
-Write to `docs/research/<topic-slug>.md` (new file) or extend
-the existing document identified above.
+Write to `docs/research/<yyyy-mm-dd>-<topic-slug>.md` (new
+file, date prefix from today's date) or extend the existing
+document identified above.
 
 Use this template:
 
