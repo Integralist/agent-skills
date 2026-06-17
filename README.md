@@ -53,11 +53,13 @@ make install
     ├── changelog/
     ├── cleanup/
     ├── code-review/
+    ├── code-review-feedback/
     ├── commit/
     ├── consensus/
     ├── critique/
     ├── decide/
     ├── delegate/
+    ├── draft-pr/
     ├── go-api/
     ├── go-conventions/             # rule → skill (generic harnesses)
     ├── go-testing/
@@ -127,11 +129,13 @@ auto-loading.
 | **changelog**             | Add a Keep a Changelog entry from the working diff or branch-vs-main                         |
 | **cleanup**               | Audit codebase for AI slop via background subagent                                           |
 | **code-review**           | Multi-dimensional review via parallel subagents                                              |
+| **code-review-feedback**  | Evaluate code review feedback with technical rigor — verify before implementing              |
 | **commit**                | Git commits with intelligent file grouping                                                   |
 | **consensus**             | Cross-model second-opinion workflow with discussion rounds and user gates                    |
 | **critique**              | Critique a document for logical fallacies                                                    |
 | **decide**                | Decision memo with structurer, contrarian, and synthesizer passes                            |
 | **delegate**              | Spawn a subagent for a task                                                                  |
+| **draft-pr**              | Draft a concise, direct pull request with a clear Problem and Solution                        |
 | **go-api**                | Generate a production-ready Go API service                                                   |
 | **go-conventions**        | Go coding conventions (mirrors `.claude/rules/go.md`)                                        |
 | **go-testing**            | Write Go tests — table-driven, fuzz, benchmarks                                              |
