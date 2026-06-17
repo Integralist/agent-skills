@@ -13,6 +13,9 @@
   dead code immediately.
 - Always propose code changes/diffs in chat and obtain explicit user approval
   before calling any code-editing tools.
+- Before displaying a long diff (more than ~40 lines), prompt me first with a
+  one-line summary of what it covers and let me choose: show the full diff, or
+  skip ahead to making the edits for my approval.
 
 # Tooling
 
