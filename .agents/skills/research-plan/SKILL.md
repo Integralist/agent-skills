@@ -193,9 +193,21 @@ When filling in the Parallel Execution section:
    handed to an AI agent later. The instructions must be
    specific enough to follow mechanically.
 
+## Phase 3: Extract formal documents
+
+Immediately after the plan is written, delegate to the
+[`extract-doc`](../extract-doc/SKILL.md) skill, passing the path to
+the plan just created. It auto-detects whether the plan warrants an
+ADR, a PRD, or both, and writes them to `docs/adr/` and `docs/prd/`
+using the same `<yyyy-mm-dd>-<slug>` filename convention as the
+plan.
+
+Run that skill to completion.
+
 ### After plan completes
 
-Notify the user that the plan is done, then present two options:
+Notify the user that the plan and its formal documents (ADR/PRD)
+are done, then present two options:
 
 1. **Research another topic** — loop back to Phase 1.
 1. **Create another plan** — loop back to the Phase 2 prompt.

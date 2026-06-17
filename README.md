@@ -60,6 +60,7 @@ make install
     ├── decide/
     ├── delegate/
     ├── draft-pr/
+    ├── extract-doc/
     ├── go-api/
     ├── go-conventions/             # rule → skill (generic harnesses)
     ├── go-testing/
@@ -136,6 +137,7 @@ auto-loading.
 | **decide**                | Decision memo with structurer, contrarian, and synthesizer passes                            |
 | **delegate**              | Spawn a subagent for a task                                                                  |
 | **draft-pr**              | Draft a concise, direct pull request with a clear Problem and Solution                        |
+| **extract-doc**           | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)    |
 | **go-api**                | Generate a production-ready Go API service                                                   |
 | **go-conventions**        | Go coding conventions (mirrors `.claude/rules/go.md`)                                        |
 | **go-testing**            | Write Go tests — table-driven, fuzz, benchmarks                                              |
