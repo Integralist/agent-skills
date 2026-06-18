@@ -62,6 +62,11 @@ Detected language: Go. Is that correct, or should I use a different
 language for the code snippets?
 ```
 
+If the confirmed language is Go, load the
+[`go-conventions`](../go-conventions/SKILL.md) skill before producing any
+Go code snippets in the plan, so all embedded code follows the project's
+Go style guide.
+
 ### Gather context
 
 Read all `docs/research/*.md` files for context. These are the
