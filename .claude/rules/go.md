@@ -51,7 +51,7 @@ After an LSP rename:
 
 1. Run `rg <old-name>` across the repository to surface remaining
    occurrences in comments, docs, and strings.
-2. Use `sed` or targeted Edit calls to update the remaining
+1. Use `sed` or targeted Edit calls to update the remaining
    occurrences.
 
 This is the one place `sed` is the right tool for a Go rename — not on
@@ -76,18 +76,18 @@ Prefer fixing the underlying issue. When a suppression is genuinely warranted,
 use the exact directive syntax each tool expects — the wrong form is silently
 ignored, leaving the warning in place.
 
-| Tool          | Directive                                                | Scope                                     |
-| ------------- | -------------------------------------------------------- | ----------------------------------------- |
-| golangci-lint | `//nolint:<linter>[,<linter>] // <reason>`               | same line (reason after `//` is required) |
-| staticcheck   | `//lint:ignore <check> <reason>`                         | same line                                 |
-| gosec         | `// #nosec G<code> <reason>`                             | same line or line above                   |
-| contextcheck  | `//nolint:contextcheck`                                  | function doc comment above `func`         |
-| revive        | `//revive:disable:<rule>` ... `//revive:enable:<rule>`   | from directive until re-enabled           |
-| codespell     | `//codespell:ignore` or `// codespell:ignore <word>`     | same line                                 |
-| yamllint      | `# yamllint disable-line rule:<rule>`                    | same line                                 |
-| yamllint      | `# yamllint disable rule:<rule>`                         | rest of file (or until `enable`)          |
-| alex          | `<!--alex ignore <word>-->`                              | following text                            |
-| alex          | `<!--alex disable <rule> <rule>-->`                      | following text                            |
+| Tool          | Directive                                              | Scope                                     |
+| ------------- | ------------------------------------------------------ | ----------------------------------------- |
+| golangci-lint | `//nolint:<linter>[,<linter>] // <reason>`             | same line (reason after `//` is required) |
+| staticcheck   | `//lint:ignore <check> <reason>`                       | same line                                 |
+| gosec         | `// #nosec G<code> <reason>`                           | same line or line above                   |
+| contextcheck  | `//nolint:contextcheck`                                | function doc comment above `func`         |
+| revive        | `//revive:disable:<rule>` ... `//revive:enable:<rule>` | from directive until re-enabled           |
+| codespell     | `//codespell:ignore` or `// codespell:ignore <word>`   | same line                                 |
+| yamllint      | `# yamllint disable-line rule:<rule>`                  | same line                                 |
+| yamllint      | `# yamllint disable rule:<rule>`                       | rest of file (or until `enable`)          |
+| alex          | `<!--alex ignore <word>-->`                            | following text                            |
+| alex          | `<!--alex disable <rule> <rule>-->`                    | following text                            |
 
 Examples:
 
@@ -645,6 +645,21 @@ slog.Group("redis",
 )
 ```
 
+### Discarding logs
+
+To silence a logger (e.g. in tests), use `slog.DiscardHandler` (Go 1.24+)
+rather than wrapping `io.Discard` in a text or JSON handler. It's a true no-op
+— it skips attribute formatting entirely, so it's cheaper and clearer of
+intent. Note it's a value, not a constructor — no parentheses:
+
+```go
+// Bad — formats attributes only to throw the bytes away.
+logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+// Good — no-op handler, no formatting work.
+logger := slog.New(slog.DiscardHandler)
+```
+
 ## Observability
 
 Add trace spans and metrics at layer boundaries — handler, service, and
@@ -1029,8 +1044,8 @@ Contents — keep it short and factual:
 
 1. **Purpose** — one or two sentences on what the package does and why it
    exists.
-2. **Responsibilities** — bullet list of what this package owns.
-3. **Usage** — a brief code snippet showing the primary entry point or
+1. **Responsibilities** — bullet list of what this package owns.
+1. **Usage** — a brief code snippet showing the primary entry point or
    typical call pattern.
 
 Do not duplicate godoc. The README orients a reader who is browsing the
@@ -1066,13 +1081,13 @@ survives refactors, and catches typos at compile time — `"GOT"` compiles;
 
 Common cases:
 
-| Magic literal                       | Stdlib constant                                                               |
-| ----------------------------------- | ----------------------------------------------------------------------------- |
-| `"GET"`, `"POST"`, `"DELETE"`, ...  | `http.MethodGet`, `http.MethodPost`, `http.MethodDelete`, ...                 |
-| `200`, `404`, `500`, ...            | `http.StatusOK`, `http.StatusNotFound`, `http.StatusInternalServerError`, ... |
-| Signals (`SIGINT`, `SIGTERM`, ...)  | `os.Interrupt`, `syscall.SIGTERM`, ...                                        |
-| File modes (`0644`, `0755`)         | `fs.FileMode` values; `os.ModePerm`                                           |
-| Time units as `time.Duration` ints  | `time.Second`, `time.Millisecond`, ...                                        |
+| Magic literal                      | Stdlib constant                                                               |
+| ---------------------------------- | ----------------------------------------------------------------------------- |
+| `"GET"`, `"POST"`, `"DELETE"`, ... | `http.MethodGet`, `http.MethodPost`, `http.MethodDelete`, ...                 |
+| `200`, `404`, `500`, ...           | `http.StatusOK`, `http.StatusNotFound`, `http.StatusInternalServerError`, ... |
+| Signals (`SIGINT`, `SIGTERM`, ...) | `os.Interrupt`, `syscall.SIGTERM`, ...                                        |
+| File modes (`0644`, `0755`)        | `fs.FileMode` values; `os.ModePerm`                                           |
+| Time units as `time.Duration` ints | `time.Second`, `time.Millisecond`, ...                                        |
 
 ```go
 // Bad
@@ -1093,11 +1108,11 @@ the value has one source of truth.
 The `net/netip` package provides value-typed, comparable, allocation-free
 replacements for the pointer-heavy types in `net`:
 
-| Old (`net`)  | New (`net/netip`) | Benefit                           |
-| ------------ | ----------------- | --------------------------------- |
-| `net.IP`     | `netip.Addr`      | Value type, comparable, no allocs |
-| `net.IPNet`  | `netip.Prefix`    | Value type, comparable            |
-| —            | `netip.AddrPort`  | IP+port as a single value type    |
+| Old (`net`) | New (`net/netip`) | Benefit                           |
+| ----------- | ----------------- | --------------------------------- |
+| `net.IP`    | `netip.Addr`      | Value type, comparable, no allocs |
+| `net.IPNet` | `netip.Prefix`    | Value type, comparable            |
+| —           | `netip.AddrPort`  | IP+port as a single value type    |
 
 ```go
 // Bad — pointer-based, not comparable.
