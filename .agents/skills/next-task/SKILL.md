@@ -26,11 +26,14 @@ Resume work from a project plan document using a subagent
 1. **Identify the project plan:**
 
    - If the user specified a plan file, use that.
+
    - Otherwise, look at the context above for non-completed
      plans.
+
    - If multiple plans exist, present the options and ask the
      user which one to use. Format as a numbered list with the
      filename.
+
    - **Always tell the user which plan you're going to use and
      wait for confirmation before proceeding.** Example:
 
@@ -85,9 +88,27 @@ the same rules the subagent would follow:
 - Respect the project's layer separation: handlers -> service
   -> repository
 
+## Completion
+
+Once the task is verified complete (tests pass, work done), you MUST mark
+it complete in the project plan before finishing:
+
+1. Edit the plan file and change the task's checkbox from `- [ ]` to
+   `- [x]`.
+1. If the plan groups subtasks under a parent task, only check the parent
+   once all of its subtasks are checked.
+1. Report to the user that the task is done and the plan has been updated.
+
+> [!NOTE]
+> The subagent (or direct execution) does NOT mark the checkbox — the main
+> thread marks it here, after confirming the work is actually complete.
+
 ## REQUIRED
 
 - You MUST confirm the plan choice before proceeding.
+- When the task is complete and verified, you MUST mark its checkbox as
+  complete (`- [x]`) in the project plan. This is the main thread's
+  responsibility, never the subagent's.
 - One task per invocation. Don't chain multiple tasks.
 - Subagent mode (default) delegates to a subagent. Use it when
   the task is large enough to eat into main-thread context. For
