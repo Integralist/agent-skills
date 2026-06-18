@@ -195,9 +195,30 @@ the verify and dedupe steps deterministic.
    for this dimension — security findings are the highest-stakes and least
    tolerant of a weaker model's misses.
 
-1. **Idiomatic Go Review** (general-purpose role) — idiomatic Go as detailed in
-   https://go.dev/doc/effective_go. This subagent MUST read
-   https://go.dev/doc/effective_go before beginning the review.
+1. **Idiomatic Go Review** (general-purpose role) *(only when `HAS_GO`)* —
+   idiomatic Go as detailed in https://go.dev/doc/effective_go **and** the
+   project's `go-conventions` convention skill. Before beginning, this subagent
+   MUST both (a) read https://go.dev/doc/effective_go and (b) load the
+   `go-conventions` skill (`.agents/skills/go-conventions/SKILL.md`), then flag
+   changed Go that violates its rules, including:
+
+   - **Naming** — the "delete the type" test; domain-prefixed struct names;
+     fields named by role/target, not by type.
+   - **Error handling** — `"<layer>: <what failed>: %w"` prefixes; `%w` for
+     domain sentinels vs `%v` to sever raw storage errors; translation only at
+     repository and handler boundaries; `errors.AsType` over `errors.As`.
+   - **Structure** — alphabetically sorted struct fields (embedded first);
+     constructor decision flow (skip trivial same-package constructors, params
+     struct for >4 args, `WithXxx` for optional config).
+   - **Observability** — `slog.LogAttrs` with snake_case event names; trace
+     spans and metrics at layer boundaries only, not internal helpers.
+   - **Layer separation** — handlers → service → repository, never skipped;
+     service signatures `(ctx, In) (Out, error)` with transport-free structs.
+   - **Conventions** — required `doc.go` and `README.md` per package; file
+     naming; stdlib constants over magic literals; `net/netip` over `net`.
+
+   This dimension is Go-specific; skip it entirely when `HAS_GO` is false (see
+   Notes).
 
 1. **Plan Adherence Review** *(only when `--plan` is active and a plan was
    located)* — see "Plan mode" above. The subagent prompt must additionally
@@ -346,3 +367,5 @@ On Claude Code, enable agent teams by adding the following to
 
 - https://go.dev/doc/effective_go — Full Effective Go document used by the
   Idiomatic Go Review subagent
+- `.agents/skills/go-conventions/SKILL.md` — the project's mandatory Go
+  convention skill; the Idiomatic Go Review subagent loads and enforces it
