@@ -1,6 +1,6 @@
 ---
 name: markdown-to-skill
-description: Convert Markdown files from a directory into agent skills. Use when the user wants to bulk-convert documentation or guides into reusable skills.
+description: Convert Markdown files from a directory into agent skills.
 disable-model-invocation: true
 ---
 
