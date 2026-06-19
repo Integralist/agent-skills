@@ -544,8 +544,17 @@ Log at layer boundaries (handlers, service, repository) and error paths — not
 inside every function. Don't log what a caller already logs; if a service method
 logs an error before returning it, the handler should not log it again.
 
-Use `slog.LogAttrs`; snake_case event names; same event name for success and
-error (level distinguishes).
+Use `slog.LogAttrs`; same event name for success and error (level
+distinguishes).
+
+Use snake_case for the identifiers you author:
+
+- **The event name** — the `msg` argument value (our handler renames this field
+  to `event`), e.g. `"create_config"`.
+- **Attribute keys** — e.g. `"config_id"`, `"ttl"`.
+
+This does **not** apply to attribute *values* — those are data (opaque IDs,
+names, free-form text) and keep whatever form they arrive in.
 
 ```go
 logger.LogAttrs(ctx, slog.LevelError, "create_config",
