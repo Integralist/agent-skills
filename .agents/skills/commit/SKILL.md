@@ -112,10 +112,11 @@ Plan documents (`docs/plans/*.md`) need special handling:
   do NOT commit. Half-finished plans are working state, not a
   checkpoint. Skip the file and note it was excluded.
 - **Completed** (implementation tasks done — remaining unchecked
-  items are post-deploy/operational only): move to
-  `docs/plans/completed/` first, then commit. Create the
-  directory if it doesn't exist. If unsure whether the plan
-  qualifies as complete, ask.
+  items are post-deploy/operational only): update the plan's
+  `Status` field (e.g. `Planning` → `Complete`), then move it to
+  `docs/plans/completed/` and commit. Create the directory if it
+  doesn't exist. If unsure whether the plan qualifies as
+  complete, ask.
 
 ## Grouping Examples
 
