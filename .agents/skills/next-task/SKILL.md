@@ -53,7 +53,6 @@ thread.
    - Update `docs/**/*.md` or `**/README.md` if the change
      alters behavior, public APIs, or usage patterns
    - Do NOT mark the checkbox as complete in the plan
-   - Do NOT commit — leave that to the user
    - Respect the project's layer separation: handlers -> service
      -> repository
 
@@ -67,6 +66,7 @@ it complete in the project plan before finishing:
 1. If the plan groups subtasks under a parent task, only check the parent
    once all of its subtasks are checked.
 1. Report to the user that the task is done and the plan has been updated.
+1. Ask the user if they want to commit. If yes, invoke `/commit`.
 
 ## REQUIRED
 
