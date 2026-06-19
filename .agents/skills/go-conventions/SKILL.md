@@ -563,45 +563,10 @@ func NewAuthzService(repo *MySQLRepository, logger *slog.Logger) AuthzService {
 }
 ```
 
-### Decision flow
-
-```txt
-Does NewX set defaults, validate, or derive state?
-├─ YES → keep constructor
-└─ NO
-   └─ Is the struct itself unexported?
-      ├─ YES → keep constructor (callers can't name the type)
-      └─ NO
-         └─ Are all call sites in the same package?
-            ├─ YES → skip constructor, instantiate directly
-            └─ NO  → are the fields unexported?
-               ├─ YES, internal/ package → export fields, instantiate directly
-               ├─ YES, public package   → keep constructor (don't leak state)
-               └─ NO  → skip constructor, instantiate directly
-```
-
-A constructor earns its keep when it does something the caller cannot: setting
-defaults, validating inputs, deriving internal state, providing access to
-unexported fields across public package boundaries, or providing access to an
-unexported type.
-
-### When to use each pattern
-
-- **Direct instantiation** — constructor would only assign params to fields
-  *and* either: all callers are in the same package, or fields are exported
-  (safe in `internal/`). No indirection needed.
-- **Trivial constructor (unexported type)** — struct is intentionally
-  unexported (e.g., backing an interface). Constructor is the only way for
-  external callers to obtain an instance.
-- **Trivial constructor (public package)** — constructor only assigns params
-  to fields, but fields are unexported in a non-`internal/` package.
-  Justified by Go's visibility rules, not by logic in the constructor.
-- **Params struct** — constructor has >4 args (any kind, including `ctx`).
-  Solves "too many arguments".
-- **`WithXxx` methods** — type has optional configuration with sensible
-  defaults. Solves "optional config with discoverable defaults". `NewX` takes
-  only required params; `WithXxx` methods set optional fields.
-- The patterns are orthogonal — a type could use more than one if needed.
+A constructor earns its keep when it does something the caller
+cannot: setting defaults, validating inputs, deriving internal
+state, or providing access to unexported fields/types across
+package boundaries.
 
 Tracer initialization at package or constructor level:
 
