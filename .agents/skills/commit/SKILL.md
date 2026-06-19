@@ -102,6 +102,21 @@ include them: `.claude/`, `.cursorrules`, `.cursorignore`,
 `.github/copilot-instructions.md`, `.windsurfrules`,
 `.clinerules`, `.gemini/`, `.codex/`, `.omp/`, `.pi/`
 
+## Project Plan Documents
+
+Plan documents (`docs/plans/*.md`) need special handling:
+
+- **Not started** (no `[x]` checkboxes): commit freely — it's a
+  new plan being checked in.
+- **In progress** (some tasks done, implementation incomplete):
+  do NOT commit. Half-finished plans are working state, not a
+  checkpoint. Skip the file and note it was excluded.
+- **Completed** (implementation tasks done — remaining unchecked
+  items are post-deploy/operational only): move to
+  `docs/plans/completed/` first, then commit. Create the
+  directory if it doesn't exist. If unsure whether the plan
+  qualifies as complete, ask.
+
 ## Grouping Examples
 
 **Clear single purpose (no prompt):**
