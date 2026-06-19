@@ -2,9 +2,8 @@
 name: next-task
 description: >-
   Continue working through a project plan. Finds the next
-  unchecked task and begins implementation. Use when the user
-  says "next task", "continue", or wants to resume project
-  plan work.
+  unchecked task and begins implementation.
+disable-model-invocation: true
 ---
 
 # Next Task

@@ -6,9 +6,8 @@ description: >-
   categories of complexity, drift from documented standards,
   drift from stated purpose, and gaps in test coverage that
   would make a redesign unsafe. Produces a phased redesign plan
-  with mandatory test-pinning before any structural change. Use
-  for "audit this codebase", "what would we do differently if
-  starting over", or "find the big restructuring wins".
+  with mandatory test-pinning before any structural change.
+disable-model-invocation: true
 ---
 
 # Redesign

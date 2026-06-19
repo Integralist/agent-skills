@@ -1,8 +1,7 @@
 ---
 name: delegate
-description: >-
-  Use when user explicitly requests agent delegation with
-  /delegate. Spawns an appropriate subagent to handle the work.
+description: Spawn an appropriate subagent to handle a task.
+disable-model-invocation: true
 user-invocable: true
 argument-hint: <task description>
 ---

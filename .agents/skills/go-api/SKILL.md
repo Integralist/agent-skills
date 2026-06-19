@@ -1,9 +1,9 @@
 ---
 name: go-api
 description: >-
-  Create a new Go API service. Use when starting a new Go
-  service, API project, or microservice. Generates complete
-  boilerplate with local development and observability.
+  Create a new Go API service with complete boilerplate, local
+  development, and observability.
+disable-model-invocation: true
 ---
 
 # Go API Service

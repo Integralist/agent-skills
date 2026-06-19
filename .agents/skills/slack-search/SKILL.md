@@ -1,6 +1,7 @@
 ---
 name: slack-search
-description: Drive Fastly's Slack workspace via the Playwright MCP to fulfil a natural-language request — translating it into either a Slack search query or a Slackbot prompt — authenticating through Okta SSO with Duo push when no persisted session exists, and returning the result.
+description: Drive Fastly's Slack workspace via the Playwright MCP to run a search query or Slackbot prompt, authenticating through Okta SSO with Duo push when needed.
+disable-model-invocation: true
 user-invocable: true
 argument-hint: A natural-language request (e.g. `find foo messages from @alice`, or `use slackbot to show my TODOs from #integralist-daily today`)
 ---

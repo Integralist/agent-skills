@@ -1,6 +1,7 @@
 ---
 name: consensus
-description: Multi-agent deliberative workflow for non-trivial tasks. The host agent assesses → consulting CLI agents review → discuss to consensus → user approves → host implements → consulting agents review the diff → discuss to consensus → user does final review. Round caps prevent ping-pong; unresolved dissent is surfaced, not synthesized away.
+description: Multi-agent deliberative workflow for non-trivial tasks — assess, review, discuss to consensus, implement, re-review, with round caps and surfaced dissent.
+disable-model-invocation: true
 when_to_use: Only after the user has explicitly confirmed it for the current task. Suitable for architectural changes, multi-file features, unclear-root-cause bug investigations, design decisions, behavior-changing refactors. Skip for typos, single-line fixes, comment-only edits, formatting, renames, or throwaway snippets.
 ---
 

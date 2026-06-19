@@ -1,17 +1,12 @@
 ---
 name: decide
 description: >-
-  Decision Memo + Contrarian Check. Use whenever the user
-  says "I need to decide X", "should I stop using X", "I'm
-  torn between A and B", or otherwise frames a consequential
-  decision they're stuck on. Runs an interview, structures
-  the options with explicit assumptions, dispatches a
-  contrarian pass to find holes and second-order effects,
-  and produces a saved decision memo with a clear
-  recommendation and reversibility rating. Trigger this even
-  when the user doesn't say "/decide" explicitly, whenever
-  they're wrestling with a course of action and would benefit
-  from a structured think rather than a Slack debate.
+  Decision Memo + Contrarian Check. Runs an interview,
+  structures the options with explicit assumptions, dispatches
+  a contrarian pass to find holes and second-order effects, and
+  produces a saved decision memo with a clear recommendation and
+  reversibility rating.
+disable-model-invocation: true
 user-invocable: true
 argument-hint: '[short description of the decision]'
 ---

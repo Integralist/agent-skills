@@ -2,9 +2,8 @@
 name: critique
 description: >-
   Critique a document for logical fallacies and weaknesses.
-  Identifies issues and provides actionable fixes. Use when
-  the user wants a document reviewed, critiqued, or
-  stress-tested for logical soundness.
+  Identifies issues and provides actionable fixes.
+disable-model-invocation: true
 ---
 
 # Critique

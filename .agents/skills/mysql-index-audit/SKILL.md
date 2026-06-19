@@ -6,6 +6,7 @@ description: >-
   partially use an index (index gaps), and index killers (leading
   wildcards, function-wrapped columns, type mismatches). Static
   analysis of schema + query code; reports EXPLAIN follow-ups.
+disable-model-invocation: true
 user-invocable: true
 argument-hint: '[path | --diff | --uncommitted]'
 ---
