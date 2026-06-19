@@ -10,7 +10,6 @@ description: >-
   a plan was just discussed in chat. Detects the language, embeds
   Gherkin acceptance criteria via behaviour-spec, defines parallel
   work streams, and extracts a formal ADR/PRD.
-user-invocable: true
 ---
 
 # Project Plan

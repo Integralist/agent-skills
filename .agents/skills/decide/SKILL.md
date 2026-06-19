@@ -7,7 +7,6 @@ description: >-
   produces a saved decision memo with a clear recommendation and
   reversibility rating.
 disable-model-invocation: true
-user-invocable: true
 argument-hint: '[short description of the decision]'
 ---
 

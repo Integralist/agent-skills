@@ -5,7 +5,6 @@ description: >-
   idiomatic Go, data correctness, and security. Works on PRs
   or local code. Pass --plan or --plan=<path> to additionally
   check the diff against an implementation plan.
-user-invocable: true
 argument-hint: '[PR_URL | --diff | --uncommitted | path] [--plan[=<path>]]'
 ---
 

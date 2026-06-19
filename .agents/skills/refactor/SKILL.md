@@ -5,7 +5,6 @@ description: >-
   plan focused on reducing complexity and fragmentation. Asks:
   "If we started over, what would we do differently?"
 disable-model-invocation: true
-user-invocable: true
 argument-hint: <feature or area to refactor>
 ---
 

@@ -8,7 +8,6 @@ description: >-
   tasks for the caller's plan. Use when the user wants BDD/Gherkin
   user stories, acceptance criteria, executable specifications, or
   says /behaviour-spec.
-user-invocable: true
 ---
 
 # Behaviour Spec

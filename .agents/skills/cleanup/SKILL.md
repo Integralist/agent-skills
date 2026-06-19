@@ -5,7 +5,6 @@ description: >-
   background subagent that examines files, fixes clear-cut
   issues, and flags behavior-changing items for discussion.
 disable-model-invocation: true
-user-invocable: true
 argument-hint: '[path | glob]'
 ---
 

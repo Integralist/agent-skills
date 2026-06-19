@@ -2,7 +2,6 @@
 name: delegate
 description: Spawn an appropriate subagent to handle a task.
 disable-model-invocation: true
-user-invocable: true
 argument-hint: <task description>
 ---
 
