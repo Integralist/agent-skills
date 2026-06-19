@@ -72,57 +72,10 @@ Fix any reported issues before considering the task complete.
 
 ### Suppressing linter warnings
 
-Prefer fixing the underlying issue. When a suppression is genuinely warranted,
-use the exact directive syntax each tool expects — the wrong form is silently
-ignored, leaving the warning in place.
-
-| Tool          | Directive                                              | Scope                                     |
-| ------------- | ------------------------------------------------------ | ----------------------------------------- |
-| golangci-lint | `//nolint:<linter>[,<linter>] // <reason>`             | same line (reason after `//` is required) |
-| staticcheck   | `//lint:ignore <check> <reason>`                       | same line                                 |
-| gosec         | `// #nosec G<code> <reason>`                           | same line or line above                   |
-| contextcheck  | `//nolint:contextcheck`                                | function doc comment above `func`         |
-| revive        | `//revive:disable:<rule>` ... `//revive:enable:<rule>` | from directive until re-enabled           |
-| codespell     | `//codespell:ignore` or `// codespell:ignore <word>`   | same line                                 |
-| yamllint      | `# yamllint disable-line rule:<rule>`                  | same line                                 |
-| yamllint      | `# yamllint disable rule:<rule>`                       | rest of file (or until `enable`)          |
-| alex          | `<!--alex ignore <word>-->`                            | following text                            |
-| alex          | `<!--alex disable <rule> <rule>-->`                    | following text                            |
-
-Examples:
-
-```go
-result := cm.customerKeySetName("customer123") //nolint:scopeguard // paired with expected below
-badRand := rand.Intn(10)                       //lint:ignore SA1019 tests seed deterministically
-cmd := exec.Command(userInput)                 // #nosec G204 input validated in handler
-//revive:disable:unexported-return
-func internalBuilder() *unexportedThing { ... }
-//revive:enable:unexported-return
-// codespell:ignore deatil
-```
-
-contextcheck false positives — place the directive on the function's doc
-comment, not on the inner call:
-
-```go
-//nolint:contextcheck
-func call1() {
-    doSomeThing(context.Background())
-}
-```
-
-```yaml
-# yamllint disable-line rule:line-length
-really_long_key: "................................................................................"
-```
-
-```markdown
-<!--alex ignore host-hostess-->
-The host greets each guest at the door.
-```
-
-Reference: revive directive docs —
-https://github.com/mgechev/revive?tab=readme-ov-file#comment-directives
+Prefer fixing the underlying issue. When a suppression is
+genuinely warranted, see
+[`LINTER-DIRECTIVES.md`](LINTER-DIRECTIVES.md) for the exact
+directive syntax each tool expects.
 
 ### Reference sources
 
@@ -559,45 +512,10 @@ func NewAuthzService(repo *MySQLRepository, logger *slog.Logger) AuthzService {
 }
 ```
 
-### Decision flow
-
-```txt
-Does NewX set defaults, validate, or derive state?
-├─ YES → keep constructor
-└─ NO
-   └─ Is the struct itself unexported?
-      ├─ YES → keep constructor (callers can't name the type)
-      └─ NO
-         └─ Are all call sites in the same package?
-            ├─ YES → skip constructor, instantiate directly
-            └─ NO  → are the fields unexported?
-               ├─ YES, internal/ package → export fields, instantiate directly
-               ├─ YES, public package   → keep constructor (don't leak state)
-               └─ NO  → skip constructor, instantiate directly
-```
-
-A constructor earns its keep when it does something the caller cannot: setting
-defaults, validating inputs, deriving internal state, providing access to
-unexported fields across public package boundaries, or providing access to an
-unexported type.
-
-### When to use each pattern
-
-- **Direct instantiation** — constructor would only assign params to fields
-  *and* either: all callers are in the same package, or fields are exported
-  (safe in `internal/`). No indirection needed.
-- **Trivial constructor (unexported type)** — struct is intentionally
-  unexported (e.g., backing an interface). Constructor is the only way for
-  external callers to obtain an instance.
-- **Trivial constructor (public package)** — constructor only assigns params
-  to fields, but fields are unexported in a non-`internal/` package.
-  Justified by Go's visibility rules, not by logic in the constructor.
-- **Params struct** — constructor has >4 args (any kind, including `ctx`).
-  Solves "too many arguments".
-- **`WithXxx` methods** — type has optional configuration with sensible
-  defaults. Solves "optional config with discoverable defaults". `NewX` takes
-  only required params; `WithXxx` methods set optional fields.
-- The patterns are orthogonal — a type could use more than one if needed.
+A constructor earns its keep when it does something the caller
+cannot: setting defaults, validating inputs, deriving internal
+state, or providing access to unexported fields/types across
+package boundaries.
 
 Tracer initialization at package or constructor level:
 
@@ -1068,68 +986,11 @@ var AllConditionTypes = []ConditionType{HeaderCondition, GeoCondition}
 
 ## Standard Library Preferences
 
-Prefer newer stdlib packages over their older equivalents in new code. When
-editing existing code that uses an older API listed below, ask the user
-whether they want to migrate it to the newer equivalent before proceeding.
-
-### Use stdlib constants over magic literals
-
-When the standard library defines a named constant for a value, use it
-instead of a string or numeric literal. The constant documents intent,
-survives refactors, and catches typos at compile time — `"GOT"` compiles;
-`http.MethodGot` does not.
-
-Common cases:
-
-| Magic literal                      | Stdlib constant                                                               |
-| ---------------------------------- | ----------------------------------------------------------------------------- |
-| `"GET"`, `"POST"`, `"DELETE"`, ... | `http.MethodGet`, `http.MethodPost`, `http.MethodDelete`, ...                 |
-| `200`, `404`, `500`, ...           | `http.StatusOK`, `http.StatusNotFound`, `http.StatusInternalServerError`, ... |
-| Signals (`SIGINT`, `SIGTERM`, ...) | `os.Interrupt`, `syscall.SIGTERM`, ...                                        |
-| File modes (`0644`, `0755`)        | `fs.FileMode` values; `os.ModePerm`                                           |
-| Time units as `time.Duration` ints | `time.Second`, `time.Millisecond`, ...                                        |
-
-```go
-// Bad
-req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-if resp.StatusCode == 200 { ... }
-
-// Good
-req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-if resp.StatusCode == http.StatusOK { ... }
-```
-
-When a repeated literal has no stdlib constant (e.g. `"application/json"`,
-a custom header name, `"tcp"`/`"udp"`), define a package-level `const` so
-the value has one source of truth.
-
-### `net/netip` over `net` for IP types (Go 1.18+)
-
-The `net/netip` package provides value-typed, comparable, allocation-free
-replacements for the pointer-heavy types in `net`:
-
-| Old (`net`) | New (`net/netip`) | Benefit                           |
-| ----------- | ----------------- | --------------------------------- |
-| `net.IP`    | `netip.Addr`      | Value type, comparable, no allocs |
-| `net.IPNet` | `netip.Prefix`    | Value type, comparable            |
-| —           | `netip.AddrPort`  | IP+port as a single value type    |
-
-```go
-// Bad — pointer-based, not comparable.
-var cidr *net.IPNet
-
-// Good — value type, usable as map key.
-var prefix netip.Prefix
-```
-
-Convert at boundaries when interacting with APIs that still use `net` types:
-
-```go
-addr := netip.MustParseAddr("10.0.0.1")
-stdIP := addr.AsSlice() // -> net.IP for legacy APIs
-
-stdAddr, ok := netip.AddrFromSlice(legacyIP) // net.IP -> netip.Addr
-```
+Prefer newer stdlib packages over their older equivalents in new
+code. When editing existing code that uses an older API, ask the
+user whether they want to migrate. See
+[`STDLIB-PREFERENCES.md`](STDLIB-PREFERENCES.md) for the full
+reference tables.
 
 ## Layer Separation
 

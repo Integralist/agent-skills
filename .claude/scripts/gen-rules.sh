@@ -37,3 +37,13 @@ gen() {
 
 gen .agents/skills/go-conventions/SKILL.md       .claude/rules/go.md       '**/*.go'
 gen .agents/skills/markdown-conventions/SKILL.md .claude/rules/markdown.md '**/*.md'
+
+# copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md
+# files so relative links in the generated rule resolve.
+copy_siblings() {
+	local skill_dir="$1" rule_dir="$2"
+	find "$skill_dir" -maxdepth 1 -name '*.md' ! -name 'SKILL.md' -exec cp {} "$rule_dir/" \;
+}
+
+copy_siblings .agents/skills/go-conventions       .claude/rules
+copy_siblings .agents/skills/markdown-conventions  .claude/rules
