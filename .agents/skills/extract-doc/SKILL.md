@@ -31,7 +31,30 @@ Read the source in full before extracting.
 
 ## Phase 1: Detect which document(s) to produce
 
-Classify the source against these signals.
+First, determine whether any formal document is worth producing.
+
+**Value gate** — a document is worth producing only when:
+
+- An **ADR** captures a genuine decision with a real alternative that
+  was rejected for a stated reason — a fork that constrains future
+  work. Mechanical changes, single-obvious-way tasks, and maintenance
+  work have no decision to capture.
+- A **PRD** captures a product/user surface with goals or success
+  criteria worth framing independently of the plan. Internal refactors,
+  tooling, and documentation work have no product surface.
+
+If the source plan clears neither bar, **produce nothing**: state why
+("no architectural decision with a rejected alternative; no user-facing
+product surface") and stop. Do not emit an all-placeholder template.
+
+> [!NOTE]
+> When invoked **directly by the user** (`/extract-doc`), lower the
+> bar — still skip a document only if it would be entirely placeholder,
+> but do not refuse a borderline case the user explicitly asked for.
+> The strict gate applies to **automatic** invocation from
+> `project-plan` / `research-plan`.
+
+If at least one bar is met, classify the source against these signals.
 
 **PRD signals** (product framing — *what & why for users*):
 
