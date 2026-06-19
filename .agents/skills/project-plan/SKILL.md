@@ -73,17 +73,27 @@ foundation for the plan.
 
 ## Behavioural specs
 
-Delegate to the [`behaviour-spec`](../behaviour-spec/SKILL.md) skill,
-passing the feature description and the confirmed language. Run that
-skill to completion.
+Always include Given/When/Then acceptance criteria in the plan — they
+clarify intent regardless of whether the plan is code, documentation, or
+maintenance.
 
-It returns two things, which you fold into the plan below:
+**When the plan describes runnable code** whose behaviour can be executed
+as tests: delegate to the [`behaviour-spec`](../behaviour-spec/SKILL.md)
+skill, passing the feature description and the confirmed language. It
+returns:
 
 - An **acceptance criteria block** of feature-level Gherkin → goes in
   the `## Acceptance Criteria (BDD)` section.
 - A list of **scaffold tasks** (create `.feature` files, add the runner
   dependency, wire the test suite, stub step definitions) → merged into
   the `## Implementation Tasks`.
+
+**When the plan is non-code** (documentation, config, skill maintenance,
+operational work): author Given/When/Then scenarios as prose acceptance
+criteria directly in the plan — verified by checkable assertions (grep,
+command output, file state) rather than a test runner. Skip the
+`behaviour-spec` delegation and note that executable scaffolding was
+omitted.
 
 ## Plan document
 
@@ -234,14 +244,22 @@ When filling in the Parallel Execution section:
 
 ## Extract formal documents
 
-Immediately after the plan is written, delegate to the
-[`extract-doc`](../extract-doc/SKILL.md) skill, passing the path to the
-plan just created. It auto-detects whether the plan warrants an ADR, a
-PRD, or both, and writes them to `docs/adr/` and `docs/prd/` using the
-same `<yyyy-mm-dd>-<slug>` filename convention as the plan.
+After the plan is written, decide whether formal documents are warranted:
 
-Run that skill to completion, then notify the user that the plan and
-its formal documents (ADR/PRD) are done.
+- **ADR** — invoke when the plan records a genuine architecture decision
+  with a real alternative that was rejected for a stated reason. Skip for
+  mechanical changes, single-obvious-way tasks, and maintenance work.
+- **PRD** — invoke when the plan has a product/user surface with goals or
+  success criteria worth framing independently. Skip for internal
+  refactors, tooling, and documentation work.
+
+If either bar is met, delegate to the
+[`extract-doc`](../extract-doc/SKILL.md) skill, passing the path to the
+plan. It writes documents to `docs/adr/` and `docs/prd/` using the same
+`<yyyy-mm-dd>-<slug>` filename convention.
+
+If neither bar is met, note in the plan's `## Notes & Caveats` why
+formal documents were skipped, and move on.
 
 ## Guidelines
 
