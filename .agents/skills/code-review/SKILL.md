@@ -199,22 +199,7 @@ the verify and dedupe steps deterministic.
    project's `go-conventions` convention skill. Before beginning, this subagent
    MUST both (a) read https://go.dev/doc/effective_go and (b) load the
    `go-conventions` skill (`.agents/skills/go-conventions/SKILL.md`), then flag
-   changed Go that violates its rules, including:
-
-   - **Naming** — the "delete the type" test; domain-prefixed struct names;
-     fields named by role/target, not by type.
-   - **Error handling** — `"<layer>: <what failed>: %w"` prefixes; `%w` for
-     domain sentinels vs `%v` to sever raw storage errors; translation only at
-     repository and handler boundaries; `errors.AsType` over `errors.As`.
-   - **Structure** — alphabetically sorted struct fields (embedded first);
-     constructor decision flow (skip trivial same-package constructors, params
-     struct for >4 args, `WithXxx` for optional config).
-   - **Observability** — `slog.LogAttrs` with snake_case event names; trace
-     spans and metrics at layer boundaries only, not internal helpers.
-   - **Layer separation** — handlers → service → repository, never skipped;
-     service signatures `(ctx, In) (Out, error)` with transport-free structs.
-   - **Conventions** — required `doc.go` and `README.md` per package; file
-     naming; stdlib constants over magic literals; `net/netip` over `net`.
+   changed Go that violates its rules.
 
    This dimension is Go-specific; skip it entirely when `HAS_GO` is false (see
    Notes).
