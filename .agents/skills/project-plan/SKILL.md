@@ -25,19 +25,17 @@ document and is most often run standalone.
 
 ## When to use this skill
 
-Invoke this skill whenever a plan document needs writing — never
-hand-roll one by copying the shape of files already in `docs/plans/`.
-In particular:
+The frontmatter `description` carries the trigger phrases. Beyond those,
+two points are easy to get wrong:
 
-- The user asks to "create a project plan", "write a plan doc",
-  "create a new project plan doc", "document this plan", or similar.
-- **A plan was just discussed or presented in chat** and the user wants
-  it saved (e.g. "save this so we can revisit it", "turn this into a
-  plan doc"). This is the common case: the plan already exists in the
-  conversation — capture *that* plan, do not invent a new one or skip
-  the skill.
-- Research exists or not — research is optional input, not a
-  precondition.
+- **A plan just discussed in chat is the source, not a prompt to start
+  over.** When the user says "save this", "turn this into a plan doc",
+  capture *that* plan — do not invent a new one or skip the skill.
+- Research is optional input, not a precondition — proceed with or
+  without `docs/research/`.
+
+Never hand-roll a plan by copying the shape of files already in
+`docs/plans/`.
 
 ## Input
 
@@ -53,15 +51,16 @@ Determine what to plan, in priority order:
 ### Detect programming language
 
 Auto-detect the project's primary language(s) by examining file
-extensions and build files. Present the detected language to the user
-for confirmation:
+extensions and build files, then proceed with the detected language
+unless the user corrects you — fold the detection into whatever you ask
+the user next rather than blocking on a standalone confirmation:
 
 ```txt
-Detected language: Go. Is that correct, or should I use a different
-language for the code snippets?
+Planning in Go (detected). Tell me if the snippets should use a
+different language.
 ```
 
-If the confirmed language is Go, load the
+If the language is Go, load the
 [`go-conventions`](../go-conventions/SKILL.md) skill before producing any
 Go code snippets in the plan, so all embedded code follows the project's
 Go style guide.
@@ -98,8 +97,13 @@ omitted.
 ## Plan document
 
 Write a detailed implementation guide to
-`docs/plans/<yyyy-mm-dd>-<plan-slug>.md` (date prefix from today's
-date).
+`docs/plans/<yyyy-mm-dd>-<plan-slug>.md`. Get the date prefix from the
+shell (`date +%F`) — do not guess it. Get the author from
+`git config user.name`.
+
+A new plan's `Status` is always `Planning`. The transition to `Complete`
+and the move to `docs/plans/completed/` are handled at commit time — see
+[`commit`](../commit/SKILL.md).
 
 Use this template:
 
@@ -107,18 +111,25 @@ Use this template:
 # {Plan Name}
 
 - **Status**: Planning
-- **Author**: {author from git config}
-- **Created**: {YYYY-MM-DD}
-- **Language**: {confirmed language}
+- **Author**: {git config user.name}
+- **Created**: {date +%F}
+- **Language**: {confirmed language, or "Markdown"/"N/A" for non-code}
 
 ## Summary
 
 {What needs to be built and why — one paragraph.}
 
-## Acceptance Criteria (BDD)
+## Acceptance Criteria
 
-Feature-level behaviour the implementation must satisfy, from
-`behaviour-spec`. These become executable scenarios (godog for Go).
+Feature-level behaviour the implementation must satisfy. Always
+Given/When/Then. Heading and verification differ by plan type:
+
+- **Code plan** — title this `## Acceptance Criteria (BDD)`; scenarios
+  come from `behaviour-spec` and become executable (godog for Go).
+- **Non-code plan** (docs, config, maintenance) — keep
+  `## Acceptance Criteria`; scenarios are verified by checkable
+  assertions (grep, command output, file state), not a test runner.
+  Note that executable scaffolding was omitted.
 
 ```gherkin
 Feature: {capability}
@@ -173,8 +184,9 @@ dependency is a conscious choice.}
 ### Phase N: Verification
 
 - [ ] **Task N.1**: {How to test end-to-end}
-- [ ] **Task N.2**: All `## Acceptance Criteria (BDD)` scenarios pass
-  via `make test` (godog for Go)
+- [ ] **Task N.2**: All `## Acceptance Criteria` scenarios hold — for a
+  code plan, via `make test` (godog for Go); for a non-code plan, via
+  the grep/command/file-state assertions named in each scenario
 
 ## File Changes
 
@@ -225,6 +237,13 @@ Reference specific task IDs.
 
 ### Parallel execution section
 
+First decide whether parallelism applies at all. If the work is a single
+coherent stream, or is inherently sequential (each task depends on the
+prior one), say so in one line and omit the Subagent Roles, Work Streams,
+and Synchronization Points tables — do not fabricate streams to fill the
+template. Only fill in the section below when there are genuinely
+independent streams.
+
 When filling in the Parallel Execution section:
 
 1. **Identify independent work streams.** Look for tasks that touch
@@ -268,13 +287,17 @@ formal documents were skipped, and move on.
   `path/to/file.go:42` for code, URL for external docs. Claims you
   cannot cite must be labelled "unverified assumption" and include how
   to verify them.
+- Before finalizing, verify every cited reference resolves: grep/read
+  each `path:line` and confirm the symbol still exists. Line numbers go
+  stale — a citation that points at the wrong line is worse than none.
 - Break work into logical phases (usually by component or layer).
 - Each task should be small enough to complete in one session.
 - Include a verification phase with concrete test commands.
 - Code snippets should be precise — real function signatures, real
   types, real import paths. Not pseudocode.
 - Plans should be actionable.
-- Wrap all Markdown output at 80 columns.
+- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) for
+  all Markdown output.
 
 ## Agent teams (if your harness supports it)
 
