@@ -191,29 +191,10 @@ architectural decisions.}
 
 Print a short summary and the file path in the conversation.
 
-## Surface Durable Rules
+## Surface durable rules
 
-After producing the plan, review the investigation findings for
-**systemic patterns** that should be codified as ongoing
-conventions or anti-patterns — guidance that applies beyond this
-specific refactor.
-
-### Process
-
-1. If the investigation surfaced no durable lessons, skip this
-   step entirely. Do not force it.
-
-2. For each candidate rule, check your project's rules or
-   conventions directory for an existing file that covers the
-   topic. Update it if one exists.
-
-3. If no existing file covers the topic, create a new
-   conventions file.
-
-4. **Present the proposed rule(s) to the user for confirmation
-   before writing.**
-
-5. Only write after the user confirms.
+Load [`durable-rules/SKILL.md`](../durable-rules/SKILL.md) and
+follow its process.
 
 ## Guidelines
 

@@ -61,6 +61,7 @@ make install
     ├── decide/
     ├── delegate/
     ├── draft-pr/
+    ├── durable-rules/
     ├── extract-doc/
     ├── git-metadata/
     ├── go-api/
@@ -142,6 +143,7 @@ auto-loading.
 | **decide**                | Decision memo with structurer, contrarian, and synthesizer passes                            |
 | **delegate**              | Spawn a subagent for a task                                                                  |
 | **draft-pr**              | Draft a concise, direct pull request with a clear Problem and Solution                       |
+| **durable-rules**         | Surface systemic patterns from an investigation as codified conventions or anti-patterns     |
 | **extract-doc**           | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)   |
 | **git-metadata**          | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises |
 | **go-api**                | Generate a production-ready Go API service                                                   |
