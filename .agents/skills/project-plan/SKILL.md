@@ -278,21 +278,11 @@ formal documents were skipped, and move on.
 
 ## Agent teams (if your harness supports it)
 
-If your harness supports named, parallel agent teams (e.g. Claude
-Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
-execute the Parallel Execution section as a real team: create one
+Execute the Parallel Execution section as a real team: create one
 teammate per work stream, give each its stream's tasks, and use the
 Synchronization Points table to decide where a teammate must wait for
 another's output before proceeding. The team lead coordinates hand-offs
 and shuts the team down when all tasks complete.
 
-On Claude Code, enable agent teams by adding the following to
-`.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
+See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+enablement instructions.

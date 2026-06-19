@@ -10,10 +10,10 @@ argument-hint: <task description>
 Delegate the task to a subagent. Do not execute work directly.
 
 1. Parse everything after `/delegate` as the task description
-2. Select a subagent role from the table below
-3. Invoke the subagent immediately — no preliminary reads or
+1. Select a subagent role from the table below
+1. Invoke the subagent immediately — no preliminary reads or
    commands
-4. Report results
+1. Report results
 
 ## Agent Selection
 
@@ -21,13 +21,13 @@ Route to the subagent that best matches the task. The roles
 below are descriptions, not agent names — use your platform's
 actual agent names.
 
-| Task Type                          | Subagent Role                    |
-| ---------------------------------- | -------------------------------- |
-| Find code/files, trace deps        | Exploration / investigation      |
-| Design approach, architecture      | Planning                         |
-| Commands, multi-step work, refactor| General-purpose / workhorse      |
-| Code review \*                     | Review specialist                |
-| Web research \*                    | Research specialist               |
+| Task Type                           | Subagent Role               |
+| ----------------------------------- | --------------------------- |
+| Find code/files, trace deps         | Exploration / investigation |
+| Design approach, architecture       | Planning                    |
+| Commands, multi-step work, refactor | General-purpose / workhorse |
+| Code review \*                      | Review specialist           |
+| Web research \*                     | Research specialist         |
 
 \* Fall back to your platform's general-purpose / workhorse
 agent if no specialist is available.
@@ -39,9 +39,7 @@ agent if no specialist is available.
 
 ## Agent teams (if your harness supports it)
 
-If your harness supports named, parallel agent teams (e.g. Claude
-Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
-prefer spawning the delegate as a named teammate the user can chat
+Prefer spawning the delegate as a named teammate the user can chat
 with directly, rather than a fire-and-forget subagent:
 
 - Create a team named `delegate-{short-slug}` (a 2-3 word
@@ -54,13 +52,5 @@ with directly, rather than a fire-and-forget subagent:
 - Have the agent report findings back to the team lead and mark
   the task completed when done.
 
-On Claude Code, enable agent teams by adding the following to
-`.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
+See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+enablement instructions.

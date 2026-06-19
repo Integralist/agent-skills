@@ -213,18 +213,8 @@ follow its process.
 
 ## Agent teams (if your harness supports it)
 
-If your harness supports named, parallel agent teams (e.g. Claude
-Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
-run the investigation agent as a teammate in parallel rather than
+Run the investigation agent as a teammate in parallel rather than
 inline, then build the plan from its report.
 
-On Claude Code, enable agent teams by adding the following to
-`.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
+See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+enablement instructions.

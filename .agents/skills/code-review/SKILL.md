@@ -329,23 +329,13 @@ in the summary.
 
 ## Agent teams (if your harness supports it)
 
-If your harness supports named, parallel agent teams (e.g. Claude
-Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
-run the review subagents as parallel teammates: spawn one per
+Run the review subagents as parallel teammates: spawn one per
 review dimension, have each report findings back to the team lead,
 then synthesize. This is faster than sequential subagent calls when
 the harness can run them concurrently.
 
-On Claude Code, enable agent teams by adding the following to
-`.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
+See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+enablement instructions.
 
 ## References
 

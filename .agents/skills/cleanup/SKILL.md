@@ -195,20 +195,10 @@ Print a short summary and the file path in the conversation.
 
 ## Agent teams (if your harness supports it)
 
-If your harness supports named, parallel agent teams (e.g. Claude
-Code's experimental [agent teams](https://code.claude.com/docs/en/agent-teams)),
-run the cleanup agent as a background teammate so the main thread
+Run the cleanup agent as a background teammate so the main thread
 stays responsive while it works. Spawn the agent with the prompt
 and checklist above, have it report back to the team lead when
 done, and compile the summary from its report.
 
-On Claude Code, enable agent teams by adding the following to
-`.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
+See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+enablement instructions.
