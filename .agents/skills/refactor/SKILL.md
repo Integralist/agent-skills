@@ -29,57 +29,9 @@ Parse the response into a short kebab-case slug (e.g.,
 
 ## Gather project metadata
 
-Before spawning the investigation subagent, run the following
-git commands in the current working directory to build a
-diagnostic snapshot. Capture the output and include it in the
-subagent prompt as context.
-
-### Churn hotspots — most-changed files in the last year
-
-```bash
-git log --format=format: --name-only --since="1 year ago" \
-  | sort | uniq -c | sort -nr | head -20
-```
-
-### Bus factor — contributors ranked by commit count
-
-```bash
-git shortlog -sn --no-merges
-```
-
-Also check recent activity (last 6 months) to flag absent top
-contributors:
-
-```bash
-git shortlog -sn --no-merges --since="6 months ago"
-```
-
-### Bug clusters — files most often touched in bug-fix commits
-
-```bash
-git log -i -E --grep="fix|bug|broken" \
-  --name-only --format='' | sort | uniq -c | sort -nr | head -20
-```
-
-### Commit velocity — commits per month
-
-```bash
-git log --format='%ad' --date=format:'%Y-%m' \
-  | sort | uniq -c
-```
-
-### Crisis patterns — reverts, hotfixes, and rollbacks
-
-```bash
-git log --oneline --since="1 year ago" \
-  | grep -iE 'revert|hotfix|emergency|rollback'
-```
-
-### Cross-reference
-
-Files that appear in **both** the churn hotspots and the bug
-clusters lists are the highest-risk code. Flag these explicitly
-in the metadata passed to the subagent.
+Load [`git-metadata/SKILL.md`](../git-metadata/SKILL.md) and
+run its commands. Include the output in the subagent prompt as
+context so it can prioritize empirically.
 
 ## Investigation Phase
 

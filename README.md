@@ -62,6 +62,7 @@ make install
     ├── delegate/
     ├── draft-pr/
     ├── extract-doc/
+    ├── git-metadata/
     ├── go-api/
     ├── go-conventions/             # rule → skill (generic harnesses)
     ├── go-testing/
@@ -142,6 +143,7 @@ auto-loading.
 | **delegate**              | Spawn a subagent for a task                                                                  |
 | **draft-pr**              | Draft a concise, direct pull request with a clear Problem and Solution                       |
 | **extract-doc**           | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)   |
+| **git-metadata**          | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises |
 | **go-api**                | Generate a production-ready Go API service                                                   |
 | **go-conventions**        | Go coding conventions (mirrors `.claude/rules/go.md`)                                        |
 | **go-testing**            | Write Go tests — table-driven, fuzz, benchmarks                                              |

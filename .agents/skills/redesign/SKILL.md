@@ -32,49 +32,9 @@ argument → slug `codebase`.
 
 ## Gather project metadata
 
-Run the following git commands in the current working directory and capture
-output for inclusion in every subagent prompt. The metadata lets each
-subagent prioritize empirically rather than guessing.
-
-### Churn hotspots — most-changed files in the last year
-
-```bash
-git log --format=format: --name-only --since="1 year ago" \
-  | sort | uniq -c | sort -nr | head -20
-```
-
-### Bus factor — contributors ranked by commit count
-
-```bash
-git shortlog -sn --no-merges
-git shortlog -sn --no-merges --since="6 months ago"
-```
-
-### Bug clusters — files most often touched in bug-fix commits
-
-```bash
-git log -i -E --grep="fix|bug|broken" \
-  --name-only --format='' | sort | uniq -c | sort -nr | head -20
-```
-
-### Commit velocity — commits per month
-
-```bash
-git log --format='%ad' --date=format:'%Y-%m' \
-  | sort | uniq -c
-```
-
-### Crisis patterns — reverts, hotfixes, rollbacks
-
-```bash
-git log --oneline --since="1 year ago" \
-  | grep -iE 'revert|hotfix|emergency|rollback'
-```
-
-### Cross-reference
-
-Files that appear in **both** churn hotspots and bug clusters are the
-highest-risk code. Flag these explicitly in the metadata passed to subagents.
+Load [`git-metadata/SKILL.md`](../git-metadata/SKILL.md) and
+run its commands. Include the output in every subagent prompt so
+each can prioritize empirically.
 
 ## Detect language
 
