@@ -5,10 +5,10 @@ description: >-
   documentation best practices: brevity, eliminating
   assumptions, modularization, visualization, and reducing
   stale code references. Use when writing new documentation
-  from scratch or reviewing and rewriting existing documents
+  from scratch, or editing, or reviewing and rewriting existing documents
   for clarity and quality.
 user-invocable: true
-argument-hint: '--new <topic> | --improve <file>'
+argument-hint: --new <topic> | --improve <file>
 ---
 
 # Technical Documentation

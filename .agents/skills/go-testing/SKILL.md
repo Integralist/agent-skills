@@ -2,8 +2,7 @@
 name: go-testing
 description: >-
   Write unit and integration tests for Go services. Use when
-  creating tests, test helpers, mocks, fuzz tests, or benchmarks
-  in Go projects.
+  creating, editing or updating tests, test helpers, mocks, fuzz tests, or  benchmarks in Go projects.
 ---
 
 # Go Testing

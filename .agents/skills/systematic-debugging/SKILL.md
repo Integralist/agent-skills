@@ -18,10 +18,10 @@ Never apply symptom-focused patches that mask underlying problems. Understand WH
 Before touching any code:
 
 1. **Read error messages thoroughly** — Every word matters
-2. **Reproduce the issue consistently** — If you can't reproduce it, you can't verify a fix
-3. **Examine recent changes** — What changed before this started failing?
-4. **Gather diagnostic evidence** — Logs, stack traces, state dumps
-5. **Trace data flow** — Follow the call chain to find where bad values originate
+1. **Reproduce the issue consistently** — If you can't reproduce it, you can't verify a fix
+1. **Examine recent changes** — What changed before this started failing?
+1. **Gather diagnostic evidence** — Logs, stack traces, state dumps
+1. **Trace data flow** — Follow the call chain to find where bad values originate
 
 **Root Cause Tracing Technique:**
 
@@ -38,28 +38,28 @@ Before touching any code:
 ### Phase 2: Pattern Analysis
 
 1. **Locate working examples** — Find similar code that works correctly
-2. **Compare implementations completely** — Don't just skim
-3. **Identify differences** — What's different between working and broken?
-4. **Understand dependencies** — What does this code depend on?
+1. **Compare implementations completely** — Don't just skim
+1. **Identify differences** — What's different between working and broken?
+1. **Understand dependencies** — What does this code depend on?
 
 ### Phase 3: Hypothesis and Testing
 
 Apply the scientific method:
 
 1. **Formulate ONE clear hypothesis** — "The error occurs because X"
-2. **Design minimal test** — Change ONE variable at a time
-3. **Predict the outcome** — What should happen if hypothesis is correct?
-4. **Run the test** — Execute and observe
-5. **Verify results** — Did it behave as predicted?
-6. **Iterate or proceed** — Refine hypothesis if wrong, implement if right
+1. **Design minimal test** — Change ONE variable at a time
+1. **Predict the outcome** — What should happen if hypothesis is correct?
+1. **Run the test** — Execute and observe
+1. **Verify results** — Did it behave as predicted?
+1. **Iterate or proceed** — Refine hypothesis if wrong, implement if right
 
 ### Phase 4: Implementation
 
 1. **Create failing test case** — Captures the bug behavior
-2. **Implement single fix** — Address root cause, not symptoms
-3. **Verify test passes** — Confirms fix works
-4. **Run full test suite** — Ensure no regressions
-5. **If fix fails, STOP** — Re-evaluate hypothesis
+1. **Implement single fix** — Address root cause, not symptoms
+1. **Verify test passes** — Confirms fix works
+1. **Run full test suite** — Ensure no regressions
+1. **If fix fails, STOP** — Re-evaluate hypothesis
 
 **Critical rule:** If THREE or more fixes fail consecutively, STOP. This signals architectural problems requiring discussion, not more patches.
 
