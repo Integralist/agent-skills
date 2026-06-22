@@ -50,6 +50,7 @@ make install
 └── skills/
     ├── _shared/                    # Cross-skill references (Agent teams, etc.)
     ├── agents-md/
+    ├── bcp/
     ├── behaviour-spec/
     ├── caveman/
     ├── changelog/
@@ -130,48 +131,49 @@ auto-loading.
 
 ## Skill Reference
 
-| Skill                     | Description                                                                                  |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| **agents-md**             | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                      |
-| **behaviour-spec**        | Generate Gherkin acceptance criteria; executable godog scenarios for Go, prose for units     |
-| **caveman**               | Ultra-compressed caveman-speak mode; ~75% token reduction                                    |
-| **changelog**             | Add a Keep a Changelog entry from the working diff or branch-vs-main                         |
-| **cleanup**               | Audit codebase for AI slop via background subagent                                           |
-| **code-review**           | Multi-dimensional review via parallel subagents                                              |
-| **code-review-feedback**  | Evaluate code review feedback with technical rigor — verify before implementing              |
-| **commit**                | Git commits with intelligent file grouping                                                   |
-| **consensus**             | Cross-model second-opinion workflow with discussion rounds and user gates                    |
-| **critique**              | Critique a document for logical fallacies                                                    |
-| **decide**                | Decision memo with structurer, contrarian, and synthesizer passes                            |
-| **delegate**              | Spawn a subagent for a task                                                                  |
-| **draft-pr**              | Draft a concise, direct pull request with a clear Problem and Solution                       |
-| **durable-rules**         | Surface systemic patterns from an investigation as codified conventions or anti-patterns     |
-| **extract-doc**           | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)   |
-| **git-metadata**          | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises |
-| **go-api**                | Generate a production-ready Go API service                                                   |
-| **go-conventions**        | Go coding conventions (mirrors `.claude/rules/go.md`)                                        |
-| **go-testing**            | Write Go tests — table-driven, fuzz, benchmarks                                              |
-| **grepai**                | Semantic code search by intent                                                               |
-| **grill-me**              | Interview the user relentlessly to stress-test a plan or design                              |
-| **grill-with-docs**       | Stress-test a plan against project domain model and update CONTEXT/ADRs                      |
-| **handoff**               | Compact the current conversation into a handoff document for another agent                   |
-| **markdown-conventions**  | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                        |
-| **markdown-to-skill**     | Bulk-convert Markdown files into agent skills                                                |
-| **mysql-index-audit**     | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)          |
-| **next-task**             | Continue working through a project plan                                                      |
-| **project-plan**          | Create an implementation plan from research; embeds BDD criteria, extracts ADR/PRD           |
-| **redesign**              | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning  |
-| **refactor**              | Analyze a feature and produce a reimplementation plan                                        |
-| **research**              | Research a topic or repo deeply; writes a reference doc to `docs/research/`                  |
-| **research-plan**         | Coordinator: research (**research**) then plan (**project-plan**); bootstraps AGENTS.md      |
+| Skill                        | Description                                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| **agents-md**                | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                       |
+| **bcp**                      | Branch, commit, and open a PR in one step (orchestrates **commit** + **draft-pr**)            |
+| **behaviour-spec**           | Generate Gherkin acceptance criteria; executable godog scenarios for Go, prose for units      |
+| **caveman**                  | Ultra-compressed caveman-speak mode; ~75% token reduction                                     |
+| **changelog**                | Add a Keep a Changelog entry from the working diff or branch-vs-main                          |
+| **cleanup**                  | Audit codebase for AI slop via background subagent                                            |
+| **code-review**              | Multi-dimensional review via parallel subagents                                               |
+| **code-review-feedback**     | Evaluate code review feedback with technical rigor — verify before implementing               |
+| **commit**                   | Git commits with intelligent file grouping                                                    |
+| **consensus**                | Cross-model second-opinion workflow with discussion rounds and user gates                     |
+| **critique**                 | Critique a document for logical fallacies                                                     |
+| **decide**                   | Decision memo with structurer, contrarian, and synthesizer passes                             |
+| **delegate**                 | Spawn a subagent for a task                                                                   |
+| **draft-pr**                 | Draft a concise, direct pull request with a clear Problem and Solution                        |
+| **durable-rules**            | Surface systemic patterns from an investigation as codified conventions or anti-patterns      |
+| **extract-doc**              | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)    |
+| **git-metadata**             | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises  |
+| **go-api**                   | Generate a production-ready Go API service                                                    |
+| **go-conventions**           | Go coding conventions (mirrors `.claude/rules/go.md`)                                         |
+| **go-testing**               | Write Go tests — table-driven, fuzz, benchmarks                                               |
+| **grepai**                   | Semantic code search by intent                                                                |
+| **grill-me**                 | Interview the user relentlessly to stress-test a plan or design                               |
+| **grill-with-docs**          | Stress-test a plan against project domain model and update CONTEXT/ADRs                       |
+| **handoff**                  | Compact the current conversation into a handoff document for another agent                    |
+| **markdown-conventions**     | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                         |
+| **markdown-to-skill**        | Bulk-convert Markdown files into agent skills                                                 |
+| **mysql-index-audit**        | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)           |
+| **next-task**                | Continue working through a project plan                                                       |
+| **project-plan**             | Create an implementation plan from research; embeds BDD criteria, extracts ADR/PRD            |
+| **redesign**                 | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning   |
+| **refactor**                 | Analyze a feature and produce a reimplementation plan                                         |
+| **research**                 | Research a topic or repo deeply; writes a reference doc to `docs/research/`                   |
+| **research-plan**            | Coordinator: research (**research**) then plan (**project-plan**); bootstraps AGENTS.md       |
 | **security-review-feedback** | Triage a security review's findings — verdict per finding (true/false positive) before fixing |
-| **slack-search**          | Drive Slack via Playwright MCP to run searches or Slackbot prompts                           |
-| **summarize-for-product** | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)             |
-| **systematic-debugging**  | Four-phase debugging with root cause analysis                                                |
-| **teach**                 | Stateful tutor workspace — missions, lessons, learning records, reference docs               |
-| **tech-docs**             | Write or improve technical documentation via five documentation pillars                      |
-| **test-feedback**         | Parse test failures and fix them in a background subagent                                    |
-| **writing-great-skills**  | Reference for writing and editing skills well — vocabulary and principles for predictability |
+| **slack-search**             | Drive Slack via Playwright MCP to run searches or Slackbot prompts                            |
+| **summarize-for-product**    | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)              |
+| **systematic-debugging**     | Four-phase debugging with root cause analysis                                                 |
+| **teach**                    | Stateful tutor workspace — missions, lessons, learning records, reference docs                |
+| **tech-docs**                | Write or improve technical documentation via five documentation pillars                       |
+| **test-feedback**            | Parse test failures and fix them in a background subagent                                     |
+| **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability  |
 
 ## How `.claude/` and `.agents/` relate
 
