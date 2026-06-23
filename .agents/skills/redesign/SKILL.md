@@ -60,19 +60,10 @@ Every subagent must report findings only — **none of them edit code**.
 ### Subagent 1: Aspirational structure
 
 Soul of the skill: push hard for restructurings that *delete* whole
-categories of complexity rather than rearranging it. Include this brief
-verbatim in the subagent prompt:
-
-> You are a principal engineer performing a strict, ambitious code-quality
-> audit. Do not stop at "this could be a bit cleaner." Look for reframings
-> that make whole branches, helpers, modes, conditionals, or layers
-> disappear entirely. Prefer the solution that makes the code feel
-> inevitable in hindsight. If you see a path to *delete* complexity rather
-> than rearrange it, push hard for that path.
->
-> Assume there is often a "code judo" move available — a re-organization
-> that uses the existing architecture more effectively and makes a whole
-> class of complexity vanish. Find it.
+categories of complexity rather than rearranging it. Include the code-judo
+brief from [`../_shared/CODE-JUDO.md`](../_shared/CODE-JUDO.md) verbatim in
+the subagent prompt, then the concrete triggers and preferred remedies
+below.
 
 #### Concrete triggers to scan for
 
@@ -261,28 +252,28 @@ reject Phase 0.
 
 ## Output
 
-Create the output directory with `mkdir -p docs/plans`, then write the
-plan to `docs/plans/<yyyy-mm-dd>-redesign-<slug>.md` (date
-prefix from today's date):
+Emit the plan using the shared skeleton in
+[`../_shared/REIMPL-PLAN-TEMPLATE.md`](../_shared/REIMPL-PLAN-TEMPLATE.md).
+Substitute:
+
+- `{Plan Type}` → `Redesign`
+- `{Scope Name}` → the scope name (subsystem or `codebase`)
+- `{plan-type}` → `redesign`
+- `{slug}` → the scope slug
+
+`redesign` is more demanding than `refactor`, so it fills the shared
+template's insertion-point anchors and overrides one phase:
+
+**`extra metadata bullets`** — add:
 
 ````markdown
-# Redesign: {Scope Name}
-
-- **Status**: Planning
-- **Author**: {git config user.name}
-- **Created**: {YYYY-MM-DD}
-- **Language**: {detected language}
 - **Scope**: codebase | <subsystem path>
+````
 
-## Summary
+**`findings / analysis sections`** (between Current State and What We Should
+Have Done First) — add:
 
-{One paragraph: the systemic problem and the high-level redesign strategy.}
-
-## Current State
-
-{Files, data flow, where the problems are. Mermaid diagram if the system
-is complex.}
-
+````markdown
 ## Findings
 
 ### Aspirational Structure
@@ -311,15 +302,12 @@ trigger that fired, impact, concrete remedy.}
 {Explicit list of behaviors the redesign must preserve, derived from
 purpose docs and existing tests. This is the post-redesign verification
 target.}
+````
 
-## What We Should Have Done First
+**`pre-prerequisite phases`** (before Phase 1, inside Reimplementation
+Tasks) — add the Phase 0 callout and phase:
 
-{Prerequisites — interfaces, shared types, test infrastructure,
-architectural decisions — that should have existed before the current
-implementation was built.}
-
-## Reimplementation Tasks
-
+````markdown
 > [!IMPORTANT]
 > Phase 0 contains characterization tests that pin existing behavior.
 > These tests **pass by construction** — this is the documented exception
@@ -336,25 +324,16 @@ implementation was built.}
   ```{language}
   // Example pinning test signature
   ```
+````
 
-### Phase 1: Prerequisites
+Phase 2 tasks should cite their pinning: `Pinned by: Phase 0 tasks
+{0.x, 0.y}.` — or, if the boundary still lacks coverage,
+`BLOCKED-ON-TESTS: needs {specific missing tests}.`
 
-- [ ] **Task 1.1**: {Interfaces, shared types, fakes the redesign needs.}
+**Phase N: Verification** — override the shared template's generic
+verification tasks with:
 
-### Phase 2: {Core Redesign}
-
-- [ ] **Task 2.1**: {Specific restructure.}
-  Pinned by: Phase 0 tasks {0.x, 0.y}.
-  {Or, if the boundary still lacks coverage:}
-  `BLOCKED-ON-TESTS`: needs {specific missing tests}.
-
-### Phase N-1: Documentation
-
-- [ ] **Task (N-1).1**: Update `**/README.md` files for packages whose
-  public API changed.
-- [ ] **Task (N-1).2**: Update `docs/**/*.md` for user-facing behavior
-  changes.
-
+````markdown
 ### Phase N: Verification
 
 - [ ] **Task N.1**: Run all Phase 0 pinning tests — must still pass.
@@ -362,13 +341,11 @@ implementation was built.}
   above still holds.
 - [ ] **Task N.3**: Verify complexity reduction — file/function size
   metrics, layer-leak count, branching count.
+````
 
-## File Changes
+**`trailing sections`** (after File Changes) — add:
 
-| File           | Change                         |
-| -------------- | ------------------------------ |
-| `path/to/file` | {Brief description of changes} |
-
+````markdown
 ## Approval Bar
 
 This plan treats the following as presumptive blockers — if any survive
@@ -381,31 +358,23 @@ into the implementation, justify them explicitly:
 - Unnecessary abstractions, wrappers, or escape-hatch-typed contracts
   remain.
 - A near-duplicate of an existing canonical helper is kept.
-
-## Notes & Caveats
-
-- {Edge cases, risks, open questions, tasks tagged `BLOCKED-ON-TESTS`.}
 ````
 
-Print a short summary and the file path in the conversation.
+In `Notes & Caveats`, also list any tasks tagged `BLOCKED-ON-TESTS`.
 
 ## Surface durable rules
 
 Load [`durable-rules/SKILL.md`](../durable-rules/SKILL.md) and
 follow its process.
 
-## Guidelines
+## Additional guidelines
 
-- Use specific file paths and line numbers when referencing code.
-- Code snippets must use real function signatures, real types, real import
-  paths. Not pseudocode.
-- Each task should be small enough to complete in one session.
-- The plan describes a redesign, not incremental patches. The goal is
-  "what would we do if starting over," not "what's the minimal diff."
+The shared template carries the base plan-writing guidelines. For redesign,
+also:
+
 - Be direct and demanding about quality. Do not soften major
   maintainability issues into mild suggestions. If the implementation
   missed an opportunity for a dramatic simplification, say so clearly.
-- Wrap all Markdown output at 80 columns.
 
 ## Non-goals
 

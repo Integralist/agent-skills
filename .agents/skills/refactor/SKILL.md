@@ -45,6 +45,10 @@ subagent prompt must include:
   investigate first and to corroborate its findings against the
   empirical data
 - The investigation checklist below (include verbatim)
+- The **code-judo brief** from
+  [`../_shared/CODE-JUDO.md`](../_shared/CODE-JUDO.md) (include
+  verbatim) — push the subagent toward deletions, not just
+  rearrangements, scoped to this single feature
 - Instructions to use file reading, search, and any relevant
   language tools available
 
@@ -107,7 +111,8 @@ Include this verbatim in the subagent prompt:
 > 1. **Fragmentation issues** — ranked by impact
 > 1. **Coupling issues** — ranked by risk
 > 1. **Missing prerequisites** — what should have existed first
-> 1. **Key insight** — the single most important thing to change
+> 1. **Key insight** — the single biggest deletion opportunity: the
+>    one change that makes the most complexity vanish
 
 ## Analysis
 
@@ -121,95 +126,23 @@ reimplementation strategy. Focus on:
 
 ## Plan Output
 
-Create the output directory with `mkdir -p docs/plans`, then
-write the plan to `docs/plans/<yyyy-mm-dd>-refactor-<slug>.md`
-(date prefix from today's date):
+Emit the plan using the shared skeleton in
+[`../_shared/REIMPL-PLAN-TEMPLATE.md`](../_shared/REIMPL-PLAN-TEMPLATE.md).
+Substitute:
 
-````markdown
-# Refactor: {Feature Name}
+- `{Plan Type}` → `Refactor`
+- `{Scope Name}` → the feature name
+- `{plan-type}` → `refactor`
+- `{slug}` → the feature slug
 
-- **Status**: Planning
-- **Author**: {author from git config}
-- **Created**: {YYYY-MM-DD}
-- **Language**: {detected language}
-
-## Summary
-
-{One paragraph: what is wrong with the current implementation
-and the high-level reimplementation strategy.}
-
-## Current State
-
-{Brief description of the current implementation — key files,
-data flow, and where the problems are. Include a Mermaid
-diagram if the system is complex.}
-
-## What We Should Have Done First
-
-{Prerequisites that should have existed before this feature
-was built — interfaces, shared types, test infrastructure,
-architectural decisions.}
-
-## Reimplementation Tasks
-
-### Phase 1: Prerequisites
-
-- [ ] **Task 1.1**: {Prerequisite work}
-
-  {Detailed notes with code snippets:}
-
-  ```{language}
-  // Example code showing the approach
-  ```
-
-### Phase 2: {Core Reimplementation}
-
-- [ ] **Task 2.1**: {Specific task}
-
-### Phase N-1: Documentation
-
-- [ ] **Task (N-1).1**: Update `**/README.md` files for
-  packages whose public API changed
-- [ ] **Task (N-1).2**: Update `docs/**/*.md` for user-facing
-  behavior changes
-
-### Phase N: Verification
-
-- [ ] **Task N.1**: {How to verify behavior is preserved}
-- [ ] **Task N.2**: {How to verify complexity is reduced}
-
-## File Changes
-
-| File           | Change                         |
-| -------------- | ------------------------------ |
-| `path/to/file` | {Brief description of changes} |
-
-## Notes & Caveats
-
-- {Edge cases, risks, or open questions.}
-````
-
-Print a short summary and the file path in the conversation.
+`refactor` adds no extra sections — leave every insertion-point
+anchor empty. The shared file also carries the output path and
+the plan-writing guidelines.
 
 ## Surface durable rules
 
 Load [`durable-rules/SKILL.md`](../durable-rules/SKILL.md) and
 follow its process.
-
-## Guidelines
-
-- Use specific file paths and line numbers when referencing
-  code.
-- Code snippets must use real function signatures, real types,
-  real import paths. Not pseudocode.
-- Break reimplementation into logical phases (prerequisites
-  first, then core work, then verification).
-- Each task should be small enough to complete in one session.
-- The plan should describe a reimplementation, not incremental
-  patches. The goal is "what would we do if starting over," not
-  "what's the minimal diff."
-- Include a verification phase with concrete test commands.
-- Wrap all Markdown output at 80 columns.
 
 ## Agent teams (if your harness supports it)
 
