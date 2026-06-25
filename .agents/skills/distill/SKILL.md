@@ -1,0 +1,139 @@
+---
+name: distill
+description: >-
+  Rewrite text to be more concise, clear, and direct without
+  losing critical information. Inventories load-bearing details
+  first, rewrites, then audits the rewrite to verify nothing
+  essential was dropped. Use to clean up a plan, technical guide,
+  agent instructions, or any prose that is too long or hard to
+  follow — especially before handing it to an agent to execute.
+  Triggers on "clean up / tighten / condense / distill this",
+  "make this more concise without losing detail", or /distill.
+argument-hint: "[file path | pasted text]"
+---
+
+# Distill
+
+Rewrite text to be shorter, clearer, and more direct **without
+losing any information needed to act on it safely and
+accurately**. Preservation is the priority; brevity is the means.
+
+The risk in any condensing pass is silently dropping a
+load-bearing detail — an exact path, an ordering constraint, an
+edge case. This skill defends against that with a strict loop:
+inventory what must survive, rewrite, then audit the rewrite
+against the inventory. The audit is the point.
+
+This applies to any text: implementation plans, technical guides,
+runbooks, agent instructions, design notes. It is especially
+valuable before handing a document to an agent to execute, where
+a dropped detail becomes a wrong action.
+
+## Input detection
+
+- **File path given** — read the file in full, then rewrite it in
+  place. Per house rules, propose the change (summary, or full
+  diff if asked) and get approval *before* writing.
+- **Text pasted in chat** — output the rewrite in chat. Write
+  nothing to disk.
+- **Ambiguous** — ask which the user wants before proceeding.
+
+## Process
+
+Do these in order. Steps 1 and 3 are mandatory and bracket the
+rewrite — never skip them.
+
+1. **Inventory load-bearing content (before rewriting).** Read
+   the source in full. Extract every must-preserve item into a
+   checklist (see [What is load-bearing](#what-is-load-bearing)).
+   This is the contract the rewrite must satisfy.
+1. **Rewrite.** Produce a tighter, clearer version. Restructure
+   freely — lists, tables, numbered steps — and use a direct
+   imperative voice. Fidelity is to the *information*, not the
+   original wording or structure.
+1. **Audit against the inventory (after rewriting).** Walk every
+   checklist item and confirm it survives in the new text. For
+   anything intentionally cut, record why. If an item is missing
+   by accident, restore it. This step is the guarantee.
+
+## What is load-bearing
+
+Preserve everything in the left column. Cut freely from the
+right.
+
+| Preserve (load-bearing)                 | Safe to cut (decorative)         |
+| --------------------------------------- | -------------------------------- |
+| Exact paths, commands, flags, values    | Filler, throat-clearing, hedging |
+| Ordering and sequencing constraints     | Repetition and restated context  |
+| Preconditions and dependencies          | Narrative scaffolding            |
+| Edge cases, gotchas, and warnings       | Over-explanation of the obvious  |
+| Acceptance criteria, success conditions | Motivational/apologetic asides   |
+| Rationale that prevents a wrong action  | Off-topic historical context     |
+
+> [!WARNING]
+> When unsure whether a detail is load-bearing, treat it as
+> load-bearing. A retained sentence costs little; a dropped
+> constraint can break execution.
+
+## Rewrite principles
+
+- Be concise — cut words that carry no information.
+- Use a direct, imperative voice for instructions.
+- Restructure into lists, tables, or steps wherever that helps an
+  executor follow the text. Structure may change completely;
+  meaning may not.
+- Preserve technical accuracy exactly. Never invent, infer, or
+  "improve" facts that were not in the source.
+- Keep exact tokens verbatim — paths, identifiers, commands, and
+  values are copied, never paraphrased.
+
+## Output
+
+**For pasted text**, present in this order:
+
+1. The rewritten text.
+
+1. A **Preservation audit** — each inventory item with its fate:
+
+   ```txt
+   - {item} — kept | relocated to {where} | cut: {reason}
+   ```
+
+1. A short list of anything deliberately dropped, if not already
+   clear from the audit.
+
+**For a file**, summarize the changes, get approval, then write.
+Include the preservation audit in the summary.
+
+## Guardrails
+
+- If the text is already tight, say so and make only minimal
+  edits. Do not manufacture cuts to look productive.
+- If cutting an item is risky, flag it for the user instead of
+  silently dropping it.
+- If the source is a `docs/plans/` project-plan document, keep its
+  required structure intact — see
+  [`project-plan`](../project-plan/SKILL.md). Condense within the
+  structure rather than collapsing it.
+
+## Optional rigor: independent audit
+
+For long or high-stakes text, delegate step 3 to a fresh subagent
+(if your harness supports it). Give it *only* the original
+load-bearing inventory and the rewritten text — not the rewriting
+rationale — and ask it to report any inventory item it cannot
+find in the rewrite. A reviewer unaware of the rewriter's
+intentions catches omissions the rewriter rationalized away.
+
+## Related skills
+
+- [`tech-docs`](../tech-docs/SKILL.md) — improving repo
+  *documentation* via doc-specific pillars (Mermaid diagrams,
+  modularization, eliminating assumptions, stale-code references).
+  Use it for document structure and quality; use `distill` as its
+  deeper-condensing companion when preserving every load-bearing
+  detail is the concern.
+- [`summarize-for-product`](../summarize-for-product/SKILL.md) —
+  different goal: translate an engineering doc for a non-engineer
+  audience. That reshapes content for a reader; `distill`
+  preserves all content for an executor.

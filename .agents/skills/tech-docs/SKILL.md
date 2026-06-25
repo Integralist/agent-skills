@@ -77,6 +77,9 @@ ambiguous, ask the user which mode they want.
 - Kill historical/legacy sections that serve no current
   reader. That context belongs in git history or a linked
   ADR, not in an active reference doc.
+- For aggressive condensing of long prose where every
+  load-bearing detail must survive, use the
+  [`distill`](../distill/SKILL.md) skill.
 
 ### 2. Eliminate Assumptions
 

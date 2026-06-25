@@ -62,6 +62,7 @@ make install
     ├── critique/
     ├── decide/
     ├── delegate/
+    ├── distill/
     ├── draft-pr/
     ├── durable-rules/
     ├── extract-doc/
@@ -146,6 +147,7 @@ auto-loading.
 | **critique**                 | Critique a document for logical fallacies                                                     |
 | **decide**                   | Decision memo with structurer, contrarian, and synthesizer passes                             |
 | **delegate**                 | Spawn a subagent for a task                                                                   |
+| **distill**                  | Rewrite text concisely without losing critical info; inventory → rewrite → audit              |
 | **draft-pr**                 | Draft a concise, direct pull request with a clear Problem and Solution                        |
 | **durable-rules**            | Surface systemic patterns from an investigation as codified conventions or anti-patterns      |
 | **extract-doc**              | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)    |
