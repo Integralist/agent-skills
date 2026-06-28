@@ -151,6 +151,9 @@ Spawn a single general-purpose subagent. The prompt must
 include:
 
 - The repo path (`~/code/{org}/{repo}`)
+- A statement that this is **read-only research**: investigate and
+  report findings only; do not modify code, write files, or run
+  state-changing commands
 - The user's question or research goal
 - The **project metadata** gathered above — instruct the
   subagent to use this metadata to prioritize which code to

@@ -199,6 +199,17 @@ dependency is a conscious choice.}
 This section defines how to split implementation across subagents for
 parallel work.
 
+> [!IMPORTANT]
+> Only delegate a work stream to a fire-and-forget subagent if it is
+> independent, well-specified, touches files no other stream touches,
+> and won't need interactive steering. A sealed subagent can't be
+> redirected mid-flight — it ploughs ahead while objections pile up.
+> Work you expect to iterate on belongs in the main thread or a
+> chat-able teammate. For editing work that still benefits from
+> parallel scanning, prefer a two-phase split: a read-only subagent
+> returns a proposed-change list, then the main thread applies edits
+> with the user able to veto each one.
+
 ### Subagent Roles
 
 | Subagent Role             | Responsibility                    |
@@ -247,7 +258,10 @@ Reference specific task IDs.
 > sealed parallel stream. When in doubt, prefer fewer streams.
 > See
 > [`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
-> for the full rule.
+> for the full rule. The generated plan carries a condensed version
+> of this rule in its `## Parallel Execution` section so it travels
+> to repos that lack the shared file — keep that embedded caveat
+> intact.
 
 First decide whether parallelism applies at all. If the work is a single
 coherent stream, or is inherently sequential (each task depends on the
