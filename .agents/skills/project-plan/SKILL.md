@@ -237,6 +237,18 @@ Reference specific task IDs.
 
 ### Parallel execution section
 
+> [!NOTE]
+> Parallel *coding* subagents suit independent, well-specified
+> streams that touch different files with no shared state and a
+> clear contract agreed up front. They do **not** suit work you
+> expect to steer interactively — a subagent editing code can't
+> be redirected mid-flight, so iterative or exploratory work
+> belongs in the main thread or a chat-able teammate, not a
+> sealed parallel stream. When in doubt, prefer fewer streams.
+> See
+> [`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
+> for the full rule.
+
 First decide whether parallelism applies at all. If the work is a single
 coherent stream, or is inherently sequential (each task depends on the
 prior one), say so in one line and omit the Subagent Roles, Work Streams,
@@ -307,5 +319,5 @@ Synchronization Points table to decide where a teammate must wait for
 another's output before proceeding. The team lead coordinates hand-offs
 and shuts the team down when all tasks complete.
 
-See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for
 enablement instructions.

@@ -37,10 +37,27 @@ agent if no specialist is available.
 - Reading files or running commands before delegating
 - "Let me quickly check..." before spawning the subagent
 
+## Steerability for editing tasks
+
+A fire-and-forget subagent is fine for read-only work (find,
+trace, review, research) — you consume the result at the end and
+there's nothing to steer. For **editing or iterative tasks**
+(refactor, multi-step implementation), a subagent the user can't
+interrupt will plough ahead while objections pile up, leaving a
+large diff to unwind.
+
+For those tasks, prefer a delegation primitive the user can talk
+to mid-flight — a named teammate (below) if the harness supports
+it, otherwise keep the work in the main thread rather than
+dispatching it to a sealed subagent. See
+[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
+for the full rule.
+
 ## Agent teams (if your harness supports it)
 
-Prefer spawning the delegate as a named teammate the user can chat
-with directly, rather than a fire-and-forget subagent:
+For editing or iterative tasks especially, prefer spawning the
+delegate as a named teammate the user can chat with directly —
+not a fire-and-forget subagent:
 
 - Create a team named `delegate-{short-slug}` (a 2-3 word
   kebab-case summary of the task, e.g. `delegate-fix-auth`).
@@ -52,5 +69,5 @@ with directly, rather than a fire-and-forget subagent:
 - Have the agent report findings back to the team lead and mark
   the task completed when done.
 
-See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for
 enablement instructions.

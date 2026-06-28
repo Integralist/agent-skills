@@ -1,18 +1,31 @@
 ---
 name: cleanup
 description: >-
-  Review codebase for AI slop and clean it up. Spawns a
-  background subagent that examines files, fixes clear-cut
-  issues, and flags behavior-changing items for discussion.
+  Review codebase for AI slop and clean it up. A read-only
+  subagent audits files and produces a proposed fix list; the
+  main thread then applies fixes interactively so you can steer
+  each one.
 disable-model-invocation: true
 argument-hint: '[path | glob]'
 ---
 
 # Cleanup Skill
 
-Audit a codebase for AI slop using a background subagent. The
-subagent fixes obvious issues directly and flags anything that
-would change behavior. You can continue working while it runs.
+Audit a codebase for AI slop in two phases:
+
+1. **Audit (subagent, read-only)** — a subagent examines the
+   in-scope files and returns a structured list of proposed
+   changes. It edits nothing.
+1. **Apply (main thread, interactive)** — the main thread walks
+   that list with you, applying fixes you approve and skipping
+   the rest.
+
+The split is deliberate: the auditor can range across many files
+in one pass, but every edit lands in the main thread where you
+can veto or adjust it as it happens — no large diff to unwind at
+the end. See
+[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
+for the general rule this follows.
 
 ## Input
 
@@ -64,7 +77,7 @@ Files that appear in **both** the churn hotspots and the bug
 clusters lists are the highest-risk code. Flag these explicitly
 in the metadata passed to the subagent.
 
-## Spawn One Subagent
+## Spawn One Audit Subagent (read-only)
 
 Spawn a single subagent (general-purpose / workhorse role). The
 subagent prompt must include:
@@ -74,39 +87,72 @@ subagent prompt must include:
 - The **project metadata** gathered above (churn hotspots, bug
   clusters, and cross-referenced high-risk files) — instruct
   the subagent to examine high-risk files first
-- Instructions to work file by file, making edits directly
-- Instructions to track every change and every flagged item
+- Instructions to work file by file and to **edit nothing** —
+  every issue becomes a proposed-fix entry, not a change
 
 ### Subagent instructions
 
 Include this in the subagent prompt:
 
 > You are a principal engineer performing a code quality audit.
-> Your job is to find and fix "AI slop" — the telltale signs
-> of AI-generated code that was accepted without proper review.
+> Your job is to find "AI slop" — the telltale signs of
+> AI-generated code that was accepted without proper review —
+> and propose fixes for each. **This is a read-only audit: do
+> not edit any file, run any formatter, or change the workspace
+> in any way.** Read and report only.
 >
 > **Rules:**
 >
-> - Fix issues directly unless the fix would change behavior
-> - For behavior-changing fixes, flag them but do not edit
-> - Do not make changes that violate the language's or
->   codebase's conventions
-> - Be aggressive about removing slop but conservative about
->   changing behavior
+> - Propose a concrete fix for each issue you find. Do not apply
+>   it.
+> - Classify every proposed fix as **safe** (no behavior change)
+>   or **behavior-changing**.
+> - Do not propose changes that violate the language's or
+>   codebase's conventions.
+> - Be aggressive about identifying slop but conservative about
+>   what you label "safe" — when unsure, label it
+>   behavior-changing.
+> - For any fix that would alter behavior, public APIs, or usage
+>   patterns, note which `docs/**/*.md` or `**/README.md` files
+>   the apply step would also need to update.
 >
-> When code changes alter behavior, public APIs, or usage
-> patterns, update the corresponding `docs/**/*.md` or
-> `**/README.md` files. Do not create new documentation
-> files unless the change introduces a wholly new component.
+> Return your findings as a JSON array of proposed fixes, each:
 >
-> When finished, report your findings. Structure your report
-> as:
+> ```json
+> {
+>   "file": "path/to/file",
+>   "line": "approx line or range",
+>   "category": "verbosity | duplication | comments | naming | structure | over-engineering",
+>   "class": "safe | behavior-changing",
+>   "what": "the current problem",
+>   "fix": "the concrete change to make",
+>   "docs": "docs/README files the fix also touches, or null"
+> }
+> ```
 >
-> 1. **Changes made** — list of files edited with a one-line
->    summary of each change
-> 1. **Flagged for discussion** — items that would change
->    behavior, with file, line, description, and rationale
-> 1. **Files reviewed with no issues** — count only
+> Also return a count of files reviewed with no issues. Do not
+> include a "changes made" section — you make no changes.
+
+## Apply fixes interactively (main thread)
+
+Take the subagent's proposed-fix list and apply it yourself, in
+the main thread, so the user can steer each change:
+
+1. **Present the list first**, grouped by `class` (safe vs
+   behavior-changing) and then by category. Give the user a
+   quick read on scope before anything is touched.
+1. **Safe fixes** — apply them, but surface anything you're
+   second-guessing rather than waving it through. The user can
+   tell you mid-stream to skip, change approach, or stop; honor
+   it immediately.
+1. **Behavior-changing fixes** — do not apply unprompted. For
+   each, show the proposed change and ask the user to approve,
+   modify, or skip.
+1. **Docs** — when an applied fix changes behavior, public APIs,
+   or usage patterns, update the `docs`/`README` files the
+   auditor flagged. Do not create new documentation files unless
+   the change introduces a wholly new component.
+1. Track what was applied and what was skipped for the summary.
 
 ### What to look for
 
@@ -166,39 +212,41 @@ Include this checklist verbatim in the subagent prompt:
 
 ## Compile Summary
 
-After the subagent has reported, create the output directory
+After the interactive apply step, create the output directory
 with `mkdir -p docs/plans`, then write the report to
 `docs/plans/<YYYY-MM-DD-HHMM>-cleanup.md`:
 
 ```markdown
 ## Cleanup Report
 
-**Date:** YYYY-MM-DD HH:MM
-**Scope:** entire codebase | specific paths
-**Files reviewed:** <count>
-**Files changed:** <count>
-**Items flagged:** <count>
+- **Date:** YYYY-MM-DD HH:MM
+- **Scope:** entire codebase | specific paths
+- **Files reviewed:** <count>
+- **Files changed:** <count>
+- **Fixes applied:** <count>
+- **Fixes skipped:** <count>
 
-### Changes Made
+### Changes Applied
 
 [Group by category — verbosity, duplication, comments, naming,
 structure, over-engineering. Each item: file, line, what
 changed.]
 
-### Flagged for Discussion
+### Skipped / Deferred
 
-[Items that would change behavior. Each item: file, line,
-description, why it matters, suggested fix.]
+[Proposed fixes the user declined or deferred. Each item: file,
+line, description, why it matters, the proposed fix.]
 ```
 
 Print a short summary and the file path in the conversation.
 
 ## Agent teams (if your harness supports it)
 
-Run the cleanup agent as a background teammate so the main thread
-stays responsive while it works. Spawn the agent with the prompt
-and checklist above, have it report back to the team lead when
-done, and compile the summary from its report.
+Run the **audit** subagent as a background teammate so the main
+thread stays responsive while it scans. It is read-only — it
+returns the proposed-fix list, it never edits. Keep the
+interactive apply step in the main thread regardless, so every
+edit stays steerable.
 
-See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for
 enablement instructions.
