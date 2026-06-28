@@ -48,7 +48,7 @@ make install
 .agents/                            # Canonical skills + conventions
 ├── AGENTS.md                       # Shared conventions
 └── skills/
-    ├── _shared/                    # Cross-skill references (Agent teams, etc.)
+    ├── shared/                     # Cross-skill references (Agent teams, etc.)
     ├── agents-md/
     ├── bcp/
     ├── behaviour-spec/

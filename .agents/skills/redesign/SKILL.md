@@ -61,7 +61,7 @@ Every subagent must report findings only — **none of them edit code**.
 
 Soul of the skill: push hard for restructurings that *delete* whole
 categories of complexity rather than rearranging it. Include the code-judo
-brief from [`../_shared/CODE-JUDO.md`](../_shared/CODE-JUDO.md) verbatim in
+brief from [`../shared/CODE-JUDO.md`](../shared/CODE-JUDO.md) verbatim in
 the subagent prompt, then the concrete triggers and preferred remedies
 below.
 
@@ -253,7 +253,7 @@ reject Phase 0.
 ## Output
 
 Emit the plan using the shared skeleton in
-[`../_shared/REIMPL-PLAN-TEMPLATE.md`](../_shared/REIMPL-PLAN-TEMPLATE.md).
+[`../shared/REIMPL-PLAN-TEMPLATE.md`](../shared/REIMPL-PLAN-TEMPLATE.md).
 Substitute:
 
 - `{Plan Type}` → `Redesign`

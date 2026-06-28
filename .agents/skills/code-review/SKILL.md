@@ -334,7 +334,7 @@ review dimension, have each report findings back to the team lead,
 then synthesize. This is faster than sequential subagent calls when
 the harness can run them concurrently.
 
-See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for
 enablement instructions.
 
 ## References

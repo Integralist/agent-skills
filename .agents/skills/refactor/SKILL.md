@@ -46,7 +46,7 @@ subagent prompt must include:
   empirical data
 - The investigation checklist below (include verbatim)
 - The **code-judo brief** from
-  [`../_shared/CODE-JUDO.md`](../_shared/CODE-JUDO.md) (include
+  [`../shared/CODE-JUDO.md`](../shared/CODE-JUDO.md) (include
   verbatim) — push the subagent toward deletions, not just
   rearrangements, scoped to this single feature
 - Instructions to use file reading, search, and any relevant
@@ -127,7 +127,7 @@ reimplementation strategy. Focus on:
 ## Plan Output
 
 Emit the plan using the shared skeleton in
-[`../_shared/REIMPL-PLAN-TEMPLATE.md`](../_shared/REIMPL-PLAN-TEMPLATE.md).
+[`../shared/REIMPL-PLAN-TEMPLATE.md`](../shared/REIMPL-PLAN-TEMPLATE.md).
 Substitute:
 
 - `{Plan Type}` → `Refactor`
@@ -149,5 +149,5 @@ follow its process.
 Run the investigation agent as a teammate in parallel rather than
 inline, then build the plan from its report.
 
-See [`_shared/AGENT-TEAMS.md`](../_shared/AGENT-TEAMS.md) for
+See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for
 enablement instructions.
