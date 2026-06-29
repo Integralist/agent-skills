@@ -180,7 +180,11 @@ the verify and dedupe steps deterministic.
 
 1. **Consistency Review** (general-purpose role) — naming patterns, code style
    consistency, error handling patterns, metric/label/logging consistency,
-   structural consistency with existing codebase
+   structural consistency with existing codebase. *(When `HAS_GO`)* Before
+   reviewing, this subagent MUST load the `go-conventions` skill
+   (`.agents/skills/go-conventions/SKILL.md`) and judge Go naming, error
+   handling, and structural consistency against its documented rules rather
+   than generic conventions.
 
 1. **Data Correctness Review** (general-purpose role) — correctness of
    computations and state, race conditions in concurrent access, correct
