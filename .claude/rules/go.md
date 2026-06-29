@@ -240,6 +240,25 @@ type Service struct {
 }
 ```
 
+### Default-value constants
+
+Constants that hold a default value start with the `default` prefix, followed
+by the noun they describe. The qualifier `default` leads; it does not sit in
+the middle of the name:
+
+```go
+// Bad — "default" buried in the middle.
+const debugDefaultPort = 8080
+const portDefault = 8080
+
+// Good — "default" leads, noun follows.
+const defaultDebugPort = 8080
+const defaultTimeout = 30 * time.Second
+```
+
+This reads as "the default debug port" and groups all defaults together
+alphabetically and in autocomplete.
+
 ## Imports
 
 Three groups separated by blank lines: stdlib, third-party, internal.
