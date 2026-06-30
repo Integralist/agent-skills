@@ -9,6 +9,7 @@ description: >-
   follow — especially before handing it to an agent to execute.
   Triggers on "clean up / tighten / condense / distill this",
   "make this more concise without losing detail", or /distill.
+disable-model-invocation: true
 argument-hint: "[file path | pasted text]"
 ---
 
