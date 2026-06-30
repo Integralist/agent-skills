@@ -12,132 +12,92 @@ argument-hint: --new <topic> | --improve <file>
 
 # Technical Documentation
 
-Write new or improve existing technical documentation.
-Apply the five documentation pillars below to reduce
-friction for the reader and produce a concrete document.
+Write new or improve existing technical documentation. Apply the five pillars
+below to reduce reader friction and produce a concrete document.
 
-## Mode Selection
+## Mode selection
 
-- `--new <topic>` — write a new document from scratch
-- `--improve <file>` — review and rewrite an existing document
+- `--new <topic>` — write a new document from scratch.
+- `--improve <file>` — review and rewrite an existing document.
 
-If neither flag is provided, infer from context. If still
-ambiguous, ask the user which mode they want.
+If neither flag is given, infer from context. If still ambiguous, ask.
 
 ## Process
 
-### When improving an existing document (`--improve`)
+**Improving (`--improve`):**
 
-1. **Prompt for the file:**
+1. If no file path was given, ask: `Which file do you want me to improve?`
+1. Read the file in full.
+1. Audit against the five pillars, noting every violation (a specific passage
+   that breaks a pillar rule).
+1. Rewrite the document, applying all fixes. Deliver the rewritten document —
+   don't just list problems.
+1. Present a change summary, organized by pillar.
 
-   If the user did not provide a file path, ask:
+**Writing (`--new`):**
 
-   ```txt
-   Which file do you want me to improve?
-   ```
+1. Clarify scope — confirm topic, audience, and purpose with the user.
+1. Draft, applying all five pillars from the start: clear purpose, defined
+   terms, focused sections, diagrams where helpful, source-file references
+   instead of pasted code.
+1. Present the draft for review.
 
-1. **Read the file** in full.
+## The five pillars
 
-1. **Audit against the five pillars.** For each pillar, note
-   every violation found. A violation is a specific passage
-   that breaks a pillar rule.
-
-1. **Rewrite the document.** Apply all fixes and produce the
-   improved version. Do not just list problems — deliver the
-   rewritten document.
-
-1. **Present a change summary.** After the rewrite, list what
-   changed and why, organized by pillar.
-
-### When writing a new document (`--new`)
-
-1. **Clarify scope.** Confirm the topic, audience, and purpose
-   of the document with the user.
-
-1. **Draft the document.** Apply all five pillars from the
-   start. Structure the content with a clear purpose, define
-   terms, keep sections focused, use diagrams where helpful,
-   and reference source files instead of pasting code.
-
-1. **Present the draft** for review.
-
-## The Five Pillars
-
-### 1. Brevity and Professionalism
+### 1. Brevity and professionalism
 
 - Omit needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Write the
-  point, then cut anything that survives removal without loss of
-  meaning.
-- Maintain a neutral-expert voice throughout. Strip out
-  frustration, over-enthusiasm, humor that obscures meaning,
-  and first-person asides that do not serve the reader.
-- Evaluate at the section level, not just sentence level: is
-  this section earning its length? If a diagram or table
-  already communicates the same information, cut the prose
-  that restates it.
-- Kill historical/legacy sections that serve no current
-  reader. That context belongs in git history or a linked
-  ADR, not in an active reference doc.
-- For aggressive condensing of long prose where every
-  load-bearing detail must survive, use the
-  [`distill`](../distill/SKILL.md) skill.
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Write the point,
+  then cut anything that survives removal without loss of meaning.
+- Maintain a neutral-expert voice. Strip frustration, over-enthusiasm, humor
+  that obscures meaning, and first-person asides that don't serve the reader.
+- Evaluate at the section level, not just the sentence: is this section earning
+  its length? If a diagram or table already says it, cut the prose that
+  restates it.
+- Kill historical/legacy sections that serve no current reader — that context
+  belongs in git history or a linked ADR, not an active reference doc.
+- For aggressive condensing of long prose where every load-bearing detail must
+  survive, use [`distill`](../distill/SKILL.md).
 
-### 2. Eliminate Assumptions
+### 2. Eliminate assumptions
 
-- Define every term that a reader outside the team might not
-  know. Never assume a concept is "common knowledge."
-- Add hyperlinks to Wikipedia or official documentation for
-  industry terms, protocols, and third-party tools so readers
-  of all levels can follow along.
+- Define every term a reader outside the team might not know. Never assume
+  "common knowledge."
+- Hyperlink industry terms, protocols, and third-party tools to Wikipedia or
+  official docs so readers of all levels can follow.
 
-### 3. Focus and Modularize
+### 3. Focus and modularize
 
-- If a section is long enough to be its own document, flag it
-  for extraction into a separate file.
-- Add or improve internal cross-references between related
-  documents. Information should be easy to navigate.
-- Avoid the "Mega-Doc" trap: one document, one clear purpose.
+- If a section is long enough to be its own document, flag it for extraction.
+- Add or improve cross-references between related documents.
+- Avoid the mega-doc trap: one document, one clear purpose.
 
-### 4. Visualize Simply
+### 4. Visualize simply
 
-- Where architecture or workflows are described in prose,
-  suggest or add a Mermaid diagram. Diagrams and tables can
-  replace prose, not just supplement it — delete paragraphs
-  that a visual already communicates.
-- Use tables for "multiple dimensions × multiple cases"
-  information (e.g., environment matrices, permission
-  grids). A table that replaces four paragraphs is a net
-  win for the reader.
-- Use indented structured text for linear chains or
-  hierarchies that are too simple for a diagram but too
-  structured for prose.
-- Diagrams must be high-level and clean. Complexity in a
-  diagram defeats its purpose.
+- Where architecture or workflows are described in prose, suggest or add a
+  Mermaid diagram. Diagrams and tables replace prose, not just supplement it —
+  delete paragraphs a visual already communicates.
+- Use tables for "multiple dimensions × multiple cases" information (e.g.
+  environment matrices, permission grids). A table replacing four paragraphs is
+  a net win.
+- Use indented structured text for linear chains or hierarchies too simple for
+  a diagram but too structured for prose.
+- Keep diagrams high-level and clean. Complexity defeats the purpose.
 
-### 5. Minimize Stale Code References
+### 5. Minimize stale code references
 
-- Flag inline code blocks that will become outdated as the
-  codebase evolves.
-- Cut code snippets that restate what a diagram, table, or
-  structured text block already shows. Redundancy is reason
-  enough to remove a snippet — staleness risk is secondary.
-- Prefer describing the logic or pointing to source files
-  over pasting code snippets.
-- If a code example is essential, note the risk of staleness
-  and suggest a strategy to keep it current (e.g., a test
-  that validates the example).
+- Flag inline code blocks that will become outdated as the codebase evolves.
+- Cut snippets that restate what a diagram, table, or structured-text block
+  already shows. Redundancy alone justifies removal — staleness is secondary.
+- Prefer describing the logic or pointing to source files over pasting code.
+- If a code example is essential, note the staleness risk and suggest a way to
+  keep it current (e.g. a test that validates the example).
 
 ## Output
 
-### Rewritten Document
+**Rewritten document** — the full rewritten document, the primary deliverable.
 
-Present the full rewritten document. This is the primary
-deliverable.
-
-### Change Summary
-
-After the rewrite, list changes grouped by pillar:
+**Change summary** — after the rewrite, list changes grouped by pillar:
 
 ```txt
 **{Pillar Name}**
@@ -145,28 +105,24 @@ After the rewrite, list changes grouped by pillar:
 - {What changed and why — one line per change.}
 ```
 
-### Extraction Recommendations
-
-If any sections should be moved to separate files, list them:
+**Extraction recommendations** — if any sections should move to separate
+files, list them; otherwise state explicitly that none are needed:
 
 ```txt
 **{Section title}** → {suggested-filename.md}
 Reason: {Why this section warrants its own document.}
 ```
 
-If no extractions are needed, state that explicitly.
-
 ## Guidelines
 
-- The rewritten document is the deliverable, not just a list
-  of suggestions. Produce the improved text.
-- Preserve the author's intent and technical accuracy. Do not
-  invent information.
-- Do not add code blocks unless the original had them and
-  they are essential. Prefer references to source files.
-- When adding Mermaid diagrams, ideally keep them under
-  15 nodes.
-- If the document is already well-written, say so and make
-  only minor improvements. Do not manufacture issues.
-- The golden rule: never force a reader to "read the code"
-  just to understand what a project does.
+- The rewritten document is the deliverable, not a list of suggestions. Produce
+  the improved text.
+- Preserve the author's intent and technical accuracy. Do not invent
+  information.
+- Do not add code blocks unless the original had them and they are essential.
+  Prefer references to source files.
+- When adding Mermaid diagrams, ideally keep them under 15 nodes.
+- If the document is already well-written, say so and make only minor
+  improvements. Do not manufacture issues.
+- Golden rule: never force a reader to "read the code" just to understand what a
+  project does.

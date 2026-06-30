@@ -8,8 +8,7 @@ disable-model-invocation: true
 
 # Next Task
 
-Resume work from a project plan document directly in the main
-thread.
+Resume work from a project plan, in the main thread.
 
 ## Context
 
@@ -17,62 +16,48 @@ thread.
 
 ## Process
 
-1. **Identify the project plan:**
+1. **Identify the project plan.** Use the user's file if specified;
+   otherwise pick from the context above. If multiple non-completed plans
+   exist, present them as a numbered list with filenames and ask which to
+   use. **Always state the plan you'll use and wait for confirmation.**
 
-   - If the user specified a plan file, use that.
+   ```txt
+   I'll work from docs/plans/cross-team-routing-isolation.md.
+   OK, or did you have a different plan in mind?
+   ```
 
-   - Otherwise, look at the context above for non-completed
-     plans.
+1. **Read the plan** and find the first unchecked task (`- [ ]`).
 
-   - If multiple plans exist, present the options and ask the
-     user which one to use. Format as a numbered list with the
-     filename.
-
-   - **Always tell the user which plan you're going to use and
-     wait for confirmation before proceeding.** Example:
-
-     ```txt
-     I'll work from docs/plans/cross-team-routing-isolation.md.
-     OK, or did you have a different plan in mind?
-     ```
-
-1. **Read the plan** and find the first unchecked task
-   (`- [ ]`).
-
-1. **Announce the task** you're about to work on:
+1. **Announce the task:**
 
    ```txt
    Next up: Task 2.3 — Add cache invalidation for config
    updates
    ```
 
-1. **Execute the task** directly in the main thread:
+1. **Execute it directly in the main thread:**
 
-   - Write tests first (no code without a failing test)
-   - Run `make test` when done
-   - Update `docs/**/*.md` or `**/README.md` if the change
-     alters behavior, public APIs, or usage patterns
-   - Do NOT mark the checkbox as complete in the plan
-   - Respect the project's layer separation: handlers -> service
-     -> repository
+   - Write tests first (no code without a failing test).
+   - Run `make test` when done.
+   - Update `docs/**/*.md` or `**/README.md` if the change alters
+     behavior, public APIs, or usage patterns.
+   - Do NOT mark the checkbox complete yet.
+   - Respect layer separation: handlers -> service -> repository.
 
 ## Completion
 
-Once the task is verified complete (tests pass, work done), you MUST mark
-it complete in the project plan before finishing:
+Once verified (tests pass, work done), mark it complete before finishing:
 
-1. Edit the plan file and change the task's checkbox from `- [ ]` to
-   `- [x]`.
-1. If the plan groups subtasks under a parent task, only check the parent
-   once all of its subtasks are checked.
-1. Report to the user that the task is done and the plan has been updated.
-1. Ask the user if they want to commit. If yes, invoke `/commit`.
+1. Change the task's checkbox from `- [ ]` to `- [x]` in the plan file.
+1. If subtasks group under a parent, check the parent only once all its
+   subtasks are checked.
+1. Report that the task is done and the plan updated.
+1. Ask whether to commit. If yes, invoke `/commit`.
 
 ## REQUIRED
 
-- You MUST confirm the plan choice before proceeding.
-- You MUST do the implementation work directly in the main thread.
-  Do NOT spawn subagents.
-- When the task is complete and verified, you MUST mark its checkbox as
-  complete (`- [x]`) in the project plan.
+- Confirm the plan choice before proceeding.
+- Do the implementation work directly in the main thread — do NOT spawn
+  subagents.
+- When the task is complete and verified, mark its checkbox `- [x]`.
 - One task per invocation. Don't chain multiple tasks.

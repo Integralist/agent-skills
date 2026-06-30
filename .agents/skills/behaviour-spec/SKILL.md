@@ -12,48 +12,40 @@ description: >-
 
 # Behaviour Spec
 
-Turn a feature description into **behavioural specifications** written
-in Gherkin (Given/When/Then). The point is a machine-checkable
-definition of done: the behaviour an implementer must satisfy, in
+Turn a feature description into behavioural specifications in Gherkin
+(Given/When/Then): a machine-checkable definition of done expressed in
 ubiquitous language shared by humans and AI.
 
-This skill is normally invoked by [`project-plan`](../project-plan/SKILL.md),
-which folds the output into a plan document. It can also run
-standalone.
+Normally invoked by [`project-plan`](../project-plan/SKILL.md), which folds the
+output into a plan document. Can also run standalone.
 
-## Altitude: where Gherkin earns its keep
+## Two altitudes
 
-Apply Gherkin at two levels, but realise them differently.
+**Feature / boundary → executable `.feature` files.** Behaviour observable at
+an API, CLI, HTTP handler, or other system boundary. Here Gherkin pays off: the
+scenarios are living documentation *and* run as acceptance tests (godog for Go).
+This is the real payoff — generate runnable specs.
 
-**Feature / boundary level → executable `.feature` files.** Behaviour
-observable at an API, CLI, HTTP handler, or other system boundary. Here
-Gherkin pays for itself: the scenarios are living documentation in
-ubiquitous language *and* run as acceptance tests (godog for Go). This
-is the real payoff — generate runnable specs.
-
-**Unit / functional level → Given/When/Then prose only.** Behaviour of
-an individual function or type. Capture it as Given/When/Then prose in
-the plan's task description, then implement it as an ordinary
-table-driven Go test. Do **not** generate `.feature` files for units.
+**Unit / functional → Given/When/Then prose only.** Behaviour of an individual
+function or type. Capture it as G/W/T prose in the plan's task description, then
+implement it as an ordinary table-driven Go test. Do **not** generate
+`.feature` files for units.
 
 > [!IMPORTANT]
-> A Go table-driven test already *is* Given/When/Then — the `fields`
-> are the Given, the call under test is the When, and `want` is the
-> Then. Wrapping a unit in a `.feature` file plus regex step
-> definitions creates a second artifact that duplicates the test and
-> drifts from it. Keep one source of truth per level.
+> A Go table-driven test already *is* Given/When/Then — `fields` are the
+> Given, the call under test is the When, `want` is the Then. Wrapping a unit
+> in a `.feature` file plus regex step definitions creates a second artifact
+> that duplicates the test and drifts from it. Keep one source of truth per
+> level.
 
 ## Input
 
-Determine what to specify:
+1. Invoked from another skill with a feature description and confirmed language:
+   use those.
 
-1. If invoked from another skill that passes a feature description and
-   the confirmed language, use those.
+1. A plan path given: read it; derive behaviours from its summary and tasks.
 
-1. If a plan path is given, read it and derive the behaviours from its
-   summary and tasks.
-
-1. Otherwise prompt the user:
+1. Otherwise prompt:
 
    ```txt
    What feature or behaviour should I write scenarios for, and what
@@ -61,8 +53,6 @@ Determine what to specify:
    ```
 
 ## Writing feature-level scenarios
-
-Use standard Gherkin structure:
 
 ```gherkin
 Feature: Short capability name
@@ -90,26 +80,19 @@ Feature: Short capability name
       |    50 |     50 |   0 |
 ```
 
-Guidance:
-
-- **Declarative, not imperative.** Describe *what* behaviour is
-  expected, not the UI clicks or function calls used to get there.
-- **One behaviour per scenario.** If a scenario needs "and then also",
-  split it.
-- **Ubiquitous language.** Use the domain's vocabulary, the same terms
-  the plan and code use.
-- **`Background`** for preconditions shared by every scenario in a
-  feature; **`Scenario Outline` + `Examples`** for the same behaviour
-  across a table of inputs.
+- **Declarative, not imperative.** Describe *what* behaviour is expected, not
+  the UI clicks or function calls used to get there.
+- **One behaviour per scenario.** If it needs "and then also", split it.
+- **Ubiquitous language** — the same domain terms the plan and code use.
+- `Background` for preconditions shared by every scenario; `Scenario Outline` +
+  `Examples` for the same behaviour across a table of inputs.
 
 ## Go / godog wiring
 
-When the language is Go, the feature-level scenarios run under
-[godog](https://github.com/cucumber/godog) via `go test`, so they
-execute as part of `make test` — no separate test runner.
-
-Layout: `.feature` files live in a `features/` directory next to the
-package test that wires them.
+When the language is Go, feature-level scenarios run under
+[godog](https://github.com/cucumber/godog) via `go test`, so they execute as
+part of `make test` — no separate runner. Layout: `.feature` files live in a
+`features/` directory next to the package test that wires them.
 
 ```go
 package myapp_test
@@ -167,11 +150,11 @@ func TestFeatures(t *testing.T) {
 }
 ```
 
-Unimplemented steps return `godog.ErrPending` so the suite reports them
-as pending rather than passing silently. Follow
+Unimplemented steps return `godog.ErrPending` so the suite reports them as
+pending rather than passing silently. Follow
 [`go-conventions`](../go-conventions/SKILL.md) and
-[`go-testing`](../go-testing/SKILL.md) for surrounding Go style (these
-are not restated here).
+[`go-testing`](../go-testing/SKILL.md) for surrounding Go style (not restated
+here).
 
 ## Other languages
 
@@ -186,17 +169,16 @@ Same Gherkin, different runner:
 | Python     | behave / pytest-bdd    |
 | .NET       | Reqnroll (ex-SpecFlow) |
 
-For a non-Go language, write the scenarios and describe the runner
-wiring at the same altitude; the executable-vs-prose split is
-unchanged.
+For a non-Go language, write the scenarios and describe the runner wiring at the
+same altitude; the executable-vs-prose split is unchanged.
 
 ## Output
 
 Return two things to the caller:
 
-1. **Acceptance criteria block** — the feature-level `Feature`/
-   `Scenario` Gherkin, ready to drop into the plan's
-   `## Acceptance Criteria (BDD)` section.
+1. **Acceptance criteria block** — the feature-level `Feature`/`Scenario`
+   Gherkin, ready to drop into the plan's `## Acceptance Criteria (BDD)`
+   section.
 
 1. **Scaffold tasks** — plan tasks a later implementer (e.g.
    [`next-task`](../next-task/SKILL.md)) can execute mechanically:
@@ -207,19 +189,18 @@ Return two things to the caller:
    - Add `TestFeatures` + `InitializeScenario` wiring.
    - Stub each step definition returning `godog.ErrPending`.
 
-   Definition of done for these tasks: **all scenarios pass via
-   `make test`**.
+   Definition of done: **all scenarios pass via `make test`**.
 
-Do not write `.feature` files into the repo yourself — emit them as
-scaffold tasks so file creation stays with implementation.
+Do not write `.feature` files into the repo yourself — emit them as scaffold
+tasks so file creation stays with implementation.
 
 ## Guidelines
 
-- Only feature/boundary behaviour becomes `.feature` files; units stay
-  as Given/When/Then prose in task descriptions.
+- Only feature/boundary behaviour becomes `.feature` files; units stay as
+  Given/When/Then prose in task descriptions.
 - Scenarios must be concrete and observable — no "works correctly".
 - Omit needless words in step phrasing — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 - Wrap all Markdown output at 80 columns; follow the project's Markdown
-  conventions (bullet lists for metadata label lines, language
-  identifiers on code blocks).
+  conventions (bullet lists for metadata label lines, language identifiers on
+  code blocks).

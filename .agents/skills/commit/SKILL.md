@@ -10,8 +10,7 @@ allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 
 ## Context
 
-If the fields below show commands rather than output, run each
-one first.
+If the fields below show commands rather than output, run each one first.
 
 - Status: !`git status 2>/dev/null || echo "(not a git repo)"`
 - Staged: !`git diff --cached 2>/dev/null || echo "(not a git repo)"`
@@ -23,32 +22,31 @@ one first.
 ## Process
 
 1. **Review context above:**
-   - Check for: merge conflicts, large files,
-     sensitive file names (`.env`, `.env.*`, `*.env`, `*secret*`,
-     `*credential*`, `*.key`)
+
+   - Check for merge conflicts, large files, sensitive file names
+     (`.env`, `.env.*`, `*.env`, `*secret*`, `*credential*`, `*.key`).
    - Scan diff content for hardcoded secrets: API keys, tokens,
-     passwords, connection strings
+     passwords, connection strings.
    - For untracked files (from `git status --porcelain`), use
-     `git add -N <file>` then `git diff` to scan their contents
-     for the same secrets
-   - **If on main or master branch: STOP. Warn the user and wait
-     for explicit confirmation before committing. No exceptions.**
+     `git add -N <file>` then `git diff` to scan their contents for the
+     same secrets.
+   - **If on main or master branch: STOP. Warn the user and wait for
+     explicit confirmation before committing. No exceptions.**
 
-2. **Assess staging state:**
-   - If files are already staged, list them and ask whether to
-     commit only those or include unstaged changes
-   - If nothing is staged, proceed to analysis of all unstaged
-     changes
-   - Never silently add files on top of an existing partial stage
+1. **Assess staging state:**
 
-3. **Analyze files for grouping:**
-   - Identify file purposes: config, docs, source, tests,
-     scripts, assets
-   - Identify relationships: files that reference each other,
-     same module/feature
-   - Identify change types: new files, modifications, renames
+   - If files are already staged, list them and ask whether to commit
+     only those or include unstaged changes.
+   - If nothing is staged, analyze all unstaged changes.
+   - Never silently add files on top of an existing partial stage.
 
-4. **Decide on commits:**
+1. **Analyze files for grouping:**
+
+   - Purpose: config, docs, source, tests, scripts, assets.
+   - Relationships: files that reference each other; same module/feature.
+   - Change types: new files, modifications, renames.
+
+1. **Decide on commits:**
 
    ```txt
    All files single purpose → one commit, no prompt
@@ -56,24 +54,27 @@ one first.
    Grouping ambiguous → prompt with 2-3 options
    ```
 
-5. **If grouping is ambiguous, present numbered options and wait
-   for the user's response:**
-   - Option 1: All in one commit (describe contents)
-   - Option 2: Suggested split (describe each group)
-   - Option 3: One per file (only if ≤5 files)
+1. **If grouping is ambiguous, present numbered options and wait for the
+   user's response:**
 
-6. **If splitting into multiple commits, order them so
-   dependencies come first.** Type definitions before consumers.
-   Shared utilities before features that import them. If ordering
-   is unclear, ask.
+   - Option 1: All in one commit (describe contents).
+   - Option 2: Suggested split (describe each group).
+   - Option 3: One per file (only if ≤5 files).
 
-7. **For each commit group:**
-   - If splitting into multiple commits, unstage everything
-     first: `git reset --quiet` (skip this if committing only
-     what the user already staged)
-   - Stage specific files: `git add <file1> <file2>` (never
-     `-A` or `.`)
-   - Verify staged: `git diff --cached --name-only`
+1. **If splitting into multiple commits, order them so dependencies come
+   first.** Type definitions before consumers. Shared utilities before
+   features that import them. If ordering is unclear, ask.
+
+1. **For each commit group:**
+
+   - If splitting into multiple commits, unstage everything first:
+     `git reset --quiet` (skip this if committing only what the user
+     already staged).
+
+   - Stage specific files: `git add <file1> <file2>` (never `-A` or `.`).
+
+   - Verify staged: `git diff --cached --name-only`.
+
    - Commit via stdin to avoid shell escaping issues:
 
      ```bash
@@ -84,39 +85,37 @@ one first.
      COMMIT_MSG
      ```
 
-8. **If pre-commit hook modifies files:** review the changes.
-   Only amend if they're mechanical (formatting, linting). If
-   substantive or unclear, ask before amending.
+1. **If pre-commit hook modifies files:** review the changes. Only amend
+   if they're mechanical (formatting, linting). If substantive or unclear,
+   ask before amending.
 
-9. **Update project plan:** If you have been working against a
-   project plan (e.g. a plan file, task list, or checklist in the
-   conversation or filesystem), mark the task or item that
-   corresponds to the committed change as done. Match the plan's
-   existing format: `[x]` for Markdown checklists, ✅ for emoji
-   markers, or whatever convention the document uses.
+1. **Update project plan:** If you have been working against a project
+   plan (a plan file, task list, or checklist in the conversation or
+   filesystem), mark the corresponding task done. Match the plan's
+   existing format: `[x]` for Markdown checklists, ✅ for emoji markers, or
+   whatever convention the document uses.
 
 ## Agent Context Files
 
-Skip these from commits unless the user explicitly asks to
-include them: `.claude/`, `.cursorrules`, `.cursorignore`,
-`.github/copilot-instructions.md`, `.windsurfrules`,
-`.clinerules`, `.gemini/`, `.codex/`, `.omp/`, `.pi/`
+Skip these from commits unless the user explicitly asks to include them:
+`.claude/`, `.cursorrules`, `.cursorignore`,
+`.github/copilot-instructions.md`, `.windsurfrules`, `.clinerules`,
+`.gemini/`, `.codex/`, `.omp/`, `.pi/`
 
 ## Project Plan Documents
 
 Plan documents (`docs/plans/*.md`) need special handling:
 
-- **Not started** (no `[x]` checkboxes): commit freely — it's a
-  new plan being checked in.
-- **In progress** (some tasks done, implementation incomplete):
-  do NOT commit. Half-finished plans are working state, not a
-  checkpoint. Skip the file and note it was excluded.
-- **Completed** (implementation tasks done — remaining unchecked
-  items are post-deploy/operational only): update the plan's
-  `Status` field (e.g. `Planning` → `Complete`), then move it to
-  `docs/plans/completed/` and commit. Create the directory if it
-  doesn't exist. If unsure whether the plan qualifies as
-  complete, ask.
+- **Not started** (no `[x]` checkboxes): commit freely — it's a new plan
+  being checked in.
+- **In progress** (some tasks done, implementation incomplete): do NOT
+  commit. Half-finished plans are working state, not a checkpoint. Skip
+  the file and note it was excluded.
+- **Completed** (implementation tasks done — remaining unchecked items are
+  post-deploy/operational only): update the plan's `Status` field (e.g.
+  `Planning` → `Complete`), then move it to `docs/plans/completed/` and
+  commit. Create the directory if it doesn't exist. If unsure whether the
+  plan qualifies as complete, ask.
 
 ## Grouping Examples
 
@@ -140,18 +139,18 @@ Plan documents (`docs/plans/*.md`) need special handling:
 
 ## Commit Message Style
 
-- State what changed and why
-- Use counts: "3 files" not "several files"
-- Active voice, specific language
+- State what changed and why.
+- Use counts: "3 files" not "several files".
+- Active voice, specific language.
 - Omit needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md)
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 - If `~/.gitcommit` exists, read it for the user's preferred
-  commit-message conventions (type prefixes, scopes, subject
-  style, examples) and follow them
+  commit-message conventions (type prefixes, scopes, subject style,
+  examples) and follow them.
 
 ## Safety
 
-- NEVER commit secrets (.env, credentials, keys, tokens,
-  passwords, connection strings)
-- NEVER skip hooks without user request
-- NEVER force operations without user consent
+- NEVER commit secrets (.env, credentials, keys, tokens, passwords,
+  connection strings).
+- NEVER skip hooks without user request.
+- NEVER force operations without user consent.

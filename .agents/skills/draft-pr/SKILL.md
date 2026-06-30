@@ -6,8 +6,8 @@ allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git b
 
 # Draft PR
 
-Open a pull request whose description is direct and concise, structured
-around a clear **Problem** and **Solution**.
+Open a pull request whose description is direct and concise, structured around a
+clear **Problem** and **Solution**.
 
 ## Context
 
@@ -23,15 +23,15 @@ If the fields below show commands rather than output, run each one first.
 
 1. **Check preconditions.**
 
-   - Not a git repo, or branch is the base branch itself → stop and say
-     so. A PR needs a feature branch distinct from base.
+   - Not a git repo, or branch is the base branch itself → stop and say so. A PR
+     needs a feature branch distinct from base.
    - If an open PR already exists for this branch, stop and ask whether to
      update its description instead of opening a new one.
 
 1. **Determine the base branch.** Use the default branch from Context. If
-   it's unknown, run `git symbolic-ref --short refs/remotes/origin/HEAD`,
-   falling back to `main`, then `master`. Confirm with the user if still
-   ambiguous (e.g. the branch was cut from something else).
+   unknown, run `git symbolic-ref --short refs/remotes/origin/HEAD`, falling
+   back to `main`, then `master`. Confirm with the user if still ambiguous (e.g.
+   the branch was cut from something else).
 
 1. **Read the full branch diff** against the base:
 
@@ -41,37 +41,36 @@ If the fields below show commands rather than output, run each one first.
    git diff "$base"...HEAD           # actual hunks
    ```
 
-   Don't rely on diffstat alone; the Problem/Solution must reflect the
-   actual hunks. Read commit messages for intent the diff doesn't reveal.
+   Don't rely on diffstat alone; Problem/Solution must reflect the actual hunks.
+   Read commit messages for intent the diff doesn't reveal.
 
-1. **Write the description** using the Template below.
+1. **Write the description** using the Template.
 
-   - **Problem:** what was wrong or missing, and why it matters. State the
-     observable symptom or gap, not the implementation. If the branch
-     links to an issue/ticket, reference it here.
-   - **Solution:** what the change does to fix the Problem, at a level a
-     reviewer can verify against the diff. Lead with the key change;
-     mention notable trade-offs or alternatives rejected.
-   - Keep both tight. One short paragraph or a few bullets each. Cut
-     filler ("this PR", "simply", "just"). Active voice.
-   - Add `## Notes` only if there's testing done, a migration step, a
-     risk, or a follow-up worth flagging. Omit it otherwise.
+   - **Problem:** what was wrong or missing and why it matters — the observable
+     symptom or gap, not the implementation. Reference the linked issue/ticket
+     if any.
+   - **Solution:** what the change does to fix the Problem, verifiable against
+     the diff. Lead with the key change; note notable trade-offs or rejected
+     alternatives.
+   - Keep both tight — one short paragraph or a few bullets each. Cut filler
+     ("this PR", "simply", "just"). Active voice.
+   - Add `## Notes` only for testing done, a migration step, a risk, or a
+     follow-up worth flagging. Omit otherwise.
 
-1. **Derive the title** from the change: imperative mood, concise, no
-   trailing period. Follow `~/.gitcommit` conventions (type prefix/scope)
-   if that file exists.
+1. **Derive the title** from the change: imperative mood, concise, no trailing
+   period. Follow `~/.gitcommit` conventions (type prefix/scope) if that file
+   exists.
 
-1. **Show the title and description to the user and wait for approval.**
-   Do not open the PR before then.
+1. **Show the title and description to the user and wait for approval.** Do not
+   open the PR before then.
 
 1. **Push if needed,** then open the PR:
 
    - `git push -u origin <branch>` if the branch has no upstream.
    - `gh pr create --base <base> --title <title> --body-file -` piping the
-     approved body via heredoc. Write paragraphs as single unwrapped
-     lines — do not hard-wrap at 80 columns (see Style).
-   - Open ready-for-review by default. Add `--draft` only if the user
-     asked for a draft.
+     approved body via heredoc. Write paragraphs as single unwrapped lines — do
+     not hard-wrap at 80 columns (see Style).
+   - Open ready-for-review by default. Add `--draft` only if the user asked.
 
 1. **Report the PR URL** from `gh`'s output.
 
@@ -96,16 +95,16 @@ the key change; note trade-offs.>
 ## Style
 
 - Omit needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). No marketing
-  tone, no restating the diff line by line, no boilerplate checklists.
-- **Don't hard-wrap the PR body.** GitHub soft-wraps prose, so manual
-  line breaks at 80 columns render as ragged text. Write each paragraph
-  as one continuous line; use real blank lines between paragraphs and
-  list items for structure. (The 80-column markdown convention applies
-  to source files, not to text submitted to GitHub.)
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). No marketing tone,
+  no restating the diff line by line, no boilerplate checklists.
+- **Don't hard-wrap the PR body.** GitHub soft-wraps prose, so manual breaks at
+  80 columns render as ragged text. Write each paragraph as one continuous line;
+  use real blank lines between paragraphs and list items for structure. (The
+  80-column markdown convention applies to source files, not text submitted to
+  GitHub.)
 - Use backticks for identifiers, paths, flags, env vars.
 - Describe behaviour and intent, not a file-by-file walkthrough.
-- Don't invent testing or context that isn't in the diff or supplied by
-  the user — ask instead.
-- Match any PR template the repo ships (`.github/PULL_REQUEST_TEMPLATE*`)
-  if present, mapping Problem/Solution onto its sections.
+- Don't invent testing or context absent from the diff or supplied by the user —
+  ask instead.
+- Match any PR template the repo ships (`.github/PULL_REQUEST_TEMPLATE*`),
+  mapping Problem/Solution onto its sections.

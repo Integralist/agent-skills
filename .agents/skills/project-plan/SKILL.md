@@ -14,46 +14,44 @@ description: >-
 
 # Project Plan
 
-Produce a precise, actionable implementation guide from research
-documents and a description of what to build. The plan carries
-**executable acceptance criteria** (Gherkin) so an implementer — human
-or AI — has a machine-checkable definition of done.
+Produce a precise, actionable implementation guide from research documents and a
+description of what to build. The plan carries **executable acceptance criteria**
+(Gherkin) so an implementer — human or AI — has a machine-checkable definition of
+done.
 
-This skill is normally invoked by [`research-plan`](../research-plan/SKILL.md)
-after research completes, but it is the single way to produce a plan
-document and is most often run standalone.
+Normally invoked by [`research-plan`](../research-plan/SKILL.md) after research
+completes, but it is the single way to produce a plan document and is most often
+run standalone.
 
 ## When to use this skill
 
-The frontmatter `description` carries the trigger phrases. Beyond those,
-two points are easy to get wrong:
+The frontmatter `description` carries the trigger phrases. Two points are easy
+to get wrong:
 
-- **A plan just discussed in chat is the source, not a prompt to start
-  over.** When the user says "save this", "turn this into a plan doc",
-  capture *that* plan — do not invent a new one or skip the skill.
-- Research is optional input, not a precondition — proceed with or
-  without `docs/research/`.
+- **A plan just discussed in chat is the source, not a prompt to start over.**
+  When the user says "save this" or "turn this into a plan doc", capture *that*
+  plan — do not invent a new one or skip the skill.
+- Research is optional input, not a precondition — proceed with or without
+  `docs/research/`.
 
-Never hand-roll a plan by copying the shape of files already in
-`docs/plans/`.
+Never hand-roll a plan by copying the shape of files already in `docs/plans/`.
 
 ## Input
 
 Determine what to plan, in priority order:
 
-1. If invoked from another skill that passes the build goal and
-   research context, use those.
-1. **If a plan was already worked out in the current conversation, use
-   that** as the source — this skill structures and persists it; it does
-   not start over.
+1. If invoked from another skill that passes the build goal and research
+   context, use those.
+1. **If a plan was already worked out in the current conversation, use that** as
+   the source — this skill structures and persists it; it does not start over.
 1. Otherwise ask the user what they want to build.
 
 ### Detect programming language
 
-Auto-detect the project's primary language(s) by examining file
-extensions and build files, then proceed with the detected language
-unless the user corrects you — fold the detection into whatever you ask
-the user next rather than blocking on a standalone confirmation:
+Auto-detect the primary language(s) from file extensions and build files, then
+proceed with the detected language unless the user corrects you — fold the
+detection into whatever you ask next rather than blocking on a standalone
+confirmation:
 
 ```txt
 Planning in Go (detected). Tell me if the snippets should use a
@@ -61,48 +59,42 @@ different language.
 ```
 
 If the language is Go, load the
-[`go-conventions`](../go-conventions/SKILL.md) skill before producing any
-Go code snippets in the plan, so all embedded code follows the project's
-Go style guide.
+[`go-conventions`](../go-conventions/SKILL.md) skill before producing any Go
+snippets, so all embedded code follows the project's Go style guide.
 
 ### Gather context
 
-Read all `docs/research/*.md` files for context. These are the
-foundation for the plan.
+Read all `docs/research/*.md` files. These are the foundation for the plan.
 
 ## Behavioural specs
 
-Always include Given/When/Then acceptance criteria in the plan — they
-clarify intent regardless of whether the plan is code, documentation, or
-maintenance.
+Always include Given/When/Then acceptance criteria — they clarify intent whether
+the plan is code, documentation, or maintenance.
 
-**When the plan describes runnable code** whose behaviour can be executed
-as tests: delegate to the [`behaviour-spec`](../behaviour-spec/SKILL.md)
-skill, passing the feature description and the confirmed language. It
-returns:
+**When the plan describes runnable code** whose behaviour can run as tests:
+delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md), passing the feature
+description and confirmed language. It returns:
 
-- An **acceptance criteria block** of feature-level Gherkin → goes in
-  the `## Acceptance Criteria (BDD)` section.
+- An **acceptance criteria block** of feature-level Gherkin → goes in the
+  `## Acceptance Criteria (BDD)` section.
 - A list of **scaffold tasks** (create `.feature` files, add the runner
   dependency, wire the test suite, stub step definitions) → merged into
-  the `## Implementation Tasks`.
+  `## Implementation Tasks`.
 
 **When the plan is non-code** (documentation, config, skill maintenance,
 operational work): author Given/When/Then scenarios as prose acceptance
-criteria directly in the plan — verified by checkable assertions (grep,
-command output, file state) rather than a test runner. Skip the
-`behaviour-spec` delegation and note that executable scaffolding was
-omitted.
+criteria directly — verified by checkable assertions (grep, command output, file
+state) rather than a test runner. Skip the `behaviour-spec` delegation and note
+that executable scaffolding was omitted.
 
 ## Plan document
 
-Write a detailed implementation guide to
-`docs/plans/<yyyy-mm-dd>-<plan-slug>.md`. Get the date prefix from the
-shell (`date +%F`) — do not guess it. Get the author from
+Write the guide to `docs/plans/<yyyy-mm-dd>-<plan-slug>.md`. Get the date prefix
+from the shell (`date +%F`) — do not guess. Get the author from
 `git config user.name`.
 
-A new plan's `Status` is always `Planning`. The transition to `Complete`
-and the move to `docs/plans/completed/` are handled at commit time — see
+A new plan's `Status` is always `Planning`. The transition to `Complete` and the
+move to `docs/plans/completed/` happen at commit time — see
 [`commit`](../commit/SKILL.md).
 
 Use this template:
@@ -264,77 +256,71 @@ Reference specific task IDs.
 > intact.
 
 First decide whether parallelism applies at all. If the work is a single
-coherent stream, or is inherently sequential (each task depends on the
-prior one), say so in one line and omit the Subagent Roles, Work Streams,
-and Synchronization Points tables — do not fabricate streams to fill the
-template. Only fill in the section below when there are genuinely
-independent streams.
+coherent stream, or is inherently sequential (each task depends on the prior
+one), say so in one line and omit the Subagent Roles, Work Streams, and
+Synchronization Points tables — do not fabricate streams to fill the template.
+Only fill in the section when there are genuinely independent streams.
 
-When filling in the Parallel Execution section:
+When filling it in:
 
-1. **Identify independent work streams.** Look for tasks that touch
-   different files, packages, or layers with no shared state. These can
-   run in parallel.
-1. **Define subagent roles by stream, not by task.** Each subagent
-   should own a coherent slice of the system, not a grab-bag of
-   unrelated tasks.
-1. **Minimize synchronization points.** Prefer designs where streams
-   share a contract (interface, schema, API spec) agreed up front so
-   they can work independently.
-1. **Keep the team small.** Two to four subagents is typical. More
-   subagents means more coordination overhead.
-1. **Make execution instructions concrete.** The plan will be handed to
-   an AI agent later. The instructions must be specific enough to follow
-   mechanically.
+1. **Identify independent work streams.** Tasks that touch different files,
+   packages, or layers with no shared state can run in parallel.
+1. **Define subagent roles by stream, not by task.** Each subagent owns a
+   coherent slice of the system, not a grab-bag of unrelated tasks.
+1. **Minimize synchronization points.** Prefer designs where streams share a
+   contract (interface, schema, API spec) agreed up front so they work
+   independently.
+1. **Keep the team small.** Two to four subagents is typical; more means more
+   coordination overhead.
+1. **Make execution instructions concrete.** The plan goes to an AI agent later;
+   instructions must be specific enough to follow mechanically.
 
 ## Extract formal documents
 
 After the plan is written, decide whether formal documents are warranted:
 
-- **ADR** — invoke when the plan records a genuine architecture decision
-  with a real alternative that was rejected for a stated reason. Skip for
-  mechanical changes, single-obvious-way tasks, and maintenance work.
-- **PRD** — invoke when the plan has a product/user surface with goals or
-  success criteria worth framing independently. Skip for internal
-  refactors, tooling, and documentation work.
+- **ADR** — invoke when the plan records a genuine architecture decision with a
+  real alternative rejected for a stated reason. Skip for mechanical changes,
+  single-obvious-way tasks, and maintenance work.
+- **PRD** — invoke when the plan has a product/user surface with goals or success
+  criteria worth framing independently. Skip for internal refactors, tooling,
+  and documentation work.
 
-If either bar is met, delegate to the
-[`extract-doc`](../extract-doc/SKILL.md) skill, passing the path to the
-plan. It writes documents to `docs/adr/` and `docs/prd/` using the same
+If either bar is met, delegate to [`extract-doc`](../extract-doc/SKILL.md),
+passing the plan path. It writes to `docs/adr/` and `docs/prd/` using the same
 `<yyyy-mm-dd>-<slug>` filename convention.
 
-If neither bar is met, note in the plan's `## Notes & Caveats` why
-formal documents were skipped, and move on.
+If neither bar is met, note in the plan's `## Notes & Caveats` why formal
+documents were skipped, and move on.
 
 ## Guidelines
 
 - Use specific file paths and line numbers when referencing code.
-- Every factual claim in the plan must be cited inline —
-  `path/to/file.go:42` for code, URL for external docs. Claims you
-  cannot cite must be labelled "unverified assumption" and include how
-  to verify them.
-- Before finalizing, verify every cited reference resolves: grep/read
-  each `path:line` and confirm the symbol still exists. Line numbers go
-  stale — a citation that points at the wrong line is worse than none.
+- Cite every factual claim inline — `path/to/file.go:42` for code, URL for
+  external docs. Claims you cannot cite must be labelled "unverified assumption"
+  and include how to verify them.
+- Before finalizing, verify every cited reference resolves: grep/read each
+  `path:line` and confirm the symbol still exists. Line numbers go stale — a
+  citation pointing at the wrong line is worse than none.
 - Break work into logical phases (usually by component or layer).
 - Each task should be small enough to complete in one session.
 - Include a verification phase with concrete test commands.
-- Code snippets should be precise — real function signatures, real
-  types, real import paths. Not pseudocode.
-- Plans should be actionable.
+- Code snippets must be precise — real function signatures, types, and import
+  paths. Not pseudocode.
+- Keep plans actionable.
 - Omit needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose,
-  not load-bearing detail (paths, constraints, acceptance criteria).
-- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) for
-  all Markdown output.
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
+  load-bearing detail (paths, constraints, acceptance criteria).
+- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) for all
+  Markdown output.
 
 ## Agent teams (if your harness supports it)
 
-Execute the Parallel Execution section as a real team: create one
-teammate per work stream, give each its stream's tasks, and use the
-Synchronization Points table to decide where a teammate must wait for
-another's output before proceeding. The team lead coordinates hand-offs
-and shuts the team down when all tasks complete.
+Execute the Parallel Execution section as a real team: create one teammate per
+work stream, give each its stream's tasks, and use the Synchronization Points
+table to decide where a teammate must wait for another's output before
+proceeding. The team lead coordinates hand-offs and shuts the team down when all
+tasks complete.
 
-See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for
-enablement instructions.
+See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for enablement
+instructions.

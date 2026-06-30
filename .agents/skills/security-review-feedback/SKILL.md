@@ -5,30 +5,27 @@ description: Use when receiving a security review or vulnerability report — fr
 
 # Security Review Reception
 
-## Overview
-
 A security finding is a **claim to verify**, not an order to implement.
 
-**Core principle:** Every finding earns a **verdict** before any fix is
-written — `TRUE POSITIVE`, `FALSE POSITIVE`, or `NEEDS-INFO`. Reachability and
-impact are proven with evidence, not assumed from how the code looks.
+**Core principle:** every finding earns a **verdict** before any fix is written
+— `TRUE POSITIVE`, `FALSE POSITIVE`, or `NEEDS-INFO`. Prove reachability and
+impact with evidence; never assume them from how the code looks.
 
-Security reviews — AI-generated, command-driven, or written by a human — fail
-in a specific way: **false positives and severity inflation**. AI reviewers in
-particular over-flag ("this pattern looks dangerous") and overrate severity
-("definitely critical") without tracing whether an attacker can reach or
-control the code. Implementing every flagged item wastes effort and churns code
-for issues that are unreachable or mathematically impossible.
+Security reviews — AI, command-driven, or human — fail the same way: **false
+positives and severity inflation**. AI reviewers especially over-flag ("this
+pattern looks dangerous") and overrate severity ("definitely critical") without
+tracing whether an attacker can reach or control the code. Implementing every
+flagged item churns code for issues that are unreachable or impossible.
 
 ## Relationship to `code-review-feedback`
 
-The reception *posture* is shared, not re-stated here. Load
+The reception *posture* is shared, not restated here. Load
 `code-review-feedback` for it: no performative agreement ("you're absolutely
 right"), no gratitude, push back with technical reasoning, clarify unclear items
 first, implement one at a time and test each.
 
-This skill adds the **security verdict** layer on top of that posture: before
-the "implement" stage, every finding passes through the verdict workflow below.
+This skill adds the **security verdict** layer on top: before the implement
+stage, every finding passes the verdict workflow.
 
 ## The Verdict Workflow
 
@@ -47,9 +44,9 @@ THEN:
 ### 1. Restate the claim
 
 State the vulnerability, alleged root cause, trigger, and claimed impact in your
-own words. Half of false positives collapse here — the claim does not cohere
-when stated precisely. If you cannot restate it coherently, the verdict is
-`NEEDS-INFO`: ask the reviewer rather than guessing.
+own words. Half of false positives collapse here — the claim doesn't cohere when
+stated precisely. If you can't restate it coherently, verdict is `NEEDS-INFO`:
+ask the reviewer rather than guessing.
 
 ### 2. Establish the threat model
 
@@ -64,11 +61,11 @@ trusted internal data, rarely survives this step.
 ### 3. Trace source → sink
 
 Confirm attacker-controlled data actually reaches the dangerous operation. Trace
-the full path step by step — do not assume network/user data arrives
-unmodified. Then trace **backwards**: find every validation, bounds check, and
-assertion that precedes the sink. Vulnerable-looking code is often guarded
-upstream. Verify claimed guards (an auth middleware, a "behind requireAdmin"
-comment) against the actual registration — do not trust the claim.
+the full path step by step — don't assume network/user data arrives unmodified.
+Then trace **backwards**: find every validation, bounds check, and assertion
+preceding the sink. Vulnerable-looking code is often guarded upstream. Verify
+claimed guards (auth middleware, a "behind requireAdmin" comment) against the
+actual registration — don't trust the claim.
 
 ### 4. Run the gate reviews
 
@@ -85,11 +82,11 @@ first gate it fails makes it a `FALSE POSITIVE`, recorded with the evidence.
 
 ### 5. Assign a verdict + calibrate severity
 
-Do not adopt the reviewer's severity uncritically — re-derive it from
-**impact × reachability**. An unauthenticated, trivially reachable RCE is
-critical; the same bug behind three privilege checks is not. AI reviewers
-systematically over-rate; a finding that survives the gates but needs improbable
-preconditions is `low`, not `critical`.
+Don't adopt the reviewer's severity uncritically — re-derive it from **impact ×
+reachability**. An unauthenticated, trivially reachable RCE is critical; the
+same bug behind three privilege checks is not. AI reviewers systematically
+over-rate; a finding that survives the gates but needs improbable preconditions
+is `low`, not `critical`.
 
 ## Rationalizations to Reject
 
@@ -105,7 +102,7 @@ If you catch yourself thinking any of these, STOP.
 
 ## Verdict Output Format
 
-Report one line per finding, then act only on the confirmed set:
+One line per finding, then act only on the confirmed set:
 
 ```txt
 FINDING #1 TRUE POSITIVE  — SQL injection in search handler; user query reaches raw concat (sink: db.go:88)
@@ -127,7 +124,7 @@ even when its links are not.
 
 Apply the full checklist in
 [`false-positive-patterns.md`](false-positive-patterns.md) before finalizing any
-`FALSE POSITIVE` verdict. A rejection is a claim too, and it must be evidenced.
+`FALSE POSITIVE` verdict. A rejection is a claim too, and must be evidenced.
 
 ## The Bottom Line
 

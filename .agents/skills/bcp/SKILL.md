@@ -9,8 +9,8 @@ disable-model-invocation: true
 
 # Branch → Commit → PR
 
-Orchestrate the full "ship my changes" flow. Run the three steps
-in order, stopping if any step needs the user's input.
+Orchestrate the "ship my changes" flow. Run the three steps in
+order, stopping if any needs the user's input.
 
 ## Process
 

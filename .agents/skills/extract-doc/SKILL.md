@@ -12,49 +12,44 @@ allowed-tools: Bash(git config:*), Bash(date:*), Glob, Read, Write
 
 # Extract Doc
 
-Turn an implementation plan (or any design doc) into formal,
-standardized records: an **ADR**, a **PRD**, or both. A plan mixes
-*what to build* (product framing) with *how and why* (architectural
-decisions); this skill separates those into the right artifacts.
+Turn an implementation plan (or any design doc) into formal records: an
+**ADR**, a **PRD**, or both. A plan mixes *what to build* (product framing)
+with *how and why* (architectural decisions); this skill separates those into
+the right artifacts.
 
 ## Input
 
 Identify the source document:
 
-1. If a path is given as an argument, use it.
-1. Otherwise look in `docs/plans/` and use the most recently
-   modified plan. If several exist and the choice is ambiguous,
-   prompt the user to pick.
-1. If invoked from another skill that passes a path, use that.
+1. Path given as an argument → use it.
+1. Otherwise → most recently modified plan in `docs/plans/`. If the choice is
+   ambiguous, prompt the user to pick.
+1. Invoked from another skill that passes a path → use that.
 
 Read the source in full before extracting.
 
 ## Phase 1: Detect which document(s) to produce
 
-First, determine whether any formal document is worth producing.
-
 **Value gate** — a document is worth producing only when:
 
-- An **ADR** captures a genuine decision with a real alternative that
-  was rejected for a stated reason — a fork that constrains future
-  work. Mechanical changes, single-obvious-way tasks, and maintenance
-  work have no decision to capture.
-- A **PRD** captures a product/user surface with goals or success
-  criteria worth framing independently of the plan. Internal refactors,
-  tooling, and documentation work have no product surface.
+- An **ADR** captures a genuine decision with a real alternative rejected for a
+  stated reason — a fork that constrains future work. Mechanical changes,
+  single-obvious-way tasks, and maintenance work have no decision to capture.
+- A **PRD** captures a product/user surface with goals or success criteria
+  worth framing independently of the plan. Internal refactors, tooling, and
+  documentation work have no product surface.
 
-If the source plan clears neither bar, **produce nothing**: state why
-("no architectural decision with a rejected alternative; no user-facing
-product surface") and stop. Do not emit an all-placeholder template.
+If the source clears neither bar, **produce nothing**: state why ("no
+architectural decision with a rejected alternative; no user-facing product
+surface") and stop. Do not emit an all-placeholder template.
 
 > [!NOTE]
-> When invoked **directly by the user** (`/extract-doc`), lower the
-> bar — still skip a document only if it would be entirely placeholder,
-> but do not refuse a borderline case the user explicitly asked for.
-> The strict gate applies to **automatic** invocation from
-> `project-plan` / `research-plan`.
+> When invoked **directly by the user** (`/extract-doc`), lower the bar —
+> still skip a document only if it would be entirely placeholder, but do not
+> refuse a borderline case the user explicitly asked for. The strict gate
+> applies to **automatic** invocation from `project-plan` / `research-plan`.
 
-If at least one bar is met, classify the source against these signals.
+If at least one bar is met, classify against these signals.
 
 **PRD signals** (product framing — *what & why for users*):
 
@@ -64,35 +59,29 @@ If at least one bar is met, classify the source against these signals.
 
 **ADR signals** (architecture — *how & why technically*):
 
-- Records one or more technical decisions (technology, pattern,
-  schema, interface, trade-off).
+- Records technical decisions (technology, pattern, schema, interface,
+  trade-off).
 - Has rejected alternatives, caveats, or risk discussion.
 - Constrains future implementation.
 
-Decide:
+Decide: product framing only → **PRD**; technical decisions only →
+**ADR(s)**; both present → **both** (typical for a full plan).
 
-- Product framing only → **PRD**.
-- Technical decisions only → **ADR(s)**.
-- Both present → **both** (typical for a full plan).
-
-State the classification and which files will be produced, then
-proceed. Do not block on confirmation — if the user disagrees they
-will redirect. (When invoked from `research-plan`, this is fully
-automatic.)
+State the classification and which files will be produced, then proceed. Do not
+block on confirmation — if the user disagrees they will redirect. (From
+`research-plan`, this is fully automatic.)
 
 > [!NOTE]
-> A single plan often contains several distinct architectural
-> decisions. Produce **one ADR per decision**, not one giant ADR.
+> A single plan often contains several distinct architectural decisions.
+> Produce **one ADR per decision**, not one giant ADR.
 
 ## Phase 2: Write the ADR(s)
 
 ADRs live in `docs/adr/`, one file per decision:
-`docs/adr/<yyyy-mm-dd>-<short-title>.md` (the date prefix matches
-the convention used by `research` and `decide` skill output). Get
-today's date with `date +%F`.
+`docs/adr/<yyyy-mm-dd>-<short-title>.md` (date prefix matches the convention
+used by `research` and `decide` output). Get today's date with `date +%F`.
 
-Use this template (Nygard skeleton + mandatory **Options
-Considered**):
+Template (Nygard skeleton + mandatory **Options Considered**):
 
 ```markdown
 # {Short decision title}
@@ -126,15 +115,13 @@ or rejected.}
 follow-on work, new constraints, and risks.}
 ```
 
-Status is `Accepted` when the plan reflects a committed decision;
-use `Proposed` if the plan is still tentative.
+Status is `Accepted` when the plan reflects a committed decision; use
+`Proposed` if the plan is still tentative.
 
 ## Phase 3: Write the PRD
 
-PRDs live in `docs/prd/<yyyy-mm-dd>-<slug>.md` (one per
-product/feature). Get today's date with `date +%F`.
-
-Use this template:
+PRDs live in `docs/prd/<yyyy-mm-dd>-<slug>.md` (one per product/feature). Get
+today's date with `date +%F`.
 
 ```markdown
 # {Product / Feature Name} — PRD
@@ -190,21 +177,20 @@ implementation-agnostic.}
 
 ## Phase 4: Report
 
-List the files created with their paths. For ADRs, give a
-one-line summary of each decision recorded.
+List the files created with their paths. For ADRs, give a one-line summary of
+each decision recorded.
 
 ## Guidelines
 
-- Extract; do not invent. Every statement must trace to the source
-  plan or its cited research. If the plan lacks something a section
-  needs (e.g. success metrics), write `_Not specified in source._`
-  rather than fabricating.
+- Extract; do not invent. Every statement must trace to the source plan or its
+  cited research. If the plan lacks something a section needs (e.g. success
+  metrics), write `_Not specified in source._` rather than fabricating.
 - Omit needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 - Keep ADRs small and single-purpose — one decision each.
 - PRDs stay implementation-agnostic; push the "how" into ADRs.
-- Cross-link: PRD references the plan; ADRs reference the PRD or
-  plan where relevant.
+- Cross-link: PRD references the plan; ADRs reference the PRD or plan where
+  relevant.
 - Wrap all Markdown output at 80 columns.
-- Follow the project's Markdown conventions (bullet lists for
-  metadata label lines, language identifiers on code blocks).
+- Follow the project's Markdown conventions (bullet lists for metadata label
+  lines, language identifiers on code blocks).

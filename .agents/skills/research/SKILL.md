@@ -13,13 +13,11 @@ description: >-
 # Research
 
 Produce a deep reference document for a topic or repository.
-Output goes to `docs/research/<yyyy-mm-dd>-<slug>.md` (date
-prefix from today's date) and serves as the foundation for
-later planning or implementation work.
+Output goes to `docs/research/<yyyy-mm-dd>-<slug>.md` (date prefix
+from today's date) and serves as the foundation for later
+planning or implementation work.
 
 ## Detect research mode
-
-Determine which mode to use based on the user's input:
 
 | Input                                 | Mode               |
 | ------------------------------------- | ------------------ |
@@ -29,50 +27,40 @@ Determine which mode to use based on the user's input:
 
 ## Check for existing research
 
-Before starting new research in either mode, scan
-`docs/research/` for documents that already cover the topic or
-repo. Filenames carry a `yyyy-mm-dd-` date prefix, so match on
-the slug portion and ignore the date — a request about "CI
-pipeline caching" is covered by an existing `*-ci.md` or
-`*-continuous-integration.md`; a request about the
-`fastly/spotless` repo is covered by `*-spotless.md`.
+Before starting either mode, scan `docs/research/` for documents
+that already cover the topic or repo. Match on the slug portion;
+ignore the `yyyy-mm-dd-` date prefix — "CI pipeline caching" is
+covered by an existing `*-ci.md` or `*-continuous-integration.md`;
+the `fastly/spotless` repo is covered by `*-spotless.md`.
 
-- **Exact or near match found**: Read the document. If it
-  already covers what the user needs, summarize and stop. If it
-  covers the topic partially, extend it — add new sections or
-  deepen existing ones rather than creating a second file.
-- **No match found**: Proceed with the appropriate research
-  mode below.
+- **Exact or near match**: read it. If it covers what the user
+  needs, summarize and stop. If it covers the topic partially,
+  extend it (add/deepen sections) rather than creating a second
+  file.
+- **No match**: proceed with the mode below.
 
 ## Mode A: Code research (repo by name or URL)
-
-Use this mode when the user references a specific repository.
 
 ### Parse input
 
 Extract `{org}` and `{repo}` from the argument:
 
-1. **GitHub URL** — strip `https://github.com/` prefix, split
-   on `/` to get `{org}` and `{repo}`. Remove any trailing
-   `.git`.
-1. **`org/repo` form** — split on `/`.
-1. **Bare repo name** — no `/` present; `{org}` is unknown.
+1. **GitHub URL** — strip `https://github.com/`, split on `/`,
+   remove any trailing `.git`.
+1. **`org/repo`** — split on `/`.
+1. **Bare repo name** — no `/`; `{org}` is unknown.
 
 ### Locate locally
 
-1. If `{org}` is known, check whether `~/code/{org}/{repo}`
-   exists.
-1. If only a bare name, search `~/code/*/{repo}` for a matching
-   directory.
-   - If exactly one match is found, use it.
-   - If multiple matches are found, list them and ask the user
-     which one to use.
-   - If no match is found, ask the user for the org (or full
-     URL) so you can clone it.
+1. If `{org}` is known, check `~/code/{org}/{repo}`.
+1. If only a bare name, search `~/code/*/{repo}`:
+   - One match: use it.
+   - Multiple: list them and ask which to use.
+   - None: ask the user for the org (or full URL) to clone.
 
 ### Clone if missing
 
-If the repo is not found locally and `{org}` is known:
+If not found locally and `{org}` is known:
 
 ```bash
 gh repo clone {org}/{repo} ~/code/{org}/{repo}
@@ -80,9 +68,9 @@ gh repo clone {org}/{repo} ~/code/{org}/{repo}
 
 ### Gather project metadata
 
-Run the following git commands inside the repo directory to
-build a diagnostic snapshot. Capture the output and include it
-in the subagent prompt as context.
+Run these git commands inside the repo to build a diagnostic
+snapshot. Capture the output and include it in the subagent
+prompt as context.
 
 **Churn hotspots** — most-changed files in the last year:
 
@@ -98,8 +86,7 @@ git -C {repo_path} log --format=format: --name-only \
 git -C {repo_path} shortlog -sn --no-merges
 ```
 
-Also check recent activity (last 6 months) to flag absent top
-contributors:
+Recent activity (last 6 months) to flag absent top contributors:
 
 ```bash
 git -C {repo_path} shortlog -sn --no-merges \
@@ -128,82 +115,67 @@ git -C {repo_path} log --oneline --since="1 year ago" \
   | grep -iE 'revert|hotfix|emergency|rollback'
 ```
 
-**Cross-reference**: Files that appear in **both** churn
-hotspots and bug clusters are the highest-risk code. Flag these
-explicitly in the metadata passed to the subagent.
+**Cross-reference**: files in **both** churn hotspots and bug
+clusters are the highest-risk code. Flag these explicitly in the
+metadata passed to the subagent.
 
 ### When in doubt, ask
 
-Do not guess. If any of the following are unclear, stop and ask
-the user before proceeding:
+Don't guess. Stop and ask the user if:
 
-- The input is ambiguous (e.g. a bare name that could match
-  multiple orgs).
+- The input is ambiguous (e.g. a bare name matching multiple orgs).
 - You aren't sure what the user wants to know about the repo.
 - The clone would go to an unexpected location.
 - The repo doesn't exist on GitHub (clone fails).
 
-Prefer a short clarifying question over a wrong assumption.
-
 ### Spawn a subagent for code research
 
-Spawn a single general-purpose subagent. The prompt must
-include:
+Spawn a single general-purpose subagent. The prompt must include:
 
-- The repo path (`~/code/{org}/{repo}`)
+- The repo path (`~/code/{org}/{repo}`).
 - A statement that this is **read-only research**: investigate and
-  report findings only; do not modify code, write files, or run
-  state-changing commands
-- The user's question or research goal
-- The **project metadata** gathered above — instruct the
-  subagent to use this metadata to prioritize which code to
-  read first
-- Instructions to use file reading, search, and exploration
-  patterns to investigate the codebase
-- Instructions to use any relevant MCP servers available in the
-  session (e.g. `gopls` for Go projects — `go_search`,
-  `go_file_context`, `go_package_api`; `context7` for library
-  documentation lookups)
-- Instructions to note any stale `docs/**/*.md` or
-  `**/README.md` files discovered during research
+  report only; do not modify code, write files, or run
+  state-changing commands.
+- The user's question or research goal.
+- The **project metadata** above — instruct the subagent to use it
+  to prioritize which code to read first.
+- Instructions to use file reading, search, and exploration to
+  investigate the codebase.
+- Instructions to use relevant MCP servers available in the
+  session (e.g. `gopls` for Go — `go_search`, `go_file_context`,
+  `go_package_api`; `context7` for library docs).
+- Instructions to note any stale `docs/**/*.md` or `**/README.md`
+  files discovered during research.
 
 ### Save findings
 
-Write findings to `docs/research/<yyyy-mm-dd>-{repo}.md` (new
-file, date prefix from today's date) or extend the existing
-document identified during the "Check for existing research"
-step. The document must include a **Project
-Metadata** section at the top with the git diagnostic snapshot
-(churn hotspots, bus factor, bug clusters, commit velocity,
-crisis patterns, and high-risk files).
+Write to `docs/research/<yyyy-mm-dd>-{repo}.md` (date prefix from
+today), or extend the existing document found earlier. The
+document must include a **Project Metadata** section at the top
+with the git diagnostic snapshot (churn hotspots, bus factor, bug
+clusters, commit velocity, crisis patterns, high-risk files). Use
+the Mode B template below.
 
-Use the same research template shown in Mode B below.
-
-### Present findings
-
-Summarize the research to the user and note where the full
+Then summarize the research to the user and note where the full
 document was saved.
 
 ## Mode B: Topic research
 
-Use this mode for concepts, technologies, patterns, or anything
-that isn't a specific repo.
+Use for concepts, technologies, patterns — anything that isn't a
+specific repo.
 
 ### Conduct research
 
-Take the user's topic and study it deeply. Use every tool at
-your disposal: read source code, explore the codebase, fetch
-documentation via MCP, search the web, and check sibling
-repositories in the parent directory (`../`) for relevant
-reference implementations or prior art.
+Study the topic deeply. Use every tool: read source code, explore
+the codebase, fetch docs via MCP, search the web, and check
+sibling repositories in the parent directory (`../`) for reference
+implementations or prior art.
 
 ### Output
 
-Write to `docs/research/<yyyy-mm-dd>-<topic-slug>.md` (new
-file, date prefix from today's date) or extend the existing
-document identified above.
-
-Use this template:
+Write to `docs/research/<yyyy-mm-dd>-<topic-slug>.md` (date prefix
+from today), or extend the existing document found earlier. Use
+this template:
 
 ```markdown
 # {Topic}
@@ -243,14 +215,11 @@ and what was given up.}
 
 ## Guidelines
 
-- Every factual claim in a research document must be cited
-  inline — `path/to/file.go:42` for code, URL for external
-  docs. Claims you cannot cite must be labelled "unverified
-  assumption" and include how to verify them.
-- Use specific file paths and line numbers when referencing
-  code.
-- Research documents should be exhaustive in coverage but concise in
-  prose — omit needless words, see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Exhaustive
-  means no fact dropped, not more words per fact.
+- Cite every factual claim inline — `path/to/file.go:42` for code,
+  URL for external docs. Claims you cannot cite must be labelled
+  "unverified assumption" and include how to verify them.
+- Use specific file paths and line numbers when referencing code.
+- Be exhaustive in coverage but concise in prose — omit needless
+  words, see [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
+  Exhaustive means no fact dropped, not more words per fact.
 - Wrap all Markdown output at 80 columns.
