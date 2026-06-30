@@ -63,6 +63,7 @@ make install
     ├── decide/
     ├── delegate/
     ├── distill/
+    ├── domain-modeling/
     ├── draft-pr/
     ├── durable-rules/
     ├── extract-doc/
@@ -73,6 +74,7 @@ make install
     ├── grepai/
     ├── grill-me/
     ├── grill-with-docs/
+    ├── grilling/
     ├── handoff/
     ├── markdown-conventions/       # rule → skill (generic harnesses)
     ├── markdown-to-skill/
@@ -148,6 +150,7 @@ auto-loading.
 | **decide**                   | Decision memo with structurer, contrarian, and synthesizer passes                             |
 | **delegate**                 | Spawn a subagent for a task                                                                   |
 | **distill**                  | Rewrite text concisely without losing critical info; inventory → rewrite → audit              |
+| **domain-modeling**          | Build and sharpen a project's domain model — glossary (CONTEXT.md) and ADRs                   |
 | **draft-pr**                 | Draft a concise, direct pull request with a clear Problem and Solution                        |
 | **durable-rules**            | Surface systemic patterns from an investigation as codified conventions or anti-patterns      |
 | **extract-doc**              | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)    |
@@ -156,8 +159,9 @@ auto-loading.
 | **go-conventions**           | Go coding conventions (mirrors `.claude/rules/go.md`)                                         |
 | **go-testing**               | Write Go tests — table-driven, fuzz, benchmarks                                               |
 | **grepai**                   | Semantic code search by intent                                                                |
-| **grill-me**                 | Interview the user relentlessly to stress-test a plan or design                               |
-| **grill-with-docs**          | Stress-test a plan against project domain model and update CONTEXT/ADRs                       |
+| **grill-me**                 | Thin delegator → runs a **grilling** session                                                  |
+| **grill-with-docs**          | Thin delegator → runs **grilling** with **domain-modeling**                                   |
+| **grilling**                 | Interview the user relentlessly to stress-test a plan or design                               |
 | **handoff**                  | Compact the current conversation into a handoff document for another agent                    |
 | **markdown-conventions**     | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                         |
 | **markdown-to-skill**        | Bulk-convert Markdown files into agent skills                                                 |
