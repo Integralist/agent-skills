@@ -101,7 +101,9 @@ that reached it — the executor needs the destination, not the journey.
 
 ## Rewrite principles
 
-- Be concise — cut words that carry no information.
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut
+  anything that survives removal without loss of meaning.
 - Use a direct, imperative voice for instructions.
 - Restructure into lists, tables, or steps wherever that helps an
   executor follow the text. Structure may change completely;

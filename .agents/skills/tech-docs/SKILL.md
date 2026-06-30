@@ -65,8 +65,10 @@ ambiguous, ask the user which mode they want.
 
 ### 1. Brevity and Professionalism
 
-- Cut wordy explanations. Get to the point.
-- Remove filler words, hedging, and unnecessary qualifiers.
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Write the
+  point, then cut anything that survives removal without loss of
+  meaning.
 - Maintain a neutral-expert voice throughout. Strip out
   frustration, over-enthusiasm, humor that obscures meaning,
   and first-person asides that do not serve the reader.

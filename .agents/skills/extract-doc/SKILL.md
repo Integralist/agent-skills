@@ -199,6 +199,8 @@ one-line summary of each decision recorded.
   plan or its cited research. If the plan lacks something a section
   needs (e.g. success metrics), write `_Not specified in source._`
   rather than fabricating.
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 - Keep ADRs small and single-purpose — one decision each.
 - PRDs stay implementation-agnostic; push the "how" into ADRs.
 - Cross-link: PRD references the plan; ADRs reference the PRD or

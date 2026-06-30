@@ -143,6 +143,8 @@ Plan documents (`docs/plans/*.md`) need special handling:
 - State what changed and why
 - Use counts: "3 files" not "several files"
 - Active voice, specific language
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md)
 - If `~/.gitcommit` exists, read it for the user's preferred
   commit-message conventions (type prefixes, scopes, subject
   style, examples) and follow them

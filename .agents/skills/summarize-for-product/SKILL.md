@@ -117,6 +117,8 @@ sign-off placeholder.
 
 - Output is paste-ready text in the assistant's response, wrapped in
   a fenced code block.
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 - Never write to `docs/`. This is communication, not an artifact.
 - If the user explicitly asks to save it, write to
   `$TMPDIR/summary-<branch>-<format>.md` (mirroring the `handoff`

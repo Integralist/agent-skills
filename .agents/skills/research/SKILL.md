@@ -249,5 +249,8 @@ and what was given up.}
   assumption" and include how to verify them.
 - Use specific file paths and line numbers when referencing
   code.
-- Research documents should be exhaustive.
+- Research documents should be exhaustive in coverage but concise in
+  prose — omit needless words, see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Exhaustive
+  means no fact dropped, not more words per fact.
 - Wrap all Markdown output at 80 columns.

@@ -218,6 +218,8 @@ scaffold tasks so file creation stays with implementation.
 - Only feature/boundary behaviour becomes `.feature` files; units stay
   as Given/When/Then prose in task descriptions.
 - Scenarios must be concrete and observable — no "works correctly".
+- Omit needless words in step phrasing — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 - Wrap all Markdown output at 80 columns; follow the project's Markdown
   conventions (bullet lists for metadata label lines, language
   identifiers on code blocks).

@@ -97,6 +97,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Style notes
 
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). One line
+  per entry; lead with the change.
 - Match the existing changelog's punctuation (em-dash `—` vs hyphen `-`
   between version and date) exactly. Don't normalise.
 - Don't include commit hashes, PR numbers, or author names unless the

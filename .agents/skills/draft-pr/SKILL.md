@@ -95,8 +95,9 @@ the key change; note trade-offs.>
 
 ## Style
 
-- Direct and concise. No marketing tone, no restating the diff line by
-  line, no boilerplate checklists.
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). No marketing
+  tone, no restating the diff line by line, no boilerplate checklists.
 - **Don't hard-wrap the PR body.** GitHub soft-wraps prose, so manual
   line breaks at 80 columns render as ragged text. Write each paragraph
   as one continuous line; use real blank lines between paragraphs and

@@ -322,6 +322,9 @@ formal documents were skipped, and move on.
 - Code snippets should be precise — real function signatures, real
   types, real import paths. Not pseudocode.
 - Plans should be actionable.
+- Omit needless words — see
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose,
+  not load-bearing detail (paths, constraints, acceptance criteria).
 - Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) for
   all Markdown output.
 
