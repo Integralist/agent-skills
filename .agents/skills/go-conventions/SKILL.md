@@ -98,6 +98,48 @@ When uncertain about Go behavior, pick the source that matches the question:
 
 Do not guess from training data — cite the source.
 
+### Looking up a package's public API
+
+To see a package's exported API (types, funcs, methods, consts, or one
+symbol's signature and doc), run `go doc` — don't grep or read source files
+first. It's faster, returns exactly the exported surface with doc comments, and
+resolves the version the build uses (module cache, `replace` directives,
+vendor).
+
+For a whole package's surface when it's in your workspace, prefer the gopls
+`go_package_api` tool (warm, in-memory). Reach for `go doc` for symbol-level
+detail, doc comments, source (`-src`), commands (`-cmd`), or a dependency gopls
+doesn't have loaded.
+
+- `go doc <path>` — whole package (e.g. `go doc net/http`).
+- `go doc <path>.<Symbol>` — one symbol; a type includes its fields and method
+  signatures (e.g. `go doc net/http.Client`).
+- `go doc <path>.<Type>.<Method>` — one method or field.
+- `-short` — one line per symbol; fastest way to scan a surface.
+- `-all` — full documented surface; `-src` — a symbol's source; `-u` — include
+  unexported identifiers.
+- `-cmd` — required for a `package main`, whose exported symbols are otherwise
+  elided.
+- `-C <dir>` (must come first) — run as if from `<dir>`, to doc a module's
+  dependency without a separate `cd`.
+
+`go doc` documents the version the current module resolves — there is no
+`path@version` syntax. To read a different version, change what the module
+resolves (`go get <mod>@<ver>` or edit go.mod), then re-run; confirm with
+`go list -m <mod>`. Common errors:
+
+- `missing go.sum entry` — dep is in go.mod but not downloaded; run
+  `go mod download <mod>`.
+- `no required module provides package` — not a dependency; run `go get <path>`
+  first (`go doc` won't fetch it).
+- Third-party packages need a surrounding module, so run from inside the repo;
+  the stdlib works anywhere.
+
+Fall back to reading source (via the gopls tools, then `Read`) only when
+`go doc` is insufficient — an unexported detail, behavior not in the doc, or a
+symbol it can't find. When you do need a symbol's source, `go doc -src
+<path>.<Symbol>` usually beats a manual grep + read.
+
 ## Formatting
 
 After editing Go files, run `gofumpt` to format all changed files:
