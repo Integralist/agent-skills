@@ -28,7 +28,13 @@ make install-agents
 # ~/.agents/skills
 make install-claude
 
-# Everything (install-claude already pulls in install-agents)
+# Gemini Antigravity CLI status line (no-op if ~/.gemini/antigravity-cli absent)
+make install-gemini
+
+# Copilot CLI status line (no-op if ~/.copilot/scripts absent)
+make install-copilot
+
+# Everything (install-claude pulls in install-agents; also runs the two above)
 make install
 ```
 
@@ -42,8 +48,14 @@ make install
 ├── rules/
 │   ├── go.md                       # Go conventions (auto-loaded for *.go)
 │   └── markdown.md                 # Markdown conventions (auto-loaded for *.md)
-├── scripts/                        # Statusline + session-cost helpers
+├── scripts/                        # statusline.sh + session-cost helpers
 └── skills -> ../.agents/skills     # Symlink — single source of truth
+
+.gemini/antigravity-cli/            # Gemini Antigravity CLI
+└── statusline.sh                   # Status line (mirrors the Claude one)
+
+.copilot/scripts/                   # Copilot CLI
+└── statusline.sh                   # Status line (mirrors the Claude one)
 
 .agents/                            # Canonical skills + conventions
 ├── AGENTS.md                       # Shared conventions

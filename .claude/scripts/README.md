@@ -85,14 +85,61 @@ claude_cost 2026-02-22  # specific date
 claude_cost -5       # last 5 days combined
 ```
 
-## `statusline-command.sh`
+## `statusline.sh`
 
-Generates the Claude Code status line. Reads a JSON payload from stdin and displays:
+Generates the Claude Code status line. Reads a JSON payload from stdin and
+displays:
 
-- Current time
-- Working directory and git branch/status/commit
+- Model name, effort level, and output style
+- Working directory
+- Git branch, dirty marker, short commit hash, and — when a tag points at
+  `HEAD` — the tag (truncated to 12 chars with `…` when longer than a standard
+  `v000.000.000` tag)
 - Language runtime version (Go, Node, Rust) based on project files
 - AWS SSO session time remaining
-- Model name and output style
 - Context window usage as a progress bar
 - Session cost
+
+Sibling status line scripts for other harnesses live in the repo root:
+`.gemini/antigravity-cli/statusline.sh` (Gemini Antigravity CLI) and
+`.copilot/scripts/statusline.sh` (Copilot CLI). All three render the same
+information, adapted to each harness's JSON payload. Install them with
+`make install-gemini` and `make install-copilot` (both no-op when the target
+directory is absent).
+
+### Configuration
+
+Claude Code invokes the status line via the `statusLine` block in
+`~/.claude/settings.json`. A representative skeleton (secrets and the AWS
+account ID redacted):
+
+```json
+{
+  "awsAuthRefresh": "aws sso login --profile bedrock",
+  "env": {
+    "AWS_PROFILE": "bedrock",
+    "AWS_REGION": "us-east-2",
+    "CLAUDE_CODE_USE_BEDROCK": "1"
+  },
+  "model": "arn:aws:bedrock:us-east-2:<ACCOUNT_ID>:inference-profile/global.anthropic.claude-opus-4-8",
+  "hooks": {
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/log-session-cost.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/statusline.sh"
+  },
+  "effortLevel": "high",
+  "theme": "dark-ansi"
+}
+```

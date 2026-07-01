@@ -63,7 +63,17 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     # Get commit hash (short)
     commit_hash=$(git rev-parse --short HEAD 2>/dev/null)
 
-    git_info=" │ "$'\ue702'" $branch$git_status ($commit_hash)"
+    # Get tag pointing at HEAD, truncated if longer than a standard v000.000.000 tag
+    git_tag=$(git tag --points-at HEAD 2>/dev/null | head -n 1)
+    tag_info=""
+    if [[ -n "$git_tag" ]]; then
+        if (( ${#git_tag} > 12 )); then
+            git_tag="${git_tag:0:12}…"
+        fi
+        tag_info=" "$''" $git_tag"
+    fi
+
+    git_info=" │ "$'\ue702'" $branch$git_status ($commit_hash)$tag_info"
 else
     git_info=""
 fi

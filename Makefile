@@ -1,4 +1,4 @@
-.PHONY: install install-agents install-claude install-pi rules
+.PHONY: install install-agents install-claude install-pi install-gemini install-copilot rules
 
 install-agents:
 	mkdir -p ~/.agents
@@ -29,4 +29,25 @@ install-claude: install-agents rules
 	rm -rf ~/.claude/skills
 	ln -s ~/.agents/skills ~/.claude/skills
 
-install: install-claude install-pi
+# Gemini (Antigravity CLI) reads ~/.gemini/antigravity-cli. Only copy the
+# statusline when that directory already exists, so the target is a no-op on
+# machines where the Gemini CLI isn't installed.
+install-gemini:
+	@if [ -d ~/.gemini/antigravity-cli ]; then \
+		cp .gemini/antigravity-cli/statusline.sh ~/.gemini/antigravity-cli/statusline.sh; \
+		echo "Installed Gemini statusline."; \
+	else \
+		echo "Skipping Gemini statusline: ~/.gemini/antigravity-cli does not exist."; \
+	fi
+
+# Copilot CLI reads ~/.copilot/scripts. Only copy the statusline when that
+# directory already exists, so the target is a no-op when Copilot isn't installed.
+install-copilot:
+	@if [ -d ~/.copilot/scripts ]; then \
+		cp .copilot/scripts/statusline.sh ~/.copilot/scripts/statusline.sh; \
+		echo "Installed Copilot statusline."; \
+	else \
+		echo "Skipping Copilot statusline: ~/.copilot/scripts does not exist."; \
+	fi
+
+install: install-claude install-pi install-gemini install-copilot
