@@ -1,0 +1,54 @@
+{
+  "allowedUrls": [
+    "https://docs.github.com"
+  ],
+  "colorMode": "high-contrast",
+  "footer": {
+    "showModelEffort": true,
+    "showDirectory": true,
+    "showBranch": true,
+    "showContextWindow": true,
+    "showQuota": true,
+    "showAgent": true
+  },
+  "hooks": {
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "jq -r '\"\\(.timestamp // now) session=\\(.session_id // .sessionId // \"\") reason=\\(.reason // \"\") cwd=\\(.cwd // \"\")\"' >> \"$HOME/.copilot/session-costs.log\"",
+        "timeoutSec": 5
+      }
+    ],
+    "notification": [
+      {
+        "type": "command",
+        "bash": "terminal-notifier -message \"Copilot CLI needs your input\" -sound Sosumi",
+        "timeoutSec": 5,
+        "matcher": "permission_prompt|elicitation_dialog"
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "bash": "terminal-notifier -message \"Copilot CLI finished\" -sound default",
+        "timeoutSec": 5
+      }
+    ]
+  },
+  "includeCoAuthoredBy": false,
+  "mergeStrategy": "rebase",
+  "model": "claude-opus-4.6",
+  "renderMarkdown": true,
+  "screenReader": false,
+  "skillDirectories": [
+    "~/.agents/skills/",
+    "/Users/mmcdonnell/code/fastly/agent-skills-internal/plugins/google-workspace/skills/"
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "/Users/mmcdonnell/.copilot/scripts/statusline.sh",
+    "padding": 0
+  },
+  "theme": "dark",
+  "experimental": true
+}

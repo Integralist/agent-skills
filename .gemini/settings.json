@@ -1,0 +1,56 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "vertex-ai"
+    }
+  },
+  "general": {
+    "defaultApprovalMode": "plan",
+    "previewFeatures": true,
+    "sessionRetention": {
+      "warningAcknowledged": true,
+      "enabled": true,
+      "maxAge": "30d"
+    }
+  },
+  "mcpServers": {
+    "gopls": {
+      "command": "gopls",
+      "args": [
+        "mcp"
+      ]
+    },
+    "github": {
+      "httpUrl": "https://api.githubcopilot.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_API_TOKEN}"
+      }
+    }
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "name": "notify-input",
+            "type": "command",
+            "command": "bash -c 'terminal-notifier -message \"Gemini CLI needs your input\" -sound Sosumi; echo \"{}\"'"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "name": "notify-finished",
+            "type": "command",
+            "command": "bash -c 'terminal-notifier -message \"Gemini CLI finished\" -sound default; echo \"{}\"'"
+          }
+        ]
+      }
+    ]
+  }
+}
