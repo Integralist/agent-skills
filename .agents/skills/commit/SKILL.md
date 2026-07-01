@@ -2,7 +2,7 @@
 name: commit
 description: >-
   Create git commits with intelligent file grouping. Use when
-  committing changes.
+  committing changes or drafting a commit message.
 allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 ---
 
@@ -75,15 +75,24 @@ If the fields below show commands rather than output, run each one first.
 
    - Verify staged: `git diff --cached --name-only`.
 
-   - Commit via stdin to avoid shell escaping issues:
+   - Write the commit message to a temp file with your file-writing tool
+     (NOT a shell heredoc), then commit from that file:
 
      ```bash
-     git commit -F - <<'COMMIT_MSG'
-     Subject line
-
-     Optional body.
-     COMMIT_MSG
+     git commit -F /tmp/commit-msg.txt
      ```
+
+     Do NOT pipe the message via a heredoc (`git commit -F - <<'EOF'`).
+     `git commit -F -` reads stdin until the closing delimiter appears
+     alone at column 0; if the shell receives it indented, with trailing
+     whitespace, or without a final newline, git never sees the terminator
+     and blocks on stdin forever — the call then hangs until it times out
+     with no error. Writing a real file sidesteps stdin, heredocs, and
+     shell escaping entirely.
+
+   - If any `git commit` call hasn't returned within a few seconds, assume
+     it is blocked reading stdin. Do not wait for the timeout — the message
+     never reached git. Re-run using the temp-file form above.
 
 1. **If pre-commit hook modifies files:** review the changes. Only amend
    if they're mechanical (formatting, linting). If substantive or unclear,
