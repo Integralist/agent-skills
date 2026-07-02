@@ -98,8 +98,9 @@ loads the same set.
 | Skill                        | Description                                                                                        |
 | ---------------------------- | -------------------------------------------------------------------------------------------------- |
 | **agents-md**                | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                            |
-| **bcp**                      | Branch, commit, and open a PR in one step (orchestrates **commit** + **draft-pr**)                 |
+| **bcp**                      | Branch, commit, and open a PR in one step (orchestrates **branch** + **commit** + **draft-pr**)    |
 | **behaviour-spec**           | Generate Gherkin acceptance criteria; executable godog scenarios for Go, prose for units           |
+| **branch**                   | Create a git feature branch named from session context (slug username + kebab slug)                |
 | **caveman**                  | Ultra-compressed caveman-speak mode; ~75% token reduction                                          |
 | **changelog**                | Add a Keep a Changelog entry from the working diff or branch-vs-main                               |
 | **cleanup**                  | Audit codebase for AI slop via background subagent                                                 |
