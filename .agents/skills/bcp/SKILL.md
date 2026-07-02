@@ -23,22 +23,10 @@ order, stopping if any needs the user's input.
    - If already on a feature branch (not `main`/`master` or the
      repo's default branch), keep it — skip to step 2.
 
-   - If on the base branch, create a feature branch before
-     committing. Name it `<git_username>/<feature-slug>`, where
-     `<git_username>` comes from git config and `<feature-slug>`
-     is a short, kebab-case description of the changes (e.g.
-     `fix-login-redirect`). If the intent is unclear, ask the
-     user for the slug.
-
-     Slugify the username so spaces and other non-alphanumeric
-     characters become hyphens (e.g. "First Last" → `first-last`):
-
-     ```bash
-     git_username=$(git config user.name \
-       | tr '[:upper:]' '[:lower:]' \
-       | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')
-     git switch -c "${git_username}/<feature-slug>"
-     ```
+   - If on the base branch, invoke the `branch` skill to create a
+     feature branch before committing. Follow its process,
+     including its prompt to confirm the slug if the intent is
+     unclear.
 
 1. **Commit.** Invoke the `commit` skill to stage and commit the
    changes with intelligent grouping. Follow its process exactly,
