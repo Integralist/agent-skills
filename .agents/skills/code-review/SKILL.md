@@ -15,8 +15,8 @@ Review code with up to four specialized subagents in parallel (five with
 local changes.
 
 > [!NOTE]
-> Some platforms cap concurrent subagents (e.g. Swival caps at 4); the four
-> dimensions fit that constraint. With `--plan`, run the Plan Adherence subagent
+> Some platforms cap concurrent subagents; the four dimensions fit a common
+> limit of 4. With `--plan`, run the Plan Adherence subagent
 > as a fifth — sequentially after the first four if the cap prevents a parallel
 > spawn. If your platform allows more, split "Consistency" into separate naming
 > and architecture reviews.

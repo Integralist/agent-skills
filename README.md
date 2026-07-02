@@ -1,31 +1,42 @@
 # Agent Skills Configuration
 
-This repository contains **global agent configuration** — skills, agents, rules,
-and project instructions designed to be used across all projects when working
-with AI coding assistants.
+Global configuration for AI coding assistants — skills, agents, rules, and
+project instructions shared across every project.
 
-It serves two targets:
+## Mental model
 
-- **Claude Code** — reads `.claude/` (CLAUDE.md, agents, rules, and a `skills`
-  symlink)
-- **Generic Agent Skills** (e.g. Swival) — reads `.agents/` (skills, AGENTS.md)
+The repo serves two harnesses from one set of files:
 
-Skills have a **single source of truth**: `.agents/skills/`. `.claude/skills` is
-a symlink to `.agents/skills`, so each skill is edited once and both harnesses
-see it. Skill content is harness-agnostic — generic language ("prompt the user",
-"spawn a subagent"). Any Claude-only guidance (e.g. agent teams) lives in a
-clearly-labeled optional "Agent teams (if your harness supports it)" section so
-other harnesses can ignore it.
+- **Claude Code** reads `.claude/` (CLAUDE.md, agents, rules, and a `skills`
+  symlink).
+- **Generic agents** (e.g. Gemini, OpenCode, Pi) read `.agents/` (skills,
+  AGENTS.md).
+
+Skills have a **single source of truth**: `.agents/skills/`. `.claude/skills`
+is a symlink to it, so each skill is edited once and both harnesses see it.
+Skill content stays harness-agnostic — generic language ("prompt the user",
+"spawn a subagent"). Claude-only guidance lives in a clearly-labeled optional
+"Agent teams (if your harness supports it)" section that other harnesses
+ignore.
+
+Everything else is a thin adapter around that shared core:
+
+| Asset       | Purpose                                                          |
+| ----------- | ---------------------------------------------------------------- |
+| `CLAUDE.md` | One-line `@~/.agents/AGENTS.md` import — same conventions        |
+| `AGENTS.md` | The canonical global conventions                                 |
+| `rules/`    | Path-glob auto-loaded conventions (generic harnesses use skills) |
+| `agents/`   | Custom sub-agent definitions spawned via the Task tool           |
+| `scripts/`  | Statusline and session-cost helpers                              |
 
 ## Install
 
 ```bash
-# Generic agents only (e.g. Swival): copies .agents/ to ~/.agents/
+# Generic agents only (e.g. Gemini, OpenCode, Pi): copies .agents/ to ~/.agents/
 make install-agents
 
-# Claude Code (also installs agents as a prerequisite): copies CLAUDE.md, rules,
-# agents, and scripts to ~/.claude/, then symlinks ~/.claude/skills →
-# ~/.agents/skills
+# Claude Code (pulls in install-agents): copies CLAUDE.md, rules, agents, and
+# scripts to ~/.claude/, then symlinks ~/.claude/skills → ~/.agents/skills
 make install-claude
 
 # Gemini Antigravity CLI status line (no-op if ~/.gemini/antigravity-cli absent)
@@ -43,11 +54,8 @@ make install
 ```plain
 .claude/                            # Claude Code
 ├── CLAUDE.md                       # @-import pointer to ~/.agents/AGENTS.md
-├── agents/
-│   └── code-improvement-reviewer.md
-├── rules/
-│   ├── go.md                       # Go conventions (auto-loaded for *.go)
-│   └── markdown.md                 # Markdown conventions (auto-loaded for *.md)
+├── agents/                         # Custom sub-agent definitions
+├── rules/                          # Conventions auto-loaded by file glob
 ├── scripts/                        # statusline.sh + session-cost helpers
 └── skills -> ../.agents/skills     # Symlink — single source of truth
 
@@ -59,93 +67,33 @@ make install
 
 .agents/                            # Canonical skills + conventions
 ├── AGENTS.md                       # Shared conventions
-└── skills/
-    ├── shared/                     # Cross-skill references (Agent teams, etc.)
-    ├── agents-md/
-    ├── bcp/
-    ├── behaviour-spec/
-    ├── caveman/
-    ├── changelog/
-    ├── cleanup/
-    ├── code-review/
-    ├── code-review-feedback/
-    ├── commit/
-    ├── consensus/
-    ├── critique/
-    ├── decide/
-    ├── delegate/
-    ├── distill/
-    ├── domain-modeling/
-    ├── draft-pr/
-    ├── durable-rules/
-    ├── extract-doc/
-    ├── git-metadata/
-    ├── go-api/
-    ├── go-conventions/             # rule → skill (generic harnesses)
-    ├── go-testing/
-    ├── grepai/
-    ├── grill-me/
-    ├── grill-with-docs/
-    ├── grilling/
-    ├── handoff/
-    ├── incident-report/
-    ├── markdown-conventions/       # rule → skill (generic harnesses)
-    ├── markdown-to-skill/
-    ├── mysql-index-audit/
-    ├── next-task/
-    ├── project-plan/
-    ├── redesign/
-    ├── refactor/
-    ├── research/
-    ├── research-plan/
-    ├── security-review-feedback/
-    ├── slack-search/
-    ├── summarize-for-product/
-    ├── systematic-debugging/
-    ├── teach/
-    ├── tech-docs/
-    ├── test-feedback/
-    ├── writing-great-skills/
+└── skills/                         # One directory per skill (see table below)
+    └── shared/                     # Cross-skill references (Agent teams, etc.)
 ```
 
 ## Components
 
-### Skills
+**Skills** — reusable instructions invoked with `/skill-name` that extend an
+agent to perform a task, follow a pattern, or apply specialized knowledge. See
+[the docs](https://code.claude.com/docs/en/skills).
 
-[Skills](https://code.claude.com/docs/en/skills) are custom code capabilities
-that extend an agent's ability to perform specific tasks, follow particular
-patterns, or apply specialized knowledge. Skills act as reusable instructions
-invoked with `/skill-name`.
+**[Agents](https://code.claude.com/docs/en/agents)** (`.claude/agents/`) —
+specialized sub-agents Claude spawns via the Task tool, each with its own model
+and instructions. Current agent: **code-improvement-reviewer** — reviews code
+for readability, performance, and best practices with concrete before/after
+suggestions.
 
-### Agents (`.claude/agents/`)
+**[Rules](https://code.claude.com/docs/en/memory#modular-rules-with-claude%2Frules%2F)**
+(`.claude/rules/`) — topic-specific instructions Claude loads automatically,
+scoped to file patterns via a YAML `paths` glob. Unlike skills, they apply
+passively. Generic agents don't support path-scoped auto-loading, so these are
+mirrored as skills (`go-conventions`, `markdown-conventions`).
 
-[Custom agents](https://code.claude.com/docs/en/agents) are specialized
-sub-agents that Claude can spawn via the Task tool. Each agent has a specific
-purpose and can be configured with different models and instructions.
+**Project instructions** — `.agents/AGENTS.md` holds the canonical conventions;
+`.claude/CLAUDE.md` is a one-line `@~/.agents/AGENTS.md` pointer so Claude Code
+loads the same set.
 
-Current agents:
-
-- **code-improvement-reviewer** — Reviews code for readability, performance, and
-  best practices with concrete before/after suggestions
-
-### Rules (`.claude/rules/`)
-
-[Rules](https://code.claude.com/docs/en/memory#modular-rules-with-claude%2Frules%2F)
-are modular, topic-specific instruction files that Claude loads automatically.
-Unlike skills (which are invoked explicitly), rules apply passively — scoped to
-file patterns via YAML frontmatter `paths` globs.
-
-In `.agents/`, rules are converted to skills (`go-conventions`,
-`markdown-conventions`) since generic agents don't support path-scoped
-auto-loading.
-
-### Project Instructions
-
-- `.agents/AGENTS.md` — the canonical global conventions
-- `.claude/CLAUDE.md` — a one-line `@~/.agents/AGENTS.md` pointer so Claude Code
-  loads the same conventions
-
-## Skill Reference
+## Skill reference
 
 | Skill                        | Description                                                                                        |
 | ---------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -195,67 +143,50 @@ auto-loading.
 | **test-feedback**            | Parse test failures and fix them in a background subagent                                          |
 | **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability       |
 
-## How `.claude/` and `.agents/` relate
-
-Skills are no longer duplicated. `.agents/skills/` is the single source; the
-`.claude/skills` symlink points at it. The only things unique to `.claude/` are
-Claude-specific assets that have no generic equivalent:
-
-| Asset       | Purpose                                                          |
-| ----------- | ---------------------------------------------------------------- |
-| `CLAUDE.md` | One-line `@~/.agents/AGENTS.md` import — same conventions        |
-| `rules/`    | Path-glob auto-loaded conventions (generic harnesses use skills) |
-| `agents/`   | Custom sub-agent definitions spawned via the Task tool           |
-| `scripts/`  | Statusline and session-cost helpers                              |
-
-Inside skill bodies, harness-agnostic language is the default. Optional
-Claude-only behavior (agent teams, `allowed-tools`/`argument-hint` frontmatter)
-is additive — other harnesses ignore what they don't understand.
-
-### Claude-specific frontmatter
+## Claude-specific frontmatter
 
 Skill bodies are harness-agnostic, but some YAML frontmatter keys are read only
-by Claude Code. They're safe to leave in shared skills — other harnesses ignore
-unknown keys.
+by Claude Code. They're safe in shared skills — other harnesses ignore unknown
+keys.
 
 | Field                      | Where        | Purpose                                                             |
 | -------------------------- | ------------ | ------------------------------------------------------------------- |
 | `user-invocable`           | `SKILL.md`   | Exposes the skill as a `/skill-name` slash command                  |
 | `argument-hint`            | `SKILL.md`   | Placeholder text shown after the slash command in the prompt        |
 | `allowed-tools`            | `SKILL.md`   | Pre-approves specific tool calls (e.g. `Bash(git diff:*)`)          |
-| `disable-model-invocation` | `SKILL.md`   | Prevents the model from auto-invoking; user must call it explicitly |
+| `disable-model-invocation` | `SKILL.md`   | Prevents auto-invocation; user must call the skill explicitly       |
 | `arguments`                | `SKILL.md`   | Structured argument definitions for a slash command                 |
 | `paths`                    | `rules/*.md` | Glob patterns that auto-load a rule when matching files are touched |
 
-### Generating rules from skills
+## Generating rules from skills
 
-`.claude/rules/go.md` and `.claude/rules/markdown.md` are **generated** from
-`go-conventions` and `markdown-conventions` skills — the skill `SKILL.md` is the
-single source of truth, and the rule differs only by frontmatter (`paths:` globs
-in place of `name:`/`description:`). Bodies stay byte-identical.
+`.claude/rules/go.md` and `.claude/rules/markdown.md` are **generated** from the
+`go-conventions` and `markdown-conventions` skills. The `SKILL.md` is the single
+source of truth; the rule differs only by frontmatter (`paths:` globs in place
+of `name:`/`description:`), and the bodies stay byte-identical.
 
-Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`). `make install` runs it automatically. After editing a `*-conventions` skill, run `make rules` before committing, since the generated rules are committed.
+Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make install` runs it automatically. After editing a `*-conventions` skill, run `make rules` before committing — the generated rules are committed.
 
 ## Workflow
 
-- research-plan → critique → next-task → commit → code-review → cleanup →
-  refactor → redesign
+A typical end-to-end flow through the skills:
+
+```txt
+research-plan → critique → next-task → commit → code-review → cleanup →
+refactor → redesign
+```
 
 ## Contributing
 
-When adding to this repository:
-
-1. Ensure additions are truly **global** and applicable across multiple projects
-1. Write clear, concise descriptions to ensure accurate interpretation
-1. Include examples where helpful
-1. Avoid project-specific details or configurations
+1. Ensure additions are truly **global** — applicable across multiple projects.
+1. Write clear, concise descriptions so agents interpret them accurately.
+1. Include examples where helpful; avoid project-specific details.
 1. Add new skills under `.agents/skills/<name>/` only — the `.claude/skills`
-   symlink picks them up automatically. Keep content harness-agnostic; put any
-   Claude-only guidance in an optional "Agent teams (if your harness supports
-   it)" section
-1. Test with Claude to ensure the desired behavior
+   symlink picks them up. Keep content harness-agnostic; put Claude-only
+   guidance in an optional "Agent teams (if your harness supports it)" section.
+1. Test with Claude to confirm the desired behavior.
 
 ## License
 
-This repository contains personal coding skills and preferences. Feel free to
-use and adapt these skills for your own projects.
+Personal coding skills and preferences. Feel free to use and adapt them for your
+own projects.
