@@ -75,11 +75,14 @@ If the fields below show commands rather than output, run each one first.
 
    - Verify staged: `git diff --cached --name-only`.
 
-   - Write the commit message to a temp file with your file-writing tool
-     (NOT a shell heredoc), then commit from that file:
+   - Write the commit message to a uniquely-named temp file with your
+     file-writing tool (NOT a shell heredoc), then commit from that file.
+     Use a random suffix so concurrent runs never collide, e.g.
+     `/tmp/commit-msg-<random>.txt` where `<random>` is a short random
+     string:
 
      ```bash
-     git commit -F /tmp/commit-msg.txt
+     git commit -F /tmp/commit-msg-a1b2c3.txt
      ```
 
      Do NOT pipe the message via a heredoc (`git commit -F - <<'EOF'`).
