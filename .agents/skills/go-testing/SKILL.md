@@ -2,13 +2,20 @@
 name: go-testing
 description: >-
   Write unit and integration tests for Go services. Use when
-  creating, editing or updating tests, test helpers, mocks, fuzz tests, or  benchmarks in Go projects.
+  creating, editing, or updating tests, test helpers, mocks, fuzz
+  tests, or benchmarks in Go projects.
 ---
 
 # Go Testing
 
 Guidelines for writing tests in Go services following
 established patterns.
+
+> [!NOTE]
+> [`go-conventions`](../go-conventions/SKILL.md) is the authority for Go
+> style and linter rules (`noctx`, `scopeguard`, mandatory test doc
+> comments). Load it alongside this skill; where the two overlap, it
+> wins. This skill covers test structure and templates.
 
 ## Instructions
 
@@ -30,6 +37,7 @@ Use table-driven tests with `t.Run()` for clear, maintainable
 test cases:
 
 ```go
+// TestFunctionName verifies FunctionName upper-cases input and rejects empty strings.
 func TestFunctionName(t *testing.T) {
     tests := []struct {
         name        string
@@ -195,8 +203,8 @@ func TestHandler(t *testing.T) {
                 reqBody = bytes.NewBufferString(tt.body)
             }
 
-            req := httptest.NewRequest(
-                tt.method, tt.path, reqBody)
+            req := httptest.NewRequestWithContext(
+                t.Context(), tt.method, tt.path, reqBody)
             req.Header.Set(
                 "Content-Type", "application/json")
 
@@ -216,26 +224,31 @@ func TestHandler(t *testing.T) {
 
 ### Mocks
 
-Create simple struct-based mocks that implement interfaces:
+Use `testify/mock`. Embed `mock.Mock`, record calls with `m.Called`,
+and add a compile-time interface check:
 
 ```go
 type MockClient struct {
-    logger *slog.Logger
+    mock.Mock
 }
 
-func NewMockClient(logger *slog.Logger) *MockClient {
-    return &MockClient{logger: logger}
-}
+var _ Client = (*MockClient)(nil)
 
-func (m *MockClient) DoSomething(
-    ctx context.Context, id string,
-) error {
-    m.logger.LogAttrs(ctx, slog.LevelInfo,
-        "mock_do_something",
-        slog.String("id", id),
-    )
-    return nil
+func (m *MockClient) DoSomething(ctx context.Context, id string) error {
+    args := m.Called(ctx, id)
+    return args.Error(0)
 }
+```
+
+Set expectations in the test and assert them:
+
+```go
+m := &MockClient{}
+m.On("DoSomething", mock.Anything, "abc").Return(nil)
+
+// exercise code under test with m ...
+
+m.AssertExpectations(t)
 ```
 
 ### Assertions
