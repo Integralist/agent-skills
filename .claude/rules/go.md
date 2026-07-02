@@ -133,8 +133,7 @@ resolves (`go get <mod>@<ver>` or edit go.mod), then re-run; confirm with
 
 Fall back to reading source (via the gopls tools, then `Read`) only when
 `go doc` is insufficient — an unexported detail, behavior not in the doc, or a
-symbol it can't find. When you do need a symbol's source, `go doc -src
-<path>.<Symbol>` usually beats a manual grep + read.
+symbol it can't find. When you do need a symbol's source, `go doc -src <path>.<Symbol>` usually beats a manual grep + read.
 
 ## Formatting
 
@@ -765,6 +764,14 @@ id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
 ```
 
 ## Testing
+
+> [!IMPORTANT]
+> Before writing, editing, or reviewing any `*_test.go` file — or test
+> helpers, mocks, fuzz tests, or benchmarks — load the
+> [`go-testing`](../go-testing/SKILL.md) skill for the full templates
+> (table-driven, f-tests, HTTP handlers, mocks, fuzz, benchmarks). The
+> rules below are the linter and naming constraints that bind whatever
+> you write; `go-testing` is the structure.
 
 Table-driven tests with `testCases` slice and `t.Run`:
 
