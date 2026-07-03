@@ -136,7 +136,6 @@ loads the same set.
 | **research**                 | Research a topic or repo deeply; writes a reference doc to `docs/research/`                        |
 | **research-plan**            | Coordinator: research (**research**) then plan (**project-plan**); bootstraps AGENTS.md            |
 | **security-review-feedback** | Triage a security review's findings — verdict per finding (true/false positive) before fixing      |
-| **slack-search**             | Drive Slack via Playwright MCP to run searches or Slackbot prompts                                 |
 | **summarize-for-product**    | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)                   |
 | **systematic-debugging**     | Four-phase debugging with root cause analysis                                                      |
 | **teach**                    | Stateful tutor workspace — missions, lessons, learning records, reference docs                     |
