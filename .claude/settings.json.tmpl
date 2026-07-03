@@ -1,11 +1,7 @@
 {
-  "awsAuthRefresh": "aws sso login --profile bedrock",
   "skillListingBudgetFraction": 0.04,
   "env": {
-    "AWS_PROFILE": "bedrock",
-    "AWS_REGION": "us-east-2",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "CLAUDE_CODE_USE_BEDROCK": "1",
     "CLAUDE_CODE_WORKFLOWS": "1"
   },
   "attribution": {
@@ -36,21 +32,7 @@
     ],
     "defaultMode": "plan"
   },
-  "model": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-opus-4-6-v1[1m]",
-  "modelOverrides": {
-    "claude-opus-4-8": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-opus-4-8",
-    "claude-opus-4-7": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-opus-4-7",
-    "claude-opus-4-6-1m": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-opus-4-6-v1[1m]",
-    "claude-opus-4-6": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-opus-4-6-v1",
-    "claude-opus-4-5": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-opus-4-5-20251101-v1:0",
-    "claude-opus-4-1": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-opus-4-1-20250805-v1:0",
-    "claude-sonnet-5": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-sonnet-5",
-    "claude-sonnet-4-6": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-sonnet-4-6",
-    "claude-sonnet-4-5": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-sonnet-4-5-20250929-v1:0",
-    "claude-sonnet-4": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-sonnet-4-20250514-v1:0",
-    "claude-haiku-4-5": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "claude-3-5-haiku": "arn:aws:bedrock:us-east-2:{{ op://Employee/AWS BedRock Account ID/password }}:inference-profile/global.anthropic.claude-3-5-haiku-20241022-v1:0"
-  },
+  "model": "claude-opus-4-6",
   "hooks": {
     "Notification": [
       {
