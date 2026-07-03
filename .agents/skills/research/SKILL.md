@@ -39,6 +39,21 @@ the `fastly/spotless` repo is covered by `*-spotless.md`.
   file.
 - **No match**: proceed with the mode below.
 
+## Search organizational knowledge sources
+
+Beyond code and the web, search organizational knowledge sources
+in **both** modes — see
+[`../shared/KNOWLEDGE-SOURCES.md`](../shared/KNOWLEDGE-SOURCES.md)
+for the source catalog and the fallback rule when a source is
+unavailable.
+
+For research specifically, weight them as follows:
+
+- **Confluence** and **Google Drive** — primary sources alongside
+  code and web docs.
+- **Slack** — supporting context, not authoritative
+  documentation.
+
 ## Mode A: Code research (repo by name or URL)
 
 ### Parse input
@@ -144,6 +159,9 @@ Spawn a single general-purpose subagent. The prompt must include:
 - Instructions to use relevant MCP servers available in the
   session (e.g. `gopls` for Go — `go_search`, `go_file_context`,
   `go_package_api`; `context7` for library docs).
+- Instructions to search organizational knowledge sources
+  (Confluence/Drive for design docs, Slack for discussions about
+  the repo) — see "Search organizational knowledge sources".
 - Instructions to note any stale `docs/**/*.md` or `**/README.md`
   files discovered during research.
 
@@ -169,7 +187,9 @@ specific repo.
 Study the topic deeply. Use every tool: read source code, explore
 the codebase, fetch docs via MCP, search the web, and check
 sibling repositories in the parent directory (`../`) for reference
-implementations or prior art.
+implementations or prior art. Also search organizational knowledge
+sources — Confluence, Google Drive, and Slack — per "Search
+organizational knowledge sources" above.
 
 ### Output
 

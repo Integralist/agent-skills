@@ -24,6 +24,10 @@ Before touching any code:
 1. **Gather diagnostic evidence** — logs, stack traces, state dumps.
 1. **Trace data flow** — follow the call chain to where bad values
    originate.
+1. **Check for prior occurrences** — search organizational knowledge
+   sources (Slack, Confluence, Jira) for the same error, a known issue,
+   or a past incident. See
+   [`../shared/KNOWLEDGE-SOURCES.md`](../shared/KNOWLEDGE-SOURCES.md).
 
 **Root-cause tracing technique:**
 
