@@ -21,9 +21,21 @@ for the rule this follows.
 1. **Determine the output path** — what the user provided, else
    `/tmp/output`.
 
-1. **Verify the file exists** by reading it. If missing or empty, ask
-   the user where the output is. Do NOT spawn a subagent without valid
-   test output.
+1. **Verify the file exists and is non-empty** by reading it. If missing
+   or empty, ask the user where the output is. Do NOT spawn a subagent
+   without valid test output.
+
+1. **Scan for failures mechanically — never eyeball.** A read of a long
+   file that interleaves passing lines and `make run` infra logs is how
+   real failures slip past. Search for markers instead:
+
+   ```bash
+   rg -n 'FAIL|--- FAIL|^panic:|DATA RACE|^not ok|Error Trace|build failed' <path>
+   ```
+
+   - Matches → these are the failures; pass them to the subagent.
+   - No matches → report "no failures found" *and the command you ran* so
+     the user can confirm. Never declare "all tests pass" from skimming.
 
 1. **Spawn a read-only diagnosis subagent.** Its prompt must include:
 
@@ -58,6 +70,8 @@ for the rule this follows.
 ## REQUIRED
 
 - Verify the output file exists before spawning.
+- Detect failures by search (`rg`), not by reading — a clean read of a
+  noisy file is not proof the tests passed.
 - The diagnosis subagent is read-only — it diagnoses, never edits.
 - Apply fixes in the main thread so each stays steerable.
 - Never weaken assertions to make tests pass.
