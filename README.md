@@ -98,6 +98,7 @@ loads the same set.
 | Skill                        | Description                                                                                        |
 | ---------------------------- | -------------------------------------------------------------------------------------------------- |
 | **agents-md**                | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                            |
+| **architect**                | Design-and-plan coordinator: bootstrap → research → spec → plan (idea to artifacts)                |
 | **bcp**                      | Branch, commit, and open a PR in one step (orchestrates **branch** + **commit** + **draft-pr**)    |
 | **behaviour-spec**           | Generate Gherkin acceptance criteria; executable godog scenarios for Go, prose for units           |
 | **branch**                   | Create a git feature branch named from session context (slug username + kebab slug)                |
@@ -115,7 +116,6 @@ loads the same set.
 | **domain-modeling**          | Build and sharpen a project's domain model — glossary (CONTEXT.md) and ADRs                        |
 | **draft-pr**                 | Draft a concise, direct pull request with a clear Problem and Solution                             |
 | **durable-rules**            | Surface systemic patterns from an investigation as codified conventions or anti-patterns           |
-| **extract-doc**              | Extract a formal ADR and/or PRD from an existing implementation plan (auto-detects format)         |
 | **git-metadata**             | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises       |
 | **go-api**                   | Generate a production-ready Go API service                                                         |
 | **go-conventions**           | Go coding conventions (mirrors `.claude/rules/go.md`)                                              |
@@ -130,17 +130,19 @@ loads the same set.
 | **markdown-to-skill**        | Bulk-convert Markdown files into agent skills                                                      |
 | **mysql-index-audit**        | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)                |
 | **next-task**                | Continue working through a project plan                                                            |
-| **project-plan**             | Create an implementation plan from research; embeds BDD criteria, extracts ADR/PRD                 |
+| **project-plan**             | Implementation plan from a spec; vertical slices with Blocked-by edges, extracts ADRs via to-adr   |
 | **redesign**                 | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning        |
 | **refactor**                 | Analyze a feature and produce a reimplementation plan                                              |
 | **research**                 | Research a topic or repo deeply; writes a reference doc to `docs/research/`                        |
-| **research-plan**            | Coordinator: research (**research**) then plan (**project-plan**); bootstraps AGENTS.md            |
 | **security-review-feedback** | Triage a security review's findings — verdict per finding (true/false positive) before fixing      |
 | **summarize-for-product**    | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)                   |
 | **systematic-debugging**     | Four-phase debugging with root cause analysis                                                      |
 | **teach**                    | Stateful tutor workspace — missions, lessons, learning records, reference docs                     |
 | **tech-docs**                | Write or improve technical documentation via five documentation pillars                            |
 | **test-feedback**            | Parse test failures and fix them in a background subagent                                          |
+| **to-adr**                   | Extract a formal ADR (one per decision) from a plan or design doc                                  |
+| **to-prd**                   | Extract a focused PRD (product what & why) from a spec or plan                                     |
+| **to-spec**                  | Write a spec to `docs/specifications/` — problem, solution, stories, acceptance criteria, seams    |
 | **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability       |
 
 ## Claude-specific frontmatter
@@ -172,7 +174,7 @@ Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make instal
 A typical end-to-end flow through the skills:
 
 ```txt
-research-plan → critique → next-task → commit → code-review → cleanup →
+architect → critique → next-task → commit → code-review → cleanup →
 refactor → redesign
 ```
 

@@ -16,8 +16,9 @@ Turn a feature description into behavioural specifications in Gherkin
 (Given/When/Then): a machine-checkable definition of done expressed in
 ubiquitous language shared by humans and AI.
 
-Normally invoked by [`project-plan`](../project-plan/SKILL.md), which folds the
-output into a plan document. Can also run standalone.
+Invoked by [`to-spec`](../to-spec/SKILL.md) for its acceptance-criteria block,
+and by [`project-plan`](../project-plan/SKILL.md) for its scaffold tasks. Can
+also run standalone.
 
 ## Two altitudes
 
@@ -43,7 +44,7 @@ implement it as an ordinary table-driven Go test. Do **not** generate
 1. Invoked from another skill with a feature description and confirmed language:
    use those.
 
-1. A plan path given: read it; derive behaviours from its summary and tasks.
+1. A spec or plan path given: read it; derive behaviours from it.
 
 1. Otherwise prompt:
 

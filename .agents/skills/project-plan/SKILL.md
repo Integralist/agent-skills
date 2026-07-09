@@ -1,38 +1,34 @@
 ---
 name: project-plan
 description: >-
-  Write a project plan / implementation plan document to docs/plans/.
-  ALWAYS use this skill — do not hand-roll a plan by mimicking files
-  in docs/. Triggers on: "create a project plan", "write a plan doc",
-  "create a new project plan doc", "save this as a plan so we can
-  revisit it", "turn this into a plan", "document this plan", or
-  /project-plan. Applies whether or not research exists, and even when
-  a plan was just discussed in chat. Detects the language, embeds
-  Gherkin acceptance criteria via behaviour-spec, defines parallel
-  work streams, and extracts a formal ADR/PRD.
+  Write an implementation plan to docs/plans/. ALWAYS use this skill
+  — never hand-roll a plan by mimicking files in docs/. Use when the
+  user wants to create a project/implementation plan, when a plan
+  discussed in chat should be persisted, or says /project-plan. Works
+  with or without a spec. Decomposes into vertical slices with
+  Blocked-by edges, points to the spec for acceptance criteria, and
+  extracts ADRs via to-adr.
 ---
 
 # Project Plan
 
-Produce a precise, actionable implementation guide from research documents and a
-description of what to build. The plan carries **executable acceptance criteria**
-(Gherkin) so an implementer — human or AI — has a machine-checkable definition of
-done.
+Produce a precise, actionable implementation guide: the volatile *how*. The
+stable *what* and the definition of done live in the
+[`spec`](../to-spec/SKILL.md); this plan links them and turns them into ordered,
+demoable work carrying real code — actual signatures, types, and import paths.
 
-Normally invoked by [`research-plan`](../research-plan/SKILL.md) after research
-completes, but it is the single way to produce a plan document and is most often
-run standalone.
+Normally invoked by [`architect`](../architect/SKILL.md) after the spec, but it
+is the single way to produce a plan document and is often run standalone.
 
 ## When to use this skill
 
-The frontmatter `description` carries the trigger phrases. Two points are easy
-to get wrong:
+Two points are easy to get wrong:
 
 - **A plan just discussed in chat is the source, not a prompt to start over.**
   When the user says "save this" or "turn this into a plan doc", capture *that*
   plan — do not invent a new one or skip the skill.
-- Research is optional input, not a precondition — proceed with or without
-  `docs/research/`.
+- A spec and research are optional input, not preconditions — proceed with or
+  without them.
 
 Never hand-roll a plan by copying the shape of files already in `docs/plans/`.
 
@@ -40,11 +36,14 @@ Never hand-roll a plan by copying the shape of files already in `docs/plans/`.
 
 Determine what to plan, in priority order:
 
-1. If invoked from another skill that passes the build goal and research
-   context, use those.
-1. **If a plan was already worked out in the current conversation, use that** as
-   the source — this skill structures and persists it; it does not start over.
-1. Otherwise ask the user what they want to build.
+1. Invoked from `architect` with a build goal, spec, and research → use those.
+1. **A plan already worked out in the current conversation** → structure and
+   persist *that*; do not start over.
+1. Otherwise → ask the user what to build.
+
+Locate the spec: a path passed in, or the matching file in
+`docs/specifications/`. Read it — its acceptance criteria and implementation
+decisions feed the plan.
 
 ### Detect programming language
 
@@ -58,46 +57,36 @@ Planning in Go (detected). Tell me if the snippets should use a
 different language.
 ```
 
-If the language is Go, load the
-[`go-conventions`](../go-conventions/SKILL.md) skill before producing any Go
-snippets, so all embedded code follows the project's Go style guide.
+If the language is Go, load [`go-conventions`](../go-conventions/SKILL.md)
+before producing any Go snippets, so embedded code follows the style guide.
 
 ### Gather context
 
-Read all `docs/research/*.md` files. These are the foundation for the plan.
+Read the spec (above) and all `docs/research/*.md`. These are the foundation for
+the plan.
 
-## Behavioural specs
+## Acceptance criteria & scaffolding
 
-Always include Given/When/Then acceptance criteria — they clarify intent whether
-the plan is code, documentation, or maintenance.
+The **spec** owns the acceptance criteria — the plan links them from its
+`## Specification` section, it does not restate them.
 
-**When the plan describes runnable code** whose behaviour can run as tests:
-delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md), passing the feature
-description and confirmed language. It returns:
-
-- An **acceptance criteria block** of feature-level Gherkin → goes in the
-  `## Acceptance Criteria (BDD)` section.
-- A list of **scaffold tasks** (create `.feature` files, add the runner
-  dependency, wire the test suite, stub step definitions) → merged into
-  `## Implementation Tasks`.
-
-**When the plan is non-code** (documentation, config, skill maintenance,
-operational work): author Given/When/Then scenarios as prose acceptance
-criteria directly — verified by checkable assertions (grep, command output, file
-state) rather than a test runner. Skip the `behaviour-spec` delegation and note
-that executable scaffolding was omitted.
+- **Code plan** → delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md),
+  passing the spec's scenarios and language, for its **scaffold tasks** (add the
+  runner dependency, create `features/*.feature`, wire the suite, stub steps).
+  Fold these into the slice that first exercises them.
+- **Non-code plan** → the spec's prose criteria are verified by checkable
+  assertions (grep, command output, file state); no executable scaffolding.
+- **No spec** (standalone, or a plan discussed in chat) → prefer running
+  [`to-spec`](../to-spec/SKILL.md) first. Otherwise delegate to `behaviour-spec`
+  for both criteria and scaffold tasks, and embed the criteria in
+  `## Specification` as a fallback, noting the spec is absent.
 
 ## Plan document
 
-Write the guide to `docs/plans/<yyyy-mm-dd>-<plan-slug>.md`. Get the date prefix
-from the shell (`date +%F`) — do not guess. Get the author from
-`git config user.name`.
-
-A new plan's `Status` is always `Planning`. The transition to `Complete` and the
-move to `docs/plans/completed/` happen at commit time — see
-[`commit`](../commit/SKILL.md).
-
-Use this template:
+Write to `docs/plans/<yyyy-mm-dd>-<plan-slug>.md`. Date from `date +%F`, author
+from `git config user.name`. A new plan's `Status` is always `Planning`; the
+transition to `Complete` and the move to `docs/plans/completed/` happen at
+commit time — see [`commit`](../commit/SKILL.md).
 
 ````markdown
 # {Plan Name}
@@ -109,76 +98,67 @@ Use this template:
 
 ## Summary
 
-{What needs to be built and why — one paragraph.}
+{What is being built and why — one paragraph. Full what/why and
+definition of done live in the spec.}
 
-## Acceptance Criteria
+## Specification
 
-Feature-level behaviour the implementation must satisfy. Always
-Given/When/Then. Heading and verification differ by plan type:
+Acceptance criteria and scope:
+[{spec name}](../specifications/<yyyy-mm-dd>-slug.md).
 
-- **Code plan** — title this `## Acceptance Criteria (BDD)`; scenarios
-  come from `behaviour-spec` and become executable (godog for Go).
-- **Non-code plan** (docs, config, maintenance) — keep
-  `## Acceptance Criteria`; scenarios are verified by checkable
-  assertions (grep, command output, file state), not a test runner.
-  Note that executable scaffolding was omitted.
-
-```gherkin
-Feature: {capability}
-
-  Scenario: {one concrete behaviour}
-    Given {a starting state}
-    When {an action occurs}
-    Then {an observable outcome holds}
-```
+{If no spec exists, embed feature-level Given/When/Then here as a
+fallback and note the spec is absent.}
 
 ## Research
 
-This plan draws from the following research documents:
-
 - [topic-a](../research/2026-06-17-topic-a.md)
-- [topic-b](../research/2026-06-17-topic-b.md)
 
 ## Prerequisites & Dependencies
 
-{External services, libraries, tools, or configuration required before
-implementation begins. If using feature-level Gherkin, list the BDD
-runner here — e.g. `github.com/cucumber/godog` for Go — so the new
-dependency is a conscious choice.}
+{External services, libraries, tools, or config required before
+implementation. For a code plan, list the BDD runner here — e.g.
+`github.com/cucumber/godog` for Go — so the new dependency is a
+conscious choice.}
 
-## Implementation Tasks
+## Implementation
 
-### Phase 1: {Phase Name}
+Vertical slices for multi-layer features; a flat task list for
+single-layer or non-code work — see "Slicing the work".
 
-- [ ] **Task 1.1**: {Specific task description}
+### Slice 1: {what it delivers, end to end}
 
-  {Detailed implementation notes with code snippets. Where it clarifies
-  behaviour, include unit-level Given/When/Then prose for the
-  table-driven test:}
+- **Blocked by**: None — can start immediately
+- **Delivers**: {observable, demoable behaviour across every layer
+  the slice touches}
+
+- [ ] **Task 1.1**: {specific task}
+
+  {Implementation notes with real code — actual signatures, types,
+  import paths. Where it clarifies behaviour, include unit-level
+  Given/When/Then prose for the table-driven test.}
 
   ```{language}
   // Example code showing the approach
   ```
 
-- [ ] **Task 1.2**: {Specific task description}
+### Slice 2: {what it delivers}
 
-### Phase 2: {Phase Name}
+- **Blocked by**: Slice 1 ({why})
+- **Delivers**: {…}
 
-- [ ] **Task 2.1**: {Specific task description}
+- [ ] **Task 2.1**: {specific task}
 
-### Phase N-1: Documentation
+### Documentation
 
-- [ ] **Task (N-1).1**: Update `**/README.md` files for packages whose
-  public API changed
-- [ ] **Task (N-1).2**: Update `docs/**/*.md` for user-facing behavior
-  changes
+- [ ] Update `**/README.md` for packages whose public API changed
+- [ ] Update `docs/**/*.md` for user-facing behaviour changes
 
-### Phase N: Verification
+### Verification
 
-- [ ] **Task N.1**: {How to test end-to-end}
-- [ ] **Task N.2**: All `## Acceptance Criteria` scenarios hold — for a
-  code plan, via `make test` (godog for Go); for a non-code plan, via
-  the grep/command/file-state assertions named in each scenario
+- [ ] {How to test end-to-end}
+- [ ] All spec acceptance criteria hold — code: via `make test`
+  (godog for Go); non-code: via the grep/command/file-state
+  assertions named in each scenario
 
 ## File Changes
 
@@ -188,12 +168,9 @@ dependency is a conscious choice.}
 
 ## Parallel Execution
 
-This section defines how to split implementation across subagents for
-parallel work.
-
 > [!IMPORTANT]
-> Only delegate a work stream to a fire-and-forget subagent if it is
-> independent, well-specified, touches files no other stream touches,
+> Only delegate a slice to a fire-and-forget subagent if it is
+> independent, well-specified, touches files no other slice touches,
 > and won't need interactive steering. A sealed subagent can't be
 > redirected mid-flight — it ploughs ahead while objections pile up.
 > Work you expect to iterate on belongs in the main thread or a
@@ -202,125 +179,98 @@ parallel work.
 > returns a proposed-change list, then the main thread applies edits
 > with the user able to veto each one.
 
-### Subagent Roles
+The Blocked-by graph is the parallelism: slices sharing no
+unresolved blocker and touching different files can run concurrently.
+Assign each to a subagent role.
 
-| Subagent Role             | Responsibility                    |
-| ------------------------- | --------------------------------- |
-| {Role description}        | {What this subagent owns}         |
-| {Role description}        | {What this subagent owns}         |
-
-### Work Streams
-
-Group tasks into independent work streams that can run in parallel.
-Each stream is assigned to a subagent role.
-
-**Stream 1 — {Stream Name}** ({role description})
-
-- Task {X.Y}
-- Task {X.Z}
-
-**Stream 2 — {Stream Name}** ({role description})
-
-- Task {X.Y}
-- Task {X.Z}
-
-### Synchronization Points
-
-List points where streams must wait for each other before proceeding.
-Reference specific task IDs.
-
-| Sync Point           | Blocked Stream | Waiting On     |
-| -------------------- | -------------- | -------------- |
-| {e.g., API contract} | {stream 2}     | {stream 1}     |
+| Subagent Role      | Slices              |
+| ------------------ | ------------------- |
+| {Role description} | {Slice 1, Slice 3}  |
 
 ## Notes & Caveats
 
 - {Edge cases, decisions, risks, or open questions.}
 ````
 
-### Parallel execution section
+## Slicing the work
 
-> [!NOTE]
-> Parallel *coding* subagents suit independent, well-specified
-> streams that touch different files with no shared state and a
-> clear contract agreed up front. They do **not** suit work you
-> expect to steer interactively — a subagent editing code can't
-> be redirected mid-flight, so iterative or exploratory work
-> belongs in the main thread or a chat-able teammate, not a
-> sealed parallel stream. When in doubt, prefer fewer streams.
-> See
-> [`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
-> for the full rule. The generated plan carries a condensed version
-> of this rule in its `## Parallel Execution` section so it travels
-> to repos that lack the shared file — keep that embedded caveat
-> intact.
+Decompose into **vertical slices**, not horizontal layers. A slice is a tracer
+bullet: it cuts a narrow but *complete* path through every layer it touches
+(schema, API, UI, tests), is independently demoable, and fits one work session.
+Layer-by-layer phases leave nothing runnable until the last phase lands; a slice
+gives working behaviour early. Where the spec has acceptance-criteria scenarios,
+each scenario is a natural slice boundary.
 
-First decide whether parallelism applies at all. If the work is a single
-coherent stream, or is inherently sequential (each task depends on the prior
-one), say so in one line and omit the Subagent Roles, Work Streams, and
-Synchronization Points tables — do not fabricate streams to fill the template.
-Only fill in the section when there are genuinely independent streams.
+Every slice declares **Blocked by** — the slices that must finish first, or
+"None — can start immediately".
 
-When filling it in:
+Not everything slices vertically:
 
-1. **Identify independent work streams.** Tasks that touch different files,
-   packages, or layers with no shared state can run in parallel.
-1. **Define subagent roles by stream, not by task.** Each subagent owns a
-   coherent slice of the system, not a grab-bag of unrelated tasks.
-1. **Minimize synchronization points.** Prefer designs where streams share a
-   contract (interface, schema, API spec) agreed up front so they work
-   independently.
-1. **Keep the team small.** Two to four subagents is typical; more means more
-   coordination overhead.
-1. **Make execution instructions concrete.** The plan goes to an AI agent later;
-   instructions must be specific enough to follow mechanically.
+- **Single-layer or non-code work** (one package, a doc set, config) has no
+  layers to cut — use a flat task list or group by concern, but keep the
+  Blocked-by edges.
+- **Wide mechanical refactors** (a rename or API change across many call sites)
+  use **expand–contract**:
+  1. **Expand** — introduce the new form alongside the old; nothing breaks.
+  1. **Migrate** — rewrite call sites in batches by blast radius, each batch a
+     slice blocked by Expand.
+  1. **Contract** — delete the old form once unused; blocked by all migration
+     slices.
 
-## Extract formal documents
+## Parallel execution
 
-After the plan is written, decide whether formal documents are warranted:
+First decide whether parallelism applies at all. A single coherent stream, or an
+inherently sequential chain (each slice blocked by the prior), runs in the main
+thread — say so in one line and omit the Subagent Role table. Do not fabricate
+concurrency to fill the template.
 
-- **ADR** — invoke when the plan records a genuine architecture decision with a
-  real alternative rejected for a stated reason. Skip for mechanical changes,
-  single-obvious-way tasks, and maintenance work.
-- **PRD** — invoke when the plan has a product/user surface with goals or success
-  criteria worth framing independently. Skip for internal refactors, tooling,
-  and documentation work.
+When it does apply:
 
-If either bar is met, delegate to [`extract-doc`](../extract-doc/SKILL.md),
-passing the plan path. It writes to `docs/adr/` and `docs/prd/` using the same
-`<yyyy-mm-dd>-<slug>` filename convention.
+- **Read the Blocked-by graph.** Slices with no shared unresolved blocker,
+  touching different files, run concurrently.
+- **Define roles by slice, not by task.** Each role owns a coherent slice of the
+  system, not a grab-bag.
+- **Keep the team small** — two to four roles; more means more coordination.
+- **Make instructions concrete** — the plan goes to an AI agent later, so they
+  must be followable mechanically.
 
-If neither bar is met, note in the plan's `## Notes & Caveats` why formal
-documents were skipped, and move on.
+The embedded `> [!IMPORTANT]` steerability caveat travels inside the generated
+plan so it reaches repos without
+[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md) — keep
+it intact. That file holds the full rule.
+
+## Extract decisions
+
+After the plan is written, delegate to [`to-adr`](../to-adr/SKILL.md), passing
+the plan path. Its value gate produces an ADR only for a genuine decision (a
+fork with a rejected alternative) and skips mechanical or single-obvious-way
+work. If it produces nothing, note in `## Notes & Caveats` why no ADR was
+warranted. A PRD, when warranted, is offered separately by `architect` via
+[`to-prd`](../to-prd/SKILL.md).
 
 ## Guidelines
 
 - Use specific file paths and line numbers when referencing code.
 - Cite every factual claim inline — `path/to/file.go:42` for code, URL for
-  external docs. Claims you cannot cite must be labelled "unverified assumption"
-  and include how to verify them.
+  external docs. Label anything you cannot cite an unverified assumption.
 - Before finalizing, verify every cited reference resolves: grep/read each
-  `path:line` and confirm the symbol still exists. Line numbers go stale — a
-  citation pointing at the wrong line is worse than none.
-- Break work into logical phases (usually by component or layer).
-- Each task should be small enough to complete in one session.
-- Include a verification phase with concrete test commands.
-- Code snippets must be precise — real function signatures, types, and import
-  paths. Not pseudocode.
-- Keep plans actionable.
-- Omit needless words — see
+  `path:line` and confirm the symbol still exists. A citation pointing at the
+  wrong line is worse than none.
+- Each slice small enough to complete in one session.
+- Code snippets must be precise — real signatures, types, and import paths. Not
+  pseudocode.
+- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) and omit
+  needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
   load-bearing detail (paths, constraints, acceptance criteria).
-- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) for all
-  Markdown output.
 
 ## Agent teams (if your harness supports it)
 
 Execute the Parallel Execution section as a real team: create one teammate per
-work stream, give each its stream's tasks, and use the Synchronization Points
-table to decide where a teammate must wait for another's output before
-proceeding. The team lead coordinates hand-offs and shuts the team down when all
-tasks complete.
+concurrent slice, give each its slice's tasks, and use the Blocked-by edges to
+decide where a teammate must wait for another's output before proceeding. The
+team lead coordinates hand-offs and shuts the team down when all slices
+complete.
 
 See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for enablement
 instructions.
