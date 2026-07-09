@@ -249,6 +249,14 @@ work. If it produces nothing, note in `## Notes & Caveats` why no ADR was
 warranted. A PRD, when warranted, is offered separately by `architect` via
 [`to-prd`](../to-prd/SKILL.md).
 
+## Surface durable rules
+
+After extracting decisions, delegate to
+[`durable-rules`](../durable-rules/SKILL.md). It codifies systemic patterns from
+the investigation as conventions or anti-patterns and skips entirely when
+nothing durable surfaced. Delegating here reaches both the `architect` flow and
+standalone `/project-plan` runs.
+
 ## Guidelines
 
 - Use specific file paths and line numbers when referencing code.
