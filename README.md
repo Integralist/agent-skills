@@ -137,6 +137,7 @@ loads the same set.
 | **security-review-feedback** | Triage a security review's findings — verdict per finding (true/false positive) before fixing      |
 | **summarize-for-product**    | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)                   |
 | **systematic-debugging**     | Four-phase debugging with root cause analysis                                                      |
+| **task**                     | Elicit the user's intent before starting work; front of the design pipeline                        |
 | **teach**                    | Stateful tutor workspace — missions, lessons, learning records, reference docs                     |
 | **tech-docs**                | Write or improve technical documentation via five documentation pillars                            |
 | **test-feedback**            | Parse test failures and fix them in a background subagent                                          |

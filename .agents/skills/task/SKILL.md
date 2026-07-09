@@ -2,8 +2,9 @@
 name: task
 description: >-
   Elicit the user's intent before starting work. Use when a request is vague,
-  when kicking off a new task, or when the user says "help me with this",
-  "I need something", "let's work on...", "draft a task", or /task.
+  when kicking off a new task, when another skill hits a vague request and needs
+  to clarify it, or when the user says "help me with this", "I need something",
+  "let's work on...", "draft a task", or /task.
 ---
 
 # Task

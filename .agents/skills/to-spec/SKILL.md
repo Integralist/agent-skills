@@ -27,7 +27,8 @@ Determine what to specify, in priority order:
 1. Invoked from `architect` with a build goal and research context → use those.
 1. A spec worked out in the current conversation → capture *that*; do not start
    over.
-1. Otherwise → ask the user what to build.
+1. Otherwise → ask the user what to build; if the request is vague, elicit
+   intent first via [`task`](../task/SKILL.md).
 
 Detect the primary language from the repo so acceptance criteria target the
 right test runner; fold the detection into whatever you ask next rather than

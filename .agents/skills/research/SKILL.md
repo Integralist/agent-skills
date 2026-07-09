@@ -17,6 +17,9 @@ Output goes to `docs/research/<yyyy-mm-dd>-<slug>.md` (date prefix
 from today's date) and serves as the foundation for later
 planning or implementation work.
 
+If the request is too vague to research (no clear topic or repo), elicit intent
+first via [`task`](../task/SKILL.md).
+
 ## Detect research mode
 
 | Input                                 | Mode               |

@@ -26,6 +26,9 @@ then prompt:
 What do you want to build? I'll research it first.
 ```
 
+If the answer is vague, delegate to [`task`](../task/SKILL.md) to elicit intent
+(audience, goal, context, constraints, format) before researching.
+
 ## Phase 1: Research
 
 Delegate to [`research`](../research/SKILL.md). It detects whether the input is

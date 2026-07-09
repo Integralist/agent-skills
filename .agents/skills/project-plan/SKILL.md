@@ -39,7 +39,8 @@ Determine what to plan, in priority order:
 1. Invoked from `architect` with a build goal, spec, and research → use those.
 1. **A plan already worked out in the current conversation** → structure and
    persist *that*; do not start over.
-1. Otherwise → ask the user what to build.
+1. Otherwise → ask the user what to build; if the request is vague, elicit
+   intent first via [`task`](../task/SKILL.md).
 
 Locate the spec: a path passed in, or the matching file in
 `docs/specifications/`. Read it — its acceptance criteria and implementation
