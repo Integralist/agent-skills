@@ -21,8 +21,8 @@ description: >-
 
 Reconcile project-instructions files so **AGENTS.md is canonical** and
 `CLAUDE.md` / `GEMINI.md` are thin stubs that `@`-import it. The same
-project then works from Claude Code, Gemini CLI, or any agent that
-honours `AGENTS.md`, with no duplicated content.
+project then works from Claude Code, Gemini CLI, GitHub Copilot, or any
+agent that honours `AGENTS.md`, with no duplicated content.
 
 ## Two modes
 
@@ -54,9 +54,16 @@ needs (see "Inputs").
 - Gemini CLI reads `GEMINI.md` and supports `@file.md` imports with
   relative or absolute paths. (See
   <https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md>.)
+- GitHub Copilot reads `AGENTS.md` **natively** — the nearest one in the
+  directory tree wins — so it needs no stub. Its legacy
+  `.github/copilot-instructions.md` accepts only inline Markdown with
+  **no import syntax**, so it can't point at AGENTS.md; treat it as a
+  content source to drain, not a stub. (See
+  <https://docs.github.com/en/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot>.)
 
-So `CLAUDE.md → @AGENTS.md` and `GEMINI.md → @AGENTS.md` give both
-tools the same content without duplication.
+So `CLAUDE.md → @AGENTS.md` and `GEMINI.md → @AGENTS.md` give both tools
+the same content without duplication, while Copilot picks up AGENTS.md
+directly.
 
 ## Bootstrap template (the rubric)
 
@@ -82,6 +89,8 @@ files:
 - `AGENTS.md` (canonical target)
 - `CLAUDE.md` (Claude Code pointer)
 - `GEMINI.md` (Gemini CLI pointer)
+- `.github/copilot-instructions.md` (GitHub Copilot legacy source — a
+  content source to consolidate, never a stub; see "GitHub Copilot")
 
 "Substantive content" means more than boilerplate or an import line. A
 file whose only non-whitespace content is `@AGENTS.md`
@@ -102,10 +111,15 @@ Inventory what is present and substantive, then follow the matching row.
 | none      | none      | content   | **Score** GEMINI.md against the rubric; promote (or rewrite to match) → AGENTS.md, then stub both pointers                               |
 | none      | content   | content   | **Score both** against the rubric; pick the one that scores higher as the base, backfill missing sections from the other, then stub both |
 
+`.github/copilot-instructions.md` sits outside this table — it is never
+a stub. If it holds substantive content, fold it into AGENTS.md per
+"GitHub Copilot" below; otherwise ignore it.
+
 ## Picking the canonical source
 
-When more than one file is in the running, score each candidate against
-the rubric:
+When more than one file is in the running — including a substantive
+`.github/copilot-instructions.md` — score each candidate against the
+rubric:
 
 1. **Rubric coverage** — WHY, WHAT, HOW. Each present, accurate, and
    non-stale scores a point; missing or wrong scores zero.
@@ -113,15 +127,16 @@ the rubric:
    and stays within ~200 lines.
 1. **Freedom from tool-specific noise** — generic guidance (structure,
    build commands, conventions) scores higher than tool-specific
-   features (Claude skills, plan mode, Gemini checkpointing/sandbox).
-   Tool-specific content is fine, but lives in the stub, not in
-   AGENTS.md.
+   features (Claude skills, plan mode, Gemini checkpointing/sandbox,
+   Copilot coding-agent settings). Tool-specific content is fine, but
+   lives in the stub, not in AGENTS.md.
 
 The **highest-scoring file becomes the base**. Backfill missing rubric
 sections from the others. Peel anything tool-specific into the matching
-stub under `## Claude Code` or `## Gemini CLI`. If two candidates score
-roughly equal, show the user a short diff summary and ask which should
-be canonical before writing.
+stub under `## Claude Code` or `## Gemini CLI`; Copilot-specific
+guidance stays in `.github/copilot-instructions.md` (see "GitHub
+Copilot"). If two candidates score roughly equal, show the user a short
+diff summary and ask which should be canonical before writing.
 
 ## Stub templates
 
@@ -163,6 +178,28 @@ With Gemini-specific additions:
 <Gemini-specific notes here>
 ```
 
+## GitHub Copilot
+
+Copilot has no stub. It reads `AGENTS.md` natively, so once content is
+canonical Copilot picks it up with no extra file. Handle
+`.github/copilot-instructions.md` by what it holds:
+
+- **Substantive content** — score and merge it into AGENTS.md like any
+  other candidate (see "Picking the canonical source"), then reduce the
+  file to genuinely Copilot-specific guidance or delete it. It cannot
+  `@`-import AGENTS.md, so never leave an import line in it.
+- **Absent or already thin** — leave it; native AGENTS.md support covers
+  Copilot.
+
+If an org mandates the file exist, make it a short prose pointer plus
+any Copilot-specific notes — a pointer in prose, not an import:
+
+```markdown
+The canonical project instructions live in `AGENTS.md`; read that file.
+
+<Copilot-specific notes here>
+```
+
 ## Update mode
 
 The file is already canonical. Run all three jobs in sequence, then gate
@@ -174,7 +211,9 @@ and 2 (still gate behind one confirmation).
    (above); do not restate it. Flag missing or malformed WHY/WHAT/HOW
    sections, length creeping past ~200 lines, and tool-specific content
    that has leaked in from a stub (it belongs under `## Claude Code` /
-   `## Gemini CLI`). Propose concrete fixes.
+   `## Gemini CLI`). Also flag substantive content that has accumulated
+   in `.github/copilot-instructions.md`; it should be folded back into
+   AGENTS.md (see "GitHub Copilot"). Propose concrete fixes.
 1. **Freshness check** — verify the WHAT/HOW claims against the repo
    using read-only tools. Confirm the build/test/lint commands exist
    (cross-check `Makefile`, `package.json` scripts, or equivalent), that
@@ -199,8 +238,11 @@ After writing, confirm:
    tool-agnostic).
 1. `CLAUDE.md` begins with `@AGENTS.md` on its first non-empty line.
 1. `GEMINI.md` begins with `@AGENTS.md` on its first non-empty line.
-1. No content lives **only** in `CLAUDE.md` or `GEMINI.md` unless it is
-   genuinely tool-specific.
+1. `.github/copilot-instructions.md`, if present, holds no substantive
+   content missing from AGENTS.md and contains no import line.
+1. No content lives **only** in `CLAUDE.md`, `GEMINI.md`, or
+   `.github/copilot-instructions.md` unless it is genuinely
+   tool-specific.
 
 Report the final state to the user as a short summary — which file is
 canonical, what was moved, what was created.
