@@ -55,7 +55,7 @@ needs (see "Inputs").
   relative or absolute paths. (See
   <https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/gemini-md.md>.)
 
-So `CLAUDE.md → @AGENTS.md` and `GEMINI.md → @./AGENTS.md` give both
+So `CLAUDE.md → @AGENTS.md` and `GEMINI.md → @AGENTS.md` give both
 tools the same content without duplication.
 
 ## Bootstrap template (the rubric)
@@ -84,7 +84,7 @@ files:
 - `GEMINI.md` (Gemini CLI pointer)
 
 "Substantive content" means more than boilerplate or an import line. A
-file whose only non-whitespace content is `@AGENTS.md` or `@./AGENTS.md`
+file whose only non-whitespace content is `@AGENTS.md`
 is a stub, not content.
 
 ## Decision table
@@ -146,17 +146,17 @@ With Claude-specific additions:
 
 ### GEMINI.md
 
-Gemini's import example uses the `@./path` form; prefer it for
-portability.
+Gemini's import example uses the `@path` form; use `@AGENTS.md` for
+parity with CLAUDE.md.
 
 ```markdown
-@./AGENTS.md
+@AGENTS.md
 ```
 
 With Gemini-specific additions:
 
 ```markdown
-@./AGENTS.md
+@AGENTS.md
 
 ## Gemini CLI
 
@@ -198,7 +198,7 @@ After writing, confirm:
 1. `AGENTS.md` matches the rubric (WHY / WHAT / HOW, under ~200 lines,
    tool-agnostic).
 1. `CLAUDE.md` begins with `@AGENTS.md` on its first non-empty line.
-1. `GEMINI.md` begins with `@./AGENTS.md` on its first non-empty line.
+1. `GEMINI.md` begins with `@AGENTS.md` on its first non-empty line.
 1. No content lives **only** in `CLAUDE.md` or `GEMINI.md` unless it is
    genuinely tool-specific.
 
