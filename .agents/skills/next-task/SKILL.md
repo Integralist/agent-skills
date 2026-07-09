@@ -26,7 +26,12 @@ Resume work from a project plan, in the main thread.
    OK, or did you have a different plan in mind?
    ```
 
-1. **Read the plan** and find the first unchecked task (`- [ ]`).
+1. **Read the plan** and find the first actionable unchecked task (`- [ ]`) in
+   document order. A task is actionable unless its slice's `- **Blocked by**:`
+   line names a slice that still has unchecked tasks — skip a blocked task and
+   keep scanning. Plans without `Blocked by` (older phase-based plans) never
+   block, so the first unchecked task wins. If every remaining task is blocked,
+   report which slice is next and what it waits on, then stop.
 
 1. **Announce the task:**
 
