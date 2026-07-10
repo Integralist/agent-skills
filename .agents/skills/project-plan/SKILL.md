@@ -4,10 +4,10 @@ description: >-
   Write an implementation plan to docs/plans/. ALWAYS use this skill
   — never hand-roll a plan by mimicking files in docs/. Use when the
   user wants to create a project/implementation plan, when a plan
-  discussed in chat should be persisted, or says /project-plan. Works
-  with or without a spec. Decomposes into vertical slices with
-  Blocked-by edges, points to the spec for acceptance criteria, and
-  extracts ADRs via to-adr.
+  discussed in chat should be persisted, or says /project-plan.
+  Guarantees a spec exists, invoking to-spec if absent. Decomposes
+  into vertical slices with Blocked-by edges, points to the spec for
+  acceptance criteria, and extracts ADRs via to-adr.
 ---
 
 # Project Plan
@@ -27,8 +27,8 @@ Two points are easy to get wrong:
 - **A plan just discussed in chat is the source, not a prompt to start over.**
   When the user says "save this" or "turn this into a plan doc", capture *that*
   plan — do not invent a new one or skip the skill.
-- A spec and research are optional input, not preconditions — proceed with or
-  without them.
+- Research is an optional input, not a precondition. A spec is required; if
+  absent, you must run `to-spec` first to create one.
 
 Never hand-roll a plan by copying the shape of files already in `docs/plans/`.
 
@@ -43,8 +43,9 @@ Determine what to plan, in priority order:
    intent first via [`task`](../task/SKILL.md).
 
 Locate the spec: a path passed in, or the matching file in
-`docs/specifications/`. Read it — its acceptance criteria and implementation
-decisions feed the plan.
+`docs/specifications/`. If no spec file exists yet, you must first run
+[`to-spec`](../to-spec/SKILL.md) to create one. Read it — its acceptance
+criteria and implementation decisions feed the plan.
 
 ### Detect programming language
 
@@ -77,10 +78,9 @@ The **spec** owns the acceptance criteria — the plan links them from its
   Fold these into the slice that first exercises them.
 - **Non-code plan** → the spec's prose criteria are verified by checkable
   assertions (grep, command output, file state); no executable scaffolding.
-- **No spec** (standalone, or a plan discussed in chat) → prefer running
-  [`to-spec`](../to-spec/SKILL.md) first. Otherwise delegate to `behaviour-spec`
-  for both criteria and scaffold tasks, and embed the criteria in
-  `## Specification` as a fallback, noting the spec is absent.
+- **No spec** (standalone, or a plan discussed in chat) → you must run
+  [`to-spec`](../to-spec/SKILL.md) first to generate a specification doc under
+  `docs/specifications/`. This ensures a stable specification file exists.
 
 ## Plan document
 
@@ -106,9 +106,6 @@ definition of done live in the spec.}
 
 Acceptance criteria and scope:
 [{spec name}](../specifications/<yyyy-mm-dd>-slug.md).
-
-{If no spec exists, embed feature-level Given/When/Then here as a
-fallback and note the spec is absent.}
 
 ## Research
 
