@@ -81,6 +81,24 @@ surfaces, coding style) is discoverable via tools, MCPs, skills, and
 reading the code. Keep it under 200 lines — both tools load these files
 in full at session start, and longer files reduce adherence.
 
+When the project has a `CONTEXT.md` (or `CONTEXT-MAP.md`) domain glossary,
+open AGENTS.md with a short **Domain Language** section pointing to it, so
+agents consult the canonical terms before reusing overloaded words. Point
+to the glossary; never copy it in. Skip the section when no such file
+exists.
+
+Template below — the overloaded words are a placeholder. Replace them
+with the terms this project's `CONTEXT.md` actually flags as overloaded;
+if the glossary names none, drop the "such as …" clause.
+
+```markdown
+## Domain Language
+
+Canonical domain terms and their relationships live in `CONTEXT.md`.
+Consult it before introducing new terminology or reusing overloaded
+words such as "active", "domain", or "activation".
+```
+
 ## Inputs
 
 Operate on the project root where the skill is invoked. The relevant
@@ -209,11 +227,13 @@ and 2 (still gate behind one confirmation).
 
 1. **Structure audit** — score the existing AGENTS.md against the rubric
    (above); do not restate it. Flag missing or malformed WHY/WHAT/HOW
-   sections, length creeping past ~200 lines, and tool-specific content
-   that has leaked in from a stub (it belongs under `## Claude Code` /
-   `## Gemini CLI`). Also flag substantive content that has accumulated
-   in `.github/copilot-instructions.md`; it should be folded back into
-   AGENTS.md (see "GitHub Copilot"). Propose concrete fixes.
+   sections, a missing **Domain Language** pointer when a
+   `CONTEXT.md`/`CONTEXT-MAP.md` exists, length creeping past ~200 lines,
+   and tool-specific content that has leaked in from a stub (it belongs
+   under `## Claude Code` / `## Gemini CLI`). Also flag substantive
+   content that has accumulated in `.github/copilot-instructions.md`; it
+   should be folded back into AGENTS.md (see "GitHub Copilot"). Propose
+   concrete fixes.
 1. **Freshness check** — verify the WHAT/HOW claims against the repo
    using read-only tools. Confirm the build/test/lint commands exist
    (cross-check `Makefile`, `package.json` scripts, or equivalent), that
@@ -236,6 +256,8 @@ After writing, confirm:
 
 1. `AGENTS.md` matches the rubric (WHY / WHAT / HOW, under ~200 lines,
    tool-agnostic).
+1. If a `CONTEXT.md`/`CONTEXT-MAP.md` exists, `AGENTS.md` opens with a
+   **Domain Language** section pointing to it (not copying it).
 1. `CLAUDE.md` begins with `@AGENTS.md` on its first non-empty line.
 1. `GEMINI.md` begins with `@AGENTS.md` on its first non-empty line.
 1. `.github/copilot-instructions.md`, if present, holds no substantive
