@@ -145,8 +145,9 @@ Spawn one subagent per dimension (roles below are descriptions, not agent names
 - The review dimension and focus area
 - `DIFF_PATH` (with the instruction to read the diff from it) and `FILE_LIST`
 - For `LARGE_DIFF`: read each changed file individually
-- **Do NOT add comments to any PR. Return findings as structured JSON (schema
-  below) when complete.**
+- **Review-only; do not modify code or run tools that change state. Do NOT add
+  comments to any PR. Return findings as structured JSON (schema below) when
+  complete.**
 
 ### Findings schema
 

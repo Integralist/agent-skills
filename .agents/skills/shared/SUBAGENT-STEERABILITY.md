@@ -20,6 +20,11 @@ Split tasks by whether the subagent **edits the workspace**:
   end. The user's "I don't like this, change it" never reaches a
   subagent that isn't the main agent.
 
+Two subagent shapes make editing safe: **two-phase** when each edit
+needs its own decision, and **verified-pattern fan-out** when the
+decision is made once and mechanically repeated across files. Both
+are below.
+
 ## What to do instead for editing work
 
 Prefer, in order:
@@ -31,6 +36,18 @@ Prefer, in order:
    keeps the parallel-scan speed of a subagent while returning
    every edit to a steerable context. See `cleanup` and
    `test-feedback` for worked examples.
+1. **Verified-pattern fan-out.** When the edit is mechanical
+   replication of one pattern across many independent files,
+   establish and verify the pattern on a single representative case
+   in the main thread, get the user's approval of that case, then
+   fan out subagents to apply the identical transform to the rest.
+   The user approves the pattern plus one worked example — not each
+   file — so the parallelism is real and the control point survives.
+   Valid only when the transform is uniform, the files are
+   independent, and a reviewed exemplar exists. If a file needs
+   judgment the exemplar didn't settle, it is not this pattern —
+   fall back to the two-phase split. See `markdown-to-skill` and
+   `go-api`.
 1. **A chat-able named teammate** (if the harness supports agent
    teams) — a delegate the user can talk to directly mid-flight,
    rather than a fire-and-forget dispatch. See

@@ -239,7 +239,10 @@ and 2 (still gate behind one confirmation).
    (cross-check `Makefile`, `package.json` scripts, or equivalent), that
    documented entry points and structure still match, and that listed
    gotchas still apply. Flag anything stale or wrong, and cite what you
-   checked.
+   checked. On a large repo, run this as a read-only subagent (or one per
+   claim class) that returns a findings list — review-only; do not modify
+   code or run tools that change state. It feeds the confirmation gate
+   below; it edits nothing.
 1. **Session-lessons harvest** — review the current session for durable,
    non-obvious facts that fit WHY/WHAT/HOW: a gotcha that cost time, a
    non-obvious command, a constraint not discoverable from the code.

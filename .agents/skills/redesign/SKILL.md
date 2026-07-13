@@ -46,7 +46,8 @@ user's Go conventions):
 
 Spawn all four in a single message with parallel tool calls. All four are the
 platform's `general-purpose` (workhorse) role. Each prompt must include the
-project metadata, the detected language, and the in-scope file list.
+project metadata, the detected language, the in-scope file list, and the
+instruction: review-only; do not modify code or run tools that change state.
 
 > [!IMPORTANT]
 > Every subagent reports findings only — **none of them edit code.**

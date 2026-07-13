@@ -85,6 +85,12 @@ constraints, risks.}
 Use `Accepted` for a committed decision, `Proposed` while the plan is still
 tentative.
 
+When a plan yields several decisions, this is a
+[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): draft the
+**first** ADR, confirm its shape with the user, then fan out subagents to draft
+the rest — one per decision, each passed only its decision and the approved
+skeleton. The value gate above still applies per decision.
+
 ## Report
 
 List the files created and give a one-line summary of each decision recorded.

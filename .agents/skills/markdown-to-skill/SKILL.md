@@ -90,6 +90,17 @@ Skip conflicts unless the user confirms overwrite. For each file:
    <original content, minus old frontmatter>
    ```
 
+### Parallel apply (optional)
+
+Conversion is a uniform, per-file transform — a
+[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md). Convert
+the **first** file in the main thread and show the user the result. Once
+they confirm the derived name, description, and frontmatter, the rest is
+mechanical: fan out one subagent per file (or per batch) to apply the
+identical Step 5 rules, each writing its own skill dir and reporting back.
+Conflicts still skip per Step 5. The user approves the transform once, not
+each file.
+
 ### Step 6: Report results
 
 Report the destination, count of skills created, files skipped (with

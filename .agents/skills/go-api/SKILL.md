@@ -24,6 +24,16 @@ When asked to create a new Go API service:
    `{SERVICE_NAME_SNAKE}`, `{SERVICE_NAME_PASCAL}`,
    `{MODULE_PATH}`) with appropriate values
 
+### Parallel scaffold (optional)
+
+Scaffolding is a fixed placeholder map applied across independent
+templates — a
+[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md). Scaffold
+**one representative file** first (e.g. `internal/api`) with placeholders
+resolved, and confirm the substitutions and layout with the user. Once
+approved, fan out subagents to instantiate the remaining templates in
+parallel — the placeholder map is fixed, so the work is mechanical.
+
 ## Project Structure
 
 Generate the following structure:

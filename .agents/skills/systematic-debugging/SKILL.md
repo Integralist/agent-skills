@@ -29,6 +29,11 @@ Before touching any code:
    or a past incident. See
    [`../shared/KNOWLEDGE-SOURCES.md`](../shared/KNOWLEDGE-SOURCES.md).
 
+On a gnarly bug, delegate this evidence-gathering and prior-occurrence
+search to a read-only diagnostic subagent that reports findings —
+review-only; do not modify code or run tools that change state. Phase 4
+implementation stays in the main thread so each fix is steerable.
+
 **Root-cause tracing technique:**
 
 ```txt

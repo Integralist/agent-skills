@@ -40,7 +40,10 @@ Deep learning needs three things:
 - **Wisdom** — from interacting with other learners and practitioners.
 
 Until `RESOURCES.md` is well-populated, focus on finding high-quality resources.
-Never trust your parametric knowledge.
+Never trust your parametric knowledge. Fan out read-only research subagents to
+gather and vet candidates in parallel — review-only; do not modify code or run
+tools that change state — returning annotated links for `RESOURCES.md`. Lesson
+authoring and learner interaction stay in the main thread.
 
 Topics vary in mix: theoretical physics is more knowledge-based; yoga is more
 skills-based.
