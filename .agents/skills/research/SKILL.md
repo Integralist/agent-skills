@@ -148,7 +148,10 @@ Don't guess. Stop and ask the user if:
 
 ### Spawn a subagent for code research
 
-Spawn a single general-purpose subagent. The prompt must include:
+Spawn a single general-purpose subagent on the cheapest model tier
+adequate to the research (see
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)).
+The prompt must include:
 
 - The repo path (`~/code/{org}/{repo}`).
 - A statement that this is **read-only research**: investigate and

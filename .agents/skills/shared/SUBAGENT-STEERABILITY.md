@@ -64,3 +64,26 @@ explicitly in the subagent prompt: *review-only; do not modify
 code or run tools that change state.* This is the pattern in
 `consensus`, `code-review`, `redesign`, and `decide`, and it is
 why those skills need no steering gate.
+
+## Model tier for the subagent
+
+A subagent inherits the main model by default — often needlessly expensive.
+When your harness lets you set a subagent's model, pick the cheapest tier
+adequate to the task. Never hardcode a model name; the main agent chooses
+within its own ecosystem.
+
+- **Cheapest tier** — mechanical, high-recall, low-judgment: bulk file
+  reads, grep/trace, drafting commit/PR/changelog prose, formatting, and
+  the apply agents of a verified-pattern fan-out.
+- **Mid tier** — analytical read-only reasoning: code review, security
+  analysis, root-cause diagnosis.
+- **Main (session) model** — engineering judgment: design, ambiguous
+  debugging, and the interactive apply phase of a two-phase split.
+
+The read-only audit phase is the natural place to spend a cheap tier; the
+interactive apply stays on the main model.
+
+Never silently downgrade work touching product-code correctness or
+design/debug judgment. Disclose the downgrade at the gate that approves the
+work — the verified-pattern exemplar, or a direct prompt — and let the user
+veto. Mechanical, read-only, git, and docs delegation needs no prompt.

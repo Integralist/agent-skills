@@ -34,8 +34,10 @@ prioritize empirically.
 
 ## Investigation Phase
 
-Spawn a single subagent (exploration / investigation role). Its prompt
-must include:
+Spawn a single subagent (exploration / investigation role) on the cheapest
+model tier adequate to the investigation (see
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)).
+Its prompt must include:
 
 - The feature or area to investigate.
 - The current working directory.

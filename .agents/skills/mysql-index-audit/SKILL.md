@@ -362,6 +362,10 @@ Step 2 (query inventory) as two concurrent subagents over the same file set,
 then correlate their results in Step 3. This is faster on large codebases. On a
 single-agent harness, run the steps sequentially — the result is identical.
 
+Both inventory steps are mechanical file reads — run them on the cheapest model
+tier adequate to the task (see
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)).
+
 ## References
 
 - Source notes:

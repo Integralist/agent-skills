@@ -140,7 +140,10 @@ let the user decide.
 ## Spawn Subagents
 
 Spawn one subagent per dimension (roles below are descriptions, not agent names
-— use your platform's primitives). Each prompt must include:
+— use your platform's primitives). Run each on the cheapest model tier adequate
+to its dimension (see
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)). Each
+prompt must include:
 
 - The review dimension and focus area
 - `DIFF_PATH` (with the instruction to read the diff from it) and `FILE_LIST`

@@ -41,6 +41,16 @@
 - Cite the source — `path/to/file.go:42` for code, URL for docs. If you can't
   cite, label it "unverified assumption" and say how to verify.
 
+# Cost management
+
+- Don't burn the top-tier model on mechanical work. When delegating to a
+  subagent and your harness lets you set its model, default to the cheapest
+  tier adequate to the task — see
+  `.agents/skills/shared/SUBAGENT-STEERABILITY.md`.
+- Prompt before running software-engineering work — product-code edits,
+  design, debugging — on a downgraded model. Mechanical, read-only, git, and
+  docs work needs no prompt.
+
 # Skills
 
 - Skills live only in `.agents/skills/<name>/`. `.claude/skills` is a symlink to
