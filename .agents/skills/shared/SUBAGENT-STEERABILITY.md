@@ -4,6 +4,17 @@ Guidance for any skill that delegates work to a subagent. The
 question is not "is this task big enough to delegate?" but "can
 the user steer it once it starts?"
 
+## The subagent starts blank
+
+A subagent inherits none of this conversation — it sees only the
+prompt you give it. Some harnesses spawn a subagent as a fresh CLI
+invocation of themselves (e.g. `pi --print ...` over bash), where
+this is absolute: no shared history, no open files, nothing but the
+argument string. Make every delegating prompt self-contained — the
+proposed-change list, the verified exemplar, the file paths, the
+review-only constraint — because there is no ambient context to fall
+back on.
+
 ## The rule
 
 Split tasks by whether the subagent **edits the workspace**:
