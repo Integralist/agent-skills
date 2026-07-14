@@ -45,7 +45,10 @@ make install-gemini
 # Copilot CLI status line (no-op if ~/.copilot/scripts absent)
 make install-copilot
 
-# Everything (install-claude pulls in install-agents; also runs the two above)
+# OpenCode config, TUI settings, and model preferences
+make install-opencode
+
+# Everything (install-claude pulls in install-agents; also runs the above)
 make install
 ```
 
@@ -64,6 +67,13 @@ make install
 
 .copilot/scripts/                   # Copilot CLI
 └── statusline.sh                   # Status line (mirrors the Claude one)
+
+.config/opencode/                   # OpenCode config
+├── config.json.tmpl                # Main config with 1Password secret reference
+└── tui.json                        # Notifications and TUI settings
+
+.local/state/opencode/
+└── model.json                      # Favorite models and variants
 
 .agents/                            # Canonical skills + conventions
 ├── AGENTS.md                       # Shared conventions

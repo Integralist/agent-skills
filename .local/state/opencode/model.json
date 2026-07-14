@@ -1,0 +1,53 @@
+{
+  "recent": [],
+  "favorite": [
+    {
+      "providerID": "github-copilot",
+      "modelID": "gpt-5.6-terra"
+    },
+    {
+      "providerID": "github-copilot",
+      "modelID": "gpt-5.6-sol"
+    },
+    {
+      "providerID": "github-copilot",
+      "modelID": "gpt-5.6-luna"
+    },
+    {
+      "providerID": "github-copilot",
+      "modelID": "kimi-k2.7-code"
+    },
+    {
+      "providerID": "google-vertex",
+      "modelID": "gemini-3.1-pro-preview"
+    },
+    {
+      "providerID": "google-vertex",
+      "modelID": "gemini-3.5-flash"
+    },
+    {
+      "providerID": "amazon-bedrock",
+      "modelID": "global.anthropic.claude-opus-4-8"
+    },
+    {
+      "providerID": "amazon-bedrock",
+      "modelID": "global.anthropic.claude-opus-4-6-v1[1m]"
+    }
+  ],
+  "variant": {
+    "amazon-bedrock/anthropic.claude-haiku-4-5-20251001-v1:0": "default",
+    "amazon-bedrock/anthropic.claude-opus-4-6-v1": "high",
+    "amazon-bedrock/anthropic.claude-sonnet-5": "medium",
+    "amazon-bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0": "default",
+    "amazon-bedrock/global.anthropic.claude-opus-4-6-v1": "high",
+    "amazon-bedrock/global.anthropic.claude-opus-4-8": "high",
+    "amazon-bedrock/us.anthropic.claude-opus-4-6-v1": "high",
+    "github-copilot/gpt-5.6-sol": "high",
+    "github-copilot/gpt-5.6-terra": "high",
+    "github-copilot/gpt-5.6-luna": "default",
+    "google-vertex/claude-opus-4-6@default": "high",
+    "google-vertex/gemini-3.1-pro-preview": "high",
+    "google-vertex/gemini-3.5-flash": "high",
+    "google/gemini-3.5-flash": "high"
+  }
+}

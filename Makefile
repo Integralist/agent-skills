@@ -1,4 +1,4 @@
-.PHONY: install install-agents install-claude install-pi install-gemini install-copilot rules
+.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode rules
 
 install-agents:
 	mkdir -p ~/.agents
@@ -80,4 +80,19 @@ install-copilot:
 		echo "Skipping Copilot statusline: ~/.copilot/scripts does not exist."; \
 	fi
 
-install: install-claude install-pi install-gemini install-copilot
+# OpenCode keeps configuration and model preferences in separate XDG
+# directories. config.json is templated because it contains the Context7 API
+# key; the other files contain no secrets and are copied verbatim.
+install-opencode:
+	mkdir -p ~/.config/opencode ~/.local/state/opencode
+	cp .config/opencode/tui.json ~/.config/opencode/tui.json
+	cp .local/state/opencode/model.json ~/.local/state/opencode/model.json
+	@if command -v op >/dev/null; then \
+		op inject -i .config/opencode/config.json.tmpl -o ~/.config/opencode/config.json -f; \
+		echo "Installed OpenCode config, TUI settings, and model preferences."; \
+	else \
+		echo "Installed OpenCode TUI settings and model preferences."; \
+		echo "Skipping config.json: 1Password CLI (op) not found."; \
+	fi
+
+install: install-claude install-pi install-gemini install-copilot install-opencode

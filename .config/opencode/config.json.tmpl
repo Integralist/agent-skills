@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true,
+      "headers": {
+        "CONTEXT7_API_KEY": "{{ op://Employee/context7 MCP/credential }}"
+      }
+    },
+    "fastly": {
+      "type": "local",
+      "command": [
+        "/Users/mmcdonnell/go/bin/fastly-mcp"
+      ],
+      "enabled": true
+    },
+    "gopls": {
+      "type": "local",
+      "command": [
+        "gopls",
+        "mcp"
+      ],
+      "enabled": false
+    }
+  },
+  "model": "amazon-bedrock/global.anthropic.claude-opus-4-6-v1",
+  "provider": {
+    "amazon-bedrock": {
+      "models": {
+        "global.anthropic.claude-opus-4-8": {
+          "cost": {
+            "input": 6,
+            "output": 30
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 16000
+          },
+          "name": "Claude Opus 4.8",
+          "reasoningEffort": "high"
+        },
+        "global.anthropic.claude-opus-4-6-v1[1m]": {
+          "cost": {
+            "input": 15,
+            "output": 75
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 16000
+          },
+          "name": "Claude Opus 4.6 (1M Context)",
+          "reasoningEffort": "high"
+        },
+        "global.anthropic.claude-opus-4-6-v1": {
+          "cost": {
+            "input": 15,
+            "output": 75
+          },
+          "limit": {
+            "context": 200000,
+            "output": 16000
+          },
+          "name": "Claude Opus 4.6",
+          "reasoningEffort": "high"
+        },
+        "global.anthropic.claude-sonnet-5": {
+          "cost": {
+            "input": 2,
+            "output": 10
+          },
+          "limit": {
+            "context": 200000,
+            "output": 16000
+          },
+          "name": "Claude Sonnet 5",
+          "reasoningEffort": "high"
+        }
+      },
+      "whitelist": [
+        "global.anthropic.claude-opus-4-8",
+        "global.anthropic.claude-opus-4-6-v1[1m]",
+        "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "global.anthropic.claude-sonnet-5"
+      ],
+      "options": {
+        "region": "us-east-2"
+      }
+    },
+    "google-vertex": {
+      "models": {
+        "gemini-3.5-flash": {
+          "name": "Gemini 3.5 Flash",
+          "cost": {
+            "input": 1.5,
+            "output": 9
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 8192
+          },
+          "reasoningEffort": "high"
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro",
+          "cost": {
+            "input": 2,
+            "output": 12
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 8192
+          },
+          "reasoningEffort": "high"
+        }
+      },
+      "whitelist": [
+        "gemini-3.5-flash",
+        "gemini-3.1-pro-preview"
+      ]
+    }
+  },
+  "permission": {
+    "edit": "ask"
+  },
+  "theme": "nord"
+}
