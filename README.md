@@ -73,8 +73,9 @@ make install
 
 ## Components
 
-**Skills** — reusable instructions invoked with `/skill-name` that extend an
-agent to perform a task, follow a pattern, or apply specialized knowledge. See
+**Skills** — reusable instructions that extend an agent with a task, pattern, or
+specialized knowledge. Depending on frontmatter, agents discover them from the
+request or users invoke them explicitly with `/skill-name`. See
 [the docs](https://code.claude.com/docs/en/skills).
 
 **[Agents](https://code.claude.com/docs/en/agents)** (`.claude/agents/`) —
@@ -130,6 +131,7 @@ loads the same set.
 | **markdown-to-skill**        | Bulk-convert Markdown files into agent skills                                                      |
 | **mysql-index-audit**        | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)                |
 | **next-task**                | Continue working through a project plan                                                            |
+| **perspectives**             | Explore evidence, sentiment, risks, benefits, alternatives, and process                            |
 | **project-plan**             | Implementation plan from a spec; vertical slices with Blocked-by edges, extracts ADRs via to-adr   |
 | **redesign**                 | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning        |
 | **refactor**                 | Analyze a feature and produce a reimplementation plan                                              |
@@ -145,6 +147,24 @@ loads the same set.
 | **to-prd**                   | Extract a focused PRD (product what & why) from a spec or plan                                     |
 | **to-spec**                  | Write a spec to `docs/specifications/` — problem, solution, stories, acceptance criteria, seams    |
 | **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability       |
+
+## Choosing an analysis skill
+
+| Skill            | Use when                                                                                   | Primary output                                               |
+| ---------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| **code-review**  | Code or a diff exists and you want defects identified                                      | Verified findings and open questions                         |
+| **decide**       | You must choose between consequential options                                              | Durable decision memo and recommendation                     |
+| **consensus**    | A complex design or implementation needs independent cross-model review and approval gates | Reviewed assessment or implementation with dissent preserved |
+| **perspectives** | You want quick breadth, brainstorming, or a structured "what are we missing?" pass         | Multi-perspective analysis and next step                     |
+
+Common sequences:
+
+- Unclear problem space: **perspectives** → **decide**
+- Consequential engineering choice: **decide** → **consensus**
+- Complex implementation: **consensus**, which invokes **code-review** before
+  cross-model implementation review
+- Ordinary pull request or local diff: **code-review**
+- Quick meeting or brainstorming pass: **perspectives**
 
 ## Claude-specific frontmatter
 
@@ -172,12 +192,18 @@ Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make instal
 
 ## Workflow
 
-A typical end-to-end flow through the skills:
+Core implementation flow:
 
 ```txt
-architect → critique → next-task → commit → code-review → cleanup →
-refactor → redesign
+architect → next-task → commit → code-review
 ```
+
+Optional branches:
+
+- **critique** — review a plan or document before implementation
+- **cleanup** — remove AI-generated clutter
+- **refactor** — plan a simpler reimplementation of an existing feature
+- **redesign** — audit the wider codebase for structural simplification
 
 ## Contributing
 

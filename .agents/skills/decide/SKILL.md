@@ -36,6 +36,9 @@ before moving on. Ask in this order:
 1. **What's the decision?** — In one sentence.
 1. **What are the options?** — List them. If only one, ask "What
    are the alternatives, including doing nothing?"
+1. **Can any option avoid the central trade-off?** — Look for a smaller,
+   staged, combined, or otherwise lateral option rather than accepting the
+   initial framing.
 1. **Why now?** — Why decide today/this week/this month? What
    changes if you wait?
 1. **What's the decision window?** — Deadline, opportunity cost, or
@@ -53,7 +56,9 @@ before moving on. Ask in this order:
 1. **Which of those beliefs are you least sure about?** — The
    weakest link.
 1. **Who else has a stake?** — Co-founder, team, investors,
-   customers, family. Whose buy-in matters.
+   customers, family. Whose buy-in matters, and what enthusiasm, resistance,
+   or anxiety have they actually expressed? Do not infer sentiment they have
+   not communicated.
 1. **What's reversible vs. one-way?** — Is this a hat or a tattoo?
 1. **What would make you change your mind?** — Kill criteria.
 1. **Gut call right now?** — Force a tentative answer before the
@@ -75,14 +80,18 @@ Structurer. Its instructions must include:
 - The full interview transcript (questions and answers).
 - The decision slug (e.g., `hire-vp-eng`, `kill-feature-x`).
 - Produce a draft memo using the Output template below — Context,
-  Options, Assumptions per option, Costs, Upside, Downside,
+  Evidence ledger, Options, Assumptions per option, Costs, Upside, Downside,
   Reversibility, Stakeholders, Gut call, Kill criteria.
+- Classify each decision-relevant claim as `Verified fact`, `User belief`,
+  `Assumption`, or `Unknown`. Do not upgrade a belief or assumption to fact.
 - "Do not recommend. Do not editorialize. Just structure."
 - "If an answer is missing or thin, write `_(unanswered)_` rather
   than inventing content."
 - "Return the draft memo as Markdown."
 
-Wait for the Structurer before spawning the Contrarian.
+Before advancing, verify the draft accounts for every interview answer, marks
+missing answers `_(unanswered)_`, classifies every decision-relevant claim, and
+covers every serious option. Return omissions to the Structurer for correction.
 
 ## Step 3 — Spawn the Contrarian subagent
 
@@ -102,14 +111,16 @@ red-team it. Its instructions must include:
     investment rather than future expected value.
   - **Reversibility check** — decisions labelled reversible that
     aren't, or vice versa.
-  - **Steel-manned alternative** — the strongest case for the
-    option the user is leaning *away* from.
+  - **Steel-manned options** — the strongest success case for every serious
+    option, including the option the user is leaning away from.
 - "Be specific. 'You haven't thought about competitors' is useless.
   'If competitor X mirrors this in 3 months, your moat is gone' is
   useful."
 - "Return findings as Markdown, organized under the sections above."
 
-Wait for the Contrarian before spawning the Synthesizer.
+Before advancing, verify the critique covers every required section and
+steel-mans every serious option. Return omissions to the Contrarian for
+correction.
 
 ## Step 4 — Spawn the Synthesizer subagent
 
@@ -122,15 +133,20 @@ include:
 - "Produce the final memo in the Output format below. You must
   recommend a single option. 'It depends' is not a recommendation.
   If you genuinely cannot recommend, the recommendation is 'gather
-  more information' and you must specify exactly which one piece of
-  information would resolve it."
-- "Mark every claim from the user with the user's language. Mark
-  every claim from the Contrarian as `_(contrarian)_`. Don't blend
-  them silently."
+  more information' and you must specify the smallest evidence-gathering step
+  and the critical unknowns it resolves."
+- "Preserve the evidence classification from the draft. Mark every claim from
+  the Contrarian as `_(contrarian)_`. Don't blend sources silently."
 - "Compare the recommendation to the user's gut call. If they
   agree, say so. If they disagree, say so loudly and explain why
   the analysis diverged from the gut."
 - "Return the final memo as Markdown using the Output template."
+
+Before saving, verify the memo contains every required section, preserves claim
+classifications, makes one recommendation, accounts for every serious option,
+and states the smallest evidence-gathering step when information is
+insufficient. It must be understandable six months later without the interview
+transcript. Return omissions to the Synthesizer for correction.
 
 ## Step 5 — Save the memo
 
@@ -150,13 +166,21 @@ Then present the memo and ask:
 What now?
 
 1. Lock it in — I'll mark this decided and note the kill criteria.
-2. Sleep on it — I'll save the memo and we revisit tomorrow.
-3. Push back — tell me where the analysis is wrong and we re-run.
+2. Revisit later — I'll mark it for revisit on a date you choose.
+3. Push back — identify the disputed input or reasoning and rerun from there.
 4. Something else.
 ```
 
-If the user picks "Lock it in", append a `## Decided` section with
-the chosen option, the date, and the kill criteria as a checklist.
+Apply the selected mutation:
+
+- **Lock it in** — set `Status` to `Decided` and append `## Decided` with the
+  option and date. Keep the existing kill-criteria checklist authoritative.
+- **Revisit later** — ask for the revisit date, set `Status` to `Revisit`, and
+  add `Revisit date` to the metadata list. Do not promise to schedule or
+  initiate the revisit.
+- **Push back** — amend the disputed input or instructions, then rerun from the
+  earliest affected pass: Structurer for source inputs, Contrarian for critique,
+  or Synthesizer for weighting and recommendation.
 
 ## Output template
 
@@ -174,6 +198,12 @@ structure:
 ## Context
 
 {2–4 sentences. Why this decision, why now.}
+
+## Evidence ledger
+
+| Claim | Status | Source or verification needed |
+| ----- | ------ | ----------------------------- |
+| ...   | Verified fact / User belief / Assumption / Unknown | ... |
 
 ## Options
 
@@ -198,9 +228,9 @@ structure:
 
 ## Stakeholders
 
-| Who           | Stake                          | Buy-in needed?  |
-| ------------- | ------------------------------ | --------------- |
-| ...           | ...                            | Yes / No        |
+| Who | Stake | Buy-in needed? | Expressed sentiment |
+| --- | --- | --- | --- |
+| ... | ... | Yes / No | Enthusiasm / resistance / anxiety / unknown |
 
 ## Contrarian pass
 
@@ -209,7 +239,7 @@ structure:
 - **Selection bias:** ...
 - **Sunk cost / momentum:** ...
 - **Reversibility check:** ...
-- **Steel-manned alternative:** ...
+- **Steel-manned options:** ...
 
 ## Gut call
 
@@ -233,16 +263,3 @@ If any of these become true, abandon or revisit:
 
 {Anything still unanswered. Use `_(unanswered)_` markers from the draft.}
 ```
-
-## Notes
-
-- Keep the three passes separate — structuring, adversarial
-  reasoning, and synthesis are different jobs; blending them
-  weakens each. Don't collapse them into one subagent unless the
-  user explicitly asks for a fast version.
-- Don't skip the gut-call question. Without it, the synthesised
-  recommendation can't be checked against the user's intuition,
-  which is the whole point of separating analysis from instinct.
-- The memo is a tool for the user, not a deliverable for someone
-  else. Optimise for "the user can re-read this in 6 months and
-  remember why" over external polish.
