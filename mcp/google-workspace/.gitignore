@@ -1,0 +1,7 @@
+# Runtime OAuth artifacts, written next to gemini-extension.json on first auth.
+# Never commit these — they are per-user credentials.
+gemini-cli-workspace-token.json
+.gemini-cli-workspace-master-key
+
+# Runtime server logs.
+logs/

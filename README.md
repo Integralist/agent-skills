@@ -48,6 +48,9 @@ make install-copilot
 # OpenCode config, TUI settings, and model preferences
 make install-opencode
 
+# Google Workspace MCP server → ~/.local/share/google-workspace-mcp/
+make install-google-workspace-mcp
+
 # Everything (install-claude pulls in install-agents; also runs the above)
 make install
 ```
@@ -74,6 +77,11 @@ make install
 
 .local/state/opencode/
 └── model.json                      # Favorite models and variants
+
+mcp/google-workspace/               # Google Workspace MCP server (all agents)
+├── dist/index.js                   # Apache-2.0 upstream bundle (self-contained)
+├── launch.sh                       # Self-locating launcher; resolves node
+└── gemini-extension.json           # Anchors OAuth token storage to install dir
 
 .agents/                            # Canonical skills + conventions
 ├── AGENTS.md                       # Shared conventions
@@ -103,6 +111,28 @@ mirrored as skills (`go-conventions`, `markdown-conventions`).
 **Project instructions** — `.agents/AGENTS.md` holds the canonical conventions;
 `.claude/CLAUDE.md` is a one-line `@~/.agents/AGENTS.md` pointer so Claude Code
 loads the same set.
+
+## MCP servers
+
+`mcp/google-workspace/` bundles a self-contained Google Workspace MCP server
+(Calendar, Drive, Docs, Sheets, Slides, Gmail, Chat, People) usable by any
+MCP-capable agent. It's an unmodified Apache-2.0 build of upstream
+[`gemini-cli-extensions/workspace`](https://github.com/gemini-cli-extensions/workspace)
+— see [`mcp/google-workspace/README.md`](./mcp/google-workspace/README.md) for
+provenance, authentication, and update steps.
+
+`make install-google-workspace-mcp` copies it to
+`~/.local/share/google-workspace-mcp/`. Agent configs reference that path via
+`$HOME`, so nothing is tied to a username. opencode and Gemini CLI are wired
+automatically; register it with Claude Code once:
+
+```bash
+claude mcp add google-workspace -- \
+  bash -c 'exec "$HOME/.local/share/google-workspace-mcp/launch.sh"'
+```
+
+Each user authenticates to their own Google account via browser OAuth on first
+use; there are no shared credentials.
 
 ## Skill reference
 

@@ -1,0 +1,13 @@
+Google Workspace MCP server
+============================
+
+dist/index.js is an unmodified prebuilt bundle of the upstream Google
+Workspace extension, redistributed under the Apache License 2.0 (see LICENSE).
+
+Upstream:  https://github.com/gemini-cli-extensions/workspace
+Ref:       v0.0.8
+Commit:    c3fe28298ed7d98d60b3cf4ac2420c5826d4b97a
+
+Copyright the upstream authors. Licensed under the Apache License, Version 2.0.
+You may not use this file except in compliance with the License. A copy of the
+License is included in the LICENSE file in this directory.

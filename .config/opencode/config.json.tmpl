@@ -12,7 +12,18 @@
     "fastly": {
       "type": "local",
       "command": [
-        "/Users/mmcdonnell/go/bin/fastly-mcp"
+        "bash",
+        "-c",
+        "exec \"$HOME/go/bin/fastly-mcp\""
+      ],
+      "enabled": true
+    },
+    "google-workspace": {
+      "type": "local",
+      "command": [
+        "bash",
+        "-c",
+        "exec \"$HOME/.local/share/google-workspace-mcp/launch.sh\""
       ],
       "enabled": true
     },

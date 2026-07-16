@@ -1,4 +1,4 @@
-.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode rules
+.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp rules
 
 install-agents:
 	mkdir -p ~/.agents
@@ -95,4 +95,16 @@ install-opencode:
 		echo "Skipping config.json: 1Password CLI (op) not found."; \
 	fi
 
-install: install-claude install-pi install-gemini install-copilot install-opencode
+# Google Workspace MCP server (Calendar, Drive, Docs, Sheets, Slides, Gmail,
+# Chat). dist/index.js is an unmodified Apache-2.0 prebuilt bundle of upstream
+# gemini-cli-extensions/workspace (see mcp/google-workspace/NOTICE). Copied to a
+# stable, username-free location every agent's MCP config points at via
+# $HOME. Runtime OAuth token files live only in the destination and are never
+# overwritten, since they are absent from the source tree.
+install-google-workspace-mcp:
+	mkdir -p ~/.local/share/google-workspace-mcp
+	cp -r mcp/google-workspace/ ~/.local/share/google-workspace-mcp/
+	chmod +x ~/.local/share/google-workspace-mcp/launch.sh
+	@echo "Installed Google Workspace MCP server."
+
+install: install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp

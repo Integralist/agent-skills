@@ -1,0 +1,5 @@
+{
+  "name": "google-workspace",
+  "version": "0.0.8",
+  "description": "Google Workspace MCP server (Calendar, Drive, Docs, Sheets, Slides, Gmail, Chat)"
+}

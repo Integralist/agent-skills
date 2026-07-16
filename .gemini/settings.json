@@ -20,6 +20,13 @@
         "mcp"
       ]
     },
+    "google-workspace": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "exec \"$HOME/.local/share/google-workspace-mcp/launch.sh\""
+      ]
+    },
     "github": {
       "httpUrl": "https://api.githubcopilot.com/mcp",
       "headers": {
