@@ -28,6 +28,10 @@
 - Use your Edit tool for changes; Grep tool for searching; `rg` for regex
   patterns.
 - Use Mermaid diagrams for complex systems.
+- Edit one file per tool call; never batch multiple files into a single
+  edit/patch call — a workaround for an unfixed opencode TUI bug that garbles
+  multi-file patches. Remove once fixed (opencode#21914). Reads and tests may
+  still be batched.
 - Write commit messages to a temp file and `git commit -F <file>`. Never pipe
   via heredoc (`git commit -F - <<'EOF'`) — if the closing delimiter arrives
   indented or without a trailing newline, git blocks on stdin forever and the
