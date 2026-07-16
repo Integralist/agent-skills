@@ -13,20 +13,21 @@ Resume work from a project plan, in the main thread.
 ## Context
 
 - Project plans: !`find docs/plans -maxdepth 1 -name '*.md' ! -name 'README.md' -newer docs/plans/completed 2>/dev/null | head -10 || find docs/plans -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | head -10`
+- Task lists: !`find docs/tasks -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | head -10`
 
 ## Process
 
-1. **Identify the project plan.** Use the user's file if specified;
-   otherwise pick from the context above. If multiple non-completed plans
+1. **Identify the plan or task list.** Use the user's file if specified;
+   otherwise pick from the context above. If multiple candidates
    exist, present them as a numbered list with filenames and ask which to
-   use. **Always state the plan you'll use and wait for confirmation.**
+   use. **Always state the file you'll use and wait for confirmation.**
 
    ```txt
    I'll work from docs/plans/cross-team-routing-isolation.md.
    OK, or did you have a different plan in mind?
    ```
 
-1. **Read the plan** and find the first actionable unchecked task (`- [ ]`) in
+1. **Read the file** and find the first actionable unchecked task (`- [ ]`) in
    document order. A task is actionable unless its slice's `- **Blocked by**:`
    line names a slice that still has unchecked tasks — skip a blocked task and
    keep scanning. Plans without `Blocked by` (older phase-based plans) never

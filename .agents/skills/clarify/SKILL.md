@@ -1,13 +1,13 @@
 ---
-name: task
+name: clarify
 description: >-
-  Elicit the user's intent before starting work. Use when a request is vague,
-  when kicking off a new task, when another skill hits a vague request and needs
-  to clarify it, or when the user says "help me with this", "I need something",
-  "let's work on...", "draft a task", or /task.
+  Elicit and pin down the user's intent before starting work. Use when a
+  request is vague, when kicking off new work, when another skill hits a
+  vague request and needs to clarify it, or when the user says "help me
+  with this", "I need something", "let's work on...", or /clarify.
 ---
 
-# Task
+# Clarify
 
 Clarify the user's intent before acting.
 

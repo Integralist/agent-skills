@@ -136,57 +136,58 @@ use; there are no shared credentials.
 
 ## Skill reference
 
-| Skill                        | Description                                                                                        |
-| ---------------------------- | -------------------------------------------------------------------------------------------------- |
-| **agents-md**                | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                            |
-| **architect**                | Design-and-plan coordinator: bootstrap → research → spec → plan (idea to artifacts)                |
-| **bcp**                      | Branch, commit, and open a PR in one step (orchestrates **branch** + **commit** + **draft-pr**)    |
-| **behaviour-spec**           | Generate Gherkin acceptance criteria; executable godog scenarios for Go, prose for units           |
-| **branch**                   | Create a git feature branch named from session context (slug username + kebab slug)                |
-| **caveman**                  | Ultra-compressed caveman-speak mode; ~75% token reduction                                          |
-| **changelog**                | Add a Keep a Changelog entry from the working diff or branch-vs-main                               |
-| **cleanup**                  | Audit codebase for AI slop via background subagent                                                 |
-| **code-review**              | Multi-dimensional review via parallel subagents                                                    |
-| **code-review-feedback**     | Evaluate code review feedback with technical rigor — verify before implementing                    |
-| **commit**                   | Git commits with intelligent file grouping                                                         |
-| **consensus**                | Cross-model second-opinion workflow with discussion rounds and user gates                          |
-| **critique**                 | Critique a document for logical fallacies                                                          |
-| **decide**                   | Decision memo with structurer, contrarian, and synthesizer passes                                  |
-| **delegate**                 | Spawn a subagent for a task                                                                        |
-| **distill**                  | Rewrite text concisely without losing critical info; inventory → rewrite → audit                   |
-| **domain-modeling**          | Build and sharpen a project's domain model — glossary (CONTEXT.md) and ADRs                        |
-| **draft-pr**                 | Draft a concise, direct pull request with a clear Problem and Solution                             |
-| **durable-rules**            | Surface systemic patterns from an investigation as codified conventions or anti-patterns           |
-| **git-metadata**             | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises       |
-| **go-api**                   | Generate a production-ready Go API service                                                         |
-| **go-conventions**           | Go coding conventions (mirrors `.claude/rules/go.md`)                                              |
-| **go-testing**               | Write Go tests — table-driven, fuzz, benchmarks                                                    |
-| **grepai**                   | Semantic code search by intent                                                                     |
-| **grill-me**                 | Thin delegator → runs a **grilling** session                                                       |
-| **grill-with-docs**          | Thin delegator → runs **grilling** with **domain-modeling**                                        |
-| **grilling**                 | Interview the user relentlessly to stress-test a plan or design                                    |
-| **handoff**                  | Compact the current conversation into a handoff document for another agent                         |
-| **incident-report**          | Write up a session's incident debugging into a report at `docs/reports/` — timeline, impact, fixes |
-| **markdown-conventions**     | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                              |
-| **markdown-to-skill**        | Bulk-convert Markdown files into agent skills                                                      |
-| **mysql-index-audit**        | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)                |
-| **next-task**                | Continue working through a project plan                                                            |
-| **perspectives**             | Explore evidence, sentiment, risks, benefits, alternatives, and process                            |
-| **project-plan**             | Implementation plan from a spec; vertical slices with Blocked-by edges, extracts ADRs via to-adr   |
-| **redesign**                 | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning        |
-| **refactor**                 | Analyze a feature and produce a reimplementation plan                                              |
-| **research**                 | Research a topic or repo deeply; writes a reference doc to `docs/research/`                        |
-| **security-review-feedback** | Triage a security review's findings — verdict per finding (true/false positive) before fixing      |
-| **summarize-for-product**    | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)                   |
-| **systematic-debugging**     | Four-phase debugging with root cause analysis                                                      |
-| **task**                     | Elicit the user's intent before starting work; front of the design pipeline                        |
-| **teach**                    | Stateful tutor workspace — missions, lessons, learning records, reference docs                     |
-| **tech-docs**                | Write or improve technical documentation via five documentation pillars                            |
-| **test-feedback**            | Parse test failures and fix them in a background subagent                                          |
-| **to-adr**                   | Extract a formal ADR (one per decision) from a plan or design doc                                  |
-| **to-prd**                   | Extract a focused PRD (product what & why) from a spec or plan                                     |
-| **to-spec**                  | Write a spec to `docs/specifications/` — problem, solution, stories, acceptance criteria, seams    |
-| **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability       |
+| Skill                        | Description                                                                                                                            |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **agents-md**                | Make AGENTS.md canonical; stub CLAUDE.md/GEMINI.md as @-import pointers                                                                |
+| **architect**                | Design-and-plan coordinator: bootstrap → research → spec → plan (idea to artifacts)                                                    |
+| **bcp**                      | Branch, commit, and open a PR in one step (orchestrates **branch** + **commit** + **draft-pr**)                                        |
+| **behaviour-spec**           | Generate Gherkin acceptance criteria; executable godog scenarios for Go, prose for units                                               |
+| **branch**                   | Create a git feature branch named from session context (slug username + kebab slug)                                                    |
+| **caveman**                  | Ultra-compressed caveman-speak mode; ~75% token reduction                                                                              |
+| **changelog**                | Add a Keep a Changelog entry from the working diff or branch-vs-main                                                                   |
+| **clarify**                  | Elicit and pin down the user's intent before starting work; front of the design pipeline                                               |
+| **cleanup**                  | Audit codebase for AI slop via background subagent                                                                                     |
+| **code-review**              | Multi-dimensional review via parallel subagents                                                                                        |
+| **code-review-feedback**     | Evaluate code review feedback with technical rigor — verify before implementing                                                        |
+| **commit**                   | Git commits with intelligent file grouping                                                                                             |
+| **consensus**                | Cross-model second-opinion workflow with discussion rounds and user gates                                                              |
+| **critique**                 | Critique a document for logical fallacies                                                                                              |
+| **decide**                   | Decision memo with structurer, contrarian, and synthesizer passes                                                                      |
+| **delegate**                 | Spawn a subagent for a task                                                                                                            |
+| **distill**                  | Rewrite text concisely without losing critical info; inventory → rewrite → audit                                                       |
+| **domain-modeling**          | Build and sharpen a project's domain model — glossary (CONTEXT.md) and ADRs                                                            |
+| **draft-pr**                 | Draft a concise, direct pull request with a clear Problem and Solution                                                                 |
+| **durable-rules**            | Surface systemic patterns from an investigation as codified conventions or anti-patterns                                               |
+| **git-metadata**             | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises                                           |
+| **go-api**                   | Generate a production-ready Go API service                                                                                             |
+| **go-conventions**           | Go coding conventions (mirrors `.claude/rules/go.md`)                                                                                  |
+| **go-testing**               | Write Go tests — table-driven, fuzz, benchmarks                                                                                        |
+| **grepai**                   | Semantic code search by intent                                                                                                         |
+| **grill-me**                 | Thin delegator → runs a **grilling** session                                                                                           |
+| **grill-with-docs**          | Thin delegator → runs **grilling** with **domain-modeling**                                                                            |
+| **grilling**                 | Interview the user relentlessly to stress-test a plan or design                                                                        |
+| **handoff**                  | Compact the current conversation into a handoff document for another agent                                                             |
+| **incident-report**          | Write up a session's incident debugging into a report at `docs/reports/` — timeline, impact, fixes                                     |
+| **markdown-conventions**     | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                                                                  |
+| **markdown-to-skill**        | Bulk-convert Markdown files into agent skills                                                                                          |
+| **mysql-index-audit**        | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)                                                    |
+| **next-task**                | Continue working through a project plan                                                                                                |
+| **perspectives**             | Explore evidence, sentiment, risks, benefits, alternatives, and process                                                                |
+| **project-plan**             | Implementation plan from a spec; vertical slices with Blocked-by edges, extracts ADRs via to-adr                                       |
+| **redesign**                 | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning                                            |
+| **refactor**                 | Analyze a feature and produce a reimplementation plan                                                                                  |
+| **research**                 | Research a topic or repo deeply; writes a reference doc to `docs/research/`                                                            |
+| **security-review-feedback** | Triage a security review's findings — verdict per finding (true/false positive) before fixing                                          |
+| **summarize-for-product**    | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)                                                       |
+| **systematic-debugging**     | Four-phase debugging with root cause analysis                                                                                          |
+| **tasks**                    | Crystallize the in-session plan into a mechanical, TDD-shaped task list at `docs/tasks/`; verbatim test + code + per-task verification |
+| **teach**                    | Stateful tutor workspace — missions, lessons, learning records, reference docs                                                         |
+| **tech-docs**                | Write or improve technical documentation via five documentation pillars                                                                |
+| **test-feedback**            | Parse test failures and fix them in a background subagent                                                                              |
+| **to-adr**                   | Extract a formal ADR (one per decision) from a plan or design doc                                                                      |
+| **to-prd**                   | Extract a focused PRD (product what & why) from a spec or plan                                                                         |
+| **to-spec**                  | Write a spec to `docs/specifications/` — problem, solution, stories, acceptance criteria, seams                                        |
+| **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability                                           |
 
 ## Choosing an analysis skill
 

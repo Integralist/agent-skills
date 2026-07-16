@@ -40,7 +40,7 @@ Determine what to plan, in priority order:
 1. **A plan already worked out in the current conversation** → structure and
    persist *that*; do not start over.
 1. Otherwise → ask the user what to build; if the request is vague, elicit
-   intent first via [`task`](../task/SKILL.md).
+   intent first via [`clarify`](../clarify/SKILL.md).
 
 Locate the spec: a path passed in, or the matching file in
 `docs/specifications/`. If no spec file exists yet, you must first run
