@@ -814,6 +814,16 @@ for _, tc := range testCases {
   // Good — context is explicit.
   req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, body)
   ```
+- Name the `httptest.NewRecorder()` result `rr` ("[r]esponse [r]ecorder") —
+  always, never `rec`, `w`, or `response`, for consistency:
+  ```go
+  // Bad — inconsistent naming.
+  rec := httptest.NewRecorder()
+  response := httptest.NewRecorder()
+
+  // Good.
+  rr := httptest.NewRecorder()
+  ```
 - Narrow variable scope to satisfy the `scopeguard` linter. When a variable is
   only used inside an `if` block, fold the assignment into the `if` init
   statement:
