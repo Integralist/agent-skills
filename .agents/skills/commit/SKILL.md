@@ -31,7 +31,8 @@ If the fields below show commands rather than output, run each one first.
      `git add -N <file>` then `git diff` to scan their contents for the
      same secrets.
    - **If on main or master branch: STOP. Warn the user and wait for
-     explicit confirmation before committing. No exceptions.**
+     explicit confirmation before committing — unless the user passed the
+     `--force` flag, in which case proceed without asking. No exceptions.**
 
 1. **Assess staging state:**
 
