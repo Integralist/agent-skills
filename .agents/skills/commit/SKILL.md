@@ -121,9 +121,8 @@ Plan documents (`docs/plans/*.md`) need special handling:
 
 - **Not started** (no `[x]` checkboxes): commit freely — it's a new plan
   being checked in.
-- **In progress** (some tasks done, implementation incomplete): do NOT
-  commit. Half-finished plans are working state, not a checkpoint. Skip
-  the file and note it was excluded.
+- **In progress** (some tasks done, implementation incomplete): commit
+  freely — a half-implemented plan is a valid checkpoint.
 - **Completed** (implementation tasks done — remaining unchecked items are
   post-deploy/operational only): update the plan's `Status` field (e.g.
   `Planning` → `Complete`), then move it to `docs/plans/completed/` and
