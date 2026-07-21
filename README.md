@@ -5,12 +5,14 @@ project instructions shared across every project.
 
 ## Mental model
 
-The repo serves two harnesses from one set of files:
+The repo serves multiple harnesses from one set of files:
 
 - **Claude Code** reads `.claude/` (CLAUDE.md, agents, rules, and a `skills`
   symlink).
-- **Generic agents** (e.g. Gemini, OpenCode, Pi) read `.agents/` (skills,
+- **Generic agents** (e.g. Gemini and OpenCode) read `.agents/` (skills,
   AGENTS.md).
+- **Pi** reads `.pi/agent/` for its settings and theme; `make install-pi` also
+  copies the shared `AGENTS.md` and installs its configured packages.
 
 Skills have a **single source of truth**: `.agents/skills/`. `.claude/skills`
 is a symlink to it, so each skill is edited once and both harnesses see it.
@@ -32,8 +34,11 @@ Everything else is a thin adapter around that shared core:
 ## Install
 
 ```bash
-# Generic agents only (e.g. Gemini, OpenCode, Pi): copies .agents/ to ~/.agents/
+# Generic agents only (e.g. Gemini and OpenCode): copies .agents/ to ~/.agents/
 make install-agents
+
+# Pi: installs Pi, configured packages, shared instructions, and settings
+make install-pi
 
 # Claude Code (pulls in install-agents): copies CLAUDE.md, rules, agents, and
 # scripts to ~/.claude/, then symlinks ~/.claude/skills → ~/.agents/skills
@@ -83,6 +88,10 @@ mcp/google-workspace/               # Google Workspace MCP server (all agents)
 ├── launch.sh                       # Self-locating launcher; resolves node
 └── gemini-extension.json           # Anchors OAuth token storage to install dir
 
+.pi/agent/                          # Pi configuration
+├── settings.json                   # Defaults, enabled models, and packages
+└── themes/nord-contrast.json       # Custom Pi theme
+
 .agents/                            # Canonical skills + conventions
 ├── AGENTS.md                       # Shared conventions
 └── skills/                         # One directory per skill (see table below)
@@ -90,6 +99,10 @@ mcp/google-workspace/               # Google Workspace MCP server (all agents)
 ```
 
 ## Components
+
+**Pi** — installed by `make install-pi` with the `pi-statusbar` and `pi-effort`
+packages. The repository provides a Gemini Flash default, a curated enabled-model
+list, hidden thinking blocks, and the custom `nord-contrast` theme.
 
 **Skills** — reusable instructions that extend an agent with a task, pattern, or
 specialized knowledge. Depending on frontmatter, agents discover them from the
