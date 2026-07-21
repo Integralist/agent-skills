@@ -4,10 +4,18 @@ install-agents:
 	mkdir -p ~/.agents
 	cp -r .agents/ ~/.agents/
 
-# Pi reads ~/.pi/agent/AGENTS.md. Install the canonical AGENTS.md there too.
+# Install Pi, its configured packages, and global settings. The repository
+# settings are copied last so they remain the source of truth after pi install
+# updates the global package store.
 install-pi:
-	mkdir -p ~/.pi/agent
+	npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort; do \
+		pi install "$$package" --no-approve; \
+	done
+	mkdir -p ~/.pi/agent/themes
 	cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md
+	cp .pi/agent/settings.json ~/.pi/agent/settings.json
+	cp .pi/agent/themes/nord-contrast.json ~/.pi/agent/themes/nord-contrast.json
 
 # Regenerate .claude/rules/{go,markdown}.md from their canonical skills. The
 # skill SKILL.md bodies are the single source of truth; rules differ only by
