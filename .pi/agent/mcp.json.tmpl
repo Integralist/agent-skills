@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "google-workspace": {
+      "command": "bash",
+      "args": ["-c", "exec \"$HOME/.local/share/google-workspace-mcp/launch.sh\""]
+    },
+    "gopls": {
+      "command": "gopls",
+      "args": ["mcp"]
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{{ op://Employee/context7 MCP/credential }}"
+      }
+    }
+  }
+}

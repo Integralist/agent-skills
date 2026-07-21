@@ -6,16 +6,23 @@ install-agents:
 
 # Install Pi, its configured packages, and global settings. The repository
 # settings are copied last so they remain the source of truth after pi install
-# updates the global package store.
+# updates the global package store. mcp.json is templated because it contains
+# the Context7 API key; op inject bakes it in, skipped when op is absent.
 install-pi:
 	npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort; do \
+	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort npm:@shuv1337/pi-mcp-adapter; do \
 		pi install "$$package" --no-approve; \
 	done
 	mkdir -p ~/.pi/agent/themes
 	cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md
 	cp .pi/agent/settings.json ~/.pi/agent/settings.json
 	cp .pi/agent/themes/nord-contrast.json ~/.pi/agent/themes/nord-contrast.json
+	@if command -v op >/dev/null; then \
+		op inject -i .pi/agent/mcp.json.tmpl -o ~/.pi/agent/mcp.json -f; \
+		echo "Installed Pi mcp.json."; \
+	else \
+		echo "Skipping mcp.json: 1Password CLI (op) not found."; \
+	fi
 
 # Regenerate .claude/rules/{go,markdown}.md from their canonical skills. The
 # skill SKILL.md bodies are the single source of truth; rules differ only by

@@ -100,9 +100,11 @@ mcp/google-workspace/               # Google Workspace MCP server (all agents)
 
 ## Components
 
-**Pi** — installed by `make install-pi` with the `pi-statusbar` and `pi-effort`
-packages. The repository provides a Gemini Flash default, a curated enabled-model
-list, hidden thinking blocks, and the custom `nord-contrast` theme.
+**Pi** — installed by `make install-pi` with the `pi-statusbar`, `pi-effort`,
+and `pi-mcp-adapter` packages. The repository provides a Gemini Flash default, a
+curated enabled-model list, hidden thinking blocks, the custom `nord-contrast`
+theme, and an `mcp.json` (templated for the Context7 API key) wiring the
+google-workspace, gopls, and Context7 MCP servers.
 
 **Skills** — reusable instructions that extend an agent with a task, pattern, or
 specialized knowledge. Depending on frontmatter, agents discover them from the
@@ -136,8 +138,9 @@ provenance, authentication, and update steps.
 
 `make install-google-workspace-mcp` copies it to
 `~/.local/share/google-workspace-mcp/`. Agent configs reference that path via
-`$HOME`, so nothing is tied to a username. opencode and Gemini CLI are wired
-automatically; register it with Claude Code once:
+`$HOME`, so nothing is tied to a username. opencode, Gemini CLI, and Pi are
+wired automatically (Pi via `.pi/agent/mcp.json.tmpl`, alongside the gopls and
+Context7 servers); register it with Claude Code once:
 
 ```bash
 claude mcp add google-workspace -- \

@@ -6,7 +6,8 @@
   "theme": "nord-contrast",
   "packages": [
     "npm:@odinlayer/pi-statusbar",
-    "npm:pi-effort"
+    "npm:pi-effort",
+    "npm:@shuv1337/pi-mcp-adapter"
   ],
   "enabledModels": [
     "amazon-bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0",
