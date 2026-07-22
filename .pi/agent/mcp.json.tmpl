@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "fastly": {
+      "command": "npx",
+      "args": [
+        "-p",
+        "@fastly/mcp",
+        "fastly-mcp"
+      ]
+    },
     "google-workspace": {
       "command": "bash",
       "args": ["-c", "exec \"$HOME/.local/share/google-workspace-mcp/launch.sh\""]

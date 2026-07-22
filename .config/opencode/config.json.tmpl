@@ -12,9 +12,10 @@
     "fastly": {
       "type": "local",
       "command": [
-        "bash",
-        "-c",
-        "exec \"$HOME/go/bin/fastly-mcp\""
+        "npx",
+        "-p",
+        "@fastly/mcp",
+        "fastly-mcp"
       ],
       "enabled": true
     },
