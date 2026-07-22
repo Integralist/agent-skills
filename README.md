@@ -108,7 +108,7 @@ mcp/google-workspace/               # Google Workspace MCP server (all agents)
 and `pi-mcp-adapter` packages. The repository provides a Gemini Flash default, a
 curated enabled-model list, hidden thinking blocks, the custom `nord-contrast`
 theme, and an `mcp.json` (templated for the Context7 API key) wiring the
-google-workspace, gopls, and Context7 MCP servers.
+Atlassian, fastly, google-workspace, gopls, and Context7 MCP servers.
 
 **Skills** — reusable instructions that extend an agent with a task, pattern, or
 specialized knowledge. Depending on frontmatter, agents discover them from the
@@ -161,6 +161,15 @@ claude mcp add google-workspace -- \
 
 Each user authenticates to their own Google account via browser OAuth on first
 use; there are no shared credentials.
+
+The **Atlassian** server (Jira, Confluence, Compass) is wired into Pi, Gemini
+CLI, Copilot CLI, and OpenCode via their respective config files. Each proxies
+the official remote endpoint (`https://mcp.atlassian.com/v1/sse`) through
+`mcp-remote`, which opens a browser for OAuth on first run and caches tokens
+under `~/.mcp-auth` — shared across harnesses, so you authenticate once (clear
+with `rm -rf ~/.mcp-auth` to re-authenticate). Claude Code is intentionally
+omitted: it reaches Atlassian through its own connector and the Atlassian
+plugin.
 
 ## Skill reference
 
