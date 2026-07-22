@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{{ op://Employee/context7 MCP/credential }}"
+      }
+    },
+    "fastly": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-p", "@fastly/mcp", "fastly-mcp"],
+      "env": {}
+    },
+    "gopls": {
+      "type": "stdio",
+      "command": "gopls",
+      "args": ["mcp"],
+      "env": {}
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_API_TOKEN}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--user-data-dir", "${HOME}/.playwright-mcp-data"],
+      "env": {}
+    }
+  }
+}

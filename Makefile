@@ -40,6 +40,13 @@ rules:
 # template (settings.json.tmpl) with a 1Password secret reference in place of
 # the ID. `op inject` interpolates it into the installed file. Skipped with a
 # warning when the 1Password CLI isn't available.
+#
+# ~/.claude.json holds many settings we don't manage, so we never overwrite it
+# wholesale. install codifies only mcpServers in .claude.json.tmpl (Context7 key
+# as an op ref). If ~/.claude.json is absent, the injected template is copied
+# verbatim; if present, jq deep-merges our mcpServers over the existing object
+# (our servers win, manually-added servers survive, nothing else is touched).
+# Requires jq for the merge path; skipped with a warning when jq is absent.
 install-claude: install-agents rules
 	mkdir -p ~/.claude
 	cp .claude/CLAUDE.md ~/.claude/CLAUDE.md
@@ -51,8 +58,24 @@ install-claude: install-agents rules
 	@if command -v op >/dev/null; then \
 		op inject -i .claude/settings.json.tmpl -o ~/.claude/settings.json -f; \
 		echo "Installed Claude settings.json."; \
+		if [ ! -f ~/.claude.json ]; then \
+			op inject -i .claude.json.tmpl -o ~/.claude.json -f; \
+			echo "Created ~/.claude.json from template."; \
+		elif command -v jq >/dev/null; then \
+			tmp=$$(mktemp); \
+			op inject -i .claude.json.tmpl -o "$$tmp" -f; \
+			if jq -s '.[0] as $$cur | .[1] as $$tmpl | $$cur | .mcpServers = (($$cur.mcpServers // {}) + $$tmpl.mcpServers)' ~/.claude.json "$$tmp" > "$$tmp.merged"; then \
+				mv "$$tmp.merged" ~/.claude.json; \
+				echo "Merged mcpServers into ~/.claude.json."; \
+			else \
+				echo "Failed to merge ~/.claude.json; left unchanged."; \
+			fi; \
+			rm -f "$$tmp" "$$tmp.merged"; \
+		else \
+			echo "Skipping ~/.claude.json: jq not found."; \
+		fi; \
 	else \
-		echo "Skipping settings.json: 1Password CLI (op) not found."; \
+		echo "Skipping settings.json and ~/.claude.json: 1Password CLI (op) not found."; \
 	fi
 
 # Gemini (Antigravity CLI) reads ~/.gemini/antigravity-cli. Only copy the
