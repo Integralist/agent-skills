@@ -109,6 +109,8 @@ install-gemini:
 # Copilot CLI reads ~/.copilot. Only copy the statusline and settings.json when
 # ~/.copilot/scripts already exists, so the target is a no-op when Copilot isn't
 # installed. settings.json holds no secrets, so it's committed verbatim.
+# mcp-config.json is templated because it holds the Context7 API key; op inject
+# bakes it in, skipped when op is absent.
 install-copilot:
 	@if [ -d ~/.copilot/scripts ]; then \
 		cp .copilot/scripts/statusline.sh ~/.copilot/scripts/statusline.sh; \
@@ -116,6 +118,16 @@ install-copilot:
 		echo "Installed Copilot statusline and settings.json."; \
 	else \
 		echo "Skipping Copilot statusline: ~/.copilot/scripts does not exist."; \
+	fi
+	@if [ -d ~/.copilot ]; then \
+		if command -v op >/dev/null; then \
+			op inject -i .copilot/mcp-config.json.tmpl -o ~/.copilot/mcp-config.json -f; \
+			echo "Installed Copilot mcp-config.json."; \
+		else \
+			echo "Skipping mcp-config.json: 1Password CLI (op) not found."; \
+		fi; \
+	else \
+		echo "Skipping Copilot mcp-config.json: ~/.copilot does not exist."; \
 	fi
 
 # OpenCode keeps configuration and model preferences in separate XDG

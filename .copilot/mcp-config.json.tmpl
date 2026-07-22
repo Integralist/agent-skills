@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "Fastly": {
+      "type": "local",
+      "command": "npx",
+      "args": ["-p", "@fastly/mcp", "fastly-mcp"],
+      "tools": ["*"]
+    },
+    "Context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{{ op://Employee/context7 MCP/credential }}"
+      },
+      "tools": ["*"]
+    },
+    "gopls": {
+      "type": "local",
+      "command": "gopls",
+      "args": ["mcp"],
+      "tools": ["*"]
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_API_TOKEN}"
+      },
+      "tools": ["*"]
+    },
+    "google-workspace": {
+      "type": "local",
+      "command": "bash",
+      "args": ["-c", "exec \"$HOME/.local/share/google-workspace-mcp/launch.sh\""],
+      "tools": ["*"]
+    }
+  }
+}

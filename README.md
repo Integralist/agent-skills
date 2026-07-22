@@ -75,8 +75,10 @@ make install
 .gemini/antigravity-cli/            # Gemini Antigravity CLI
 └── statusline.sh                   # Status line (mirrors the Claude one)
 
-.copilot/scripts/                   # Copilot CLI
-└── statusline.sh                   # Status line (mirrors the Claude one)
+.copilot/                           # Copilot CLI
+├── mcp-config.json.tmpl            # MCP servers (Context7 key templated)
+├── settings.json                   # Defaults and TUI settings
+└── scripts/statusline.sh           # Status line (mirrors the Claude one)
 
 .config/opencode/                   # OpenCode config
 ├── config.json.tmpl                # Main config with 1Password secret reference
