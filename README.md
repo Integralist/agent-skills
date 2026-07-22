@@ -63,6 +63,8 @@ make install
 ## Structure
 
 ```plain
+.claude.json.tmpl                   # Global MCP servers (Context7 key templated)
+
 .claude/                            # Claude Code
 ├── CLAUDE.md                       # @-import pointer to ~/.agents/AGENTS.md
 ├── agents/                         # Custom sub-agent definitions
@@ -135,6 +137,14 @@ MCP-capable agent. It's an unmodified Apache-2.0 build of upstream
 [`gemini-cli-extensions/workspace`](https://github.com/gemini-cli-extensions/workspace)
 — see [`mcp/google-workspace/README.md`](./mcp/google-workspace/README.md) for
 provenance, authentication, and update steps.
+
+Claude Code reads its global MCP servers from `~/.claude.json`, a file that also
+holds unrelated settings we don't manage. `make install-claude` therefore
+codifies only the `mcpServers` block in `.claude.json.tmpl` (Context7 key as a
+1Password reference). When `~/.claude.json` is absent the injected template is
+copied verbatim; when it exists, `jq` deep-merges our servers over the current
+object — our entries win, manually-added servers survive, and every other
+setting is left untouched. The merge path needs `jq`.
 
 `make install-google-workspace-mcp` copies it to
 `~/.local/share/google-workspace-mcp/`. Agent configs reference that path via
