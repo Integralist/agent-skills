@@ -10,7 +10,7 @@ install-agents:
 # the Context7 API key; op inject bakes it in, skipped when op is absent.
 install-pi:
 	npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort npm:@shuv1337/pi-mcp-adapter; do \
+	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort npm:@shuv1337/pi-mcp-adapter npm:pi-intercom; do \
 		pi install "$$package" --no-approve; \
 	done
 	mkdir -p ~/.pi/agent/themes
