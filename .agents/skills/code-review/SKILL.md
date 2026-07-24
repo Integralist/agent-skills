@@ -2,9 +2,9 @@
 name: code-review
 description: >-
   Code review using specialized subagents. Analyzes behavior and tests,
-  security, reliability, and maintainability. Works on remote PRs and local
-  code, including unpushed changes. Pass --plan or --plan=<path> to check the
-  diff against an implementation plan.
+  security, reliability, and maintainability. Use when reviewing a remote PR or
+  local code, including unpushed/uncommitted changes. Pass --plan or
+  --plan=<path> to check the diff against an implementation plan.
 argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan[=<path>]]'
 ---
 

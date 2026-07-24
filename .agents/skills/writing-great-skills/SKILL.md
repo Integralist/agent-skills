@@ -23,11 +23,12 @@ When user-invoked skills multiply past what you can remember, that piled-up cogn
 
 ## Writing the description
 
-A **description** does two jobs — state what the skill is, and list the **branches** that should trigger it. Every word adds **context load**, so prune it even harder than the body:
+For a **model-invoked** skill the description is the _primary trigger_ — get it wrong and the skill fails before its body ever runs. It does two jobs: state the **what** (capability) and the **when** (trigger **branches**). Vagueness fails both ways at once — the skill **misses** prompts it should catch _and_ **hijacks** ones it shouldn't. Every word adds **context load**, so prune it even harder than the body:
 
 - **Front-load the skill's leading word** — the description is where it does its invocation work.
+- **Name concrete artifacts and verbs**, not categories. "Create, edit, analyze `.docx` files" fires precisely; "helps with documents" both under- and over-fires. The specifics _are_ the boundary the agent matches against.
 - **One trigger per branch.** Synonyms that rename a single branch are **duplication** ("build features using TDD … asks for test-first development" is one branch written twice). Collapse them; keep only genuinely distinct branches.
-- **Cut identity that's already in the body.** Keep the description to triggers, plus any "when another skill needs…" reach clause.
+- **Cut identity that's already in the body.** Keep the "what" to the disambiguating capability; leave elaboration to the body. Keep the "when" to triggers, plus any "when another skill needs…" reach clause.
 
 ## Information hierarchy
 
@@ -70,6 +71,12 @@ Hunt for chances to refactor skills onto leading words. A triad spelled out at t
 - "a loop you believe in" → _red_ — converts a fuzzy gate into a binary observable state (the loop goes _red_ on the bug, or it doesn't).
 
 You win twice: fewer tokens, _and_ a sharper hook for the agent to hang its thinking on. Assume every skill carries restatements that leading words retire — go find them.
+
+## Directives, not essays
+
+Write the body as **directives** — imperative actions the agent runs ("Always call `X`; never `Y`") — not passive prose it must infer intent from. Passive trivia ("`X` is recommended because it handles state") reads as background and gets skipped; the same fact as a directive gets executed. A five-line snippet beats five paragraphs. The trigger clause obeys this too: "Use when…", not a passive summary.
+
+Give the _reason_ behind a rule, though: it lets the agent generalize to edge cases you never enumerated rather than overfit to the literal prompt — not a **no-op**, since it changes behaviour on the cases you didn't write down.
 
 ## Failure modes
 

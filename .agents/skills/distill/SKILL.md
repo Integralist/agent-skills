@@ -4,11 +4,8 @@ description: >-
   Rewrite text to be more concise, clear, and direct without
   losing critical information. Inventories load-bearing details
   first, rewrites, then audits the rewrite to verify nothing
-  essential was dropped. Use to clean up a plan, technical guide,
-  agent instructions, or any prose that is too long or hard to
-  follow — especially before handing it to an agent to execute.
-  Triggers on "clean up / tighten / condense / distill this",
-  "make this more concise without losing detail", or /distill.
+  essential was dropped — for a plan, technical guide, agent
+  instructions, or any prose too long or hard to follow.
 disable-model-invocation: true
 argument-hint: "[file path | pasted text]"
 ---
