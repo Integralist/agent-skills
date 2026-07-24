@@ -145,6 +145,11 @@ rewriter's intentions catches omissions the rewriter rationalized away.
 
 ## Related skills
 
+- [`polish`](../polish/SKILL.md) — the light companion for short prose (a
+  paragraph, prompt, message, comment). Same clarity-and-concision goal
+  without the inventory-and-audit loop. Use it when the passage fits on
+  screen and clarity, not preservation, is the concern; reach for
+  `distill` when losing a load-bearing detail would break execution.
 - [`tech-docs`](../tech-docs/SKILL.md) — improving repo *documentation*
   via doc-specific pillars (Mermaid diagrams, modularization, eliminating
   assumptions, stale-code references). Use it for document structure and

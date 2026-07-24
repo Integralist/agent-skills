@@ -210,6 +210,7 @@ plugin.
 | **mysql-index-audit**        | Statically audit a codebase for MySQL index misuse (leftmost-prefix, gaps, killers)                                                    |
 | **next-task**                | Continue working through a project plan                                                                                                |
 | **perspectives**             | Explore evidence, sentiment, risks, benefits, alternatives, and process                                                                |
+| **polish**                   | Rewrite a short passage for clarity and concision; light companion to distill (no audit loop)                                          |
 | **project-plan**             | Implementation plan from a spec; vertical slices with Blocked-by edges, extracts ADRs via to-adr                                       |
 | **redesign**                 | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning                                            |
 | **refactor**                 | Analyze a feature and produce a reimplementation plan                                                                                  |
