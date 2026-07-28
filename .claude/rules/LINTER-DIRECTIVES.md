@@ -1,3 +1,5 @@
+<!-- generated from .agents/skills/go-conventions/LINTER-DIRECTIVES.md — edit there, run `make rules` -->
+
 # Linter Suppression Directives
 
 Use the exact directive syntax each tool expects — the wrong

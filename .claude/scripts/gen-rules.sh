@@ -38,11 +38,20 @@ gen() {
 gen .agents/skills/go-conventions/SKILL.md       .claude/rules/go.md       '**/*.go'
 gen .agents/skills/markdown-conventions/SKILL.md .claude/rules/markdown.md '**/*.md'
 
-# copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md
-# files so relative links in the generated rule resolve.
+# copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md files so relative
+# links in the generated rule resolve. Each copy gets a "generated" banner so a
+# reader (or agent) editing it knows the edit belongs in the source skill —
+# go.md/markdown.md already signal derivation via their `paths:` frontmatter.
 copy_siblings() {
-	local skill_dir="$1" rule_dir="$2"
-	find "$skill_dir" -maxdepth 1 -name '*.md' ! -name 'SKILL.md' -exec cp {} "$rule_dir/" \;
+	local skill_dir="$1" rule_dir="$2" src base
+	while IFS= read -r src; do
+		base="$(basename "$src")"
+		{
+			printf -- '<!-- generated from %s — edit there, run `make rules` -->\n\n' "$src"
+			cat "$src"
+		} >"$rule_dir/$base"
+		echo "generated $rule_dir/$base from $src"
+	done < <(find "$skill_dir" -maxdepth 1 -name '*.md' ! -name 'SKILL.md')
 }
 
 copy_siblings .agents/skills/go-conventions       .claude/rules
