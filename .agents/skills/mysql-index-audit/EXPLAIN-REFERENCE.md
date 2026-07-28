@@ -9,6 +9,7 @@ Inline criteria for interpreting the `EXPLAIN` output the user gathers.
 | `system` / `const` | Exactly one row, found instantly (primary-key lookup).    |
 | `eq_ref`           | One-row join match on a unique/primary key.               |
 | `ref`              | Index lookup returning several rows.                      |
+| `index_merge`      | Two+ indexes merged for one table — prefer one composite. |
 | `range`            | Index slice (`BETWEEN`, `IN`, `>`, `<`).                  |
 | `index`            | Full **index** scan — entire index read.                  |
 | `ALL`              | Full **table** scan — every row read. Usually the target. |
@@ -25,19 +26,25 @@ Inline criteria for interpreting the `EXPLAIN` output the user gathers.
 - `key` — the index actually chosen. If `possible_keys` lists an index but
   `key` is `NULL`, the optimizer judged a full scan cheaper (common on small
   tables or when reading a large fraction of rows).
+- `key_len` — bytes of the index actually used to seek. It counts only the
+  **access-predicate** columns (those setting scan start/stop points), so a
+  `key_len` shorter than the full composite index means a leftmost prefix stops
+  short — a column is missing or a range halted traversal (see PARTIAL and
+  RANGE-ORDER in the audit).
 
 ## `Extra` — red flags and green lights
 
-| Flag                       | Verdict  | Meaning                                            |
-| -------------------------- | -------- | -------------------------------------------------- |
-| `Using index`              | Good     | Covering index — answered from the index alone.    |
-| `Using index condition`    | Good     | Index Condition Pushdown — filtered at storage.    |
-| `Using index for group-by` | Good     | Loose index scan.                                  |
-| `Using where`              | Neutral  | Filtered after fetch; worrying if `type` is `ALL`. |
-| `Using intersect(...)`     | Neutral  | Index merge — a composite index is usually better. |
-| `Using filesort`           | Bad      | Manual sort; index order didn't match `ORDER BY`.  |
-| `Using temporary`          | Bad      | Internal temp table (often `UNION`/`DISTINCT`).    |
-| `Dependent Subquery`       | Very bad | Subquery runs once per outer row.                  |
+| Flag                       | Verdict  | Meaning                                              |
+| -------------------------- | -------- | ---------------------------------------------------- |
+| `Using index`              | Good     | Covering index — answered from the index alone.      |
+| `Using index condition`    | Good     | Index Condition Pushdown — filtered at storage.      |
+| `Using index for group-by` | Good     | Loose index scan.                                    |
+| `Using where`              | Neutral  | Filtered after fetch; worrying if `type` is `ALL`.   |
+| `Using intersect(...)`     | Neutral  | Index merge (`AND`) — a composite is usually better. |
+| `Using union(...)`         | Neutral  | Index merge (`OR`) — a composite is usually better.  |
+| `Using filesort`           | Bad      | Manual sort; index order didn't match `ORDER BY`.    |
+| `Using temporary`          | Bad      | Internal temp table (often `UNION`/`DISTINCT`).      |
+| `Dependent Subquery`       | Very bad | Subquery runs once per outer row.                    |
 
 ## Leftmost-prefix rule
 

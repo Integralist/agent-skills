@@ -100,7 +100,9 @@ Grep for:
 > assembly, query builders whose columns depend on runtime input) **cannot be
 > fully resolved statically**. Do not guess their column set. List them in the
 > report under "Needs manual EXPLAIN" with the file:line, so the user can run
-> `EXPLAIN` against the actual generated SQL.
+> `EXPLAIN` against the actual generated SQL. One shape is the exception: a
+> static `OR :p IS NULL` catch-all is fully visible in the source — classify it
+> as a KILLER (Step 3), not "needs EXPLAIN".
 
 > [!NOTE]
 > A **CTE or derived table** is either *merged* into the outer query or
@@ -119,6 +121,18 @@ Grep for:
 
 For each query, match it against the indexes on the same table and classify it.
 The classifications below are the core of the audit.
+
+> [!IMPORTANT]
+> **InnoDB indexes are clustered: every secondary index implicitly carries the
+> primary-key columns.** The table *is* its primary-key index, so a secondary
+> index on `(a)` is physically `(a, <pk>)`, and a secondary-index lookup that
+> needs other columns must then seek the clustered index by PK. Two
+> consequences drive findings below:
+>
+> - A query selecting only the index's own columns **plus PK columns** is
+>   already covered — don't recommend adding the PK to the index (see COVERING).
+> - A wide primary key bloats *every* secondary index on the table, slowing
+>   writes and inflating storage. Flag wide or natural PKs as a cost multiplier.
 
 ### UNUSED — leftmost-prefix violation
 
@@ -185,6 +199,15 @@ SELECT * FROM users WHERE country = 'UK' AND created_at >= '2026-01-01';
 > range column benefits from the index. Order the index so the most selective
 > range comes last and the rest are filtered.
 
+> [!NOTE]
+> The vocabulary for this: columns the index can *seek* on are **access
+> predicates** — they set the scan's start and stop points; columns it can only
+> *check* after the seek are **filter predicates** — rows are read, then
+> discarded. A range turns every column to its right into a filter predicate.
+> `EXPLAIN` exposes the split: access predicates lengthen `key_len`, filter
+> predicates show as `Using where`. The audit's goal is to maximise access
+> predicates — equality columns first, then a single range.
+
 ### Index killers
 
 Even with a matching index, these force a scan:
@@ -198,6 +221,26 @@ Even with a matching index, these force a scan:
 
 A type mismatch (comparing a `VARCHAR` column to a numeric literal) forces MySQL
 to convert every row before comparing — the index is bypassed.
+
+### KILLER — catch-all / smart-logic predicates
+
+A query that makes each filter optional with `OR :p IS NULL` (or
+`col = COALESCE(:p, col)`) forces the optimizer to plan for the worst case —
+every filter disabled — so it picks a full table scan and keeps that plan even
+when the caller supplies a value. Unlike a genuinely dynamic WHERE clause, this
+shape is fully visible in the source, so classify it here rather than deferring
+it to "Needs manual EXPLAIN".
+
+```sql
+-- KILLER: any predicate may be NULL-disabled -> full scan, always
+SELECT * FROM employees
+ WHERE (subsidiary_id = ? OR ? IS NULL)
+   AND (last_name     = ? OR ? IS NULL);
+```
+
+Fix: build the WHERE clause dynamically, emitting only the predicates the caller
+supplied (still with bind parameters). Each resulting shape gets its own plan
+and uses the matching index.
 
 ### REDUNDANT / DUPLICATE indexes
 
@@ -219,12 +262,35 @@ idx_b (user_id, created_at)    <- keep
 A frequent `WHERE`/`JOIN` predicate with no index whose leftmost column matches.
 Recommend a composite index ordered equality-columns-first.
 
+A **join** predicate needs an index just as a `WHERE` does. In a nested-loops
+join MySQL probes the joined ("driven") table once per driving row, so the join
+columns on the driven side — typically the foreign key — must be indexed, or
+each probe is a full scan. Flag an unindexed join/FK column as MISSING.
+
+### INDEX-MERGE — two indexes doing one index's job
+
+The query has independent predicates on two columns, each served by its own
+single-column index, so MySQL merges them (`EXPLAIN` shows type `index_merge`
+and `Using union`/`Using intersect(...)`). One index scan is faster than two: a
+single composite index almost always beats a merge, because a B-tree serves
+only **one** range as an access predicate — two independent ranges can't both
+seek.
+
+```txt
+idx_last (last_name)          <- merged...
+idx_dob  (date_of_birth)      <- ...instead of one composite
+```
+
+Fix: replace the pair with one composite index, most-selective column first.
+Treat a standing `index_merge` plan as a MISSING-composite signal.
+
 ### COVERING opportunity
 
 The query selects only columns that already live in (or could be added to) the
 index, so MySQL can answer it from the index alone (`Extra: Using index`, an
 "index-only scan"). Suggest extending the composite index to include the
-selected columns.
+selected columns. Remember the PK columns are already present (see the InnoDB
+note above) — a select of indexed columns plus PK is covered as-is.
 
 > [!NOTE]
 > In PostgreSQL this is the `INCLUDE` clause
@@ -288,6 +354,49 @@ whether it is materialized on disk.
 > the more reliable choice for turning an un-indexable function result into
 > static, searchable data.
 
+### SORT-ORDER — filesort from an unsatisfiable ORDER BY
+
+An `ORDER BY` whose columns and directions don't match an index's leading
+columns forces a `Using filesort` step. A mixed-direction sort
+(`ORDER BY a ASC, b DESC`) needs an index that declares those directions per
+column; a plain `(a, b)` index can't serve it.
+
+```sql
+-- Needs a direction-matched index, else filesort:
+SELECT ... FROM sales ORDER BY sale_date ASC, product_id DESC;
+CREATE INDEX idx_sales_dt_pr ON sales (sale_date ASC, product_id DESC);
+```
+
+> [!IMPORTANT]
+> Descending index columns require **MySQL 8.0+** — before 8.0 (and MariaDB
+> before 10.8) the `DESC` keyword parses but is ignored, so the index is stored
+> ascending and the mixed-direction sort still filesorts. Confirm the server
+> version before recommending a directional index. MySQL 8.0 also has no
+> `NULLS FIRST/LAST`; `NULL`s sort first ascending, last descending.
+
+### PAGINATION — deep OFFSET scan
+
+`LIMIT n OFFSET m` makes MySQL read and discard all `m` skipped rows every call,
+so response time grows with page depth; concurrent inserts also shift the
+window, duplicating or skipping rows across pages. Flag any large or user-driven
+`OFFSET`.
+
+Fix: **keyset (seek) pagination** — carry the last row's sort key forward and
+seek past it with a row-value comparison, backed by an index on the sort
+columns. Constant time per page, stable under inserts.
+
+```sql
+-- Instead of: ORDER BY sale_date DESC LIMIT 10 OFFSET 10000
+CREATE INDEX idx_sales_dt_id ON sales (sale_date, sale_id);
+SELECT * FROM sales
+ WHERE (sale_date, sale_id) < (?, ?)   -- last row of previous page
+ ORDER BY sale_date DESC, sale_id DESC
+ LIMIT 10;
+```
+
+The trailing key column (`sale_id`) makes the order deterministic so rows
+sharing a `sale_date` aren't skipped at the page boundary.
+
 ## Step 4 — Report
 
 Present findings grouped by severity (High / Medium / Low). For each finding
@@ -296,7 +405,7 @@ include:
 - The index definition (`file:line`) with its ordered columns
 - The offending query (`file:line`)
 - The classification (UNUSED / PARTIAL / RANGE-ORDER / KILLER / REDUNDANT /
-  MISSING / COVERING / GENERATED-COLUMN)
+  MISSING / INDEX-MERGE / COVERING / GENERATED-COLUMN / SORT-ORDER / PAGINATION)
 - **Why it matters** (one line)
 - A **concrete fix** (reorder index columns, add a column to the query, add an
   index, rewrite the predicate, add a generated column, drop a redundant index)
@@ -375,3 +484,5 @@ tier adequate to the task (see
   <https://dev.mysql.com/doc/refman/8.0/en/explain-output.html>
 - Generated columns:
   <https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html>
+- SQL indexing reference (access vs filter predicates, clustered indexes, keyset
+  pagination): <https://use-the-index-luke.com/>
