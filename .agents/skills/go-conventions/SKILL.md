@@ -15,6 +15,19 @@ description: >-
 
 We are peers writing Go. Prioritize correctness, clarity, and best practices.
 
+> [!IMPORTANT]
+> Some sections below describe my house architecture for an **HTTP/API
+> service** — the `handlers → service → repository` layering and the tracing,
+> metrics, caching, and middleware that hang off it (**Observability, HTTP
+> Handlers, Service Layer, Repository Layer, Middleware, Caching, Layer
+> Separation**, and the layered entries under **File Naming**). Apply them when
+> building or extending a service of that shape. In a CLI, a library, or a repo
+> with a different established architecture, match what's already there — don't
+> impose the layering. Helper and package names in those sections (`errorsx`,
+> `httpx`, `traces.WithSpan`, `withDBMetrics`, `middleware.Pipeline`,
+> `CacheManager`) illustrate the pattern; in an existing repo, use its
+> equivalents. Everything else here is language-level and applies to all Go.
+
 ## Tooling
 
 ### Go LSP (gopls)
@@ -315,7 +328,7 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/fastly/blue-ribbon/internal/metrics"
+	"github.com/org/project/internal/metrics"
 )
 ```
 
