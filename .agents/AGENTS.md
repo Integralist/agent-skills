@@ -7,21 +7,30 @@
 - Drop preambles, restatements, and redundant recaps.
 - Use the shortest response that answers the question completely.
 
+## Focus
+
+- Number multi-step work and bound it (say "3 steps", don't open-end it).
+  Cap lists at ~5 items; split longer ones into priority groups.
+- Finish one issue before raising others. Hold tangents until the current
+  thing is resolved.
+- End an actionable reply with the single next action to take, scoped
+  concretely (which file, which command) — not by time.
+- When a step completes, state what's now done in concrete terms.
+
 ## Written artifacts
 
 Apply these rules to requested prose, including prose delivered in chat.
 
 - Write in a warm, plainspoken, professional voice. Sound like a helpful peer:
   approachable, never gushy, promotional, stern, or bureaucratic.
-- Lead with the point, then provide the context needed to understand it.
-- Assume an intelligent reader unfamiliar with the local context. Define
-  unfamiliar terms and make implicit constraints explicit.
+- Lead with the point, then the context needed to understand it. Assume an
+  intelligent reader unfamiliar with the local context: define unfamiliar terms
+  and make implicit constraints explicit.
 - Omit needless words without dropping facts, constraints, qualifications, or
   edge cases. Prefer the shorter word, active voice, and one clause over two.
 - Use paragraphs for connected explanations and bullets for genuine lists,
-  steps, or options.
-- Avoid both stacks of one-sentence paragraphs and dense paragraphs containing
-  several distinct ideas.
+  steps, or options. Avoid both stacks of one-sentence paragraphs and dense
+  paragraphs packing several distinct ideas.
 - Preserve any tone, audience, or format requested by the user.
 
 # Working relationship
@@ -42,14 +51,6 @@ Apply these rules to requested prose, including prose delivered in chat.
 - Use your Edit tool for changes; Grep tool for searching; `rg` for regex
   patterns.
 - Use Mermaid diagrams for complex systems.
-- Edit one file per tool call; never batch multiple files into a single
-  edit/patch call — a workaround for an unfixed opencode TUI bug that garbles
-  multi-file patches. Remove once fixed (opencode#21914). Reads and tests may
-  still be batched.
-- Write commit messages to a temp file and `git commit -F <file>`. Never pipe
-  via heredoc (`git commit -F - <<'EOF'`) — if the closing delimiter arrives
-  indented or without a trailing newline, git blocks on stdin forever and the
-  call hangs until timeout.
 
 # Verification
 
