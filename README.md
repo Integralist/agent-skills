@@ -212,6 +212,7 @@ plugin.
 | **perspectives**             | Explore evidence, sentiment, risks, benefits, alternatives, and process                                                                |
 | **polish**                   | Rewrite a short passage for clarity and concision; light companion to distill (no audit loop)                                          |
 | **project-plan**             | Implementation plan from a spec; vertical slices with Blocked-by edges, extracts ADRs via to-adr                                       |
+| **recap**                    | Recap the current session in chat — Done / In progress / Next (no file written)                                                        |
 | **redesign**                 | Codebase-wide aspirational audit; produces phased redesign plan with mandatory test pinning                                            |
 | **refactor**                 | Analyze a feature and produce a reimplementation plan                                                                                  |
 | **research**                 | Research a topic or repo deeply; writes a reference doc to `docs/research/`                                                            |
