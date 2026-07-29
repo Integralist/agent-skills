@@ -35,6 +35,10 @@ Take the plan from the first source that exists, in order:
    `docs/research/` — fold its detail in.
 1. Neither — stop (see Precondition).
 
+A whole plan need not become one document. Pass a single slice as the scope to
+crystallize it alone — when one task doc would be unwieldy, or you want to
+execute early slices before finalizing later ones.
+
 Do not re-derive what the session already settled. Verify specific references
 with tools; never re-explore settled ground.
 
