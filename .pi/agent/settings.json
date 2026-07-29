@@ -9,7 +9,7 @@
     "npm:pi-effort",
     "npm:@shuv1337/pi-mcp-adapter",
     "npm:pi-intercom",
-    "npm:pi-btw"
+    "git:github.com/Integralist/pi-btw"
   ],
   "enabledModels": [
     "amazon-bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0",
