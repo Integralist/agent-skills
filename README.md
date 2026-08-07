@@ -202,7 +202,7 @@ plugin.
 | **grepai**                   | Semantic code search by intent                                                                                                         |
 | **grill-me**                 | Thin delegator → runs a **grilling** session                                                                                           |
 | **grill-with-docs**          | Thin delegator → runs **grilling** with **domain-modeling**                                                                            |
-| **grilling**                 | Interview the user relentlessly to stress-test a plan or design                                                                        |
+| **grilling**                 | Interview the user in rounds across a design tree's frontier to stress-test a plan, decision, or idea                                  |
 | **handoff**                  | Compact the current conversation into a handoff document for another agent                                                             |
 | **incident-report**          | Write up a session's incident debugging into a report at `docs/reports/` — timeline, impact, fixes                                     |
 | **markdown-conventions**     | Markdown formatting conventions (mirrors `.claude/rules/markdown.md`)                                                                  |
