@@ -226,6 +226,7 @@ plugin.
 | **to-adr**                   | Extract a formal ADR (one per decision) from a plan or design doc                                                                      |
 | **to-prd**                   | Extract a focused PRD (product what & why) from a spec or plan                                                                         |
 | **to-spec**                  | Write a spec to `docs/specifications/` — problem, solution, stories, acceptance criteria, seams                                        |
+| **wait-what**                | Stop and re-pitch a message that didn't land — context, Simplified Technical English, `CONTEXT.md` terms                               |
 | **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability                                           |
 
 ## Choosing an analysis skill
