@@ -235,6 +235,7 @@ plugin.
 | Skill            | Use when                                                                                   | Primary output                                               |
 | ---------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
 | **code-review**  | Code or a diff exists and you want defects identified                                      | Verified findings and open questions                         |
+| **precedent**    | Work is correct and you want it to match the project's own patterns                        | Divergences citing the peer that sets each pattern           |
 | **decide**       | You must choose between consequential options                                              | Durable decision memo and recommendation                     |
 | **consensus**    | A complex design or implementation needs independent cross-model review and approval gates | Reviewed assessment or implementation with dissent preserved |
 | **perspectives** | You want quick breadth, brainstorming, or a structured "what are we missing?" pass         | Multi-perspective analysis and next step                     |
@@ -246,6 +247,7 @@ Common sequences:
 - Complex implementation: **consensus**, which invokes **code-review** before
   cross-model implementation review
 - Ordinary pull request or local diff: **code-review**
+- New code that works but may not look like its neighbours: **precedent**
 - Quick meeting or brainstorming pass: **perspectives**
 
 ## Claude-specific frontmatter
