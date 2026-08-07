@@ -227,7 +227,7 @@ plugin.
 | **to-prd**                   | Extract a focused PRD (product what & why) from a spec or plan                                                                         |
 | **to-spec**                  | Write a spec to `docs/specifications/` — problem, solution, stories, acceptance criteria, seams                                        |
 | **wait-what**                | Stop and re-pitch a message that didn't land — context, Simplified Technical English, `CONTEXT.md` terms                               |
-| **writing-great-skills**     | Reference for writing and editing skills well — vocabulary and principles for predictability                                           |
+| **writing-for-agents**       | Reference for writing any agent-facing document — skills, AGENTS.md, CLAUDE.md, GEMINI.md                                              |
 
 ## Choosing an analysis skill
 
