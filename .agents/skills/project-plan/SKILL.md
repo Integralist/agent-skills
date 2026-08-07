@@ -128,6 +128,9 @@ single-layer or non-code work — see "Slicing the work".
 - **Blocked by**: None — can start immediately
 - **Delivers**: {observable, demoable behaviour across every layer
   the slice touches}
+- **Consumes**: None
+- **Produces**: {exact signatures later slices rely on — function
+  names, parameter and return types, import paths}
 
 - [ ] **Task 1.1**: {specific task}
 
@@ -143,6 +146,8 @@ single-layer or non-code work — see "Slicing the work".
 
 - **Blocked by**: Slice 1 ({why})
 - **Delivers**: {…}
+- **Consumes**: {exact signatures taken from Slice 1}
+- **Produces**: {…}
 
 - [ ] **Task 2.1**: {specific task}
 
@@ -202,6 +207,12 @@ each scenario is a natural slice boundary.
 Every slice declares **Blocked by** — the slices that must finish first, or
 "None — can start immediately".
 
+A slice also declares its interface: **Consumes** (exact signatures it takes
+from earlier slices) and **Produces** (exact signatures later slices rely on).
+A slice handed to a subagent sees only its own section, so this block is the
+only way its implementer learns the names and types its neighbours use.
+**Delivers** describes behaviour; it does not carry types.
+
 Not everything slices vertically:
 
 - **Single-layer or non-code work** (one package, a doc set, config) has no
@@ -237,6 +248,23 @@ plan so it reaches repos without
 [`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md) — keep
 it intact. That file holds the full rule.
 
+## Self-review
+
+Run these against the finished plan yourself — a checklist, not a subagent
+dispatch. Fix what you find inline and move on; there is no second pass.
+
+1. **Spec coverage** — walk each requirement in the spec and name the slice
+   that implements it. A requirement with no slice is a missing slice, not a
+   line in Notes & Caveats.
+1. **Citations resolve** — grep or read each `path:line` you cited and confirm
+   the symbol still exists. A citation pointing at the wrong line is worse
+   than none.
+1. **Type consistency** — every symbol a slice invents is spelled identically
+   everywhere later slices use it. `clearLayers()` in Slice 1 against
+   `clearFullLayers()` in Slice 4 is a bug shipped into the plan. Diff the
+   Consumes and Produces blocks against each other first; mismatches surface
+   there.
+
 ## Extract decisions
 
 After the plan is written, delegate to [`to-adr`](../to-adr/SKILL.md), passing
@@ -259,9 +287,6 @@ standalone `/project-plan` runs.
 - Use specific file paths and line numbers when referencing code.
 - Cite every factual claim inline — `path/to/file.go:42` for code, URL for
   external docs. Label anything you cannot cite an unverified assumption.
-- Before finalizing, verify every cited reference resolves: grep/read each
-  `path:line` and confirm the symbol still exists. A citation pointing at the
-  wrong line is worse than none.
 - Each slice small enough to complete in one session.
 - Code snippets must be precise — real signatures, types, and import paths. Not
   pseudocode.

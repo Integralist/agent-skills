@@ -89,7 +89,8 @@ ordered tasks.
 
 - Exact references only — real signatures, types, import paths, not pseudocode.
   Cite each as `path/to/file.go:42`; before finalizing, confirm every cited
-  symbol still resolves.
+  symbol still resolves, and that every symbol a task invents is spelled
+  identically in every later task that uses it.
 - Keep the "Context" prose tight — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md) and
   [`markdown-conventions`](../markdown-conventions/SKILL.md).
