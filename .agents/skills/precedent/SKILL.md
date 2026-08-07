@@ -2,9 +2,9 @@
 name: precedent
 description: >-
   Conform work to the precedent a project already sets — naming, API shape,
-  error handling, test style, terminology. Use when the user asks whether a
-  change fits the codebase, when another skill needs to judge project
-  conformance, or on /precedent.
+  error handling, test style, document structure, terminology. Use when the
+  user asks whether a change fits the codebase, when another skill needs to
+  judge project conformance, or on /precedent.
 argument-hint: "[path | --uncommitted]"
 ---
 
@@ -25,14 +25,18 @@ the question, it is authoritative and this skill defers to it:
 
 This skill owns what no guide writes down: the patterns a codebase grew.
 
-## Scope
+## Input
 
-Take the target from the first source that applies:
+The argument follows the skill invocation. Detect the scope:
 
-1. A path or file passed as the argument.
-1. Uncommitted changes (`git status --porcelain`), on `--uncommitted` or when
-   the user means "what I'm working on".
-1. Neither — ask which path to check.
+| Argument          | Scope                   |
+| ----------------- | ----------------------- |
+| File path or glob | Audit the given path(s) |
+| `--uncommitted`   | Uncommitted changes     |
+| No argument       | Ask which path to check |
+
+For `--uncommitted`, derive the file list with `git status --porcelain`. Treat
+"what I'm working on" as `--uncommitted`.
 
 ## Find the precedent
 
@@ -47,7 +51,10 @@ conform to.
 
 ## Compare
 
-Check each file against its peers on every axis that applies:
+Check each file against its peers on every axis that applies. Code and
+documents diverge in different ways, so work the group that fits the target.
+
+Code:
 
 - **Naming** — identifiers, files, test functions, packages.
 - **API shape** — signatures, return types, receivers, constructor and option
@@ -59,8 +66,16 @@ Check each file against its peers on every axis that applies:
 - **Test style** — table-driven or not, helper and fixture conventions,
   assertion style, how cases are named.
 - **Dependencies** — whether the project already has a library for this.
-- **Terminology and prose** — the words the glossary and neighbouring docs use,
-  heading depth, voice.
+
+Documents:
+
+- **Document structure** — section names and the order they come in, heading
+  depth, which sections a document of this kind carries at all.
+- **Frontmatter and metadata** — which fields peers set, and the style of their
+  values.
+- **Presentation** — table, list, or prose for the same kind of content.
+- **Terminology and voice** — the words the glossary and neighbouring docs use,
+  person, mood.
 
 Done when every file in scope has been compared against a located peer set, or
 recorded as having none.
