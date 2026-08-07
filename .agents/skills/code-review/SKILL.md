@@ -132,7 +132,11 @@ Severity reflects impact and likelihood, not reviewer confidence.
 
 1. **Maintainability and Conventions Review** — project consistency,
    readability, API design, observability, naming, error handling, and
-   language idioms. When `HAS_GO`, the subagent MUST first load the
+   language idioms. For consistency findings the subagent MUST load
+   `precedent` (`.agents/skills/precedent/SKILL.md`) and cite the peer
+   `file:line` establishing each pattern it claims the change departs from — a
+   finding with no cited sibling is an invention. When `HAS_GO`, the subagent
+   MUST first load the
    `go-conventions` skill (`.agents/skills/go-conventions/SKILL.md`) and judge
    changed Go against project rules rather than generic conventions. For other
    languages, use the repository's corresponding instructions when available.

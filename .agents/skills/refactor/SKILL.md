@@ -81,7 +81,8 @@ Include this verbatim in the subagent prompt:
 > - Logic for the same concern scattered across multiple packages
 > - Duplicated patterns that should be unified
 > - Inconsistent abstractions (same concept modeled differently in
->   different places)
+>   different places) — cite the peer `file:line` establishing each
+>   pattern you claim is departed from
 > - Leaky abstractions where internals bleed across boundaries
 > - Orphaned helpers or utilities that belong closer to their callers
 >
