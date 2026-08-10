@@ -3,6 +3,13 @@
 Global configuration for AI coding assistants — skills, agents, rules, and
 project instructions shared across every project.
 
+> [!WARNING]
+> Some configured skills and plugins are **internal** and will not work for
+> everyone. `.claude/settings.json.tmpl` and `.pi/agent/settings.json`
+> reference a private repository that is not publicly accessible, so without
+> access those entries fail to install. Remove or disable them before running
+> the install targets.
+
 ## Mental model
 
 The repo serves multiple harnesses from one set of files:
