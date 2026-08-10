@@ -67,6 +67,10 @@ make install-google-workspace-mcp
 make install
 ```
 
+Every target prints one line per action — `✅` done, `💤` skipped because a
+prerequisite is missing, `❌` failed. Commands run quietly; a failure prints its
+full output and stops the install, so nothing goes wrong silently.
+
 ## Structure
 
 ```plain
@@ -107,6 +111,10 @@ mcp/google-workspace/               # Google Workspace MCP server (all agents)
 ├── AGENTS.md                       # Shared conventions
 └── skills/                         # One directory per skill (see table below)
     └── shared/                     # Cross-skill references (Agent teams, etc.)
+
+scripts/                            # Makefile helpers (not installed anywhere)
+├── step.sh                         # One status line per install action
+└── install-claude-json.sh          # Merges mcpServers into ~/.claude.json
 ```
 
 ## Components
@@ -150,7 +158,9 @@ provenance, authentication, and update steps.
 Claude Code reads its global MCP servers from `~/.claude.json`, a file that also
 holds unrelated settings we don't manage. `make install-claude` therefore
 codifies only the `mcpServers` block in `.claude.json.tmpl` (Context7 key as a
-1Password reference). When `~/.claude.json` is absent the injected template is
+1Password reference) and installs it with
+[`scripts/install-claude-json.sh`](./scripts/install-claude-json.sh). When
+`~/.claude.json` is absent the injected template is
 copied verbatim; when it exists, `jq` deep-merges our servers over the current
 object — our entries win, manually-added servers survive, and every other
 setting is left untouched. The merge path needs `jq`.
