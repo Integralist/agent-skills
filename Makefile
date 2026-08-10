@@ -1,4 +1,4 @@
-.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules
+.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp
 
 # Every action runs through scripts/step.sh, which prints one status line and
 # swallows the command's output unless it fails — see that file for the modes.
@@ -155,11 +155,31 @@ install-opencode:
 # stable, username-free location every agent's MCP config points at via
 # $HOME. Runtime OAuth token files live only in the destination and are never
 # overwritten, since they are absent from the source tree.
+#
+# The vendored bundle is only *checked* against the latest upstream stable
+# release here, never replaced: applying an update rewrites tracked files, and
+# an install has no business leaving the working tree dirty. An outdated bundle
+# prints a line pointing at update-google-workspace-mcp, which you run when
+# you're ready to review and commit the bump.
 install-google-workspace-mcp:
 	@$(STEP) --section "Google Workspace MCP"
+	@bash scripts/workspace-mcp.sh check
 	@mkdir -p ~/.local/share/google-workspace-mcp
 	@$(STEP) "mcp/google-workspace/ → ~/.local/share/google-workspace-mcp/" cp -r mcp/google-workspace/ ~/.local/share/google-workspace-mcp/
 	@$(STEP) "launch.sh made executable" chmod +x ~/.local/share/google-workspace-mcp/launch.sh
+
+# Compare the vendored Google Workspace bundle against the latest upstream
+# stable release, and pull a newer one in when there is one. update rewrites
+# dist/index.js and the ref recorded in gemini-extension.json, NOTICE, and the
+# directory README — review the diff and commit it. Pass ARGS=--force to
+# re-download the release already vendored.
+check-google-workspace-mcp:
+	@$(STEP) --section "Google Workspace MCP"
+	@bash scripts/workspace-mcp.sh check
+
+update-google-workspace-mcp:
+	@$(STEP) --section "Google Workspace MCP"
+	@bash scripts/workspace-mcp.sh update $(ARGS)
 
 install: install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp
 	@printf '\n✨ All set.\n'

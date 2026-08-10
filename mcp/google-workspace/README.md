@@ -72,6 +72,31 @@ Any other MCP client works too — point its server config at
 
 ## Updating the bundle
 
-Download a newer prebuilt bundle from an upstream release (or build it from the
-tagged source with `npm ci && npm run build`), replace `dist/index.js`, and
-update the ref and commit in `NOTICE` and `gemini-extension.json`.
+```bash
+make check-google-workspace-mcp    # is a newer stable release out?
+make update-google-workspace-mcp   # download it and bump the recorded ref
+```
+
+`update` replaces `dist/index.js` and rewrites the ref in
+`gemini-extension.json`, `NOTICE`, and this file; review the diff and commit it.
+Nothing is written unless the download and extract both succeed. Pass
+`ARGS=--force` to re-download the release already vendored.
+
+`make install` runs the **check** for you and prints a 🔔 line when a newer
+release is out. It never applies one — that would leave tracked files modified
+as a side effect of an install — so running `update` stays a deliberate step you
+take when you're ready to commit the bump.
+
+A missing `gh`, an unreachable GitHub, or a rate-limited API prints a `💤` line
+and the install carries on.
+
+Only **stable** releases are tracked. Upstream also publishes weekly `preview-*`
+pre-releases, but those carry no build artifacts, so adopting one means building
+from tagged source (`npm ci && npm run build`) and vendoring an untagged commit
+— do that by hand if you need an unreleased feature.
+
+> [!NOTE]
+> `dist/index.js` is byte-identical in the darwin, linux, and win32 release
+> tarballs — they differ only in native `node_modules`, which aren't vendored.
+> The update always pulls the linux asset, so the result is the same on any
+> machine.

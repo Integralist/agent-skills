@@ -6,6 +6,7 @@
 #   step.sh <label> <command> [args...]  # run quietly, report the outcome
 #   step.sh --section <name>             # blank line + bold section header
 #   step.sh --ok <text>                  # success line, nothing to run
+#   step.sh --warn <text>                # something needs attention, not an error
 #   step.sh --skip <text>                # skipped step (missing prerequisite)
 #
 # A command's output is captured rather than streamed, so a successful run is
@@ -34,6 +35,10 @@ case "${1:-}" in
 	;;
 --ok)
 	printf '  ✅ %s\n' "$2"
+	exit 0
+	;;
+--warn)
+	printf '  🔔 %s\n' "$2"
 	exit 0
 	;;
 --skip)

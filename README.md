@@ -71,6 +71,28 @@ Every target prints one line per action — `✅` done, `💤` skipped because a
 prerequisite is missing, `❌` failed. Commands run quietly; a failure prints its
 full output and stops the install, so nothing goes wrong silently.
 
+## Maintenance
+
+`make install` checks whether the vendored Google Workspace MCP bundle is behind
+the latest upstream stable release and prints a 🔔 line when it is. It never
+applies the update itself, because that rewrites tracked files in
+`mcp/google-workspace/` and an install shouldn't dirty the working tree. Apply
+it when you're ready to commit the bump:
+
+```bash
+# Is a newer stable release out? (needs gh)
+make check-google-workspace-mcp
+
+# Download it, replace dist/index.js, and bump the recorded ref
+make update-google-workspace-mcp
+
+# Re-download the release already vendored
+make update-google-workspace-mcp ARGS=--force
+```
+
+See [`mcp/google-workspace/README.md`](./mcp/google-workspace/README.md) for what
+the update touches and why only stable releases are tracked.
+
 ## Structure
 
 ```plain
@@ -114,7 +136,8 @@ mcp/google-workspace/               # Google Workspace MCP server (all agents)
 
 scripts/                            # Makefile helpers (not installed anywhere)
 ├── step.sh                         # One status line per install action
-└── install-claude-json.sh          # Merges mcpServers into ~/.claude.json
+├── install-claude-json.sh          # Merges mcpServers into ~/.claude.json
+└── workspace-mcp.sh                # Checks for / applies MCP bundle updates
 ```
 
 ## Components
