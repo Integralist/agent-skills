@@ -1,0 +1,103 @@
+[
+  {
+    "id": "single-file-fix",
+    "prompt": "I fixed a nil pointer bug in auth.go. Commit it.",
+    "setup": [
+      "git init -q",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "git init --bare -q ../single-file-fix-remote.git",
+      "git remote add origin ../single-file-fix-remote.git",
+      "printf 'package auth\\n\\ntype User struct{ Name string }\\n\\nfunc Check(u *User) bool { return u.Name != \"\" }\\n' > auth.go",
+      "git add auth.go && git commit -q -m 'initial commit'",
+      "git branch -m work",
+      "printf 'package auth\\n\\ntype User struct{ Name string }\\n\\nfunc Check(u *User) bool {\\n\\tif u == nil {\\n\\t\\treturn false\\n\\t}\\n\\treturn u.Name != \"\"\\n}\\n' > auth.go"
+    ],
+    "checks": [
+      "Inspects git status and the diff before committing",
+      "Stages auth.go by name rather than with `git add -A` or `git add .`",
+      "Produces exactly one commit",
+      "Commit subject states what changed, in imperative mood with no trailing period",
+      "Commit subject describes the nil guard the diff actually adds, not a generic 'fix bug'",
+      "Leaves the commit unpushed — the `origin` remote still has no refs afterwards"
+    ]
+  },
+  {
+    "id": "multiple-unrelated-changes",
+    "prompt": "I've got changes to auth.go (bug fix), README.md (typo), and a new tests/fixtures.go file. Commit these.",
+    "setup": [
+      "git init -q",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "printf 'package auth\\n\\nfunc Check() bool { return true }\\n' > auth.go",
+      "printf '# Demo Repo\\n\\nThsi is a demo.\\n' > README.md",
+      "git add . && git commit -q -m 'initial commit'",
+      "git branch -m work",
+      "printf 'package auth\\n\\nfunc Check() bool {\\n\\treturn false\\n}\\n' > auth.go",
+      "printf '# Demo Repo\\n\\nThis is a demo.\\n' > README.md",
+      "mkdir -p tests",
+      "printf 'package tests\\n\\nvar Fixture = \"x\"\\n' > tests/fixtures.go"
+    ],
+    "checks": [
+      "Splits the work into separate commits by purpose rather than one combined commit",
+      "Infers the grouping from the diff instead of asking the user to supply it",
+      "Each commit stages only the files belonging to its own group",
+      "Each commit subject describes only what that commit contains"
+    ]
+  },
+  {
+    "id": "nothing-to-commit",
+    "prompt": "Commit my changes.",
+    "setup": [
+      "git init -q",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "printf 'package auth\\n' > auth.go",
+      "git add auth.go && git commit -q -m 'initial commit'",
+      "git branch -m work"
+    ],
+    "checks": [
+      "Checks git status before anything else",
+      "Reports that the working tree is clean",
+      "Leaves the commit count unchanged"
+    ]
+  },
+  {
+    "id": "lockfile-with-code-change",
+    "prompt": "I added a new dependency and updated go.sum/go.mod, plus the code in client.go that uses it. Commit it.",
+    "setup": [
+      "git init -q",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "printf 'module demo\\n\\ngo 1.22\\n' > go.mod",
+      "printf 'package main\\n\\nfunc Call() {}\\n' > client.go",
+      "git add . && git commit -q -m 'initial commit'",
+      "git branch -m work",
+      "printf 'module demo\\n\\ngo 1.22\\n\\nrequire example.com/dep v1.0.0\\n' > go.mod",
+      "printf 'example.com/dep v1.0.0 h1:fakehash=\\n' > go.sum",
+      "printf 'package main\\n\\nimport \"example.com/dep\"\\n\\nfunc Call() { dep.Do() }\\n' > client.go"
+    ],
+    "checks": [
+      "Commits go.mod, go.sum and client.go together in a single commit",
+      "Commit subject names the dependency being added rather than saying only 'update deps'"
+    ]
+  },
+  {
+    "id": "main-branch-guard",
+    "prompt": "Commit my changes.",
+    "setup": [
+      "git init -q",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "git symbolic-ref HEAD refs/heads/main",
+      "printf 'package auth\\n' > auth.go",
+      "git add auth.go && git commit -q -m 'initial commit'",
+      "printf 'package auth\\n\\nfunc Check() bool { return true }\\n' > auth.go"
+    ],
+    "checks": [
+      "Notices the current branch is main",
+      "Warns the user and waits for confirmation before committing",
+      "Leaves the commit count unchanged while waiting"
+    ]
+  }
+]
