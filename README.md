@@ -10,6 +10,13 @@ project instructions shared across every project.
 > access those entries fail to install. Remove or disable them before running
 > the install targets.
 
+> [!NOTE]
+> The config templates carry 1Password secret references from an internal
+> vault. [`scripts/op-inject.sh`](./scripts/op-inject.sh) resolves them at
+> install time and **skips gracefully** when that vault isn't reachable — a
+> missing `op` CLI or an unauthenticated account leaves those entries out
+> rather than aborting the install.
+
 ## Mental model
 
 The repo serves multiple harnesses from one set of files:
@@ -210,6 +217,12 @@ under `~/.mcp-auth` — shared across harnesses, so you authenticate once (clear
 with `rm -rf ~/.mcp-auth` to re-authenticate). Claude Code is intentionally
 omitted: it reaches Atlassian through its own connector and the Atlassian
 plugin.
+
+The **Portal** server is an internal MCP wired into Claude Code, Pi, Gemini
+CLI, Copilot CLI, and OpenCode. Its endpoint URL is a 1Password reference, so
+the host name never lands in this public repo. Claude Code uses the native
+`http` transport; the others proxy through `mcp-remote`. Either way you
+authenticate via SSO on first use.
 
 ## Skill reference
 

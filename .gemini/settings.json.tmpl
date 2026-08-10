@@ -48,6 +48,14 @@
       "headers": {
         "Authorization": "Bearer ${GITHUB_API_TOKEN}"
       }
+    },
+    "portal": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://{{ op://Employee/Portal MCP/URL }}/api/mcp-actions/v1"
+      ]
     }
   },
   "hooks": {

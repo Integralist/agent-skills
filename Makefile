@@ -4,6 +4,7 @@
 # swallows the command's output unless it fails — see that file for the modes.
 # Recipe lines are silenced with @ so the status lines are the only output.
 STEP := bash scripts/step.sh
+OPINJECT := bash scripts/op-inject.sh
 
 install-agents:
 	@$(STEP) --section "Agents"
@@ -28,7 +29,8 @@ install-tools:
 # Install Pi, its configured packages, and global settings. The repository
 # settings are copied last so they remain the source of truth after pi install
 # updates the global package store. mcp.json is templated because it contains
-# the Context7 API key; op inject bakes it in, skipped when op is absent.
+# the Context7 API key; scripts/op-inject.sh bakes it in, skipping gracefully
+# without Fastly 1Password access.
 install-pi: install-tools
 	@$(STEP) --section "Pi"
 	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
@@ -39,11 +41,7 @@ install-pi: install-tools
 	@$(STEP) "AGENTS.md → ~/.pi/agent/AGENTS.md" cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md
 	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
 	@$(STEP) "nord-contrast.json → ~/.pi/agent/themes/" cp .pi/agent/themes/nord-contrast.json ~/.pi/agent/themes/nord-contrast.json
-	@if command -v op >/dev/null; then \
-		$(STEP) "mcp.json → ~/.pi/agent/mcp.json (op inject)" op inject -i .pi/agent/mcp.json.tmpl -o ~/.pi/agent/mcp.json -f || exit 1; \
-	else \
-		$(STEP) --skip "mcp.json: 1Password CLI (op) not found"; \
-	fi
+	@$(OPINJECT) "mcp.json → ~/.pi/agent/mcp.json" .pi/agent/mcp.json.tmpl ~/.pi/agent/mcp.json
 
 # Regenerate .claude/rules/{go,markdown}.md from their canonical skills. The
 # skill SKILL.md bodies are the single source of truth; rules differ only by
@@ -60,8 +58,8 @@ rules:
 #
 # settings.json holds the AWS Bedrock account ID, so it's committed as a
 # template (settings.json.tmpl) with a 1Password secret reference in place of
-# the ID. `op inject` interpolates it into the installed file. Skipped with a
-# warning when the 1Password CLI isn't available.
+# the ID. scripts/op-inject.sh interpolates it into the installed file,
+# skipping gracefully without Fastly 1Password access.
 #
 # ~/.claude.json holds many settings we don't manage, so scripts/install-claude-json.sh
 # merges only our mcpServers into it; that script documents the merge rules and
@@ -75,39 +73,35 @@ install-claude: install-agents rules install-tools
 	@$(STEP) "scripts/ → ~/.claude/scripts/" cp -r .claude/scripts/ ~/.claude/scripts/
 	@rm -rf ~/.claude/skills
 	@$(STEP) "~/.claude/skills → ~/.agents/skills (symlink)" ln -s ~/.agents/skills ~/.claude/skills
-	@if command -v op >/dev/null; then \
-		$(STEP) "settings.json → ~/.claude/settings.json (op inject)" op inject -i .claude/settings.json.tmpl -o ~/.claude/settings.json -f || exit 1; \
-		if [ -f ~/.claude.json ] && ! command -v jq >/dev/null; then \
-			$(STEP) --skip "mcpServers → ~/.claude.json: jq not found"; \
-		else \
-			$(STEP) "mcpServers → ~/.claude.json" bash scripts/install-claude-json.sh || exit 1; \
-		fi; \
+	@$(OPINJECT) "settings.json → ~/.claude/settings.json" .claude/settings.json.tmpl ~/.claude/settings.json
+	@if ! command -v op >/dev/null; then \
+		$(STEP) --skip "mcpServers → ~/.claude.json: 1Password CLI (op) not found"; \
+	elif ! $(OPINJECT) --check; then \
+		$(STEP) --skip "mcpServers → ~/.claude.json: no Fastly 1Password access"; \
+	elif [ -f ~/.claude.json ] && ! command -v jq >/dev/null; then \
+		$(STEP) --skip "mcpServers → ~/.claude.json: jq not found"; \
 	else \
-		$(STEP) --skip "settings.json and ~/.claude.json: 1Password CLI (op) not found"; \
+		$(STEP) "mcpServers → ~/.claude.json" bash scripts/install-claude-json.sh || exit 1; \
 	fi
 
-# Gemini (Antigravity CLI) reads ~/.gemini/antigravity-cli. Only copy the
-# statusline when that directory already exists, so the target is a no-op on
-# machines where the Gemini CLI isn't installed.
+# Gemini CLI reads ~/.gemini; the Antigravity CLI reads ~/.gemini/antigravity-cli.
+# Each part is a no-op when its directory is absent, so the target works on
+# machines where only one (or neither) is installed.
 #
-# settings.json holds the Google VertexAI project ID, so it's committed as a
-# template (settings.json.tmpl) with a 1Password secret reference in place of
-# the ID. `op inject` interpolates it into the installed file. Skipped with a
-# warning when the 1Password CLI isn't available.
+# Both settings.json files hold a 1Password secret reference — the portal MCP
+# URL for ~/.gemini, the Google VertexAI project ID for antigravity — so both
+# are templated (settings.json.tmpl). scripts/op-inject.sh interpolates them
+# into the installed files, skipping gracefully without Fastly 1Password access.
 install-gemini:
 	@$(STEP) --section "Gemini"
 	@if [ -d ~/.gemini ]; then \
-		$(STEP) "settings.json → ~/.gemini/settings.json" cp .gemini/settings.json ~/.gemini/settings.json || exit 1; \
+		$(OPINJECT) "settings.json → ~/.gemini/settings.json" .gemini/settings.json.tmpl ~/.gemini/settings.json; \
 	else \
 		$(STEP) --skip "settings.json: ~/.gemini does not exist"; \
 	fi
 	@if [ -d ~/.gemini/antigravity-cli ]; then \
 		$(STEP) "statusline.sh → ~/.gemini/antigravity-cli/" cp .gemini/antigravity-cli/statusline.sh ~/.gemini/antigravity-cli/statusline.sh || exit 1; \
-		if command -v op >/dev/null; then \
-			$(STEP) "settings.json → ~/.gemini/antigravity-cli/ (op inject)" op inject -i .gemini/antigravity-cli/settings.json.tmpl -o ~/.gemini/antigravity-cli/settings.json -f || exit 1; \
-		else \
-			$(STEP) --skip "antigravity-cli settings.json: 1Password CLI (op) not found"; \
-		fi; \
+		$(OPINJECT) "settings.json → ~/.gemini/antigravity-cli/" .gemini/antigravity-cli/settings.json.tmpl ~/.gemini/antigravity-cli/settings.json; \
 	else \
 		$(STEP) --skip "statusline: ~/.gemini/antigravity-cli does not exist"; \
 	fi
@@ -115,8 +109,9 @@ install-gemini:
 # Copilot CLI reads ~/.copilot. Only copy the statusline and settings.json when
 # ~/.copilot/scripts already exists, so the target is a no-op when Copilot isn't
 # installed. settings.json holds no secrets, so it's committed verbatim.
-# mcp-config.json is templated because it holds the Context7 API key; op inject
-# bakes it in, skipped when op is absent.
+# mcp-config.json is templated because it holds the Context7 API key;
+# scripts/op-inject.sh bakes it in, skipping gracefully without Fastly
+# 1Password access.
 install-copilot:
 	@$(STEP) --section "Copilot"
 	@if [ -d ~/.copilot/scripts ]; then \
@@ -126,11 +121,7 @@ install-copilot:
 		$(STEP) --skip "statusline and settings.json: ~/.copilot/scripts does not exist"; \
 	fi
 	@if [ -d ~/.copilot ]; then \
-		if command -v op >/dev/null; then \
-			$(STEP) "mcp-config.json → ~/.copilot/ (op inject)" op inject -i .copilot/mcp-config.json.tmpl -o ~/.copilot/mcp-config.json -f || exit 1; \
-		else \
-			$(STEP) --skip "mcp-config.json: 1Password CLI (op) not found"; \
-		fi; \
+		$(OPINJECT) "mcp-config.json → ~/.copilot/" .copilot/mcp-config.json.tmpl ~/.copilot/mcp-config.json; \
 	else \
 		$(STEP) --skip "mcp-config.json: ~/.copilot does not exist"; \
 	fi
@@ -143,11 +134,7 @@ install-opencode:
 	@mkdir -p ~/.config/opencode ~/.local/state/opencode
 	@$(STEP) "tui.json → ~/.config/opencode/tui.json" cp .config/opencode/tui.json ~/.config/opencode/tui.json
 	@$(STEP) "model.json → ~/.local/state/opencode/model.json" cp .local/state/opencode/model.json ~/.local/state/opencode/model.json
-	@if command -v op >/dev/null; then \
-		$(STEP) "config.json → ~/.config/opencode/config.json (op inject)" op inject -i .config/opencode/config.json.tmpl -o ~/.config/opencode/config.json -f || exit 1; \
-	else \
-		$(STEP) --skip "config.json: 1Password CLI (op) not found"; \
-	fi
+	@$(OPINJECT) "config.json → ~/.config/opencode/config.json" .config/opencode/config.json.tmpl ~/.config/opencode/config.json
 
 # Google Workspace MCP server (Calendar, Drive, Docs, Sheets, Slides, Gmail,
 # Chat). dist/index.js is an unmodified Apache-2.0 prebuilt bundle of upstream

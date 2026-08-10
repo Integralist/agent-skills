@@ -20,7 +20,7 @@ target=$HOME/.claude.json
 tmp=$(mktemp)
 trap 'rm -f "$tmp" "$tmp.merged"' EXIT
 
-op inject -i "$template" -o "$tmp" -f
+op inject --account fastly.1password.com -i "$template" -o "$tmp" -f
 
 if [ ! -f "$target" ]; then
 	mv "$tmp" "$target"

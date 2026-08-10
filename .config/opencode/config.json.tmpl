@@ -40,6 +40,11 @@
         "mcp"
       ],
       "enabled": false
+    },
+    "portal": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-remote", "https://{{ op://Employee/Portal MCP/URL }}/api/mcp-actions/v1"],
+      "enabled": true
     }
   },
   "model": "amazon-bedrock/global.anthropic.claude-opus-4-6-v1",

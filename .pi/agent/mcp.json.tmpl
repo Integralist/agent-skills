@@ -25,6 +25,10 @@
       "headers": {
         "CONTEXT7_API_KEY": "{{ op://Employee/context7 MCP/credential }}"
       }
+    },
+    "portal": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://{{ op://Employee/Portal MCP/URL }}/api/mcp-actions/v1"]
     }
   }
 }

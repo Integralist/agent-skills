@@ -31,6 +31,10 @@
       "command": "npx",
       "args": ["@playwright/mcp@latest", "--user-data-dir", "${HOME}/.playwright-mcp-data"],
       "env": {}
+    },
+    "portal": {
+      "type": "http",
+      "url": "https://{{ op://Employee/Portal MCP/URL }}/api/mcp-actions/v1"
     }
   }
 }
