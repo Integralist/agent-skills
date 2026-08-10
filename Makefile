@@ -1,14 +1,25 @@
-.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp rules
+.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules
 
 install-agents:
 	mkdir -p ~/.agents
 	cp -r .agents/ ~/.agents/
 
+# Shared CLI tools driven by skills in more than one harness. crit (inline
+# code-review CLI) is used by both Claude Code and Pi. Installed via Homebrew;
+# skipped with guidance when brew is absent.
+install-tools:
+	@if command -v brew >/dev/null; then \
+		brew list crit >/dev/null 2>&1 || brew install crit; \
+		echo "Ensured crit is installed."; \
+	else \
+		echo "Skipping crit: Homebrew not found. Install manually from https://crit.md/"; \
+	fi
+
 # Install Pi, its configured packages, and global settings. The repository
 # settings are copied last so they remain the source of truth after pi install
 # updates the global package store. mcp.json is templated because it contains
 # the Context7 API key; op inject bakes it in, skipped when op is absent.
-install-pi:
+install-pi: install-tools
 	npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort npm:@shuv1337/pi-mcp-adapter npm:pi-intercom git:github.com/Integralist/pi-btw; do \
 		pi install "$$package" --no-approve; \
@@ -47,7 +58,7 @@ rules:
 # verbatim; if present, jq deep-merges our mcpServers over the existing object
 # (our servers win, manually-added servers survive, nothing else is touched).
 # Requires jq for the merge path; skipped with a warning when jq is absent.
-install-claude: install-agents rules
+install-claude: install-agents rules install-tools
 	mkdir -p ~/.claude
 	cp .claude/CLAUDE.md ~/.claude/CLAUDE.md
 	cp -r .claude/rules/ ~/.claude/rules/
