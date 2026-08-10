@@ -195,6 +195,7 @@ plugin.
 | **domain-modeling**          | Build and sharpen a project's domain model — glossary (CONTEXT.md) and ADRs                                                            |
 | **draft-pr**                 | Draft a concise, direct pull request with a clear Problem and Solution                                                                 |
 | **durable-rules**            | Surface systemic patterns from an investigation as codified conventions or anti-patterns                                               |
+| **eval**                     | Draft or refresh a skill's eval cases, run them in a sandbox, grade against the previous run                                           |
 | **git-metadata**             | Git-history diagnostic snapshot — churn hotspots, bus factor, bug clusters, velocity, crises                                           |
 | **go-api**                   | Generate a production-ready Go API service                                                                                             |
 | **go-conventions**           | Go coding conventions (mirrors `.claude/rules/go.md`)                                                                                  |
