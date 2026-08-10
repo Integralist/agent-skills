@@ -12,7 +12,7 @@
     "git:github.com/Integralist/pi-btw",
     {
       "source": "git:github.com/fastly/agent-skills-internal",
-      "skills": ["plugins/elevation/skills/**"]
+      "skills": ["plugins/ciam/skills/**", "plugins/elevation/skills/**", "plugins/portal/skills/**"]
     },
     {
       "source": "git:github.com/tomasz-tomczyk/crit",
