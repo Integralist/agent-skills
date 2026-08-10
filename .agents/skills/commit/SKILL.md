@@ -36,6 +36,9 @@ If the fields below show commands rather than output, run each one first.
 
 1. **Assess staging state:**
 
+   - If nothing is staged, nothing is modified, and nothing is
+     untracked, report the clean working tree and stop. A commit needs a
+     change; `--allow-empty` is not a substitute for one.
    - If files are already staged, list them and ask whether to commit
      only those or include unstaged changes.
    - If nothing is staged, analyze all unstaged changes.
@@ -152,6 +155,11 @@ Plan documents (`docs/plans/*.md`) need special handling:
 ## Commit Message Style
 
 - State what changed and why.
+- Describe the diff, not the request. When the user's description and the
+  actual change disagree — "fixed the nil pointer" against a diff holding
+  no pointer — the message follows the diff, and you say plainly that the
+  two differ. The commit outlives the conversation, so a claim that was
+  only ever true in chat becomes a false permanent record.
 - Use counts: "3 files" not "several files".
 - Active voice, specific language.
 - Omit needless words — see
