@@ -37,6 +37,7 @@ gen() {
 
 gen .agents/skills/go-conventions/SKILL.md       .claude/rules/go.md       '**/*.go'
 gen .agents/skills/markdown-conventions/SKILL.md .claude/rules/markdown.md '**/*.md'
+gen .agents/skills/sql-conventions/SKILL.md      .claude/rules/sql.md      '**/*.sql'
 
 # copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md files so relative
 # links in the generated rule resolve. Each copy gets a "generated" banner so a
