@@ -170,7 +170,8 @@ suggestions.
 (`.claude/rules/`) — topic-specific instructions Claude loads automatically,
 scoped to file patterns via a YAML `paths` glob. Unlike skills, they apply
 passively. Generic agents don't support path-scoped auto-loading, so these are
-mirrored as skills (`go-conventions`, `markdown-conventions`).
+mirrored as skills (`go-conventions`, `markdown-conventions`,
+`sql-conventions`).
 
 **Project instructions** — `.agents/AGENTS.md` holds the canonical conventions;
 `.claude/CLAUDE.md` is a one-line `@~/.agents/AGENTS.md` pointer so Claude Code
@@ -277,6 +278,7 @@ authenticate via SSO on first use.
 | **refactor**                 | Analyze a feature and produce a reimplementation plan                                                                                  |
 | **research**                 | Research a topic or repo deeply; writes a reference doc to `docs/research/`                                                            |
 | **security-review-feedback** | Triage a security review's findings — verdict per finding (true/false positive) before fixing                                          |
+| **sql-conventions**          | SQL migration conventions — simple DDL, not procedural scripts (mirrors `.claude/rules/sql.md`)                                        |
 | **summarize-for-product**    | Translate a plan doc or branch diff into a non-engineer summary (PR/Slack/email)                                                       |
 | **systematic-debugging**     | Four-phase debugging with root cause analysis                                                                                          |
 | **tasks**                    | Crystallize the in-session plan into a mechanical, TDD-shaped task list at `docs/tasks/`; verbatim test + code + per-task verification |
@@ -326,10 +328,11 @@ keys.
 
 ## Generating rules from skills
 
-`.claude/rules/go.md` and `.claude/rules/markdown.md` are **generated** from the
-`go-conventions` and `markdown-conventions` skills. The `SKILL.md` is the single
-source of truth; the rule differs only by frontmatter (`paths:` globs in place
-of `name:`/`description:`), and the bodies stay byte-identical.
+`.claude/rules/go.md`, `.claude/rules/markdown.md`, and `.claude/rules/sql.md`
+are **generated** from the `go-conventions`, `markdown-conventions`, and
+`sql-conventions` skills. The `SKILL.md` is the single source of truth; the rule
+differs only by frontmatter (`paths:` globs in place of `name:`/`description:`),
+and the bodies stay byte-identical.
 
 Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make install` runs it automatically. After editing a `*-conventions` skill, run `make rules` before committing — the generated rules are committed.
 
