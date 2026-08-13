@@ -211,12 +211,17 @@ use; there are no shared credentials.
 
 The **Atlassian** server (Jira, Confluence, Compass) is wired into Pi, Gemini
 CLI, Copilot CLI, and OpenCode via their respective config files. Each proxies
-the official remote endpoint (`https://mcp.atlassian.com/v1/sse`) through
-`mcp-remote`, which opens a browser for OAuth on first run and caches tokens
-under `~/.mcp-auth` — shared across harnesses, so you authenticate once (clear
-with `rm -rf ~/.mcp-auth` to re-authenticate). Claude Code is intentionally
-omitted: it reaches Atlassian through its own connector and the Atlassian
-plugin.
+the official remote endpoint (`https://mcp.atlassian.com/v1/mcp/authv2`)
+through `mcp-remote` with `--transport http-only`, which opens a browser for
+OAuth on first run and caches tokens under `~/.mcp-auth` — shared across
+harnesses, so you authenticate once (clear with `rm -rf ~/.mcp-auth` to
+re-authenticate). Claude Code is intentionally omitted: it reaches Atlassian
+through its own connector and the Atlassian plugin.
+
+That endpoint speaks MCP Streamable HTTP. The older HTTP+SSE endpoint
+(`https://mcp.atlassian.com/v1/sse`) is deprecated and stops working after
+30 June 2026, so `--transport http-only` is explicit: `mcp-remote` defaults to
+`http-first`, which silently falls back to SSE on a 404.
 
 The **Portal** server is an internal MCP wired into Claude Code, Pi, Gemini
 CLI, Copilot CLI, and OpenCode. Its endpoint URL is a 1Password reference, so
