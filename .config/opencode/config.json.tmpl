@@ -14,6 +14,15 @@
         "CONTEXT7_API_KEY": "{{ op://Employee/context7 MCP/credential }}"
       }
     },
+    "elevation": {
+      "type": "local",
+      "command": [
+        "bash",
+        "-c",
+        "PATH=\"$HOME/.local/bin:$PATH\" exec uv run --script \"$HOME/.pi/agent/git/github.com/fastly/agent-skills-internal/plugins/elevation/skills/elevation-k8s-triage/scripts/radar_mcp_proxy.py\""
+      ],
+      "enabled": true
+    },
     "fastly": {
       "type": "local",
       "command": [
@@ -40,6 +49,11 @@
         "mcp"
       ],
       "enabled": false
+    },
+    "grafana": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-remote", "https://{{ op://Employee/Grafana MCP/URL }}/mcp"],
+      "enabled": true
     },
     "portal": {
       "type": "local",
