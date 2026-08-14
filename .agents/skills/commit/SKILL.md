@@ -154,7 +154,17 @@ Plan documents (`docs/plans/*.md`) need special handling:
 
 ## Commit Message Style
 
-- State what changed and why.
+- **The subject states why the change matters, not the mechanics.** A
+  reader who never opens the diff should learn what improves. The diff
+  already shows what changed; the subject supplies the consequence.
+  Keep the type prefix and imperative mood from `~/.gitcommit`.
+
+  ```txt
+  BAD:  fix(ratelimit): set burst to 200
+  GOOD: fix(ratelimit): raise burst so valid retries stop being dropped
+  ```
+
+- Use the body for what changed and how it was verified.
 - Describe the diff, not the request. When the user's description and the
   actual change disagree — "fixed the nil pointer" against a diff holding
   no pointer — the message follows the diff, and you say plainly that the

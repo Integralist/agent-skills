@@ -58,8 +58,15 @@ If the fields below show commands rather than output, run each one first.
      follow-up worth flagging. Omit otherwise.
 
 1. **Derive the title** from the change: imperative mood, concise, no trailing
-   period. Follow `~/.gitcommit` conventions (type prefix/scope) if that file
-   exists.
+   period. State why the change matters, not the mechanics — a reviewer reading
+   only the title should learn what improves. Follow `~/.gitcommit` conventions
+   (type prefix/scope) if that file exists; a squash merge turns this title into
+   the commit subject, so it must satisfy the commit style too.
+
+   ```txt
+   BAD:  fix(fetch): add retry wrapper to the fetch helper
+   GOOD: fix(fetch): retry transient 502s so the nightly import completes
+   ```
 
 1. **Show the title and description to the user and wait for approval.** Do not
    open the PR before then.
