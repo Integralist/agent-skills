@@ -26,6 +26,30 @@ When asked to write unit tests, ask the user if they prefer:
 
 If not specified, default to table-driven tests.
 
+## What Each Test Proves
+
+Applies to all test styles (table-driven, f-tests, HTTP,
+integration):
+
+- **One behavior per case.** The case `name` states the exact
+  behavior being proven. If a case proves two things, split it
+  into two cases. (The `Test*` doc comment covers the whole set,
+  so it may name several.)
+- **No unused fields or setup.** Deleting any field or setup step
+  must break the test. Beyond the expected-value and
+  expected-error pair, fields used by only a subset of cases
+  belong in separate test tables.
+- **Assert targeted fields, not whole structs.** Avoid deep
+  struct comparisons (`reflect.DeepEqual`, `cmp.Diff` on entire
+  structs) that fail on irrelevant fields (e.g., timestamps,
+  generated IDs).
+- **Distinct code paths only.** Do not duplicate tests with
+  trivial input variations. Each case must cover a unique branch
+  or dimension.
+- **Match errors by identity.** Use `errors.Is` or `errors.As`.
+  Only fall back to substring matching (`strings.Contains`) for
+  unexported errors in third-party packages.
+
 ## Unit Tests
 
 Unit tests live alongside source code (`*_test.go`) and run with
@@ -37,14 +61,16 @@ Use table-driven tests with `t.Run()` for clear, maintainable
 test cases:
 
 ```go
+// ErrEmptyInput is declared by the package under test:
+//     var ErrEmptyInput = errors.New("input cannot be empty")
+
 // TestFunctionName verifies FunctionName upper-cases input and rejects empty strings.
 func TestFunctionName(t *testing.T) {
     tests := []struct {
-        name        string
-        input       string
-        expected    string
-        expectErr   bool
-        errContains string
+        name     string
+        input    string
+        expected string
+        wantErr  error // sentinel to match with errors.Is
     }{
         {
             name:     "valid input",
@@ -52,10 +78,9 @@ func TestFunctionName(t *testing.T) {
             expected: "HELLO",
         },
         {
-            name:        "empty input returns error",
-            input:       "",
-            expectErr:   true,
-            errContains: "input cannot be empty",
+            name:    "empty input returns error",
+            input:   "",
+            wantErr: ErrEmptyInput,
         },
     }
 
@@ -63,13 +88,9 @@ func TestFunctionName(t *testing.T) {
         t.Run(tt.name, func(t *testing.T) {
             result, err := FunctionName(tt.input)
 
-            if tt.expectErr {
-                if err == nil {
-                    t.Fatal("expected an error, but got nil")
-                }
-                if !strings.Contains(err.Error(), tt.errContains) {
-                    t.Errorf("expected error to contain %q, got %q",
-                        tt.errContains, err.Error())
+            if tt.wantErr != nil {
+                if !errors.Is(err, tt.wantErr) {
+                    t.Fatalf("expected %v, got %v", tt.wantErr, err)
                 }
                 return
             }
