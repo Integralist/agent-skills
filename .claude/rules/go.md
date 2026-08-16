@@ -9,7 +9,8 @@ paths:
 > there is nothing to do yet. They're now ready to apply when I ask you to
 > design, write, or edit Go code.
 
-We are peers writing Go. Prioritize correctness, clarity, and best practices.
+Apply the architecture guidance below only when the repository uses that
+architecture.
 
 > [!IMPORTANT]
 > Some sections below describe my house architecture for an **HTTP/API
@@ -24,15 +25,17 @@ We are peers writing Go. Prioritize correctness, clarity, and best practices.
 > `CacheManager`) illustrate the pattern; in an existing repo, use its
 > equivalents. Everything else here is language-level and applies to all Go.
 
+If `go.mod` is present, check it before using versioned language or
+standard-library APIs; match its `go` directive unless the task includes an
+upgrade.
+
 ## Tooling
 
 ### Go LSP (gopls)
 
-Prefer the gopls MCP server over `sed`, `grep`, or manual edits for Go code
-navigation and refactoring. The LSP understands Go semantics — package
-qualifiers, method receivers, identifier shadowing — and will not miss
-references or corrupt similarly-named identifiers the way text-based tools
-can. Do not reach for `sed` to rename a Go symbol.
+Use gopls rather than text search or manual edits for Go navigation and
+refactoring; it understands symbols and avoids false matches. Do not use text
+replacement to rename Go symbols.
 
 Use these gopls tools:
 
@@ -56,19 +59,9 @@ Use these gopls tools:
 
 #### Rename caveat: comments and docs
 
-`go_rename_symbol` rewrites Go references only. It does **not** touch
-code comments, godoc blocks, `README.md`, other markdown, or string
-literals — these keep the old name and become stale pointers.
-
-After an LSP rename:
-
-1. Run `rg <old-name>` across the repository to surface remaining
-   occurrences in comments, docs, and strings.
-1. Use `sed` or targeted Edit calls to update the remaining
-   occurrences.
-
-This is the one place `sed` is the right tool for a Go rename — not on
-source code, but on the non-source text the LSP leaves behind.
+`go_rename_symbol` updates Go references, not comments, docs, or string
+literals. After a rename, run `rg <old-name>` across the repository and update
+remaining non-source text with targeted edits.
 
 ### Linters
 
@@ -83,6 +76,35 @@ committing:
 
 Fix any reported issues before considering the task complete.
 
+### Modernizing code (`go fix`)
+
+Before linting, preview modernizer rewrites for the affected packages:
+
+```bash
+go fix -diff ./path/to/affected/package/... # review; exits 1 when changes exist
+go fix ./path/to/affected/package/...       # apply only after review
+```
+
+Review the preview before applying it; `go fix` runs every registered fixer by
+default.
+
+Select or disable fixers when needed:
+
+```bash
+go fix -diff -rangeint ./path/to/affected/package/...    # only rangeint
+go fix -stringsseq=false ./path/to/affected/package/...  # all except stringsseq
+```
+
+Check the module's `go` directive before accepting versioned rewrites. Raise it
+only when the task intentionally adopts a newer language or standard-library
+feature; `go fix` respects the directive.
+
+Use `go fix` for package patterns; use `go tool fix help` or
+`go tool fix help <name>` for fixer documentation.
+
+Use `//go:fix inline` on deprecated wrappers or compatibility shims when
+`go fix` should rewrite their callers, including callers in other packages.
+
 ### Suppressing linter warnings
 
 Prefer fixing the underlying issue. When a suppression is
@@ -92,61 +114,30 @@ directive syntax each tool expects.
 
 ### Reference sources
 
-When uncertain about Go behavior, pick the source that matches the question:
+When uncertain, consult the source matching the question:
 
-- **Language semantics** (operator precedence, conversion rules, `range`
-  semantics, method-set rules, type identity, addressability) — the Go
-  specification at https://go.dev/ref/spec.
-- **Standard library API surface and behavior** — `go doc <pkg>[.Symbol]` or
-  pkg.go.dev. Faster and more accurate than the spec for stdlib questions.
-- **Version availability** (e.g. "does `wg.Go` exist?", "when was
-  `errors.AsType` added?") — Go release notes at
-  https://go.dev/doc/devel/release.
-- **Tooling, modules, build behavior** — https://go.dev/ref/mod and the
-  relevant command's `go help` output.
+- Go specification for language semantics.
+- `go doc` or pkg.go.dev for standard-library APIs.
+- Go release notes for version availability.
+- Go module reference and command help for tooling and module behavior.
 
-Do not guess from training data — cite the source.
+Do not guess; cite the source.
 
 ### Looking up a package's public API
 
-To see a package's exported API (types, funcs, methods, consts, or one
-symbol's signature and doc), run `go doc` — don't grep or read source files
-first. It's faster, returns exactly the exported surface with doc comments, and
-resolves the version the build uses (module cache, `replace` directives,
-vendor).
+Use gopls `go_package_api` for workspace packages. Use `go doc` for dependency
+APIs, symbol details, source, commands, or unexported identifiers; add `-src`,
+`-cmd`, `-u`, or `-all` as needed:
 
-For a whole package's surface when it's in your workspace, prefer the gopls
-`go_package_api` tool (warm, in-memory). Reach for `go doc` for symbol-level
-detail, doc comments, source (`-src`), commands (`-cmd`), or a dependency gopls
-doesn't have loaded.
+```bash
+go doc <path>
+go doc <path>.<Symbol>
+go doc -src <path>.<Symbol>
+```
 
-- `go doc <path>` — whole package (e.g. `go doc net/http`).
-- `go doc <path>.<Symbol>` — one symbol; a type includes its fields and method
-  signatures (e.g. `go doc net/http.Client`).
-- `go doc <path>.<Type>.<Method>` — one method or field.
-- `-short` — one line per symbol; fastest way to scan a surface.
-- `-all` — full documented surface; `-src` — a symbol's source; `-u` — include
-  unexported identifiers.
-- `-cmd` — required for a `package main`, whose exported symbols are otherwise
-  elided.
-- `-C <dir>` (must come first) — run as if from `<dir>`, to doc a module's
-  dependency without a separate `cd`.
-
-`go doc` documents the version the current module resolves — there is no
-`path@version` syntax. To read a different version, change what the module
-resolves (`go get <mod>@<ver>` or edit go.mod), then re-run; confirm with
-`go list -m <mod>`. Common errors:
-
-- `missing go.sum entry` — dep is in go.mod but not downloaded; run
-  `go mod download <mod>`.
-- `no required module provides package` — not a dependency; run `go get <path>`
-  first (`go doc` won't fetch it).
-- Third-party packages need a surrounding module, so run from inside the repo;
-  the stdlib works anywhere.
-
-Fall back to reading source (via the gopls tools, then `Read`) only when
-`go doc` is insufficient — an unexported detail, behavior not in the doc, or a
-symbol it can't find. When you do need a symbol's source, `go doc -src <path>.<Symbol>` usually beats a manual grep + read.
+Run `go doc` from the module so it resolves the version selected by `go.mod`.
+If a dependency is unavailable, fix the module state first; do not read an
+unrelated version from memory.
 
 ## Formatting
 
@@ -310,9 +301,6 @@ const defaultDebugPort = 8080
 const defaultTimeout = 30 * time.Second
 ```
 
-This reads as "the default debug port" and groups all defaults together
-alphabetically and in autocomplete.
-
 ## Imports
 
 Three groups separated by blank lines: stdlib, third-party, internal.
@@ -330,9 +318,8 @@ import (
 
 ## Comments
 
-The "default to no comments" guidance is about *writing* new comments, not
-*removing* existing ones. Assume every inherited comment was placed
-deliberately until you can prove otherwise.
+Preserve inherited comments unless they are stale or redundant. The rules
+below apply when editing comments.
 
 ### Always preserve
 
@@ -359,18 +346,8 @@ deliberately until you can prove otherwise.
 
 ### Before removing any comment
 
-When an edit would delete one or more comments, first list each one
-with a one-line reason for removal, then make the edit. For example:
-
-```txt
-- handler.go:42  `// TODO: retry on 503` — keep (marker comment)
-- handler.go:58  `// create the client` — remove (restates name)
-- handler.go:71  `// NOTE: must run before auth` — keep (WHY)
-```
-
-This forces you to classify each comment against the rules above
-rather than sweeping them all out together. If you cannot articulate
-why a comment is redundant, keep it.
+Classify a comment against the rules above before deleting it and record why.
+If it is not clearly redundant or stale, keep it.
 
 ## Error Handling
 
@@ -427,25 +404,9 @@ with `%w`). Do not translate errors in the service layer unless the
 service itself produces a new domain condition (e.g., soft-delete →
 `ErrNotFound`).
 
-**Why this matters:**
-
-- **Decoupling** — without translation, handlers import storage packages
-  (`database/sql`, `redis`) to check for errors like `sql.ErrNoRows`.
-  Adding a cache layer or swapping databases forces changes in every
-  handler. Domain sentinels let handlers depend only on business concepts.
-- **Multi-transport consistency** — a service serving both HTTP and gRPC
-  maps domain errors to wire format once per transport (`ErrNotFound` →
-  404 or `codes.NotFound`), avoiding duplicated storage checks.
-- **Business logic gaps** — storage errors can't capture domain nuances.
-  A soft-deleted record exists in the database (no `sql.ErrNoRows`), but
-  the service treats it as missing. Only domain sentinels can express this.
-- **Observability vs. client safety** — `%w` on domain errors lets
-  handlers branch; `%v` on storage errors preserves the message for logs
-  but hides internals from clients. The client sees "not found"; the
-  on-call engineer sees "user 42 soft-deleted: not found".
-- **Idiomatic Go** — the standard library uses the same pattern: `os.Open`
-  translates platform-specific errors (`syscall.ENOENT`,
-  `ERROR_FILE_NOT_FOUND`) into the portable `fs.ErrNotExist`.
+This keeps handlers independent of storage drivers, lets each transport map
+domain errors consistently, and preserves storage details for logs without
+exposing them to clients.
 
 ### `%w` vs `%v` in the repository layer
 
@@ -538,57 +499,12 @@ func (c *Client) WithTimeout(d time.Duration) *Client {
 
 ### When to skip a constructor
 
-If `NewX` only assigns parameters to fields with no defaults, validation, or
-derived state, it is pointless indirection. Instantiate the struct directly at
-the call site instead:
+Skip `NewX` when it only assigns arguments to fields and the caller is in the
+same package; instantiate the struct directly.
 
-```go
-// Bad — constructor adds nothing (same-package caller).
-func NewRepository(db mysqlwrapper.Querier, r *redis.Client, l *slog.Logger, m *Metrics, tracer trace.Tracer) *MySQLRepository {
-	return &MySQLRepository{
-		db:     db,
-		logger: l,
-		metric: m,
-		redis:  r,
-		tracer: tracer,
-	}
-}
-
-// Good — direct instantiation (same-package caller).
-r := &MySQLRepository{
-	db:     db,
-	logger: logger,
-	metric: metrics,
-	redis:  redisClient,
-	tracer: tracer,
-}
-```
-
-**Cross-package boundary exceptions**: direct instantiation from another package
-requires both an exported struct name *and* exported fields. Two cases force a
-constructor:
-
-- **Unexported fields** — exporting them to dodge the constructor leaks internal
-  state. For `internal/` packages this is acceptable (no public API risk), so
-  consider exporting fields and inlining instead.
-- **Unexported struct** — when the struct is intentionally unexported (e.g.,
-  `authzService` backing an `AuthzService` interface), external callers cannot
-  name the type at all. A constructor is structurally required.
-
-```go
-// Justified — unexported struct, cross-package callers cannot name the type.
-func NewAuthzService(repo *MySQLRepository, logger *slog.Logger) AuthzService {
-	return &authzService{
-		logger: logger,
-		repo:   repo,
-	}
-}
-```
-
-A constructor earns its keep when it does something the caller
-cannot: setting defaults, validating inputs, deriving internal
-state, or providing access to unexported fields/types across
-package boundaries.
+Keep a constructor when it sets defaults, validates inputs, derives state, or
+provides access to unexported fields or types across a package boundary. Do not
+export internal fields just to avoid a constructor.
 
 Tracer initialization at package or constructor level:
 
@@ -647,16 +563,11 @@ slog.Group("redis",
 
 ### Discarding logs
 
-To silence a logger (e.g. in tests), use `slog.DiscardHandler` (Go 1.24+)
-rather than wrapping `io.Discard` in a text or JSON handler. It's a true no-op
-— it skips attribute formatting entirely, so it's cheaper and clearer of
-intent. Note it's a value, not a constructor — no parentheses:
+Use `slog.DiscardHandler` (Go 1.24+) to silence a logger, especially in tests,
+instead of wrapping `io.Discard` in a text or JSON handler. It is a value, not a
+constructor:
 
 ```go
-// Bad — formats attributes only to throw the bytes away.
-logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-
-// Good — no-op handler, no formatting work.
 logger := slog.New(slog.DiscardHandler)
 ```
 
@@ -883,15 +794,12 @@ httpx.WriteJSON(ctx, logger, w, http.StatusNotFound, problem)
 
 ## Service Layer
 
-- Service methods take `(ctx, In)` and return `(Out, error)` where `In` and
-  `Out` are plain domain structs with no transport-specific tags (no `json:`,
-  no protobuf, no HTTP types). This keeps the service reusable across
-  transports and test harnesses, and makes the signature uniform so future
-  adapters (e.g. a second transport) can wrap every method the same way.
+- Service methods take `(ctx, In)` and return `(Out, error)`. Keep `In` and
+  `Out` transport-neutral: plain domain structs with no JSON, protobuf, or
+  HTTP types.
 - Put input validation on the input struct as a `Validate() error` method,
-  not inline in the service method body. The service calls `in.Validate()`
-  as the first step inside the trace span. Handlers may also invoke it
-  between decode and the service call to fail fast on wire-level errors.
+  not inline in the service method body. Call `in.Validate()` first inside
+  the trace span; handlers may also invoke it to fail fast on wire errors.
   ```go
   type CreateConfigIn struct {
       CustomerID string
@@ -905,8 +813,7 @@ httpx.WriteJSON(ctx, logger, w, http.StatusNotFound, problem)
       return nil
   }
   ```
-- Trace-wrap the operation; metrics outside the span.
-- Validate at service boundary; return validation errors.
+- Trace-wrap the operation; record metrics outside the span.
 
 ```go
 func (s *Service) CreateThing(ctx context.Context, params ServiceParams) (*Thing, error) {
@@ -1066,8 +973,7 @@ Contents — keep it short and factual:
 1. **Usage** — a brief code snippet showing the primary entry point or
    typical call pattern.
 
-Do not duplicate godoc. The README orients a reader who is browsing the
-directory tree; godoc covers the API surface.
+Do not duplicate godoc.
 
 ## Type Definitions
 
