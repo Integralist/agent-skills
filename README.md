@@ -256,6 +256,7 @@ authenticate via SSO on first use.
 | **durable-rules**            | Turn recurring findings into durable conventions or anti-patterns.                     |
 | **eval**                     | Create and run skill evaluations, then compare with the previous run.                  |
 | **git-metadata**             | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.  |
+| **ghostty**                  | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.         |
 | **go-api**                   | Scaffold a production-ready Go API with local tooling and observability.               |
 | **go-conventions**           | Apply Go conventions when editing or reviewing `.go` files.                            |
 | **go-testing**               | Write Go unit, integration, fuzz, and benchmark tests.                                 |
