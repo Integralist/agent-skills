@@ -15,7 +15,7 @@
     },
     {
       "providerID": "github-copilot",
-      "modelID": "kimi-k2.7-code"
+      "modelID": "kimi-k3"
     },
     {
       "providerID": "google-vertex",
