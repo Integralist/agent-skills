@@ -226,6 +226,17 @@ Not everything slices vertically:
   1. **Contract** — delete the old form once unused; blocked by all migration
      slices.
 
+## Pull request delivery
+
+After slicing the work, determine its delivery shape using
+[`PULL-REQUEST-DELIVERY.md`](../shared/PULL-REQUEST-DELIVERY.md). Insert the
+confirmed `Pull Request Delivery` section after `Prerequisites & Dependencies`
+in the generated plan.
+
+The delivery graph and the `Blocked by` graph answer different questions:
+delivery groups review units into PRs, while `Blocked by` controls work order.
+A PR layer may contain several tasks or slices.
+
 ## Parallel execution
 
 First decide whether parallelism applies at all. A single coherent stream, or an

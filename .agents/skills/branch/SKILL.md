@@ -5,7 +5,7 @@ description: >-
   work. Slugifies the git username and derives a short kebab-case
   feature slug from the changes or task under discussion. Use when
   the user asks to start, create, or cut a branch.
-allowed-tools: Bash(git branch:*), Bash(git config:*), Bash(git status:*), Bash(git switch:*), Bash(git symbolic-ref:*)
+allowed-tools: Bash(git branch:*), Bash(git config:*), Bash(git status:*), Bash(git switch:*), Bash(git symbolic-ref:*), Bash(gh stack:*)
 ---
 
 # Branch
@@ -24,12 +24,18 @@ If the fields below show commands rather than output, run each one first.
 
 ## Process
 
+1. **Check for stacked delivery.** Read the active plan or task document, then
+   run `gh stack view --json`. If the document declares `Stack` or the command
+   finds an active stack, invoke [`stacked-prs`](../stacked-prs/SKILL.md) and
+   stop. It owns dependent branch creation and checkout.
+
 1. **Check the current branch.**
 
    - Not a git repo → stop and say so.
    - Already on a feature branch (not `main`/`master` or the repo's
-     default branch) → stop and report it. Don't nest a branch off
-     another feature branch unless the user explicitly asks.
+     default branch) → stop and report it. Ordinary feature branches start
+     from the repository base; `stacked-prs` handles intentional dependent
+     branches.
    - On the base branch → continue.
 
 1. **Derive the username segment.** Slugify `git config user.name`

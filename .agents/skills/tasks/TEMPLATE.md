@@ -13,10 +13,22 @@ keep it verbatim. Replace the example tasks with the real ones.
 - **Language:** {detected language}
 - **Source:** {plan/research doc paths, or "in-session planning"}
 
+## Pull Request Delivery
+
+- **Mode:** {Single PR | Stack | Independent PRs}
+
+| Layer | Base              | Tasks     | Branch            |
+| ----- | ----------------- | --------- | ----------------- |
+| 1     | `{trunk}`         | Tasks 1–3 | `{bottom-branch}` |
+| 2     | `{bottom-branch}` | Tasks 4–6 | `{top-branch}`    |
+
 ## How to execute this list
 
 Work top to bottom, one task at a time; do not skip ahead. For each task:
 
+1. Find its layer in `Pull Request Delivery`. Complete every task assigned to
+   that layer on the same branch. Create or switch stack branches only when
+   crossing a layer boundary.
 1. Add the **Test (red)** exactly as written, run its command, and confirm it
    fails with the stated failure.
 1. Add the **Implementation (green)** as written.

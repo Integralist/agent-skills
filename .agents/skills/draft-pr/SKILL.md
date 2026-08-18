@@ -1,7 +1,7 @@
 ---
 name: draft-pr
 description: Draft a concise, direct pull request with a clear Problem and Solution. Use when the user asks to create, draft, or open a PR.
-allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh repo view:*)
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh repo view:*), Bash(gh stack:*)
 ---
 
 # Draft PR
@@ -20,6 +20,12 @@ If the fields below show commands rather than output, run each one first.
 - Existing PR: !`gh pr view --json url,state,isDraft 2>/dev/null || echo "(none)"`
 
 ## Process
+
+1. **Check for a stack.** Read the active plan or task document, then run
+   `gh stack view --json`. If the document declares `Stack` or the command
+   finds an active stack, invoke [`stacked-prs`](../stacked-prs/SKILL.md) and
+   stop. `gh stack submit` creates or updates the complete PR chain and its
+   base branches.
 
 1. **Check preconditions.**
 

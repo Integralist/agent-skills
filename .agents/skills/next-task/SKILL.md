@@ -34,6 +34,16 @@ Resume work from a project plan, in the main thread.
    block, so the first unchecked task wins. If every remaining task is blocked,
    report which slice is next and what it waits on, then stop.
 
+1. **Prepare its delivery branch.** Read `Pull Request Delivery` when present
+   and map the selected task to its layer.
+
+   - Stay on the current branch when it matches the layer's declared branch.
+   - For a stack layer, invoke
+     [`stacked-prs`](../stacked-prs/SKILL.md) when its branch is not current or
+     the stack has not been initialized.
+   - For older documents without delivery metadata, follow the existing
+     single-branch workflow. Never infer one branch per task.
+
 1. **Announce the task:**
 
    ```txt
@@ -59,6 +69,8 @@ Once verified (tests pass, work done), mark it complete before finishing:
    subtasks are checked.
 1. Report that the task is done and the plan updated.
 1. Ask whether to commit. If yes, invoke `/commit`.
+1. If every task in the current PR layer is complete, report that the layer is
+   ready and ask whether to invoke `stacked-prs` to submit or update the stack.
 
 ## REQUIRED
 
@@ -67,3 +79,4 @@ Once verified (tests pass, work done), mark it complete before finishing:
   subagents.
 - When the task is complete and verified, mark its checkbox `- [x]`.
 - One task per invocation. Don't chain multiple tasks.
+- One task per invocation controls work scope, not PR boundaries.

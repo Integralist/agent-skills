@@ -42,6 +42,20 @@ execute early slices before finalizing later ones.
 Do not re-derive what the session already settled. Verify specific references
 with tools; never re-explore settled ground.
 
+## Pull request delivery
+
+After decomposing the work into tasks, determine how it should be delivered
+using
+[`PULL-REQUEST-DELIVERY.md`](../shared/PULL-REQUEST-DELIVERY.md).
+
+Use a confirmed `Pull Request Delivery` mapping from the source plan when one
+exists. Otherwise assess the tasks directly. When the guide recommends a stack,
+show the proposed task-to-layer grouping and wait for the user to accept,
+change, or decline it before writing the document.
+
+Absence of a project plan or delivery mapping never implies a single PR. A
+stack layer may contain any number of related tasks.
+
 ### Language
 
 Auto-detect the primary language from the files the plan touches; proceed unless
@@ -82,8 +96,8 @@ Write to `docs/tasks/<yyyy-mm-dd>-<slug>.md` (date from `date +%F`, author from
 `git config user.name`), `Status: Ready`. Follow the scaffold and worked example
 in [`TEMPLATE.md`](TEMPLATE.md): an execution protocol the executor follows, a
 "Context for the executor" section serializing the exploration (goal, existing
-signatures, paths, conventions, and gotchas the tasks depend on), then the
-ordered tasks.
+signatures, paths, conventions, and gotchas the tasks depend on), the confirmed
+pull request delivery mapping, then the ordered tasks.
 
 ## Guidelines
 

@@ -14,6 +14,15 @@ order, stopping if any needs the user's input.
 
 ## Process
 
+1. **Detect stacked delivery.** Read the active plan or task document, then run
+   `gh stack view --json`. If the document declares `Stack` or the command
+   finds an active stack:
+
+   - Keep the stack-managed branch.
+   - Invoke the `commit` skill.
+   - Invoke the `stacked-prs` skill to submit or update the stack.
+   - Stop.
+
 1. **Branch.** Check the current branch:
 
    ```bash
