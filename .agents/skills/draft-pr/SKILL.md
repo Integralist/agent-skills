@@ -63,11 +63,16 @@ If the fields below show commands rather than output, run each one first.
    - Add `## Notes` only for testing done, a migration step, a risk, or a
      follow-up worth flagging. Omit otherwise.
 
-1. **Derive the title** from the change: imperative mood, concise, no trailing
-   period. State why the change matters, not the mechanics — a reviewer reading
-   only the title should learn what improves. Follow `~/.gitcommit` conventions
-   (type prefix/scope) if that file exists; a squash merge turns this title into
-   the commit subject, so it must satisfy the commit style too.
+1. **Draft the title:**
+   - **Title = consequence/why, NOT diff mechanics.** A reviewer reading only
+     the title should learn what improves without opening the PR.
+     - *Reject mechanical summaries:* `update X to Y`, `add helper Z`,
+       `refactor auth module`.
+     - *Require consequence:* `retry transient 502s so nightly import completes`,
+       `adopt X for faster completion`.
+   - Keep imperative mood, concise, no trailing period.
+   - Follow `~/.gitcommit` conventions (type prefix/scope) if that file exists;
+     a squash merge turns this title into the commit subject.
 
    ```txt
    BAD:  fix(fetch): add retry wrapper to the fetch helper

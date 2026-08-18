@@ -79,6 +79,17 @@ If the fields below show commands rather than output, run each one first.
 
    - Verify staged: `git diff --cached --name-only`.
 
+   - **Draft the commit message:**
+     - **Subject = consequence/why, NOT diff mechanics.** A reader should
+       learn what improves without opening the diff.
+       - *Reject mechanical summaries:* `update X to Y`, `change config`,
+         `add field Z`.
+       - *Require consequence:* `adopt X for faster completion`,
+         `prevent dropped retries on burst`.
+     - **Body = what changed + verification.**
+     - Keep the type prefix and imperative mood from `~/.gitcommit` (or
+       `chore`, `feat`, `fix`, etc.).
+
    - Write the commit message to a uniquely-named temp file with your
      file-writing tool (NOT a shell heredoc), then commit from that file.
      Use a random suffix so concurrent runs never collide, e.g.
