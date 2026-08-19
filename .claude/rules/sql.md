@@ -4,7 +4,7 @@ paths:
 ---
 
 > [!NOTE]
-> If you were invoked directly (e.g. `/sql-conventions`) with no specific task,
+> If you were invoked directly (e.g. `/conventions-sql`) with no specific task,
 > just read this skill so its conventions are loaded into context, then stop —
 > there is nothing to do yet. They're now ready to apply when I ask you to
 > design, write, or edit SQL.

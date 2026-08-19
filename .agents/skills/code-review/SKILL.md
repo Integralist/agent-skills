@@ -137,7 +137,7 @@ Severity reflects impact and likelihood, not reviewer confidence.
    `file:line` establishing each pattern it claims the change departs from — a
    finding with no cited sibling is an invention. When `HAS_GO`, the subagent
    MUST first load the
-   `go-conventions` skill (`.agents/skills/go-conventions/SKILL.md`) and judge
+   `conventions-go` skill (`.agents/skills/conventions-go/SKILL.md`) and judge
    changed Go against project rules rather than generic conventions. For other
    languages, use the repository's corresponding instructions when available.
 

@@ -101,6 +101,6 @@ List the files created and give a one-line summary of each decision recorded.
   cited research. Missing input for a section → write
   `_Not specified in source._`, never fabricate.
 - Cross-link the source plan, and the PRD or spec where relevant.
-- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) and omit
+- Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).

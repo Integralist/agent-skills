@@ -12,7 +12,7 @@ Guidelines for writing tests in Go services following
 established patterns.
 
 > [!NOTE]
-> [`go-conventions`](../go-conventions/SKILL.md) is the authority for Go
+> [`conventions-go`](../conventions-go/SKILL.md) is the authority for Go
 > style and linter rules (`noctx`, `scopeguard`, mandatory test doc
 > comments). Load it alongside this skill; where the two overlap, it
 > wins. This skill covers test structure and templates.

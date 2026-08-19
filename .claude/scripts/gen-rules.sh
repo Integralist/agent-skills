@@ -35,9 +35,10 @@ gen() {
 	echo "generated $rule from $skill"
 }
 
-gen .agents/skills/go-conventions/SKILL.md       .claude/rules/go.md       '**/*.go'
-gen .agents/skills/markdown-conventions/SKILL.md .claude/rules/markdown.md '**/*.md'
-gen .agents/skills/sql-conventions/SKILL.md      .claude/rules/sql.md      '**/*.sql'
+gen .agents/skills/conventions-go/SKILL.md       .claude/rules/go.md       '**/*.go'
+gen .agents/skills/conventions-markdown/SKILL.md .claude/rules/markdown.md '**/*.md'
+gen .agents/skills/conventions-python/SKILL.md   .claude/rules/python.md   '**/*.py'
+gen .agents/skills/conventions-sql/SKILL.md      .claude/rules/sql.md      '**/*.sql'
 
 # copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md files so relative
 # links in the generated rule resolve. Each copy gets a "generated" banner so a
@@ -55,5 +56,7 @@ copy_siblings() {
 	done < <(find "$skill_dir" -maxdepth 1 -name '*.md' ! -name 'SKILL.md')
 }
 
-copy_siblings .agents/skills/go-conventions       .claude/rules
-copy_siblings .agents/skills/markdown-conventions  .claude/rules
+copy_siblings .agents/skills/conventions-go       .claude/rules
+copy_siblings .agents/skills/conventions-markdown  .claude/rules
+copy_siblings .agents/skills/conventions-python    .claude/rules
+copy_siblings .agents/skills/conventions-sql       .claude/rules

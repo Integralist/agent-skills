@@ -49,7 +49,7 @@ Before finalizing, confirm each `path:line` still resolves.
 
 ## Report template
 
-Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) and
+Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and
 [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 
 ```markdown

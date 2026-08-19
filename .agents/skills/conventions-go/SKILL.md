@@ -1,5 +1,5 @@
 ---
-name: go-conventions
+name: conventions-go
 description: >-
   MANDATORY for any work on Go files (*.go). Load this before editing,
   reviewing, or creating any *.go file. Go coding conventions and style
@@ -8,7 +8,7 @@ description: >-
 ---
 
 > [!NOTE]
-> If you were invoked directly (e.g. `/go-conventions`) with no specific task,
+> If you were invoked directly (e.g. `/conventions-go`) with no specific task,
 > just read this skill so its conventions are loaded into context, then stop —
 > there is nothing to do yet. They're now ready to apply when I ask you to
 > design, write, or edit Go code.

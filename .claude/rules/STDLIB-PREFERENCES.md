@@ -1,4 +1,4 @@
-<!-- generated from .agents/skills/go-conventions/STDLIB-PREFERENCES.md — edit there, run `make rules` -->
+<!-- generated from .agents/skills/conventions-go/STDLIB-PREFERENCES.md — edit there, run `make rules` -->
 
 # Standard Library Preferences
 

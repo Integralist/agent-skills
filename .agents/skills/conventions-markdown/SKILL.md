@@ -1,5 +1,5 @@
 ---
-name: markdown-conventions
+name: conventions-markdown
 description: >-
   MANDATORY for any work on Markdown files (*.md). Load this before
   editing or creating any *.md file. Markdown formatting and linting

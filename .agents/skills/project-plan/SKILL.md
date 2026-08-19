@@ -59,7 +59,7 @@ Planning in Go (detected). Tell me if the snippets should use a
 different language.
 ```
 
-If the language is Go, load [`go-conventions`](../go-conventions/SKILL.md)
+If the language is Go, load [`conventions-go`](../conventions-go/SKILL.md)
 before producing any Go snippets, so embedded code follows the style guide.
 
 ### Gather context
@@ -301,7 +301,7 @@ standalone `/project-plan` runs.
 - Each slice small enough to complete in one session.
 - Code snippets must be precise — real signatures, types, and import paths. Not
   pseudocode.
-- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) and omit
+- Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
   load-bearing detail (paths, constraints, acceptance criteria).

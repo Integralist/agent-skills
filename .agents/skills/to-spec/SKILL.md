@@ -138,6 +138,6 @@ paths, no code snippets** (those live in the plan).
 - Extract from research and code; do not invent. Cite claims — `path:line` for
   code, URL for docs — and label anything you cannot cite an unverified
   assumption.
-- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) and omit
+- Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).

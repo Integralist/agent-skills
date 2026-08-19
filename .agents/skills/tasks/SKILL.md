@@ -59,7 +59,7 @@ stack layer may contain any number of related tasks.
 ### Language
 
 Auto-detect the primary language from the files the plan touches; proceed unless
-the user corrects you. If Go, load [`go-conventions`](../go-conventions/SKILL.md)
+the user corrects you. If Go, load [`conventions-go`](../conventions-go/SKILL.md)
 before emitting any Go so embedded code follows the style guide.
 
 ## The bar
@@ -107,7 +107,7 @@ pull request delivery mapping, then the ordered tasks.
   identically in every later task that uses it.
 - Keep the "Context" prose tight — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md) and
-  [`markdown-conventions`](../markdown-conventions/SKILL.md).
+  [`conventions-markdown`](../conventions-markdown/SKILL.md).
 
 ## Hand-off
 

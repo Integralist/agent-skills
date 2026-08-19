@@ -135,7 +135,7 @@ stdlib preferences like `net/netip` over `net`, `http.MethodGet` over `"GET"`).
 Do not include them for non-Go audits:
 
 - `~/.claude/rules/go.md`
-- `~/.agents/skills/go-conventions/SKILL.md`
+- `~/.agents/skills/conventions-go/SKILL.md`
 
 #### Subagent brief
 

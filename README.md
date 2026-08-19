@@ -170,8 +170,8 @@ suggestions.
 (`.claude/rules/`) — topic-specific instructions Claude loads automatically,
 scoped to file patterns via a YAML `paths` glob. Unlike skills, they apply
 passively. Generic agents don't support path-scoped auto-loading, so these are
-mirrored as skills (`go-conventions`, `markdown-conventions`,
-`sql-conventions`).
+mirrored as skills (`conventions-go`, `conventions-markdown`,
+`conventions-python`, `conventions-sql`).
 
 **Project instructions** — `.agents/AGENTS.md` holds the canonical conventions;
 `.claude/CLAUDE.md` is a one-line `@~/.agents/AGENTS.md` pointer so Claude Code
@@ -247,6 +247,10 @@ authenticate via SSO on first use.
 | **code-review-feedback**     | Verify review feedback before accepting or implementing it.                            |
 | **commit**                   | Group related changes and create clear Git commits.                                    |
 | **consensus**                | Reach cross-model consensus through gated discussion rounds.                           |
+| **conventions-go**           | Apply Go conventions when editing or reviewing `.go` files.                            |
+| **conventions-markdown**     | Apply Markdown conventions when editing or reviewing `.md` files.                      |
+| **conventions-python**       | Apply Python conventions when editing or reviewing `.py` files.                        |
+| **conventions-sql**          | Apply SQL conventions when editing or creating migration files.                        |
 | **critique**                 | Find logical weaknesses in a document and suggest fixes.                               |
 | **decide**                   | Compare consequential options and record a reasoned decision.                          |
 | **delegate**                 | Choose and dispatch the right subagent for a task.                                     |
@@ -258,7 +262,6 @@ authenticate via SSO on first use.
 | **git-metadata**             | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.  |
 | **ghostty**                  | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.         |
 | **go-api**                   | Scaffold a production-ready Go API with local tooling and observability.               |
-| **go-conventions**           | Apply Go conventions when editing or reviewing `.go` files.                            |
 | **go-testing**               | Write Go unit, integration, fuzz, and benchmark tests.                                 |
 | **grepai**                   | Search code semantically when exact names are unknown.                                 |
 | **grill-me**                 | Start a grilling session for a plan, decision, or idea.                                |
@@ -266,7 +269,6 @@ authenticate via SSO on first use.
 | **grilling**                 | Stress-test assumptions through a structured, relentless interview.                    |
 | **handoff**                  | Summarize the current session for another agent.                                       |
 | **incident-report**          | Write an incident report from the session's debugging evidence.                        |
-| **markdown-conventions**     | Apply Markdown conventions when editing or reviewing `.md` files.                      |
 | **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
 | **mysql-index-audit**        | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.               |
 | **next-task**                | Implement and complete the next actionable plan or task-list item.                     |
@@ -279,7 +281,6 @@ authenticate via SSO on first use.
 | **refactor**                 | Plan a simpler reimplementation of an existing feature.                                |
 | **research**                 | Research a topic or repository and save a sourced reference under `docs/research/`.    |
 | **security-review-feedback** | Validate vulnerability findings for reachability and exploitability before fixing.     |
-| **sql-conventions**          | Apply SQL conventions when editing or creating migration files.                        |
 | **stacked-prs**              | Create and manage dependent PRs with the official `gh stack` extension.                |
 | **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
 | **systematic-debugging**     | Find root causes through a four-phase debugging workflow.                              |
@@ -330,13 +331,14 @@ keys.
 
 ## Generating rules from skills
 
-`.claude/rules/go.md`, `.claude/rules/markdown.md`, and `.claude/rules/sql.md`
-are **generated** from the `go-conventions`, `markdown-conventions`, and
-`sql-conventions` skills. The `SKILL.md` is the single source of truth; the rule
+`.claude/rules/go.md`, `.claude/rules/markdown.md`, `.claude/rules/python.md`,
+and `.claude/rules/sql.md` are **generated** from the `conventions-go`,
+`conventions-markdown`, `conventions-python`, and `conventions-sql` skills. The
+`SKILL.md` is the single source of truth; the rule
 differs only by frontmatter (`paths:` globs in place of `name:`/`description:`),
 and the bodies stay byte-identical.
 
-Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make install` runs it automatically. After editing a `*-conventions` skill, run `make rules` before committing — the generated rules are committed.
+Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make install` runs it automatically. After editing a `conventions-*` skill, run `make rules` before committing — the generated rules are committed.
 
 ## Workflow
 

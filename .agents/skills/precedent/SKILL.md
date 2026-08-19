@@ -19,8 +19,10 @@ finding without a cited sibling is an invention.
 An explicit convention outranks emergent precedent. Where one of these answers
 the question, it is authoritative and this skill defers to it:
 
-- Go — [`go-conventions`](../go-conventions/SKILL.md)
-- Markdown — [`markdown-conventions`](../markdown-conventions/SKILL.md)
+- Go — [`conventions-go`](../conventions-go/SKILL.md)
+- Markdown — [`conventions-markdown`](../conventions-markdown/SKILL.md)
+- Python — [`conventions-python`](../conventions-python/SKILL.md)
+- SQL — [`conventions-sql`](../conventions-sql/SKILL.md)
 - Domain terms — the nearest `CONTEXT.md` glossary
 
 This skill owns what no guide writes down: the patterns a codebase grew.

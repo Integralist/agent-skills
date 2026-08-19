@@ -153,7 +153,7 @@ func TestFeatures(t *testing.T) {
 
 Unimplemented steps return `godog.ErrPending` so the suite reports them as
 pending rather than passing silently. Follow
-[`go-conventions`](../go-conventions/SKILL.md) and
+[`conventions-go`](../conventions-go/SKILL.md) and
 [`go-testing`](../go-testing/SKILL.md) for surrounding Go style (not restated
 here).
 

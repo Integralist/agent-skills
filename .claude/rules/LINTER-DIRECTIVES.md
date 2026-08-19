@@ -1,4 +1,4 @@
-<!-- generated from .agents/skills/go-conventions/LINTER-DIRECTIVES.md — edit there, run `make rules` -->
+<!-- generated from .agents/skills/conventions-go/LINTER-DIRECTIVES.md — edit there, run `make rules` -->
 
 # Linter Suppression Directives
 

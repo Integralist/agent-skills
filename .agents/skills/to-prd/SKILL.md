@@ -108,6 +108,6 @@ List the file created with its path.
 - Extract; do not invent. Every statement traces to the source. Missing input
   for a section → write `_Not specified in source._`, never fabricate.
 - Stay implementation-agnostic — push the *how* into ADRs and the plan.
-- Follow [`markdown-conventions`](../markdown-conventions/SKILL.md) and omit
+- Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
