@@ -237,6 +237,7 @@ authenticate via SSO on first use.
 | ---------------------------- | -------------------------------------------------------------------------------------- |
 | **agents-md**                | Make `AGENTS.md` canonical and point `CLAUDE.md` and `GEMINI.md` to it.                |
 | **architect**                | Turn an idea into research, a specification, and an implementation plan.               |
+| **arena**                    | Spawn N parallel candidates, pick the strongest, and graft in the best of the rest.    |
 | **bcp**                      | Create a branch, commit changes, and open a PR or submit its stack.                    |
 | **behaviour-spec**           | Write Gherkin acceptance criteria and Go test scaffolding.                             |
 | **branch**                   | Create a feature branch named from the current task.                                   |
@@ -305,6 +306,7 @@ authenticate via SSO on first use.
 | **decide**       | You must choose between consequential options                                              | Durable decision memo and recommendation                     |
 | **consensus**    | A complex design or implementation needs independent cross-model review and approval gates | Reviewed assessment or implementation with dissent preserved |
 | **perspectives** | You want quick breadth, brainstorming, or a structured "what are we missing?" pass         | Multi-perspective analysis and next step                     |
+| **arena**        | One attempt at a non-trivial artifact risks locking in the wrong shape                     | One artifact synthesized from parallel candidates            |
 
 Common sequences:
 
@@ -315,6 +317,7 @@ Common sequences:
 - Ordinary pull request or local diff: **code-review**
 - New code that works but may not look like its neighbours: **precedent**
 - Quick meeting or brainstorming pass: **perspectives**
+- Non-trivial artifact where the first shape tends to stick: **arena**
 
 ## Claude-specific frontmatter
 
