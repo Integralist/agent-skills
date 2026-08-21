@@ -34,7 +34,7 @@ install-tools:
 install-pi: install-tools
 	@$(STEP) --section "Pi"
 	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort npm:@shuv1337/pi-mcp-adapter npm:pi-intercom git:github.com/Integralist/pi-btw; do \
+	@for package in npm:@odinlayer/pi-statusbar npm:pi-effort npm:@shuv1337/pi-mcp-adapter npm:pi-intercom npm:pi-subagents git:github.com/Integralist/pi-btw; do \
 		$(STEP) "$$package" pi install "$$package" --no-approve || exit 1; \
 	done
 	@mkdir -p ~/.pi/agent/themes

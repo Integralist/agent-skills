@@ -150,9 +150,10 @@ scripts/                            # Makefile helpers (not installed anywhere)
 ## Components
 
 **Pi** — installed by `make install-pi` with the `pi-statusbar`, `pi-effort`,
-and `pi-mcp-adapter` packages. The repository provides a Gemini Flash default, a
-curated enabled-model list, hidden thinking blocks, the custom `nord-contrast`
-theme, and an `mcp.json` (templated for the Context7 API key) wiring the
+`pi-mcp-adapter`, `pi-intercom`, `pi-subagents`, and `pi-btw` packages. The
+repository provides a Gemini Flash default, a curated enabled-model list, hidden
+thinking blocks, the custom `nord-contrast` theme, and an `mcp.json` (templated
+for the Context7 API key) wiring the
 Atlassian, fastly, google-workspace, gopls, and Context7 MCP servers.
 
 **Skills** — reusable instructions that extend an agent with a task, pattern, or

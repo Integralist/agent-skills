@@ -9,6 +9,7 @@
     "npm:pi-effort",
     "npm:@shuv1337/pi-mcp-adapter",
     "npm:pi-intercom",
+    "npm:pi-subagents",
     "git:github.com/Integralist/pi-btw",
     {
       "source": "git:github.com/fastly/agent-skills-internal",
