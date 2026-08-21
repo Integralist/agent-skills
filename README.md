@@ -292,6 +292,7 @@ authenticate via SSO on first use.
 | **to-adr**                   | Extract genuine architecture decisions into standalone ADRs.                           |
 | **to-prd**                   | Extract product goals, scope, and success measures into a PRD.                         |
 | **to-spec**                  | Write an implementation-ready feature spec with scope and acceptance criteria.         |
+| **unslop**                   | Cut AI tells and machine cadence from prose to restore human voice.                    |
 | **wait-what**                | Re-pitch a message that did not land.                                                  |
 | **writing-for-agents**       | Apply conventions that make skills and instruction files predictable.                  |
 
