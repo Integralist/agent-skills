@@ -273,6 +273,7 @@ authenticate via SSO on first use.
 | **incident-report**          | Write an incident report from the session's debugging evidence.                        |
 | **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
 | **mysql-index-audit**        | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.               |
+| **next-slice**               | Implement and complete every task in the next actionable plan slice.                   |
 | **next-task**                | Implement and complete the next actionable plan or task-list item.                     |
 | **perspectives**             | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.  |
 | **polish**                   | Improve a short passage's clarity and concision.                                       |
