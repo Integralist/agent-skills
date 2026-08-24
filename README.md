@@ -259,7 +259,7 @@ authenticate via SSO on first use.
 | **distill**                  | Shorten long prose without losing essential information.                               |
 | **domain-modeling**          | Define shared domain language and record architecture decisions.                       |
 | **draft-pr**                 | Write and open a concise PR with clear Problem and Solution sections.                  |
-| **durable-rules**            | Turn recurring findings into durable conventions or anti-patterns.                     |
+| **durable-rules**            | Turn recurring findings into conventions, anti-patterns, or skill improvements.        |
 | **eval**                     | Create and run skill evaluations, then compare with the previous run.                  |
 | **git-metadata**             | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.  |
 | **ghostty**                  | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.         |
