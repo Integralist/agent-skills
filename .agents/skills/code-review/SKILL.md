@@ -4,7 +4,7 @@ description: >-
   Code review using specialized subagents. Analyzes behavior and tests,
   security, reliability, and maintainability. Use when reviewing a remote PR or
   local code, including unpushed/uncommitted changes. Pass --plan or
-  --plan=<path> to check the diff against an implementation plan.
+  --plan=<path> to check the diff against an implementation plan or task list.
 argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan[=<path>]]'
 ---
 
@@ -38,7 +38,7 @@ Create a second temp file, `CONTEXT_PATH`, containing:
 - The stated purpose of the change
 - PR title and body, when available
 - Relevant repository instructions
-- The plan or specification, when provided
+- The plan, specification, or task list, when provided
 - Available test results
 
 Record for the subagent prompts:
@@ -141,9 +141,9 @@ Severity reflects impact and likelihood, not reviewer confidence.
    changed Go against project rules rather than generic conventions. For other
    languages, use the repository's corresponding instructions when available.
 
-1. **Plan Adherence Review** *(only when `--plan` is active and a plan was
-   located)* — see "Plan Modifier" in `MODES.md`. The prompt must additionally
-   include the plan file contents.
+1. **Plan Adherence Review** *(only when `--plan` is active and a plan or task
+   list was located)* — see "Plan Modifier" in `MODES.md`. The prompt must
+   additionally include the plan or task file contents.
 
 Collect all results before verification. Do not advance until every reviewer
 has accounted for every file and every changed file was reviewed by at least

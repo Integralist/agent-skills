@@ -96,23 +96,25 @@ working tree for uncommitted, all-local, or explicit-path files.
 
 ## Plan Modifier (`--plan[=<path>]`)
 
-Resolve the plan in this order:
+Resolve the plan or task list in this order:
 
 1. `--plan=<path>`
-1. A PR body link under `docs/plans/`
-1. The newest `docs/plans/*.md` by modification time, excluding `README.md` and
-   `docs/plans/completed/`
+1. A PR body link under `docs/plans/` or `docs/tasks/`
+1. The newest file in `docs/plans/*.md` or `docs/tasks/*.md` by modification
+   time, excluding `README.md`, `docs/plans/completed/`, and
+   `docs/tasks/completed/`
 
 When found, add its contents to `CONTEXT_PATH` and spawn the Plan Adherence
 reviewer. Its focus is:
 
-- **Unplanned files** — changed files absent from the plan
-- **Missing implementation** — planned work absent from the diff
+- **Unplanned files** — changed files absent from the plan or task list
+- **Missing implementation** — planned or tasked work absent from the diff
 - **Scope excess** — adjacent work beyond the stated goal
-- **Plan drift** — implementation contradicting the stated approach
+- **Plan drift** — implementation contradicting the stated approach or verbatim
+  task specification
 
-Report scope excess without judging it. If no plan is found, skip this reviewer
-and note that once in the summary.
+Report scope excess without judging it. If no plan or task list is found, skip
+this reviewer and note that once in the summary.
 
 ## Empty Source
 

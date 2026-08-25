@@ -46,7 +46,7 @@ requested strict scope enforcement:
 ```markdown
 ### Plan Adherence
 
-**Plan:** `docs/plans/<slug>.md`
+**Plan / Tasks:** `docs/plans/<slug>.md` or `docs/tasks/<slug>.md`
 
 - **Unplanned files:** ...
 - **Missing implementation:** ...
@@ -54,7 +54,8 @@ requested strict scope enforcement:
 - **Plan drift:** ...
 ```
 
-If no plan was located, state "Plan adherence: no plan located, skipped" once.
+If no plan or task list was located, state "Plan adherence: none located,
+skipped" once.
 
 When actionable findings exist, offer to address them. Otherwise, end with the
 assessment and open questions.
