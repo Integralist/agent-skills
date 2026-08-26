@@ -158,7 +158,9 @@ unrelated redesigns.
 Before compiling, run an adversarial verification pass to drop false positives.
 For each finding, spawn a verifier subagent (or batch findings per verifier if
 your platform caps concurrency — this stage runs *after* the dimension
-reviewers, so it does not compete for the cap). Instruct each verifier to **try
+reviewers, so it does not compete for the cap). Set `max_turns: 40` (or
+`max_turns: 50` when batching findings) so caller and invariant searches across
+the codebase do not hit turn limits prematurely. Instruct each verifier to **try
 to refute** the finding, not confirm it:
 
 - Read the cited `file`/`line` and enough surrounding context from `DIFF_PATH`
