@@ -62,6 +62,9 @@ Conventions and gotchas:
 
 ### Task 1: Add `ParsePort`, rejecting out-of-range values
 
+Validate and parse input strings into TCP/UDP port numbers, returning an error
+for values outside 1–65535 or non-numeric input.
+
 - **Location:** `netutil/port_test.go`, `netutil/port.go`
 
 **Test (red)** — add to `netutil/port_test.go`:
@@ -122,6 +125,8 @@ func ParsePort(s string) (int, error) {
 - [ ] Task 1 complete
 
 ### Task 2: {what it delivers}
+
+{Brief description of what this task delivers.}
 
 - **Location:** `{path}`, `{path}`
 

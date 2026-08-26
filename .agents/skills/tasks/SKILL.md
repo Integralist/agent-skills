@@ -79,6 +79,8 @@ the test. This rule ships inside the document — see `TEMPLATE.md`.
 Order tasks so each is executable once all prior tasks are done; the executor
 works top to bottom. Each task carries:
 
+- **Delivers** — a concise summary (1–2 sentences) explaining the behaviour or
+  capability the task delivers.
 - **Location** — exact path(s), with line anchors when editing existing code.
 - **Test (red)** — the failing test verbatim, where it goes, the command that
   runs it, and the failure to expect.
@@ -93,11 +95,15 @@ a `Verify` that is still a runnable check (build succeeds, `grep` matches).
 ## Write the document
 
 Write to `docs/tasks/<yyyy-mm-dd>-<slug>.md` (date from `date +%F`, author from
-`git config user.name`), `Status: Ready`. Follow the scaffold and worked example
-in [`TEMPLATE.md`](TEMPLATE.md): an execution protocol the executor follows, a
-"Context for the executor" section serializing the exploration (goal, existing
-signatures, paths, conventions, and gotchas the tasks depend on), the confirmed
-pull request delivery mapping, then the ordered tasks.
+`git config user.name`). A new task list's `Status` is always `Ready`; the
+transition to `Complete` and the move to `docs/tasks/completed/` happen at
+commit time — see [`commit`](../commit/SKILL.md).
+
+Follow the scaffold and worked example in [`TEMPLATE.md`](TEMPLATE.md): an
+execution protocol the executor follows, a "Context for the executor" section
+serializing the exploration (goal, existing signatures, paths, conventions, and
+gotchas the tasks depend on), the confirmed pull request delivery mapping, then
+the ordered tasks.
 
 ## Guidelines
 

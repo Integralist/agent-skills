@@ -129,19 +129,20 @@ Skip these from commits unless the user explicitly asks to include them:
 `.github/copilot-instructions.md`, `.windsurfrules`, `.clinerules`,
 `.gemini/`, `.codex/`, `.omp/`, `.pi/`
 
-## Project Plan Documents
+## Plan and Task Documents
 
-Plan documents (`docs/plans/*.md`) need special handling:
+Plan documents (`docs/plans/*.md`) and task lists (`docs/tasks/*.md`) need
+special handling:
 
-- **Not started** (no `[x]` checkboxes): commit freely — it's a new plan
-  being checked in.
+- **Not started** (no `[x]` checkboxes): commit freely — it's a new plan or task
+  list being checked in.
 - **In progress** (some tasks done, implementation incomplete): commit
-  freely — a half-implemented plan is a valid checkpoint.
+  freely — a half-implemented plan or task list is a valid checkpoint.
 - **Completed** (implementation tasks done — remaining unchecked items are
-  post-deploy/operational only): update the plan's `Status` field (e.g.
-  `Planning` → `Complete`), then move it to `docs/plans/completed/` and
-  commit. Create the directory if it doesn't exist. If unsure whether the
-  plan qualifies as complete, ask.
+  post-deploy/operational only): update the document's `Status` field (e.g.
+  `Planning` or `Ready` → `Complete`), then move it to `docs/plans/completed/` or
+  `docs/tasks/completed/` and commit. Create the directory if it doesn't exist.
+  If unsure whether the document qualifies as complete, ask.
 
 ## Grouping Examples
 
