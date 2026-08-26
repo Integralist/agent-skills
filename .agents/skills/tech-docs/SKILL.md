@@ -1,19 +1,19 @@
 ---
 name: tech-docs
 description: >-
-  Write or improve technical documentation. Applies
-  documentation best practices: brevity, eliminating
-  assumptions, modularization, visualization, and reducing
-  stale code references. Use when writing new documentation
-  from scratch, or editing, or reviewing and rewriting existing documents
-  for clarity and quality.
+  Write or improve technical documentation. Applies documentation best
+  practices: brevity, focusing on why and what rather than how, simple
+  visualizations, modularization, and decoupling from volatile code. Use when
+  writing new documentation from scratch, or editing, or reviewing and rewriting
+  existing documents for clarity and quality.
 argument-hint: --new <topic> | --improve <file>
 ---
 
 # Technical Documentation
 
 Write new or improve existing technical documentation. Apply the five pillars
-below to reduce reader friction and produce a concrete document.
+below to reduce reader friction, prevent documentation rot, and produce a
+concrete document.
 
 ## Mode selection
 
@@ -43,14 +43,13 @@ improvement stays inline.
 **Writing (`--new`):**
 
 1. Clarify scope — confirm topic, audience, and purpose with the user.
-1. Draft, applying all five pillars from the start: clear purpose, defined
-   terms, focused sections, diagrams where helpful, source-file references
-   instead of pasted code.
+1. Draft, applying all five pillars from the start: clear purpose, focus on
+   "why" and "what", simple diagrams for flow, no volatile code references.
 1. Present the draft for review.
 
 ## The five pillars
 
-### 1. Brevity and professionalism
+### 1. Brevity and high signal
 
 - Omit needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Write the point,
@@ -65,24 +64,20 @@ improvement stays inline.
 - For aggressive condensing of long prose where every load-bearing detail must
   survive, use [`distill`](../distill/SKILL.md).
 
-### 2. Eliminate assumptions
+### 2. Focus on "why" and "what", not "how"
 
-- Define every term a reader outside the team might not know. Never assume
-  "common knowledge."
-- Hyperlink industry terms, protocols, and third-party tools to Wikipedia or
-  official docs so readers of all levels can follow.
+- Document intent, domain models, constraints, trade-offs, and architectural
+  boundaries.
+- Leave internal implementation mechanics to the code and tests — the codebase
+  is the only reliable source of truth for "how".
+- Avoid step-by-step code walkthroughs in prose. If interaction flow or
+  lifecycle must be explained, use a simple diagram or protocol contract.
 
-### 3. Focus and modularize
+### 3. Visualize simply
 
-- If a section is long enough to be its own document, flag it for extraction.
-- Add or improve cross-references between related documents.
-- Avoid the mega-doc trap: one document, one clear purpose.
-
-### 4. Visualize simply
-
-- Where architecture or workflows are described in prose, suggest or add a
-  Mermaid diagram. Diagrams and tables replace prose, not just supplement it —
-  delete paragraphs a visual already communicates.
+- Where architecture, workflows, or lifecycles are described, use simple
+  Mermaid diagrams (ideally <= 15 nodes). Diagrams replace prose — delete
+  paragraphs a visual already communicates.
 - Use tables for "multiple dimensions × multiple cases" information (e.g.
   environment matrices, permission grids). A table replacing four paragraphs is
   a net win.
@@ -90,14 +85,22 @@ improvement stays inline.
   a diagram but too structured for prose.
 - Keep diagrams high-level and clean. Complexity defeats the purpose.
 
-### 5. Minimize stale code references
+### 4. Decouple from volatile code
 
-- Flag inline code blocks that will become outdated as the codebase evolves.
-- Cut snippets that restate what a diagram, table, or structured-text block
-  already shows. Redundancy alone justifies removal — staleness is secondary.
-- Prefer describing the logic or pointing to source files over pasting code.
-- If a code example is essential, note the staleness risk and suggest a way to
-  keep it current (e.g. a test that validates the example).
+- Eliminate references to volatile code artifacts: no file paths, line numbers,
+  private functions/classes, internal variable names, or pasted code blocks.
+- Reference only stable, high-level domain terms and public architectural
+  boundaries.
+- When an example is strictly necessary, provide a generic, illustrative schema
+  or contract rather than live source snippets that rot on refactor.
+
+### 5. Focus and modularize
+
+- If a section is long enough to be its own document, flag it for extraction.
+- Add or improve cross-references between related documents.
+- Avoid the mega-doc trap: one document, one clear purpose.
+- Define terms a reader outside the team might not know, but avoid explaining
+  standard industry concepts in long prose.
 
 ## Output
 
@@ -125,10 +128,8 @@ Reason: {Why this section warrants its own document.}
   the improved text.
 - Preserve the author's intent and technical accuracy. Do not invent
   information.
-- Do not add code blocks unless the original had them and they are essential.
-  Prefer references to source files.
-- When adding Mermaid diagrams, ideally keep them under 15 nodes.
+- Do not paste code blocks or point to fragile source locations. Rely on
+  domain concepts and simple diagrams.
+- Keep Mermaid diagrams under 15 nodes.
 - If the document is already well-written, say so and make only minor
   improvements. Do not manufacture issues.
-- Golden rule: never force a reader to "read the code" just to understand what a
-  project does.

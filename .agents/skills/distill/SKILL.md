@@ -148,10 +148,10 @@ rewriter's intentions catches omissions the rewriter rationalized away.
   screen and clarity, not preservation, is the concern; reach for
   `distill` when losing a load-bearing detail would break execution.
 - [`tech-docs`](../tech-docs/SKILL.md) — improving repo *documentation*
-  via doc-specific pillars (Mermaid diagrams, modularization, eliminating
-  assumptions, stale-code references). Use it for document structure and
-  quality; use `distill` as its deeper-condensing companion when
-  preserving every load-bearing detail is the concern.
+  via doc-specific pillars (Mermaid diagrams, modularization, focusing
+  on why/what, decoupling from volatile code). Use it for document
+  structure and quality; use `distill` as its deeper-condensing companion
+  when preserving every load-bearing detail is the concern.
 - [`summarize-for-product`](../summarize-for-product/SKILL.md) —
   different goal: translate an engineering doc for a non-engineer
   audience. That reshapes content for a reader; `distill` preserves all
