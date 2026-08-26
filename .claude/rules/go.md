@@ -301,6 +301,36 @@ const defaultDebugPort = 8080
 const defaultTimeout = 30 * time.Second
 ```
 
+### Parameter bundles: Params vs Opts
+
+Distinguish parameter structs by lifetime:
+
+- **`Params`** (`*Params`): dependencies and configuration required to
+  **construct a long-lived component** (e.g., `WorkerParams`,
+  `ServiceParams`). The component retains these values for its lifetime.
+- **`Opts`** (`*Opts`): inputs and configuration for **one operation or call**
+  (e.g., `FetchRecordOpts`, `ClaimTaskOpts`). Scoped to a single invocation.
+
+```go
+// Params: component lifetime (dependencies to create a long-lived component)
+type WorkerParams struct {
+	Config  Config
+	Logger  *slog.Logger
+	Metrics *metrics.Metrics
+	Store   RecordStore
+}
+
+worker := NewWorker(params)
+
+// Opts: call lifetime (inputs for a single operation)
+type FetchRecordOpts struct {
+	IncludeDeleted bool
+	RecordID       string
+}
+
+record, err := store.FetchRecord(ctx, opts)
+```
+
 ## Imports
 
 Three groups separated by blank lines: stdlib, third-party, internal.
