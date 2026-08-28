@@ -56,6 +56,9 @@ improvement stays inline.
   then cut anything that survives removal without loss of meaning.
 - Maintain a neutral-expert voice. Strip frustration, over-enthusiasm, humor
   that obscures meaning, and first-person asides that don't serve the reader.
+- Emoji stay load-bearing here too—status cells in a table (✅/❌), nothing
+  decorative in prose or headings. GitHub callouts (`> [!NOTE]`) render their
+  own icons, so don't hand-add emoji to them.
 - Evaluate at the section level, not just the sentence: is this section earning
   its length? If a diagram or table already says it, cut the prose that
   restates it.
