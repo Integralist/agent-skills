@@ -70,12 +70,18 @@ Once the whole slice is verified (tests pass, every task done), mark it complete
 before finishing:
 
 1. Change each task's checkbox in the slice from `- [ ]` to `- [x]` in the plan
-   file.
+   or task file.
 1. Check any parent whose subtasks are now all checked.
+1. If working from a per-slice task list (`docs/tasks/*-slice-<n>.md`), mark the
+   corresponding slice complete in the parent plan (`docs/plans/*.md`).
 1. Report that the slice is done and the plan updated.
 1. Ask whether to commit. If yes, invoke `/commit`.
-1. If every slice in the current PR layer is complete, report that the layer is
-   ready and ask whether to invoke `stacked-prs` to submit or update the stack.
+1. Advise on next steps:
+   - If more slices remain in the parent plan, prompt to run
+     `/tasks <plan-path> slice-<n+1>` to compile the next slice against the
+     freshly updated code.
+   - If every slice in the current PR layer is complete, ask whether to invoke
+     `stacked-prs` to submit or update the stack.
 
 ## REQUIRED
 

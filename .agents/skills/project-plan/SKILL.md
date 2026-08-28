@@ -15,7 +15,9 @@ description: >-
 Produce a precise, actionable implementation guide: the volatile *how*. The
 stable *what* and the definition of done live in the
 [`spec`](../to-spec/SKILL.md); this plan links them and turns them into ordered,
-demoable work carrying real code — actual signatures, types, and import paths.
+demoable vertical slices carrying interface contracts — actual signatures,
+types, and import paths. Detailed TDD execution steps (verbatim tests and code)
+are compiled just-in-time per slice via [`tasks`](../tasks/SKILL.md).
 
 Normally invoked by [`architect`](../architect/SKILL.md) after the spec, but it
 is the single way to produce a plan document and is often run standalone.
@@ -132,15 +134,12 @@ single-layer or non-code work — see "Slicing the work".
 - **Produces**: {exact signatures later slices rely on — function
   names, parameter and return types, import paths}
 
-- [ ] **Task 1.1**: {specific task}
+```go
+// Key interface or type signatures produced by this slice
+```
 
-  {Implementation notes with real code — actual signatures, types,
-  import paths. Where it clarifies behaviour, include unit-level
-  Given/When/Then prose for the table-driven test.}
-
-  ```{language}
-  // Example code showing the approach
-  ```
+- [ ] **Task 1.1**: {milestone / high-level step}
+- [ ] **Task 1.2**: {milestone / high-level step}
 
 ### Slice 2: {what it delivers}
 
@@ -149,7 +148,11 @@ single-layer or non-code work — see "Slicing the work".
 - **Consumes**: {exact signatures taken from Slice 1}
 - **Produces**: {…}
 
-- [ ] **Task 2.1**: {specific task}
+```go
+// Key interface or type signatures produced by this slice
+```
+
+- [ ] **Task 2.1**: {milestone / high-level step}
 
 ### Documentation
 
@@ -299,12 +302,26 @@ standalone `/project-plan` runs.
 - Cite every factual claim inline — `path/to/file.go:42` for code, URL for
   external docs. Label anything you cannot cite an unverified assumption.
 - Each slice small enough to complete in one session.
-- Code snippets must be precise — real signatures, types, and import paths. Not
-  pseudocode.
+- Keep slice definitions focused on interface contracts (`Consumes` /
+  `Produces`) and behavioral deliverables. Avoid embedding verbatim test code
+  or full function bodies — detailed TDD steps are compiled just-in-time per
+  slice via [`tasks`](../tasks/SKILL.md).
 - Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
   load-bearing detail (paths, constraints, acceptance criteria).
+
+## Execution hand-off (Just-in-Time tasks)
+
+Do not generate verbatim TDD code for all slices upfront, as early slices may
+alter implementation details for later ones. Instead, compile each slice into
+tasks just-in-time:
+
+1. Run `/tasks <plan-path> slice-1` to generate
+   `docs/tasks/<yyyy-mm-dd>-<plan-slug>-slice-1.md`.
+1. Execute Slice 1 via `/next-task`, `/next-slice`, or a delegated subagent.
+1. Once Slice 1 is verified and merged, run `/tasks <plan-path> slice-2` to
+   compile Slice 2 against the updated codebase.
 
 ## Agent teams (if your harness supports it)
 

@@ -287,7 +287,7 @@ authenticate via SSO on first use.
 | **stacked-prs**              | Create and manage dependent PRs with the official `gh stack` extension.                |
 | **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
 | **systematic-debugging**     | Find root causes through a four-phase debugging workflow.                              |
-| **tasks**                    | Write a checkbox-driven TDD task list with code, checks, and PR grouping.              |
+| **tasks**                    | Compile a plan slice into a mechanical TDD runbook with verbatim code.                 |
 | **teach**                    | Teach a concept using persistent lessons, missions, and progress records.              |
 | **tech-docs**                | Write or improve concise, maintainable technical documentation.                        |
 | **test-feedback**            | Diagnose supplied test failures, then fix them interactively.                          |
@@ -351,8 +351,12 @@ Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make instal
 Core implementation flow:
 
 ```txt
-architect → next-task → commit → code-review
+architect (spec → plan) → tasks (per slice) → next-task / next-slice → commit → code-review
 ```
+
+`architect` creates the specification (`to-spec`) and vertical slice blueprint
+(`project-plan`). Slices are compiled just-in-time into mechanical TDD task
+lists (`tasks`), which `next-task` or `next-slice` execute in the main thread.
 
 Plans and task lists can group several tasks into each review unit. When those
 units depend on each other, **stacked-prs** creates and manages the branches and

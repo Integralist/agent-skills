@@ -53,8 +53,9 @@ completion, then present:
 
 Delegate to [`project-plan`](../project-plan/SKILL.md), passing the build goal,
 the spec, and the research context. It decomposes the work into vertical slices
-with Blocked-by edges, points to the spec for acceptance criteria, and extracts
-ADRs via [`to-adr`](../to-adr/SKILL.md). Run it to completion.
+with interface contracts (`Consumes` / `Produces`) and Blocked-by edges, points
+to the spec for acceptance criteria, and extracts ADRs via
+[`to-adr`](../to-adr/SKILL.md). Run it to completion.
 
 ## Offer a PRD
 
@@ -65,6 +66,8 @@ skip it.
 
 Then present:
 
+1. **Compile first slice into tasks** — delegate to
+   [`tasks`](../tasks/SKILL.md) for Slice 1 to begin execution.
 1. **Research another topic** — loop back to Phase 1.
 1. **Create another plan** — delegate to `project-plan` again.
 

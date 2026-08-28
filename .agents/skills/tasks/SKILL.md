@@ -6,7 +6,7 @@ description: >-
   verbatim tests, verbatim code, and a runnable check per task. Writes
   to docs/tasks/.
 disable-model-invocation: true
-argument-hint: "[scope or plan path]"
+argument-hint: "[slice scope or plan path]"
 ---
 
 # Tasks
@@ -16,7 +16,9 @@ that walk down as a task list a cheaper model can *retrace* mechanically —
 without re-reading the codebase, exploring, or making a design decision. This is
 the prewalk trade: pay for exploration once, hand the executor the result.
 
-The output is a self-executing document under `docs/tasks/`. Producing it and
+The primary pattern is **Just-in-Time (JIT) per-slice compilation**: compiling
+one vertical slice at a time from a `project-plan` against the live codebase,
+producing a self-executing document under `docs/tasks/`. Producing it and
 running it are separate steps — see [Hand-off](#hand-off).
 
 ## Precondition
@@ -30,14 +32,20 @@ the user at [`project-plan`](../project-plan/SKILL.md) or
 
 Take the plan from the first source that exists, in order:
 
-1. The planning worked out in the current conversation — the primary source.
-1. A plan or research doc named by the user, or under `docs/plans/` and
+1. **A specific vertical slice from a `project-plan`** (recommended) — pass
+   the slice name/number (e.g., `/tasks slice-1` or `/tasks docs/plans/plan.md
+   slice-1`). Read the slice's `Delivers`, `Consumes`, and `Produces`, then
+   inspect the live repo state to ground all references in actual code.
+1. The planning worked out in the current conversation — crystallize the
+   active slice or scope discussed in chat.
+1. A full plan or research doc named by the user, or under `docs/plans/` and
    `docs/research/` — fold its detail in.
-1. Neither — stop (see Precondition).
+1. None of the above — stop (see Precondition).
 
-A whole plan need not become one document. Pass a single slice as the scope to
-crystallize it alone — when one task doc would be unwieldy, or you want to
-execute early slices before finalizing later ones.
+Crystallizing one vertical slice per task file (e.g.,
+`docs/tasks/<yyyy-mm-dd>-<plan-slug>-slice-1.md`) prevents stale code in
+downstream slices and keeps execution self-contained for a single session or
+subagent.
 
 Do not re-derive what the session already settled. Verify specific references
 with tools; never re-explore settled ground.
@@ -94,10 +102,13 @@ a `Verify` that is still a runnable check (build succeeds, `grep` matches).
 
 ## Write the document
 
-Write to `docs/tasks/<yyyy-mm-dd>-<slug>.md` (date from `date +%F`, author from
-`git config user.name`). A new task list's `Status` is always `Ready`; the
-transition to `Complete` and the move to `docs/tasks/completed/` happen at
-commit time — see [`commit`](../commit/SKILL.md).
+Write to `docs/tasks/<yyyy-mm-dd>-<plan-slug>-slice-<n>.md` when scoped to a
+plan slice (e.g. `2026-08-28-redis-rate-limiter-slice-1.md`), or
+`docs/tasks/<yyyy-mm-dd>-<feature-slug>.md` for standalone tasks (date from
+`date +%F`, author from `git config user.name`). A new task list's `Status` is
+always `Ready`; the transition to `Complete` and the move to
+`docs/tasks/completed/` happen at commit time — see
+[`commit`](../commit/SKILL.md).
 
 Follow the scaffold and worked example in [`TEMPLATE.md`](TEMPLATE.md): an
 execution protocol the executor follows, a "Context for the executor" section

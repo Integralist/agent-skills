@@ -64,13 +64,19 @@ Resume work from a project plan, in the main thread.
 
 Once verified (tests pass, work done), mark it complete before finishing:
 
-1. Change the task's checkbox from `- [ ]` to `- [x]` in the plan file.
+1. Change the task's checkbox from `- [ ]` to `- [x]` in the task or plan file.
 1. If subtasks group under a parent, check the parent only once all its
    subtasks are checked.
+1. If this was the final task in a per-slice task list
+   (`docs/tasks/*-slice-<n>.md`), mark the corresponding slice complete in the
+   parent plan (`docs/plans/*.md`).
 1. Report that the task is done and the plan updated.
 1. Ask whether to commit. If yes, invoke `/commit`.
-1. If every task in the current PR layer is complete, report that the layer is
-   ready and ask whether to invoke `stacked-prs` to submit or update the stack.
+1. Advise on next steps:
+   - If a per-slice task list finished and more slices remain in the parent
+     plan, suggest running `/tasks <plan-path> slice-<n+1>`.
+   - If every task in the current PR layer is complete, ask whether to invoke
+     `stacked-prs` to submit or update the stack.
 
 ## REQUIRED
 
