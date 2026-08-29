@@ -67,6 +67,13 @@ integration):
 - **Distinct code paths only.** Do not duplicate tests with
   trivial input variations. Each case must cover a unique branch
   or dimension.
+- **Extend existing tables first.** When fixing a bug or adding
+  an edge case, add a case to an existing table-driven test
+  rather than creating a new standalone `Test*` function.
+  Reserve standalone tests for distinct workflows or setups.
+- **Zero coverage regression.** Pruning or refactoring test code
+  must never decrease package statement coverage
+  (`go test -cover`).
 - **Match errors by identity.** Use `errors.Is` or `errors.As`.
   Only fall back to substring matching (`strings.Contains`) for
   unexported errors in third-party packages.
@@ -311,6 +318,49 @@ assert.Contains(t, haystack, needle,
 assert.NotNil(t, obj, "object should not be nil")
 ```
 
+## Scoped Coverage & Test Pruning
+
+Aggregate coverage (`go test -cover`) measures total code
+touched by the suite, not which test exercises which
+statements. When suites accumulate redundant tests, use scoped
+coverage with [Tobari](https://github.com/goccy/tobari) to map
+per-test execution and prune overlap.
+
+### Identifying Redundancy with Tobari
+
+1. Install Tobari:
+
+   ```bash
+   go install github.com/goccy/tobari/cmd/tobari@latest
+   ```
+
+2. Run package tests with scoped coverage hooks:
+
+   ```bash
+   GOFLAGS="$(tobari flags)" go test ./path/to/package
+   ```
+
+3. Generate the HTML overlap matrix:
+
+   ```bash
+   tobari html tobari/tobari.json
+   ```
+
+### Consolidation Rules
+
+- **Target high-overlap pairs:** Focus on test pairs with high
+  statement overlap (e.g. 70%+). Consolidate standalone tests
+  exercising the same code paths into a single table-driven test
+  or F-test.
+- **Preserve distinct assertions:** High statement overlap does
+  not mean duplicate tests. Two tests may execute the same path
+  while asserting different state or invariants. Ensure all
+  distinct checks and failure paths are preserved during
+  consolidation.
+- **Verify coverage invariants:** Run `go test -cover` before
+  and after pruning. Test count should decrease while statement
+  coverage remains equal or higher.
+
 ## Integration Tests
 
 Integration tests use the `e2e` build tag and live in the `e2e/`
@@ -435,4 +485,7 @@ go test -race ./...
 
 # With coverage
 go test -cover ./...
+
+# Scoped coverage & overlap report (Tobari)
+GOFLAGS="$(tobari flags)" go test ./path/to/pkg && tobari html tobari/tobari.json
 ```
