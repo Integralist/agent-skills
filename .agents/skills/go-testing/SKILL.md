@@ -26,6 +26,18 @@ When asked to write unit tests, ask the user if they prefer:
 
 If not specified, default to table-driven tests.
 
+## TDD Cycle in Go
+
+In compiled Go, a test written before types exist causes compilation failure,
+not an assertion failure. Always follow the 3-step TDD cycle:
+
+1. **Stub signatures:** Define types and empty function/method signatures
+   returning zero values or sentinel errors (e.g. `return nil, errors.New("unimplemented")`).
+2. **Red test:** Write the test against the stub. Run `go test` to confirm it
+   **compiles and fails on assertion**.
+3. **Green implementation:** Write the minimum logic to pass the test, then
+   refactor and clean dead code.
+
 ## What Each Test Proves
 
 Applies to all test styles (table-driven, f-tests, HTTP,
@@ -35,6 +47,15 @@ integration):
   behavior being proven. If a case proves two things, split it
   into two cases. (The `Test*` doc comment covers the whole set,
   so it may name several.)
+- **Error path parity.** Every `if err != nil` branch in production code must
+  have a corresponding test case verifying the failure behavior and sentinel
+  matching via `errors.Is` or `errors.AsType`.
+- **No vacuous assertions.** Assertions must verify actual state mutations,
+  header values, or payload contents—never assert only the absence of an error
+  (`assert.NoError`) when return values are expected.
+- **Context cancellation.** Long-running, I/O-bound, or goroutine-spawning
+  functions must have a test proving they terminate promptly when `ctx` is
+  canceled.
 - **No unused fields or setup.** Deleting any field or setup step
   must break the test. Beyond the expected-value and
   expected-error pair, fields used by only a subset of cases

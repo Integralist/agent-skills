@@ -17,7 +17,7 @@
 
 - **Critique:** Challenge reasoning critically. Omit timeline estimates from plans.
 - **Simplicity:** Solve problems by removing components or abstractions, not by stacking new ones. Architect features with the fewest moving parts that satisfy the requirement.
-- **TDD:** No code without a failing test; write minimum code to pass; clean dead code immediately. Assert expected behavior, not implementation—delete assertions that survive an inverted requirement.
+- **TDD:** Stub first, prove failure on assertion (not compilation), write minimum code to pass; clean dead code immediately. Unit test every public function and error branch; integration test every feature slice. Assert behavior, not implementation—delete assertions that survive an inverted requirement.
 - **Code Edits:** Propose diffs in chat and get explicit approval before invoking code-editing tools. A question is an inquiry, not an instruction to edit—answer it. Keep changes scoped to what was asked.
 - **Large Diffs:** If >40 lines, prompt with a 1-line summary first; let user choose to view full diff or proceed to edits.
 

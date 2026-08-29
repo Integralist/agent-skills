@@ -280,6 +280,7 @@ async def fetch_all(item_ids: list[str]) -> list[str]:
 - Verify exceptions using `with pytest.raises(ExpectedException):`.
 - Mock external systems using `unittest.mock` or `pytest-mock` (`mocker`
   fixture).
+- **Integration testing:** Place integration / boundary tests in `tests/integration/` or `tests/e2e/`. Use `httpx.AsyncClient` (with `ASGITransport`) or framework test clients against real application instances with dependencies overridden only at the wire/storage boundaries.
 
 ```python
 import pytest

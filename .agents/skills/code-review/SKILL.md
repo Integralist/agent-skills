@@ -118,7 +118,10 @@ Severity reflects impact and likelihood, not reviewer confidence.
 
 1. **Behavior and Tests Review** — intended behavior, regressions, edge cases,
    error paths, compatibility, and whether tests prove the changed behavior and
-   important failure modes.
+   important failure modes. Specifically check: (a) do new public functions or
+   error branches lack unit tests? (b) do new API endpoints or workflow slices
+   lack integration tests? (c) are assertions falsifiable (checking actual
+   mutated state/payloads rather than vacuous `assert.NoError`)?
 
 1. **Security and Abuse Resistance Review** — trust boundaries,
    authentication/authorization, injection, information leakage, unsafe

@@ -731,6 +731,8 @@ id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
 > rules below are the linter and naming constraints that bind whatever
 > you write; `go-testing` is the structure.
 
+- **Dual-layer coverage:** Write unit tests (`*_test.go`) for logic, branches, and error cases; write integration tests (`//go:build e2e` in `e2e/` or godog `.feature` files) for cross-package and handler/database boundaries.
+
 Table-driven tests with `testCases` slice and `t.Run`:
 
 ```go

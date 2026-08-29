@@ -90,12 +90,16 @@ works top to bottom. Each task carries:
 - **Delivers** — a concise summary (1–2 sentences) explaining the behaviour or
   capability the task delivers.
 - **Location** — exact path(s), with line anchors when editing existing code.
+- **Stub / Signature (if needed)** — type or signature stub so the test compiles
+  and fails on assertion.
 - **Test (red)** — the failing test verbatim, where it goes, the command that
   runs it, and the failure to expect.
 - **Implementation (green)** — the code that passes the test, verbatim, and
   where it goes.
 - **Verify** — a runnable check with its expected output: usually the test
   going green; otherwise a build, `grep`, or lint result.
+
+Every vertical slice task list should conclude with an **Integration / Boundary Verification Task** exercising the completed slice without mocks.
 
 Not every task is code. A dependency add or a config wire has no test — give it
 a `Verify` that is still a runnable check (build succeeds, `grep` matches).
