@@ -127,8 +127,8 @@ get approval, then write.
   not manufacture cuts to look productive.
 - If cutting an item is risky, flag it for the user instead of silently
   dropping it.
-- If the source is a `docs/plans/` project-plan document, keep its
-  required structure intact — see
+- If the source is a project plan document (e.g.
+  `projects/<slug>/plan.md`), keep its required structure intact — see
   [`project-plan`](../project-plan/SKILL.md). Condense within the
   structure rather than collapsing it.
 

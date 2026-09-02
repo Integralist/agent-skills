@@ -28,7 +28,7 @@ Two points are easy to get wrong:
 - Research is an optional input, not a precondition. A spec is required; if
   absent, you must run `to-spec` first to create one.
 
-Never hand-roll a plan by copying the shape of files already in `docs/plans/`.
+Never hand-roll a plan by copying the shape of files already in `projects/`.
 
 ## Input
 
@@ -40,10 +40,10 @@ Determine what to plan, in priority order:
 1. Otherwise → ask the user what to build; if the request is vague, elicit
    intent first via [`clarify`](../clarify/SKILL.md).
 
-Locate the spec: a path passed in, or the matching file in
-`docs/specifications/`. If no spec file exists yet, you must first run
-[`to-spec`](../to-spec/SKILL.md) to create one. Read it — its acceptance
-criteria and implementation decisions feed the plan.
+Locate the spec: a path passed in, or the matching `spec.md` in the project
+directory (`projects/<yyyy-mm-dd>-<slug>/spec.md`). If no spec exists yet,
+you must first run [`to-spec`](../to-spec/SKILL.md) to create one. Read it —
+its acceptance criteria and implementation decisions feed the plan.
 
 ### Detect programming language
 
@@ -62,8 +62,8 @@ before producing any Go snippets, so embedded code follows the style guide.
 
 ### Gather context
 
-Read the spec (above) and all `docs/research/*.md`. These are the foundation for
-the plan.
+Read the spec (above), any project research (`./research.md`), and relevant
+`docs/research/*.md`. These are the foundation for the plan.
 
 ## Acceptance criteria & scaffolding
 
@@ -77,15 +77,16 @@ The **spec** owns the acceptance criteria — the plan links them from its
 - **Non-code plan** → the spec's prose criteria are verified by checkable
   assertions (grep, command output, file state); no executable scaffolding.
 - **No spec** (standalone, or a plan discussed in chat) → you must run
-  [`to-spec`](../to-spec/SKILL.md) first to generate a specification doc under
-  `docs/specifications/`. This ensures a stable specification file exists.
+  [`to-spec`](../to-spec/SKILL.md) first to generate `spec.md` in the project
+  directory (`projects/<yyyy-mm-dd>-<slug>/spec.md`). This ensures a stable
+  specification file exists.
 
 ## Plan document
 
-Write to `docs/plans/<yyyy-mm-dd>-<plan-slug>.md`. Date from `date +%F`, author
+Write to `projects/<yyyy-mm-dd>-<slug>/plan.md`. Date from `date +%F`, author
 from `git config user.name`. A new plan's `Status` is always `Planning`; the
-transition to `Complete` and the move to `docs/plans/completed/` happen at
-commit time — see [`commit`](../commit/SKILL.md).
+transition to `Complete` and the move to `projects/completed/<yyyy-mm-dd>-<slug>/`
+happen at commit time — see [`commit`](../commit/SKILL.md).
 
 ````markdown
 # {Plan Name}
@@ -103,11 +104,11 @@ definition of done live in the spec.}
 ## Specification
 
 Acceptance criteria and scope:
-[{spec name}](../specifications/<yyyy-mm-dd>-slug.md).
+[{spec name}](./spec.md).
 
 ## Research
 
-- [topic-a](../research/2026-06-17-topic-a.md)
+- [research](./research.md) (or topic in `docs/research/`)
 
 ## Prerequisites & Dependencies
 
@@ -314,7 +315,7 @@ alter implementation details for later ones. Instead, compile each slice into
 tasks just-in-time:
 
 1. Run `/tasks <plan-path> slice-1` to generate
-   `docs/tasks/<yyyy-mm-dd>-<plan-slug>-slice-1.md`.
+   `projects/<yyyy-mm-dd>-<slug>/tasks-slice-1.md`.
 1. Execute Slice 1 via `/next-task`, `/next-slice`, or a delegated subagent.
 1. Once Slice 1 is verified and merged, run `/tasks <plan-path> slice-2` to
    compile Slice 2 against the updated codebase.

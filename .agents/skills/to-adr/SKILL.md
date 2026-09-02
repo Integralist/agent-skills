@@ -22,8 +22,8 @@ written; also runs standalone.
 
 1. Path given as an argument → use it.
 1. Invoked from another skill that passes a path → use that.
-1. Otherwise → most recently modified plan in `docs/plans/`; if ambiguous,
-   ask which.
+1. Otherwise → most recently modified plan in `projects/` (e.g.
+   `projects/*/plan.md`); if ambiguous, ask which.
 
 Read the source in full before extracting.
 
@@ -45,7 +45,9 @@ decision**, not one giant ADR.
 
 ## Write the ADR(s)
 
-One file per decision at `docs/adr/<yyyy-mm-dd>-<short-title>.md`. Date from
+When extracted from a project plan or scoped to an initiative, write to
+`projects/<project-slug>/adr-<short-title>.md`. For system-wide architectural
+standards, write to `docs/adr/<yyyy-mm-dd>-<short-title>.md`. Date from
 `date +%F`, author from `git config user.name`.
 
 Template — Nygard skeleton with mandatory **Options Considered**:

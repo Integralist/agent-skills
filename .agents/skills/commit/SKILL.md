@@ -131,17 +131,18 @@ Skip these from commits unless the user explicitly asks to include them:
 
 ## Plan and Task Documents
 
-Plan documents (`docs/plans/*.md`) and task lists (`docs/tasks/*.md`) need
+Project planning documents and task lists (under `projects/<slug>/`) need
 special handling:
 
-- **Not started** (no `[x]` checkboxes): commit freely — it's a new plan or task
-  list being checked in.
+- **Not started** (no `[x]` checkboxes): commit freely — it's a new project plan
+  or task list being checked in.
 - **In progress** (some tasks done, implementation incomplete): commit
   freely — a half-implemented plan or task list is a valid checkpoint.
 - **Completed** (implementation tasks done — remaining unchecked items are
   post-deploy/operational only): update the document's `Status` field (e.g.
-  `Planning` or `Ready` → `Complete`), then move it to `docs/plans/completed/` or
-  `docs/tasks/completed/` and commit. Create the directory if it doesn't exist.
+  `Planning` or `Ready` → `Complete`), then move the project directory to
+  `projects/completed/<slug>/` (or legacy `docs/plans/completed/` /
+  `docs/tasks/completed/`) and commit. Create the directory if it doesn't exist.
   If unsure whether the document qualifies as complete, ask.
 
 ## Grouping Examples

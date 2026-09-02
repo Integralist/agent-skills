@@ -22,8 +22,9 @@ standalone.
 
 1. Path given as an argument → use it.
 1. Invoked from another skill that passes a path → use that.
-1. Otherwise → most recently modified spec in `docs/specifications/`, else plan
-   in `docs/plans/`; if ambiguous, ask which.
+1. Otherwise → most recently modified spec in `projects/` (e.g.
+   `projects/*/spec.md`), else plan in `projects/*/plan.md`; if ambiguous, ask
+   which.
 
 Read the source in full before extracting.
 
@@ -44,7 +45,8 @@ framing the spec lacks.
 
 ## Write the PRD
 
-One file at `docs/prd/<yyyy-mm-dd>-<slug>.md`. Date from `date +%F`, author from
+Write to `projects/<project-slug>/prd.md` (or `docs/prd/<yyyy-mm-dd>-<slug>.md`
+if standalone without a project directory). Date from `date +%F`, author from
 `git config user.name`.
 
 ```markdown
@@ -95,7 +97,7 @@ implementation-agnostic.}
 
 ## References
 
-- Source: [{spec or plan name}](../specifications/{filename}.md)
+- Source: [{spec or plan name}](./spec.md)
 ```
 
 ## Report

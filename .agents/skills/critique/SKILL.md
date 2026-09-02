@@ -53,9 +53,9 @@ must include a recommended fix.
    - **Consistency** — self-contradiction? later sections conflict with earlier
      claims?
 
-1. **If the document is an implementation plan** (e.g. under `docs/plans/`, or
-   structured with tasks, File Changes, and Verification sections),
-   additionally evaluate:
+1. **If the document is an implementation plan** (e.g. named `plan.md`, under
+   `projects/`, or structured with tasks, File Changes, and Verification
+   sections), additionally evaluate:
 
    - **Scope integrity** — is every task within the stated goal, or do some
      drift into adjacent refactors, renames, or cleanup the objective doesn't

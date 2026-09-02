@@ -107,7 +107,7 @@ rollback, feature flag, rate limit, config change.}
 
 {The durable fix that prevents recurrence — code change, concurrency
 guard, schema change. Link to a plan if one exists:
-`docs/plans/...`.}
+`projects/<slug>/plan.md`.}
 
 ### Prevention
 

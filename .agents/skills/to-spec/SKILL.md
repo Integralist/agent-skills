@@ -34,9 +34,10 @@ blocking on it. Non-code work → language is `N/A`.
 
 ## Gather context
 
-Read all `docs/research/*.md`. Explore the codebase to understand current
-state, using the project's domain vocabulary, and read `docs/adr/` so the spec
-does not contradict a decision already made.
+Read any existing project research (`projects/<project-dir>/research.md` or
+`docs/research/*.md`). Explore the codebase to understand current state, using
+the project's domain vocabulary, and read `docs/adr/` so the spec does not
+contradict a decision already made.
 
 ## Identify testing seams
 
@@ -64,7 +65,7 @@ skip `behaviour-spec`.
 
 ## Write the spec
 
-Write to `docs/specifications/<yyyy-mm-dd>-<slug>.md`. Date from `date +%F`,
+Write to `projects/<yyyy-mm-dd>-<slug>/spec.md`. Date from `date +%F`,
 author from `git config user.name`. A new spec's `Status` is `Draft`.
 
 ````markdown
@@ -122,7 +123,7 @@ paths, no code snippets** (those live in the plan).
 
 ## Research
 
-- [topic](../research/<yyyy-mm-dd>-topic.md)
+- [research](./research.md) (or `docs/research/<yyyy-mm-dd>-topic.md`)
 
 ## Open Questions
 

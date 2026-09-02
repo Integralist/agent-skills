@@ -31,18 +31,19 @@ If the answer is vague, delegate to [`clarify`](../clarify/SKILL.md) to elicit i
 
 Delegate to [`research`](../research/SKILL.md). It detects whether the input is
 a repo or a topic, gathers project metadata for repos, and writes findings to
-`docs/research/<yyyy-mm-dd>-<slug>.md`. Run it to completion, then present:
+`docs/research/<yyyy-mm-dd>-<slug>.md` (or `projects/<yyyy-mm-dd>-<slug>/research.md`
+when scoped to an active project). Run it to completion, then present:
 
 1. **Research another topic** — ask what next and loop back to Phase 1.
 1. **Write a spec** — proceed to Phase 2.
 
 ## Phase 2: Spec
 
-Delegate to [`to-spec`](../to-spec/SKILL.md), passing the build goal and the
-Phase 1 research context. It writes the problem, solution, user stories,
-acceptance criteria (via [`behaviour-spec`](../behaviour-spec/SKILL.md)), testing
-seams, and scope to `docs/specifications/<yyyy-mm-dd>-<slug>.md`. Run it to
-completion, then present:
+Delegate to [`to-spec`](../to-spec/SKILL.md), passing the build goal, the
+project slug, and the Phase 1 research context. It writes the problem, solution,
+user stories, acceptance criteria (via
+[`behaviour-spec`](../behaviour-spec/SKILL.md)), testing seams, and scope to
+`projects/<yyyy-mm-dd>-<slug>/spec.md`. Run it to completion, then present:
 
 1. **Refine the spec or research more** — loop back to Phase 1 or 2.
 1. **Create a plan** — proceed to Phase 3.
@@ -50,22 +51,25 @@ completion, then present:
 ## Phase 3: Plan
 
 Delegate to [`project-plan`](../project-plan/SKILL.md), passing the build goal,
-the spec, and the research context. It decomposes the work into vertical slices
+the project directory, the spec, and the research context. It writes the plan to
+`projects/<yyyy-mm-dd>-<slug>/plan.md`, decomposes the work into vertical slices
 with interface contracts (`Consumes` / `Produces`) and Blocked-by edges, points
-to the spec for acceptance criteria, and extracts ADRs via
-[`to-adr`](../to-adr/SKILL.md). Run it to completion.
+to `./spec.md` for acceptance criteria, and extracts ADRs via
+[`to-adr`](../to-adr/SKILL.md) into `projects/<yyyy-mm-dd>-<slug>/adr-<title>.md`.
+Run it to completion.
 
 ## Offer a PRD
 
 After the plan, offer [`to-prd`](../to-prd/SKILL.md) as an opt-in step — a
 focused product framing (goals, success metrics, audience) sourced from the
-spec. Produce it only if the user wants stakeholder-facing framing; otherwise
-skip it.
+spec, written to `projects/<yyyy-mm-dd>-<slug>/prd.md`. Produce it only if the
+user wants stakeholder-facing framing; otherwise skip it.
 
 Then present:
 
 1. **Compile first slice into tasks** — delegate to
-   [`tasks`](../tasks/SKILL.md) for Slice 1 to begin execution.
+   [`tasks`](../tasks/SKILL.md) for Slice 1 (`projects/<yyyy-mm-dd>-<slug>/tasks-slice-1.md`)
+   to begin execution.
 1. **Research another topic** — loop back to Phase 1.
 1. **Create another plan** — delegate to `project-plan` again.
 

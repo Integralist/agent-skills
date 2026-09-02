@@ -1,8 +1,9 @@
 # Task Document Template
 
-Fill this scaffold into `docs/tasks/<yyyy-mm-dd>-<slug>.md`. `{...}` are
-placeholders; the surrounding prose is fixed text that ships to the executor —
-keep it verbatim. Replace the example tasks with the real ones.
+Fill this scaffold into `projects/<yyyy-mm-dd>-<slug>/tasks-slice-<n>.md` or
+`projects/<yyyy-mm-dd>-<slug>/tasks.md`. `{...}` are placeholders; the
+surrounding prose is fixed text that ships to the executor — keep it verbatim.
+Replace the example tasks with the real ones.
 
 ````markdown
 # {Feature} — Task List

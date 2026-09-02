@@ -202,8 +202,8 @@ Include this checklist verbatim in the subagent prompt:
 ## Compile summary
 
 After the interactive apply step, create the output directory with
-`mkdir -p docs/plans`, then write the report to
-`docs/plans/<YYYY-MM-DD-HHMM>-cleanup.md`:
+`mkdir -p docs/reports`, then write the report to
+`docs/reports/<YYYY-MM-DD-HHMM>-cleanup.md`:
 
 ```markdown
 ## Cleanup Report
