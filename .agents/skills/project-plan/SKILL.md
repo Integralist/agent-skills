@@ -65,6 +65,14 @@ before producing any Go snippets, so embedded code follows the style guide.
 Read the spec (above), any project research (`./research.md`), and relevant
 `docs/research/*.md`. These are the foundation for the plan.
 
+### Resolve decision frontier
+
+Before drafting slices, inspect the technical choices, interface contracts, and
+external dependencies for open branches or unverified assumptions. If key
+decisions remain unsettled (and were not already resolved in chat), delegate to
+[`grill-with-docs`](../grill-with-docs/SKILL.md) to run a grilling interview,
+capture domain terms, and record ADRs before writing the document.
+
 ## Acceptance criteria & scaffolding
 
 The **spec** owns the acceptance criteria — the plan links them from its
