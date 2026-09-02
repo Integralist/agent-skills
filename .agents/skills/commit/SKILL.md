@@ -80,12 +80,16 @@ If the fields below show commands rather than output, run each one first.
    - Verify staged: `git diff --cached --name-only`.
 
    - **Draft the commit message:**
-     - **Subject = consequence/why, NOT diff mechanics.** A reader should
-       learn what improves without opening the diff.
-       - *Reject mechanical summaries:* `update X to Y`, `change config`,
-         `add field Z`.
-       - *Require consequence:* `adopt X for faster completion`,
-         `prevent dropped retries on burst`.
+     - **Subject = consequence/why (outcome/benefit/prevention), NOT diff
+       mechanics (what was typed).**
+     - **Apply the "So What?" test before finalizing:** If you ask "So what? /
+       Why does this matter?", the subject must already contain the answer. If
+       the subject merely describes what code/docs changed (`add X`,
+       `require Y`, `update Z`), rewrite it to state the consequence (`prevent X
+       so Y`, `enable X for faster Y`, `space out X so Y is readable`).
+     - **Precedence over `~/.gitcommit`:** Use `~/.gitcommit` only for
+       `type(scope):` syntax; ignore any legacy `WHAT` placeholder in it—the
+       subject is strictly the **WHY / consequence**.
      - **Body = what changed + verification.**
      - Keep the type prefix and imperative mood from `~/.gitcommit` (or
        `chore`, `feat`, `fix`, etc.).
@@ -170,11 +174,18 @@ special handling:
 - **The subject states why the change matters, not the mechanics.** A
   reader who never opens the diff should learn what improves. The diff
   already shows what changed; the subject supplies the consequence.
-  Keep the type prefix and imperative mood from `~/.gitcommit`.
+  Keep the type prefix and imperative mood from `~/.gitcommit` (for
+  syntax/scoping only, not subject content).
 
   ```txt
-  BAD:  fix(ratelimit): set burst to 200
-  GOOD: fix(ratelimit): raise burst so valid retries stop being dropped
+  BAD (WHAT):  feat(draft-pr): require loose bullet lists in pr descriptions
+  GOOD (WHY):  feat(draft-pr): space out bullet lists so pr descriptions are easier to read
+
+  BAD (WHAT):  fix(ratelimit): set burst to 200
+  GOOD (WHY):  fix(ratelimit): raise burst so valid retries stop being dropped
+
+  BAD (WHAT):  fix(auth): check if user is nil in Check()
+  GOOD (WHY):  fix(auth): prevent panic when Check() receives a nil user
   ```
 
 - Use the body for what changed and how it was verified.

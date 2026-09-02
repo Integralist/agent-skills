@@ -67,19 +67,30 @@ If the fields below show commands rather than output, run each one first.
      follow-up worth flagging. Omit otherwise.
 
 1. **Draft the title:**
-   - **Title = consequence/why, NOT diff mechanics.** A reviewer reading only
-     the title should learn what improves without opening the PR.
-     - *Reject mechanical summaries:* `update X to Y`, `add helper Z`,
-       `refactor auth module`.
-     - *Require consequence:* `retry transient 502s so nightly import completes`,
-       `adopt X for faster completion`.
+   - **Title = consequence/why (outcome/benefit/prevention), NOT diff mechanics
+     (what was typed).** A reviewer reading only the title should learn what
+     improves without opening the PR.
+   - **Apply the "So What?" test before finalizing:** If you ask "So what? /
+     Why does this matter?", the title must already contain the answer. If the
+     title merely describes what changed in the diff (`add X`, `require Y`,
+     `update Z`), rewrite it with the consequence (`retry transient 502s so
+     import completes`, `space out lists so pr is readable`).
+     - *Reject mechanical summaries (WHAT):* `update X to Y`, `add helper Z`,
+       `require loose lists`, `refactor auth module`.
+     - *Require consequence (WHY):* `retry transient 502s so nightly import
+       completes`, `space out bullet lists so pr descriptions are easier to
+       read`, `prevent auth panic on nil user`.
    - Keep imperative mood, concise, no trailing period.
-   - Follow `~/.gitcommit` conventions (type prefix/scope) if that file exists;
-     a squash merge turns this title into the commit subject.
+   - Follow `~/.gitcommit` conventions for `type(scope):` syntax if that file
+     exists (ignoring any legacy `WHAT` placeholder); a squash merge turns this
+     title into the commit subject.
 
    ```txt
-   BAD:  fix(fetch): add retry wrapper to the fetch helper
-   GOOD: fix(fetch): retry transient 502s so the nightly import completes
+   BAD (WHAT):  feat(draft-pr): require loose bullet lists in pr descriptions
+   GOOD (WHY):  feat(draft-pr): space out bullet lists so pr descriptions are easier to read
+
+   BAD (WHAT):  fix(fetch): add retry wrapper to the fetch helper
+   GOOD (WHY):  fix(fetch): retry transient 502s so the nightly import completes
    ```
 
 1. **Show the title and description to the user and wait for approval.** Do not
