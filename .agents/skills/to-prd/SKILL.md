@@ -1,10 +1,9 @@
 ---
 name: to-prd
 description: >-
-  Extract a focused PRD (Product Requirements Document) — the
-  product-facing what & why — from a spec or plan. Use when the user
-  wants a PRD, product framing, goals and success metrics, or says
-  /to-prd, or when another skill offers to produce one.
+  Extract a Product Requirements Document (PRD) from a spec or plan. Use
+  when framing product goals, user personas, and success metrics for
+  stakeholders.
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Read, Write
 ---
 

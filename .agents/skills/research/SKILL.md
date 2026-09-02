@@ -1,13 +1,9 @@
 ---
 name: research
 description: >-
-  Research a topic or repository deeply and produce a reference
-  document under `docs/research/`. Handles two modes: code
-  research (repo by URL, `org/repo`, or bare name — e.g. "check
-  the spotless repo", "look at github.com/fastly/spotless") and
-  topic research (concepts, technologies, patterns). Use when
-  the user wants to research something, explore a repo, or says
-  /research.
+  Research a topic, pattern, or codebase deeply and produce a reference
+  document. Use when investigating a topic, exploring an external repository,
+  or conducting architecture research.
 ---
 
 # Research

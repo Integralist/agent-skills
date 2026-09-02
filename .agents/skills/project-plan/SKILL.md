@@ -1,13 +1,9 @@
 ---
 name: project-plan
 description: >-
-  Write an implementation plan to docs/plans/. ALWAYS use this skill
-  — never hand-roll a plan by mimicking files in docs/. Use when the
-  user wants to create a project/implementation plan, when a plan
-  discussed in chat should be persisted, or says /project-plan.
-  Guarantees a spec exists, invoking to-spec if absent. Decomposes
-  into vertical slices with Blocked-by edges, points to the spec for
-  acceptance criteria, and extracts ADRs via to-adr.
+  Write an implementation plan. Use when creating a feature implementation
+  plan, persisting a plan discussed in chat, or when another skill needs to plan
+  a change.
 ---
 
 # Project Plan

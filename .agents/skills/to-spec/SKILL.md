@@ -1,11 +1,9 @@
 ---
 name: to-spec
 description: >-
-  Produce a specification document at docs/specifications/ — problem,
-  solution, user stories, acceptance criteria, testing seams, and
-  scope for a feature. The engineering source-of-truth a plan later
-  implements. Use when the user wants a spec or says /to-spec, or
-  when another skill needs the spec phase before planning.
+  Produce a functional specification defining problem, solution, and
+  acceptance criteria. Use when specifying a feature or when another skill
+  needs the spec phase before planning.
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
 ---
 

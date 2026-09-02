@@ -1,11 +1,9 @@
 ---
 name: to-adr
 description: >-
-  Extract a formal ADR (Architecture Decision Record) from an
-  implementation plan or design doc — one ADR per genuine decision.
-  Use when the user wants to record an architecture decision or says
-  /to-adr, or when another skill needs to formalize a plan's
-  decisions.
+  Extract an Architecture Decision Record (ADR) from an implementation plan
+  or discussion. Use when recording an architectural decision with rejected
+  alternatives.
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Read, Write
 ---
 

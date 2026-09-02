@@ -1,6 +1,9 @@
 ---
 name: security-review-feedback
-description: Use when receiving a security review or vulnerability report — from an AI tool, a security-review command, or a human reviewer — and deciding which findings are real and worth fixing. Verify reachability, attacker control, and exploitability before implementing any fix; reject false positives and severity inflation rather than agreeing reflexively.
+description: >-
+  Validate security review findings and vulnerability reports before fixing.
+  Use when triaging security findings, vulnerability scanner output, or audit
+  reports.
 ---
 
 # Security Review Reception

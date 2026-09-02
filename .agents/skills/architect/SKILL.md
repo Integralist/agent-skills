@@ -1,11 +1,9 @@
 ---
 name: architect
 description: >-
-  Architect a change from idea to actionable artifacts — bootstrap
-  project instructions, research deeply, write a spec, then an
-  implementation plan, each delegated to its skill. Use when the user
-  wants to research a topic, explore a repo, write a spec, create a
-  project plan, or says /architect.
+  Design and plan a feature from idea to actionable artifacts. Use when
+  architecting a feature, exploring a design before planning, or coordinating
+  research, spec, and plan phases.
 ---
 
 # Architect
