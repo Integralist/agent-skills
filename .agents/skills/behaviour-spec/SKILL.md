@@ -1,13 +1,9 @@
 ---
 name: behaviour-spec
 description: >-
-  Generate Gherkin behavioural specifications (acceptance criteria)
-  for a feature or plan. Feature/boundary scenarios become
-  executable godog .feature files for Go; unit-level behaviour is
-  captured as Given/When/Then prose. Returns scenarios plus scaffold
-  tasks for the caller's plan. Use when the user wants BDD/Gherkin
-  user stories, acceptance criteria, executable specifications, or
-  says /behaviour-spec.
+  Generate Gherkin behavioural specifications and acceptance criteria.
+  Use when defining user stories, executable BDD specifications, or
+  acceptance criteria for a feature or plan.
 ---
 
 # Behaviour Spec

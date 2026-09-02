@@ -16,11 +16,11 @@ Prompt the user upfront for three things — no silent auto-detection.
 
 ### 1. Source of truth
 
-Scan `docs/plans/*.md` and surface candidates to confirm. Prompt with whichever
-apply:
+Scan `projects/*/plan.md` (and legacy `docs/plans/*.md`) and surface candidates
+to confirm. Prompt with whichever apply:
 
-- **Plan doc (matched)** — `docs/plans/<branch-slug>.md`, if present.
-- **Plan doc (latest)** — most recently modified `docs/plans/*.md`.
+- **Plan doc (matched)** — `projects/<branch-slug>/plan.md`, if present.
+- **Plan doc (latest)** — most recently modified `projects/*/plan.md` or `docs/plans/*.md`.
 - **Plan doc (pick)** — user names a different path.
 - **Local diff** — `git diff origin/<main>...HEAD` (everything on this branch
   vs. **remote** main).
@@ -87,7 +87,7 @@ Suggest a default by audience; let the user override.
 - <non-engineer-runnable check, or "engineering-only: see plan doc">
 
 ---
-Plan: docs/plans/<slug>.md
+Plan: projects/<slug>/plan.md
 ```
 
 **`slack`:**

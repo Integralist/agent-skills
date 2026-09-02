@@ -1,10 +1,9 @@
 ---
 name: perspectives
 description: >-
-  Multi-perspective analysis of a problem or proposal through evidence,
-  sentiment, risks, benefits, alternatives, and process. Use for a quick "what
-  are we missing?" pass. Do not use to choose a consequential option, run
-  cross-model deliberation, or review code.
+  Analyze a problem or proposal across multiple viewpoints for a quick
+  "what are we missing?" pass. Use when evaluating ideas, proposals, or
+  trade-offs.
 user-invocable: true
 argument-hint: '[topic or proposal] [optional: perspective]'
 ---

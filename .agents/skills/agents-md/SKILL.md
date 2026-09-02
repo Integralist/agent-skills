@@ -1,20 +1,9 @@
 ---
 name: agents-md
 description: >-
-  Make AGENTS.md the canonical project-instructions file and
-  ensure CLAUDE.md and GEMINI.md are thin pointers that
-  @-import it. Promotes existing CLAUDE.md/GEMINI.md content
-  into AGENTS.md when AGENTS.md is missing or weaker,
-  creates stub CLAUDE.md and GEMINI.md when absent, and
-  bootstraps a fresh AGENTS.md when the project has no
-  instructions file at all. Once canonical, also audits an
-  existing AGENTS.md for structure drift, verifies its
-  build/test/lint commands and gotchas are still accurate,
-  and harvests durable lessons from the current session.
-  Use when the user wants to tidy up agent instructions,
-  onboard a project, check whether AGENTS.md is up to date,
-  audit its structure, add what was learned this session,
-  or says /agents-md.
+  Establish AGENTS.md as the canonical project-instructions file and audit
+  existing instructions for drift and learned lessons. Use when onboarding a
+  project, auditing AGENTS.md, or updating agent instructions.
 ---
 
 # Agents-MD

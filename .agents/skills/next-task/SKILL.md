@@ -12,8 +12,7 @@ Resume work from a project plan, in the main thread.
 
 ## Context
 
-- Project plans: !`find docs/plans -maxdepth 1 -name '*.md' ! -name 'README.md' -newer docs/plans/completed 2>/dev/null | head -10 || find docs/plans -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | head -10`
-- Task lists: !`find docs/tasks -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | head -10`
+- Projects & tasks: !`find projects -maxdepth 2 -name '*.md' ! -path '*/completed/*' ! -name 'README.md' 2>/dev/null | head -15 || find docs/plans -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | head -10`
 
 ## Process
 
@@ -23,7 +22,7 @@ Resume work from a project plan, in the main thread.
    use. **Always state the file you'll use and wait for confirmation.**
 
    ```txt
-   I'll work from docs/plans/cross-team-routing-isolation.md.
+   I'll work from projects/2026-02-27-cross-team-routing-isolation/plan.md.
    OK, or did you have a different plan in mind?
    ```
 
@@ -68,8 +67,8 @@ Once verified (tests pass, work done), mark it complete before finishing:
 1. If subtasks group under a parent, check the parent only once all its
    subtasks are checked.
 1. If this was the final task in a per-slice task list
-   (`docs/tasks/*-slice-<n>.md`), mark the corresponding slice complete in the
-   parent plan (`docs/plans/*.md`).
+   (`projects/<slug>/tasks-slice-<n>.md`), mark the corresponding slice complete
+   in the parent plan (`projects/<slug>/plan.md`).
 1. Report that the task is done and the plan updated.
 1. Ask whether to commit. If yes, invoke `/commit`.
 1. Advise on next steps:

@@ -10,8 +10,9 @@ The caller substitutes:
 - `{plan-type}` — lowercase slug for the filename (`refactor` / `redesign`).
 - `{slug}` — kebab-case slug of the scope.
 
-Create the output directory with `mkdir -p docs/plans`, then write the plan
-to `docs/plans/<yyyy-mm-dd>-{plan-type}-{slug}.md` (date prefix from today's
+Create the output directory with
+`mkdir -p projects/<yyyy-mm-dd>-{plan-type}-{slug}`, then write the plan to
+`projects/<yyyy-mm-dd>-{plan-type}-{slug}/plan.md` (date prefix from today's
 date).
 
 A caller may **insert** its own sections at the anchors marked

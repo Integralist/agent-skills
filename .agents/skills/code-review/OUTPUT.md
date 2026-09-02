@@ -46,7 +46,7 @@ requested strict scope enforcement:
 ```markdown
 ### Plan Adherence
 
-**Plan / Tasks:** `docs/plans/<slug>.md` or `docs/tasks/<slug>.md`
+**Plan / Tasks:** `projects/<slug>/plan.md` or `projects/<slug>/tasks.md`
 
 - **Unplanned files:** ...
 - **Missing implementation:** ...

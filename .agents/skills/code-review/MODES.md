@@ -99,9 +99,10 @@ working tree for uncommitted, all-local, or explicit-path files.
 Resolve the plan or task list in this order:
 
 1. `--plan=<path>`
-1. A PR body link under `docs/plans/` or `docs/tasks/`
-1. The newest file in `docs/plans/*.md` or `docs/tasks/*.md` by modification
-   time, excluding `README.md`, `docs/plans/completed/`, and
+1. A PR body link under `projects/`, `docs/plans/`, or `docs/tasks/`
+1. The newest file matching `projects/*/{plan,tasks,tasks-slice-*}.md` (or legacy
+   `docs/plans/*.md` / `docs/tasks/*.md`) by modification time, excluding
+   `README.md`, `projects/completed/`, `docs/plans/completed/`, and
    `docs/tasks/completed/`
 
 When found, add its contents to `CONTEXT_PATH` and spawn the Plan Adherence
