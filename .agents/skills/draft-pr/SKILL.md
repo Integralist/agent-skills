@@ -58,8 +58,11 @@ If the fields below show commands rather than output, run each one first.
    - **Solution:** what the change does to fix the Problem, verifiable against
      the diff. Lead with the key change; note notable trade-offs or rejected
      alternatives.
-   - Keep both tight — one short paragraph or a few bullets each. Cut filler
+   - Keep both concise — one short paragraph or a few bullets each. Cut filler
      ("this PR", "simply", "just"). Active voice.
+   - **Separate list items with blank lines.** When using bullet lists, insert a
+     blank line between each item (loose list) so GitHub renders them with
+     breathing space instead of a dense block.
    - Add `## Notes` only for testing done, a migration step, a risk, or a
      follow-up worth flagging. Omit otherwise.
 
@@ -116,10 +119,15 @@ the key change; note trade-offs.>
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). No marketing tone,
   no restating the diff line by line, no boilerplate checklists.
 - **Don't hard-wrap the PR body.** GitHub soft-wraps prose, so manual breaks at
-  80 columns render as ragged text. Write each paragraph as one continuous line;
-  use real blank lines between paragraphs and list items for structure. (The
-  80-column markdown convention applies to source files, not text submitted to
-  GitHub.)
+  80 columns render as ragged text. Write each paragraph as one continuous line.
+  (The 80-column markdown convention applies to source files, not text submitted
+  to GitHub.)
+- **Space out bullet lists.** Always separate bullet list items with a blank
+  line. Tight lists render densely on GitHub and hurt readability; blank lines
+  between items produce loose lists with comfortable breathing space.
+- **Use load-bearing emojis where helpful.** Signal status or structure faster
+  than words would (e.g. ✅ verified, ⚠️ caution, ❌ breaking change). Cap at
+  one per line; keep them out of PR titles, headings, and code.
 - Use backticks for identifiers, paths, flags, env vars.
 - Describe behaviour and intent, not a file-by-file walkthrough.
 - Don't invent testing or context absent from the diff or supplied by the user —
