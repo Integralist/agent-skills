@@ -45,6 +45,9 @@ user stories, acceptance criteria (via
 [`behaviour-spec`](../behaviour-spec/SKILL.md)), testing seams, and scope to
 `projects/<yyyy-mm-dd>-<slug>/spec.md`. Run it to completion, then present:
 
+1. **Grill and stress-test the design** — delegate to
+   [`grill-with-docs`](../grill-with-docs/SKILL.md) to interview the user, pin
+   down domain terms, and record ADRs before planning.
 1. **Refine the spec or research more** — loop back to Phase 1 or 2.
 1. **Create a plan** — proceed to Phase 3.
 
