@@ -84,6 +84,10 @@ If the fields below show commands rather than output, run each one first.
    - Follow `~/.gitcommit` conventions for `type(scope):` syntax if that file
      exists (ignoring any legacy `WHAT` placeholder); a squash merge turns this
      title into the commit subject.
+   - Check `.github/workflows/` for PR title linters (such as
+     `action-semantic-pull-request`) or root commitlint configs. Repo rules
+     take precedence over `~/.gitcommit`; adhere to allowed types (e.g.
+     Conventional Commits standard plural `docs`, never `doc`).
 
    ```txt
    BAD (WHAT):  feat(draft-pr): require loose bullet lists in pr descriptions

@@ -93,6 +93,10 @@ If the fields below show commands rather than output, run each one first.
      - **Body = what changed + verification.**
      - Keep the type prefix and imperative mood from `~/.gitcommit` (or
        `chore`, `feat`, `fix`, etc.).
+     - Check repo configs (`commitlint.config.*`, `.commitlintrc*`, or
+       `.github/workflows/`) for allowed types and scopes. Repo rules take
+       precedence over `~/.gitcommit`; use Conventional Commits plural
+       `docs` (never `doc`), `feat`, `fix`, `chore`, etc.
 
    - Write the commit message to a uniquely-named temp file with your
      file-writing tool (NOT a shell heredoc), then commit from that file.

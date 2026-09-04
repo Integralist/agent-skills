@@ -5,7 +5,7 @@ description: >-
   dependent pull requests with the official gh-stack extension. Use when
   the user requests stacked PRs, a plan or task list declares PR layers,
   or work crosses a stack-layer boundary.
-allowed-tools: Bash(git branch:*), Bash(git status:*), Bash(gh extension:*), Bash(gh stack:*)
+allowed-tools: Bash(git branch:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(gh extension:*), Bash(gh stack:*), Bash(gh pr:*)
 ---
 
 # Stacked Pull Requests
@@ -61,46 +61,96 @@ several tasks or vertical slices.
    gh stack checkout <stack-number-or-branch>
    ```
 
+   Commit all pending work on the current branch using the
+   [`commit`](../commit/SKILL.md) skill before running `gh stack add` or
+   switching layers.
+
    Use `gh stack link` when PRs already exist on GitHub and local stack
    tracking is unnecessary.
 
-1. **Work and submit.**
+1. **Work and commit.**
 
-   Complete every task assigned to the current layer on its branch. Use the
-   [`commit`](../commit/SKILL.md) skill for commits. Run `gh stack add` only
-   when entering the next layer.
+   Complete every task assigned to the current layer on its branch.
+   Use the [`commit`](../commit/SKILL.md) skill for all commits.
 
-   Inspect and submit the complete stack:
+   - Commit all pending changes via `commit` before switching layers (`gh stack
+     checkout`), adding a new layer (`gh stack add`), syncing, rebasing, or
+     submitting. Never carry uncommitted changes across layer boundaries.
+
+1. **Draft PRs and submit.**
+
+   Inspect the stack:
 
    ```bash
    gh stack view --short
-   gh stack submit
    ```
 
-   Prefer the interactive submit editor so the user can review every PR's
-   title, body, and draft state. Use `--auto` only when the user accepts
-   generated titles; it creates new PRs as drafts unless `--open` is set.
+   For each PR layer in the stack, draft its title and description using the
+   [`draft-pr`](../draft-pr/SKILL.md) skill against that layer's base branch
+   (trunk for the bottom layer; the parent layer's branch for higher layers).
+   Follow `draft-pr` to obtain explicit user approval for each layer's PR.
+
+   Submit the stack to push branches and create or update the PR chain on
+   GitHub:
+
+   ```bash
+   gh stack submit --auto
+   ```
+
+   Pass `--open` to open PRs ready for review instead of drafts.
+
+   Apply the approved titles and descriptions to each PR:
+
+   ```bash
+   gh pr edit <branch> --title "<title>" --body-file /tmp/pr-body-<layer>.txt
+   ```
+
+   Write each PR description to a temp file and pass with `--body-file` (never
+   pipe via heredocs). In an interactive terminal where the user runs `gh stack
+   submit`, they may paste the approved content directly into the submit
+   editor.
 
    Keep the stack current with `gh stack sync`. Use `gh stack rebase` to
    resolve rebase conflicts and `gh stack modify` to fold, reorder, insert, or
-   rename layers.
+   rename layers. Commit any pending changes via `commit` before rebasing.
 
-1. **Merge.**
+1. **Validate CI and merge.**
+
+   Merging is strictly bottom-to-top into trunk. For every PR layer to be
+   merged, check CI status and linters:
 
    ```bash
-   gh stack merge
+   gh pr checks <PR>
+   ```
+
+   Stop if any checks or linters fail. Check out the failing layer's branch,
+   fix the issues, commit with [`commit`](../commit/SKILL.md), and re-sync or
+   re-submit before continuing.
+
+   Once all checks pass and reviews are approved, merge atomically:
+
+   ```bash
+   gh stack merge --yes --squash
    gh stack sync --prune
    ```
 
-   `gh stack merge` atomically merges the selected layer and every layer below
-   it. Stop if any selected layer is a draft, has failing checks, or is not
-   ready.
+   - To merge a subset of the stack, pass the PR number (`gh stack merge
+     <pr-number> --yes --squash`); it merges from the bottom layer up to that
+     PR.
+   - Use `--squash`, `--rebase`, or `--merge` matching the repo convention.
+   - If atomic merge fails or is blocked by branch protection, fall back to
+     merging manually bottom-up from layer 1 into trunk (GitHub will retarget
+     each subsequent PR to trunk as its base merges), then run `gh stack sync
+     --prune`.
+   - Stop if any selected layer is a draft, has failing checks, or is not
+     ready.
 
 ## Completion
 
 Finish when the stack matches the confirmed delivery mapping, every submitted
-PR has the correct base, and `gh stack view --short` reports no layer needing a
-rebase.
+PR has the correct base with a user-approved title and description matching the
+[`draft-pr`](../draft-pr/SKILL.md) skill, `gh pr checks <PR>` passes for all
+layers, and `gh stack view --short` reports no layer needing a rebase.
 
 ## Reference
 
