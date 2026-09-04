@@ -48,6 +48,9 @@ point where a test observes behaviour:
 - Position each seam as high in the architecture as it goes — a boundary (API,
   CLI, HTTP handler) over an internal call.
 - The fewer seams, the better; the ideal is one.
+- Seams establish deep module boundaries: tests observe behavior at the public
+  interface (grey box), leaving internal implementations free to evolve without
+  breaking the test harness.
 
 Confirm the seams with the user before writing them into the spec.
 

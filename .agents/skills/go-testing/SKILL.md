@@ -77,6 +77,17 @@ integration):
 - **Match errors by identity.** Use `errors.Is` or `errors.As`.
   Only fall back to substring matching (`strings.Contains`) for
   unexported errors in third-party packages.
+- **Test through the public interface.** Exercise package behavior through
+  exported functions and types (`package foo_test` preferred). Unexported
+  functions are exercised indirectly through public contracts. Do not write
+  unit tests targeting unexported helpers directly. If an unexported branch
+  cannot be reached through any public entry point, delete it as dead code.
+- **Extract child packages for complex internals.** When an internal helper or
+  algorithm has intricate branching, state machines, or edge cases that cause
+  combinatorial explosion if tested solely through the outer API, do not bypass
+  encapsulation by testing private functions. Extract that logic into a focused
+  child package under `internal/` (e.g., `internal/parser`), give it a clean
+  exported interface, and unit-test that sub-package's public API directly.
 
 ## Unit Tests
 
@@ -134,6 +145,38 @@ func TestFunctionName(t *testing.T) {
     }
 }
 ```
+
+### Repeated behavior with different operations
+
+When several tests prove the same behavior and differ only by the operation or
+its inputs, consolidate them into one table-driven test with named subtests.
+Normalize different method signatures with a function-valued case field, usually
+an operation closure:
+
+```go
+testCases := []struct {
+    name   string
+    invoke func(*Repository) error
+}{
+    {
+        name: "published outbox row",
+        invoke: func(repository *Repository) error {
+            return repository.MarkPublished(ctx, eventID, token, now)
+        },
+    },
+    {
+        name: "delivered notification",
+        invoke: func(repository *Repository) error {
+            return repository.MarkNotificationDelivered(ctx, notificationID, token, now)
+        },
+    },
+}
+```
+
+Prefer closures over generics when the variation is which method is called or
+which arguments it receives; generics add value when type parameters remove
+real type-specific duplication. Keep separate tests when the cases have
+meaningfully different setup, assertions, or behaviors.
 
 ### F-Tests (Alternative Style)
 

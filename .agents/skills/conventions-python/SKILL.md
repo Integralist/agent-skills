@@ -182,6 +182,9 @@ class UserProfile:
 
 ## Code Conventions & Idioms
 
+- **Package exports (`__all__`):** In multi-module packages or `__init__.py`,
+  define `__all__` to make the public API surface explicit. Keep internal
+  helpers unexported so callers and agents encounter a small, clear interface.
 - **Imports:** Group in order: standard library, third-party, local modules. Let
   `ruff check --fix` sort and format them. Never use star imports (`from x
   import *`).
@@ -281,6 +284,15 @@ async def fetch_all(item_ids: list[str]) -> list[str]:
 - Mock external systems using `unittest.mock` or `pytest-mock` (`mocker`
   fixture).
 - **Integration testing:** Place integration / boundary tests in `tests/integration/` or `tests/e2e/`. Use `httpx.AsyncClient` (with `ASGITransport`) or framework test clients against real application instances with dependencies overridden only at the wire/storage boundaries.
+- **Test public interfaces, not private (`_`) functions:** Exercise module and
+  class behavior through public methods. Do not import `_`-prefixed functions or
+  assert on private attributes in tests. If an internal branch cannot be reached
+  through public entry points, delete it as dead code.
+- **Extract submodules for complex internals:** If an internal algorithm,
+  parser, or transformation has complex edge cases that cause combinatorial
+  explosion when tested through the outer API, do not reach into private
+  functions. Extract the logic into a focused internal submodule with a clean
+  public function, and unit-test that sub-interface directly.
 
 ```python
 import pytest
