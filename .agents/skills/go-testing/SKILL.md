@@ -56,6 +56,9 @@ integration):
 - **Context cancellation.** Long-running, I/O-bound, or goroutine-spawning
   functions must have a test proving they terminate promptly when `ctx` is
   canceled.
+- **Use `t.Context()`.** Pass `t.Context()` (Go 1.24+) rather than
+  `context.Background()` to operations under test to guarantee automatic
+  cleanup, cancellation on failure, and subtest scoping.
 - **No unused fields or setup.** Deleting any field or setup step
   must break the test. Beyond the expected-value and
   expected-error pair, fields used by only a subset of cases
@@ -264,6 +267,49 @@ func newTestLogger(t *testing.T) *slog.Logger {
     t.Helper()
     var buf bytes.Buffer
     return slog.New(slog.NewJSONHandler(&buf, nil))
+}
+```
+
+### Test Context (`t.Context()`)
+
+Prefer `t.Context()` (Go 1.24+) over `context.Background()` in unit tests:
+
+- **Automatic lifecycle management:** Context cancels automatically when the
+  test or subtest finishes, preventing goroutine leaks without manual
+  `defer cancel()`.
+- **Immediate cancellation on failure:** Context cancels the instant a test
+  fails (e.g. `t.Fatal()`, `t.FailNow()`), aborting in-flight network requests,
+  database queries, or blocking channels immediately.
+- **Clean subtest scoping:** Subtests in `t.Run()` receive a context bounded
+  strictly to their lifetime; cancellation does not affect parent or sibling
+  subtests.
+
+```go
+func TestService(t *testing.T) {
+    t.Run("child task", func(t *testing.T) {
+        ctx := t.Context()
+        res, err := worker.Do(ctx)
+        // ...
+    })
+}
+```
+
+#### Bounded Async Channel Waits
+
+Do not replace assertion timeouts with bare `<-t.Context().Done()`. Because
+`t.Context()` cancels only when the test finishes, fails, or cleans up, a
+blocked channel wait will hang until the test runner's global timeout.
+
+Derive a bounded timeout from `t.Context()` instead:
+
+```go
+ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+defer cancel()
+
+select {
+case <-renewed:
+case <-ctx.Done():
+    t.Fatalf("claim was not renewed: %v", ctx.Err())
 }
 ```
 
