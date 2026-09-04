@@ -728,6 +728,11 @@ id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
 > you write; `go-testing` is the structure.
 
 - **Dual-layer coverage:** Write unit tests (`*_test.go`) for logic, branches, and error cases; write integration tests (`//go:build e2e` in `e2e/` or godog `.feature` files) for cross-package and handler/database boundaries.
+- **Test public interfaces, not unexported internals:** Exercise package
+  behavior through its exported API (`package foo_test` preferred). If an
+  internal component has complex branching that is awkward to exercise
+  through the top-level API, extract it to a child package under `internal/`
+  with its own clean public interface rather than testing private functions.
 
 Table-driven tests with `testCases` slice and `t.Run`:
 

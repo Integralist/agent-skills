@@ -221,6 +221,20 @@ A slice handed to a subagent sees only its own section, so this block is the
 only way its implementer learns the names and types its neighbours use.
 **Delivers** describes behaviour; it does not carry types.
 
+### Module seams and encapsulation
+
+A vertical slice cuts across layers, but it must respect **deep module
+boundaries** along that path:
+
+- **Treat adjacent modules as grey boxes.** Interact strictly through their
+  public interfaces (`Consumes`). An executor must not alter private internals
+  or unexported helpers of existing modules unless the slice explicitly plans a
+  refactor of that module.
+- **Avoid shotgun surgery.** If implementing a slice forces edits across many
+  scattered helper files, the underlying modules are shallow and leaking
+  concerns. Stop and consolidate the abstraction into a deep module behind a
+  narrow public interface before proceeding.
+
 Not everything slices vertically:
 
 - **Single-layer or non-code work** (one package, a doc set, config) has no
@@ -283,6 +297,10 @@ dispatch. Fix what you find inline and move on; there is no second pass.
    `clearFullLayers()` in Slice 4 is a bug shipped into the plan. Diff the
    Consumes and Produces blocks against each other first; mismatches surface
    there.
+1. **Encapsulation boundaries** — verify each slice only consumes public module
+   APIs. If a slice lists edits to internal files of established modules it
+   only needs to consume, push those changes back behind that module's public
+   interface.
 
 ## Extract decisions
 

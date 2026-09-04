@@ -86,6 +86,17 @@ Include this verbatim in the subagent prompt:
 > - Leaky abstractions where internals bleed across boundaries
 > - Orphaned helpers or utilities that belong closer to their callers
 >
+> **Identify shallow module sprawl:**
+>
+> - Shallow modules: packages or files with large interface surfaces relative to
+>   thin internal logic (e.g. pass-through wrappers, 1:1 forwarders)
+> - Inverted seams: callers coordinating multiple low-level helpers instead of
+>   calling one deep entry point that encapsulates the workflow
+> - Leaked internals: callers importing intermediate types or state that the
+>   module should manage privately
+> - Consolidation targets: webs of thin, interdependent files that can collapse
+>   into a single deep module behind a minimal public API
+>
 > **Identify coupling issues:**
 >
 > - Circular or upward dependencies between packages
@@ -106,6 +117,7 @@ Include this verbatim in the subagent prompt:
 > 1. **Implementation map** — files, types, and data flow
 > 1. **Complexity hotspots** — ranked by severity
 > 1. **Fragmentation issues** — ranked by impact
+> 1. **Shallow module sprawl** — opportunities for deep module consolidation
 > 1. **Coupling issues** — ranked by risk
 > 1. **Missing prerequisites** — what should have existed first
 > 1. **Key insight** — the single biggest deletion opportunity: the one
