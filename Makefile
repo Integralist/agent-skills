@@ -5,6 +5,11 @@
 # Recipe lines are silenced with @ so the status lines are the only output.
 STEP := bash scripts/step.sh
 OPINJECT := bash scripts/op-inject.sh
+PKG_TIMEOUT ?= 30
+
+ifeq ($(SKIP_AUDIT),1)
+export npm_config_audit := false
+endif
 
 install-agents:
 	@$(STEP) --section "Agents"
@@ -35,7 +40,7 @@ install-pi: install-tools
 	@$(STEP) --section "Pi"
 	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 	@for package in git:github.com/Integralist/pi-statusbar npm:@shuv1337/pi-mcp-adapter npm:pi-intercom git:github.com/Integralist/pi-subagents git:github.com/Integralist/pi-btw; do \
-		$(STEP) "$$package" pi install "$$package" --no-approve || exit 1; \
+		$(STEP) --timeout $(PKG_TIMEOUT) --optional "$$package" pi install "$$package" --no-approve; \
 	done
 	@mkdir -p ~/.pi/agent/themes
 	@$(STEP) "AGENTS.md → ~/.pi/agent/AGENTS.md" cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md
