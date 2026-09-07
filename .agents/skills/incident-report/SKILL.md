@@ -122,4 +122,4 @@ missing alert, absent integration test, no canary. What closes them.}
 ## Finish
 
 Report the written path. If a long-term fix warrants a plan, offer to
-invoke [`project-plan`](../project-plan/SKILL.md).
+invoke [`to-plan`](../to-plan/SKILL.md).

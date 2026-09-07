@@ -53,7 +53,7 @@ user stories, acceptance criteria (via
 
 ## Phase 3: Plan
 
-Delegate to [`project-plan`](../project-plan/SKILL.md), passing the build goal,
+Delegate to [`to-plan`](../to-plan/SKILL.md), passing the build goal,
 the project directory, the spec, and the research context. It writes the plan to
 `projects/<yyyy-mm-dd>-<slug>/plan.md`, decomposes the work into vertical slices
 with interface contracts (`Consumes` / `Produces`) and Blocked-by edges, points
@@ -71,15 +71,15 @@ user wants stakeholder-facing framing; otherwise skip it.
 Then present:
 
 1. **Compile first slice into tasks** — delegate to
-   [`tasks`](../tasks/SKILL.md) for Slice 1 (`projects/<yyyy-mm-dd>-<slug>/tasks-slice-1.md`)
+   [`to-tasks`](../to-tasks/SKILL.md) for Slice 1 (`projects/<yyyy-mm-dd>-<slug>/tasks-slice-1.md`)
    to begin execution.
 1. **Research another topic** — loop back to Phase 1.
-1. **Create another plan** — delegate to `project-plan` again.
+1. **Create another plan** — delegate to `to-plan` again.
 
 ## Guidelines
 
 - This skill is a thin coordinator. Research depth lives in
   [`research`](../research/SKILL.md); the spec's structure and acceptance
   criteria in [`to-spec`](../to-spec/SKILL.md); slice, Blocked-by, and
-  parallel-execution guidance in [`project-plan`](../project-plan/SKILL.md).
+  parallel-execution guidance in [`to-plan`](../to-plan/SKILL.md).
 - Wrap all Markdown output at 80 columns.

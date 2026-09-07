@@ -129,7 +129,7 @@ get approval, then write.
   dropping it.
 - If the source is a project plan document (e.g.
   `projects/<slug>/plan.md`), keep its required structure intact — see
-  [`project-plan`](../project-plan/SKILL.md). Condense within the
+  [`to-plan`](../to-plan/SKILL.md). Condense within the
   structure rather than collapsing it.
 
 ## Optional rigor: independent audit

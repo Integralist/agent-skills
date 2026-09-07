@@ -13,7 +13,7 @@ Turn a feature description into behavioural specifications in Gherkin
 ubiquitous language shared by humans and AI.
 
 Invoked by [`to-spec`](../to-spec/SKILL.md) for its acceptance-criteria block,
-and by [`project-plan`](../project-plan/SKILL.md) for its scaffold tasks. Can
+and by [`to-plan`](../to-plan/SKILL.md) for its scaffold tasks. Can
 also run standalone.
 
 ## Two altitudes

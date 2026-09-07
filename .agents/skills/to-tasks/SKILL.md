@@ -1,5 +1,5 @@
 ---
-name: tasks
+name: to-tasks
 description: >-
   Turn the plan already worked out this session into a mechanical,
   TDD-shaped task list a cheaper agent can execute without exploring —
@@ -9,15 +9,15 @@ disable-model-invocation: true
 argument-hint: "[slice scope or plan path]"
 ---
 
-# Tasks
+# To Tasks
 
-You already walked the code path while planning this session. `/tasks` writes
+You already walked the code path while planning this session. `/to-tasks` writes
 that walk down as a task list a cheaper model can *retrace* mechanically —
 without re-reading the codebase, exploring, or making a design decision. This is
 the prewalk trade: pay for exploration once, hand the executor the result.
 
 The primary pattern is **Just-in-Time (JIT) per-slice compilation**: compiling
-one vertical slice at a time from a `project-plan` against the live codebase,
+one vertical slice at a time from a `to-plan` against the live codebase,
 producing a self-executing document under `projects/<slug>/`. Producing it and
 running it are separate steps — see [Hand-off](#hand-off).
 
@@ -25,15 +25,15 @@ running it are separate steps — see [Hand-off](#hand-off).
 
 This is not a planning skill; it crystallizes a plan that already exists and
 never invents one. If no plan is in context and none is on disk, stop and point
-the user at [`project-plan`](../project-plan/SKILL.md) or
+the user at [`to-plan`](../to-plan/SKILL.md) or
 [`architect`](../architect/SKILL.md).
 
 ## Input
 
 Take the plan from the first source that exists, in order:
 
-1. **A specific vertical slice from a `project-plan`** (recommended) — pass
-   the slice name/number (e.g., `/tasks slice-1` or `/tasks
+1. **A specific vertical slice from a `to-plan`** (recommended) — pass
+   the slice name/number (e.g., `/to-tasks slice-1` or `/to-tasks
    projects/2026-08-28-redis-rate-limiter/plan.md slice-1`). Read the slice's
    `Delivers`, `Consumes`, and `Produces`, then inspect the live repo state to
    ground all references in actual code.
@@ -133,7 +133,7 @@ the ordered tasks.
 
 ## Hand-off
 
-`/tasks` stops at the document. To run it, point a fresh agent at the path —
+`/to-tasks` stops at the document. To run it, point a fresh agent at the path —
 [`delegate`](../delegate/SKILL.md), [`next-task`](../next-task/SKILL.md), or a
 subagent on a cheap model. The document is self-contained; the executor needs
 nothing but the file.
