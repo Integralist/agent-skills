@@ -78,7 +78,7 @@ before finishing:
 1. Ask whether to commit. If yes, invoke `/commit`.
 1. Advise on next steps:
    - If more slices remain in the parent plan, prompt to run
-     `/tasks <plan-path> slice-<n+1>` to compile the next slice against the
+     `/to-tasks <plan-path> slice-<n+1>` to compile the next slice against the
      freshly updated code.
    - If every slice in the current PR layer is complete, ask whether to invoke
      `stacked-prs` to submit or update the stack.

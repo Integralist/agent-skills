@@ -73,7 +73,7 @@ Once verified (tests pass, work done), mark it complete before finishing:
 1. Ask whether to commit. If yes, invoke `/commit`.
 1. Advise on next steps:
    - If a per-slice task list finished and more slices remain in the parent
-     plan, suggest running `/tasks <plan-path> slice-<n+1>`.
+     plan, suggest running `/to-tasks <plan-path> slice-<n+1>`.
    - If every task in the current PR layer is complete, ask whether to invoke
      `stacked-prs` to submit or update the stack.
 

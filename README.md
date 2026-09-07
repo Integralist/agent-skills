@@ -278,7 +278,6 @@ authenticate via SSO on first use.
 | **perspectives**             | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.  |
 | **polish**                   | Improve a short passage's clarity and concision.                                       |
 | **precedent**                | Align work with patterns established by peer files.                                    |
-| **project-plan**             | Write a specification-backed plan with vertical slices, dependencies, and PR grouping. |
 | **recap**                    | Summarize what is done, in progress, and next.                                         |
 | **redesign**                 | Audit a codebase for redesigns that remove structural complexity.                      |
 | **refactor**                 | Plan a simpler reimplementation of an existing feature.                                |
@@ -287,13 +286,14 @@ authenticate via SSO on first use.
 | **stacked-prs**              | Create and manage dependent PRs with the official `gh stack` extension.                |
 | **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
 | **systematic-debugging**     | Find root causes through a four-phase debugging workflow.                              |
-| **tasks**                    | Compile a plan slice into a mechanical TDD runbook with verbatim code.                 |
 | **teach**                    | Teach a concept using persistent lessons, missions, and progress records.              |
 | **tech-docs**                | Write or improve concise, maintainable technical documentation.                        |
 | **test-feedback**            | Diagnose supplied test failures, then fix them interactively.                          |
 | **to-adr**                   | Extract genuine architecture decisions into standalone ADRs.                           |
+| **to-plan**                  | Write a specification-backed plan with vertical slices, dependencies, and PR grouping. |
 | **to-prd**                   | Extract product goals, scope, and success measures into a PRD.                         |
 | **to-spec**                  | Write an implementation-ready feature spec with scope and acceptance criteria.         |
+| **to-tasks**                 | Compile a plan slice into a mechanical TDD runbook with verbatim code.                 |
 | **unslop**                   | Cut AI tells and machine cadence from prose to restore human voice.                    |
 | **wait-what**                | Re-pitch a message that did not land.                                                  |
 | **writing-for-agents**       | Apply conventions that make skills and instruction files predictable.                  |
@@ -351,12 +351,12 @@ Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make instal
 Core implementation flow:
 
 ```txt
-architect (spec → plan) → tasks (per slice) → next-task / next-slice → commit → code-review
+architect (spec → plan) → to-tasks (per slice) → next-task / next-slice → commit → code-review
 ```
 
 `architect` creates the specification (`to-spec`) and vertical slice blueprint
-(`project-plan`). Slices are compiled just-in-time into mechanical TDD task
-lists (`tasks`), which `next-task` or `next-slice` execute in the main thread.
+(`to-plan`). Slices are compiled just-in-time into mechanical TDD task
+lists (`to-tasks`), which `next-task` or `next-slice` execute in the main thread.
 
 Plans and task lists can group several tasks into each review unit. When those
 units depend on each other, **stacked-prs** creates and manages the branches and

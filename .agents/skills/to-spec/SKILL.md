@@ -12,7 +12,7 @@ allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
 A **spec** is the engineering source-of-truth: *what* to build and the
 definition of done. It is stable — it outlives plan revisions — because it
 carries **no file paths and no code snippets**. Those go stale, so they belong
-to the [`plan`](../project-plan/SKILL.md), where they can be kept current. Spec
+to the [`plan`](../to-plan/SKILL.md), where they can be kept current. Spec
 is the stable *what*; the plan is the volatile *how*.
 
 Normally invoked by [`architect`](../architect/SKILL.md) after research; also

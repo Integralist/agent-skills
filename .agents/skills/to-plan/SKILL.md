@@ -1,19 +1,19 @@
 ---
-name: project-plan
+name: to-plan
 description: >-
   Write an implementation plan. Use when creating a feature implementation
   plan, persisting a plan discussed in chat, or when another skill needs to plan
   a change.
 ---
 
-# Project Plan
+# To Plan
 
 Produce a precise, actionable implementation guide: the volatile *how*. The
 stable *what* and the definition of done live in the
 [`spec`](../to-spec/SKILL.md); this plan links them and turns them into ordered,
 demoable vertical slices carrying interface contracts — actual signatures,
 types, and import paths. Detailed TDD execution steps (verbatim tests and code)
-are compiled just-in-time per slice via [`tasks`](../tasks/SKILL.md).
+are compiled just-in-time per slice via [`to-tasks`](../to-tasks/SKILL.md).
 
 Normally invoked by [`architect`](../architect/SKILL.md) after the spec, but it
 is the single way to produce a plan document and is often run standalone.
@@ -322,7 +322,7 @@ After extracting decisions, delegate to
 [`durable-rules`](../durable-rules/SKILL.md). It codifies systemic patterns from
 the investigation as conventions or anti-patterns and skips entirely when
 nothing durable surfaced. Delegating here reaches both the `architect` flow and
-standalone `/project-plan` runs.
+standalone `/to-plan` runs.
 
 ## Guidelines
 
@@ -333,7 +333,7 @@ standalone `/project-plan` runs.
 - Keep slice definitions focused on interface contracts (`Consumes` /
   `Produces`) and behavioral deliverables. Avoid embedding verbatim test code
   or full function bodies — detailed TDD steps are compiled just-in-time per
-  slice via [`tasks`](../tasks/SKILL.md).
+  slice via [`to-tasks`](../to-tasks/SKILL.md).
 - Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
@@ -347,10 +347,10 @@ Do not generate verbatim TDD code for all slices upfront, as early slices may
 alter implementation details for later ones. Instead, compile each slice into
 tasks just-in-time:
 
-1. Run `/tasks <plan-path> slice-1` to generate
+1. Run `/to-tasks <plan-path> slice-1` to generate
    `projects/<yyyy-mm-dd>-<slug>/tasks-slice-1.md`.
 1. Execute Slice 1 via `/next-task`, `/next-slice`, or a delegated subagent.
-1. Once Slice 1 is verified and merged, run `/tasks <plan-path> slice-2` to
+1. Once Slice 1 is verified and merged, run `/to-tasks <plan-path> slice-2` to
    compile Slice 2 against the updated codebase.
 
 ## Agent teams (if your harness supports it)
