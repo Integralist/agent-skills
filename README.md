@@ -172,7 +172,7 @@ suggestions.
 scoped to file patterns via a YAML `paths` glob. Unlike skills, they apply
 passively. Generic agents don't support path-scoped auto-loading, so these are
 mirrored as skills (`conventions-go`, `conventions-markdown`,
-`conventions-python`, `conventions-sql`).
+`conventions-mermaid`, `conventions-python`, `conventions-sql`).
 
 **Project instructions** — `.agents/AGENTS.md` holds the canonical conventions;
 `.claude/CLAUDE.md` is a one-line `@~/.agents/AGENTS.md` pointer so Claude Code
@@ -251,6 +251,7 @@ authenticate via SSO on first use.
 | **consensus**                | Reach cross-model consensus through gated discussion rounds.                           |
 | **conventions-go**           | Apply Go conventions when editing or reviewing `.go` files.                            |
 | **conventions-markdown**     | Apply Markdown conventions when editing or reviewing `.md` files.                      |
+| **conventions-mermaid**      | Apply Mermaid conventions when creating or editing diagram files or blocks.           |
 | **conventions-python**       | Apply Python conventions when editing or reviewing `.py` files.                        |
 | **conventions-sql**          | Apply SQL conventions when editing or creating migration files.                        |
 | **critique**                 | Find logical weaknesses in a document and suggest fixes.                               |
@@ -337,10 +338,11 @@ keys.
 
 ## Generating rules from skills
 
-`.claude/rules/go.md`, `.claude/rules/markdown.md`, `.claude/rules/python.md`,
-and `.claude/rules/sql.md` are **generated** from the `conventions-go`,
-`conventions-markdown`, `conventions-python`, and `conventions-sql` skills. The
-`SKILL.md` is the single source of truth; the rule
+`.claude/rules/go.md`, `.claude/rules/markdown.md`,
+`.claude/rules/mermaid.md`, `.claude/rules/python.md`, and
+`.claude/rules/sql.md` are **generated** from the `conventions-go`,
+`conventions-markdown`, `conventions-mermaid`, `conventions-python`, and
+`conventions-sql` skills. The `SKILL.md` is the single source of truth; the rule
 differs only by frontmatter (`paths:` globs in place of `name:`/`description:`),
 and the bodies stay byte-identical.
 

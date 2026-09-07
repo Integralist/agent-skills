@@ -81,6 +81,8 @@ improvement stays inline.
 - Where architecture, workflows, or lifecycles are described, use simple
   Mermaid diagrams (ideally <= 15 nodes). Diagrams replace prose — delete
   paragraphs a visual already communicates.
+- Follow [`conventions-mermaid`](../conventions-mermaid/SKILL.md) for layout
+  structure and `mmdc` validation.
 - Use tables for "multiple dimensions × multiple cases" information (e.g.
   environment matrices, permission grids). A table replacing four paragraphs is
   a net win.

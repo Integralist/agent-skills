@@ -230,7 +230,7 @@ func createMetricStore(m *metrics.Metrics, component string) {
 
 ## README.md
 
-```markdown
+````markdown
 # internal/api
 
 This package contains the main API server setup including:
@@ -268,4 +268,4 @@ The middleware executes in order:
 ## Adding New Routes
 
 Register handlers in the `Run` function after creating the middleware pipeline.
-```
+````

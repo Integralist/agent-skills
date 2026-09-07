@@ -243,14 +243,14 @@ insertion-point anchors and overrides one phase:
 
 **`extra metadata bullets`** — add:
 
-```markdown
+````markdown
 - **Scope**: codebase | <subsystem path>
-```
+````
 
 **`findings / analysis sections`** (between Current State and What We Should
 Have Done First) — add:
 
-```markdown
+````markdown
 ## Findings
 
 ### Aspirational Structure
@@ -279,7 +279,7 @@ trigger that fired, impact, concrete remedy.}
 {Explicit list of behaviors the redesign must preserve, derived from
 purpose docs and existing tests. This is the post-redesign verification
 target.}
-```
+````
 
 **`pre-prerequisite phases`** (before Phase 1, inside Reimplementation Tasks) —
 add the Phase 0 callout and phase:
@@ -309,7 +309,7 @@ Phase 2 tasks should cite their pinning: `Pinned by: Phase 0 tasks {0.x, 0.y}.`
 **Phase N: Verification** — override the template's generic verification tasks
 with:
 
-```markdown
+````markdown
 ### Phase N: Verification
 
 - [ ] **Task N.1**: Run all Phase 0 pinning tests — must still pass.
@@ -317,11 +317,11 @@ with:
   above still holds.
 - [ ] **Task N.3**: Verify complexity reduction — file/function size
   metrics, layer-leak count, branching count.
-```
+````
 
 **`trailing sections`** (after File Changes) — add:
 
-```markdown
+````markdown
 ## Approval Bar
 
 This plan treats the following as presumptive blockers — if any survive
@@ -334,7 +334,7 @@ into the implementation, justify them explicitly:
 - Unnecessary abstractions, wrappers, or escape-hatch-typed contracts
   remain.
 - A near-duplicate of an existing canonical helper is kept.
-```
+````
 
 In `Notes & Caveats`, also list any tasks tagged `BLOCKED-ON-TESTS`.
 

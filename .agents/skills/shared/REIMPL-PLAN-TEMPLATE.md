@@ -37,7 +37,8 @@ high-level reimplementation strategy.}
 ## Current State
 
 {Brief description of the current implementation — key files, data flow, and
-where the problems are. Include a Mermaid diagram if the system is complex.}
+where the problems are. Include a Mermaid diagram if the system is complex (see
+[`conventions-mermaid`](../conventions-mermaid/SKILL.md)).}
 
 <!-- insertion point: findings / analysis sections -->
 

@@ -44,7 +44,7 @@ Each layer remains testable and reviewable on its own.
 
 Record the confirmed shape in a `Pull Request Delivery` section:
 
-```md
+````md
 ## Pull Request Delivery
 
 - **Mode:** Stack
@@ -53,7 +53,7 @@ Record the confirmed shape in a `Pull Request Delivery` section:
 | ----- | ------------------- | --------- | ------------------- |
 | 1     | `{trunk}`           | Tasks 1–3 | `{foundation}`      |
 | 2     | `{foundation}`      | Tasks 4–6 | `{api-integration}` |
-```
+````
 
 For a stack, list layers bottom to top. For one PR, use one row. For independent
 PRs, give each row the trunk as its base.

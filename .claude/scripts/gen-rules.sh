@@ -37,6 +37,7 @@ gen() {
 
 gen .agents/skills/conventions-go/SKILL.md       .claude/rules/go.md       '**/*.go'
 gen .agents/skills/conventions-markdown/SKILL.md .claude/rules/markdown.md '**/*.md'
+gen .agents/skills/conventions-mermaid/SKILL.md  .claude/rules/mermaid.md  '**/*.{mmd,mermaid}'
 gen .agents/skills/conventions-python/SKILL.md   .claude/rules/python.md   '**/*.py'
 gen .agents/skills/conventions-sql/SKILL.md      .claude/rules/sql.md      '**/*.sql'
 
@@ -58,5 +59,6 @@ copy_siblings() {
 
 copy_siblings .agents/skills/conventions-go       .claude/rules
 copy_siblings .agents/skills/conventions-markdown  .claude/rules
+copy_siblings .agents/skills/conventions-mermaid   .claude/rules
 copy_siblings .agents/skills/conventions-python    .claude/rules
 copy_siblings .agents/skills/conventions-sql       .claude/rules

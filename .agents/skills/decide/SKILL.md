@@ -187,7 +187,7 @@ Apply the selected mutation:
 The final memo (produced by the Synthesizer) must follow this
 structure:
 
-```markdown
+````markdown
 # Decision: {one-line decision}
 
 - **Date:** YYYY-MM-DD
@@ -262,4 +262,4 @@ If any of these become true, abandon or revisit:
 ## Open questions
 
 {Anything still unanswered. Use `_(unanswered)_` markers from the draft.}
-```
+````

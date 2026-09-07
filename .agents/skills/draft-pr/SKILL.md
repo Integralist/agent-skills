@@ -112,7 +112,7 @@ If the fields below show commands rather than output, run each one first.
 
 ## Template
 
-```md
+````md
 ## Problem
 
 <What's wrong or missing, and why it matters. Reference the issue/ticket
@@ -126,13 +126,15 @@ the key change; note trade-offs.>
 ## Notes
 
 <Optional: testing, migration steps, risks, follow-ups. Omit if empty.>
-```
+````
 
 ## Style
 
 - Omit needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). No marketing tone,
   no restating the diff line by line, no boilerplate checklists.
+- When producing a code block for markdown, use 4 backticks instead of 3 —
+  see [`../shared/MARKDOWN-CODE-BLOCKS.md`](../shared/MARKDOWN-CODE-BLOCKS.md).
 - **Don't hard-wrap the PR body.** GitHub soft-wraps prose, so manual breaks at
   80 columns render as ragged text. Write each paragraph as one continuous line.
   (The 80-column markdown convention applies to source files, not text submitted

@@ -80,13 +80,13 @@ Template below — the overloaded words are a placeholder. Replace them
 with the terms this project's `CONTEXT.md` actually flags as overloaded;
 if the glossary names none, drop the "such as …" clause.
 
-```markdown
+````markdown
 ## Domain Language
 
 Canonical domain terms and their relationships live in `CONTEXT.md`.
 Consult it before introducing new terminology or reusing overloaded
 words such as "active", "domain", or "activation".
-```
+````
 
 ## Inputs
 
@@ -152,38 +152,38 @@ diff summary and ask which should be canonical before writing.
 The import line is the only required content. Append any Claude-specific
 guidance **after** the import under a dedicated heading.
 
-```markdown
+````markdown
 @AGENTS.md
-```
+````
 
 With Claude-specific additions:
 
-```markdown
+````markdown
 @AGENTS.md
 
 ## Claude Code
 
 <Claude-specific notes here>
-```
+````
 
 ### GEMINI.md
 
 Gemini's import example uses the `@path` form; use `@AGENTS.md` for
 parity with CLAUDE.md.
 
-```markdown
+````markdown
 @AGENTS.md
-```
+````
 
 With Gemini-specific additions:
 
-```markdown
+````markdown
 @AGENTS.md
 
 ## Gemini CLI
 
 <Gemini-specific notes here>
-```
+````
 
 ## GitHub Copilot
 
@@ -201,11 +201,11 @@ canonical Copilot picks it up with no extra file. Handle
 If an org mandates the file exist, make it a short prose pointer plus
 any Copilot-specific notes — a pointer in prose, not an import:
 
-```markdown
+````markdown
 The canonical project instructions live in `AGENTS.md`; read that file.
 
 <Copilot-specific notes here>
-```
+````
 
 ## Update mode
 

@@ -52,7 +52,7 @@ standards, write to `docs/adr/<yyyy-mm-dd>-<short-title>.md`. Date from
 
 Template — Nygard skeleton with mandatory **Options Considered**:
 
-```markdown
+````markdown
 # {Short decision title}
 
 - **Status**: Accepted
@@ -80,7 +80,7 @@ one-line summary, then why it won or was rejected.}
 
 {What becomes easier and what becomes harder. Follow-on work, new
 constraints, risks.}
-```
+````
 
 Use `Accepted` for a committed decision, `Proposed` while the plan is still
 tentative.

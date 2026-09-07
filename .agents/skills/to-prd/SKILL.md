@@ -49,7 +49,7 @@ Write to `projects/<project-slug>/prd.md` (or `docs/prd/<yyyy-mm-dd>-<slug>.md`
 if standalone without a project directory). Date from `date +%F`, author from
 `git config user.name`.
 
-```markdown
+````markdown
 # {Product / Feature Name} — PRD
 
 - **Status**: Draft
@@ -98,7 +98,7 @@ implementation-agnostic.}
 ## References
 
 - Source: [{spec or plan name}](./spec.md)
-```
+````
 
 ## Report
 

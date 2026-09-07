@@ -199,7 +199,7 @@ Write to `docs/research/<yyyy-mm-dd>-<topic-slug>.md` (date prefix
 from today), or extend the existing document found earlier. Use
 this template:
 
-```markdown
+````markdown
 # {Topic}
 
 ## Overview
@@ -213,7 +213,8 @@ this template:
 ## Architecture / How It Works
 
 {Internal structure, data flow, component relationships.
-Use Mermaid diagrams for complex systems.}
+Use Mermaid diagrams for complex systems — validate with mmdc
+(see [`../conventions-mermaid`](../conventions-mermaid/SKILL.md)).}
 
 ## API Surface / Interface
 
@@ -233,7 +234,7 @@ and what was given up.}
 ## References
 
 {Links to source files, external docs, RFCs, issues.}
-```
+````
 
 ## Guidelines
 

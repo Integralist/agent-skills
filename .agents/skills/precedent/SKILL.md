@@ -21,6 +21,7 @@ the question, it is authoritative and this skill defers to it:
 
 - Go — [`conventions-go`](../conventions-go/SKILL.md)
 - Markdown — [`conventions-markdown`](../conventions-markdown/SKILL.md)
+- Mermaid — [`conventions-mermaid`](../conventions-mermaid/SKILL.md)
 - Python — [`conventions-python`](../conventions-python/SKILL.md)
 - SQL — [`conventions-sql`](../conventions-sql/SKILL.md)
 - Domain terms — the nearest `CONTEXT.md` glossary
