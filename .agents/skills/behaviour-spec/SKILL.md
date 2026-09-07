@@ -51,6 +51,10 @@ implement it as an ordinary table-driven Go test. Do **not** generate
 
 ## Writing feature-level scenarios
 
+Always wrap feature-level scenarios in a GitHub Flavoured Markdown fenced code
+block using the `gherkin` language identifier (` ```gherkin `). Never format
+scenarios as loose Markdown prose, lists, or headings (e.g. `### Scenario 1`).
+
 ```gherkin
 Feature: Short capability name
   As a {role}
@@ -169,12 +173,16 @@ Same Gherkin, different runner:
 For a non-Go language, write the scenarios and describe the runner wiring at the
 same altitude; the executable-vs-prose split is unchanged.
 
+For non-code or operational work (CI/CD, config, docs), language is `N/A`. Emit
+the acceptance criteria block; omit test runner scaffolding.
+
 ## Output
 
 Return two things to the caller:
 
 1. **Acceptance criteria block** — the feature-level `Feature`/`Scenario`
-   Gherkin, ready to drop into the plan's `## Acceptance Criteria (BDD)`
+   Gherkin enclosed in a GitHub Flavoured Markdown fenced code block
+   (` ```gherkin `), ready to drop into the spec's `## Acceptance Criteria`
    section.
 
 1. **Scaffold tasks** — plan tasks a later implementer (e.g.
@@ -193,6 +201,9 @@ tasks so file creation stays with implementation.
 
 ## Guidelines
 
+- Always render Given/When/Then scenarios inside a GitHub Flavoured Markdown
+  fenced code block (` ```gherkin `). Never emit them as raw Markdown prose or
+  headings.
 - Only feature/boundary behaviour becomes `.feature` files; units stay as
   Given/When/Then prose in task descriptions.
 - Scenarios must be concrete and observable — no "works correctly".

@@ -56,15 +56,11 @@ Confirm the seams with the user before writing them into the spec.
 
 ## Write the acceptance criteria
 
-Feature/boundary behaviour → delegate to
-[`behaviour-spec`](../behaviour-spec/SKILL.md), passing the feature description
-and language. Take its **acceptance-criteria block** (Gherkin) for the spec's
-`## Acceptance Criteria` section. Leave its **scaffold tasks** for the plan —
-they are implementation, not spec.
-
-Non-code work (docs, config, operational) → author Given/When/Then prose
-directly, verified by checkable assertions (grep, command output, file state);
-skip `behaviour-spec`.
+Delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md), passing the feature
+description and language (`N/A` for non-code or operational work). Take its
+**acceptance-criteria block** (rendered in a fenced ` ```gherkin ` code block)
+for the spec's `## Acceptance Criteria` section. Leave its **scaffold tasks**
+for the plan — they are implementation, not spec.
 
 ## Write the spec
 
@@ -93,17 +89,23 @@ author from `git config user.name`. A new spec's `Status` is `Draft`.
 
 ## Acceptance Criteria
 
-The definition of done — feature-level Given/When/Then. From
-`behaviour-spec` for code; prose scenarios verified by
-grep/command/file-state for non-code.
+The definition of done — feature-level Given/When/Then from
+`behaviour-spec`, rendered in a fenced `gherkin` code block. Verification
+is by test runner for code, or checkable assertions (grep, command output,
+file state) for non-code and operational work.
 
 ```gherkin
 Feature: {capability}
+
+  As a {actor}
+  I want {capability}
+  So that {benefit}
 
   Scenario: {one concrete behaviour}
     Given {a starting state}
     When {an action occurs}
     Then {an observable outcome holds}
+    And {another observable outcome}
 ```
 
 ## Testing Seams
@@ -143,3 +145,6 @@ paths, no code snippets** (those live in the plan).
 - Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
+- Render all Given/When/Then acceptance criteria in GitHub Flavoured Markdown
+  fenced `gherkin` code blocks. Never render scenarios as plain prose or
+  Markdown headings.
