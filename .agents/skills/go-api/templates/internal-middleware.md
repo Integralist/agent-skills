@@ -340,7 +340,7 @@ func (ww *wrappedWriter) Write(data []byte) (int, error) {
 
 ## README.md
 
-```markdown
+````markdown
 # internal/middleware
 
 HTTP middleware pipeline for cross-cutting concerns.
@@ -390,4 +390,4 @@ Recommended order:
 6. WithDependencies (fail fast if deps unavailable)
 7. LogRouteAndTraceID (log with full context)
 8. InFlight (track active requests)
-```
+````

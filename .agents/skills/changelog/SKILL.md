@@ -79,7 +79,7 @@ in the project's `CHANGELOG.md`.
 
 When creating a new `CHANGELOG.md`:
 
-```markdown
+````markdown
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -91,7 +91,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - ...
-```
+````
 
 ## Style notes
 

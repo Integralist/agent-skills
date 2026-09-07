@@ -32,19 +32,19 @@ line when rendered (GitHub treats them as one paragraph). So a block of
 
 Use a bullet list instead:
 
-```md
+````md
 - **Date:** 2026-06-16
 - **Reporter:** Jane Doe
 - **Config under test:** `foo`
-```
+````
 
 Not this (renders on one line):
 
-```md
+````md
 **Date:** 2026-06-16
 **Reporter:** Jane Doe
 **Config under test:** `foo`
-```
+````
 
 A bullet list is preferred over forcing breaks with a trailing `\` or two
 trailing spaces — it's clearer and survives reformatting.
@@ -55,6 +55,9 @@ trailing spaces — it's clearer and survives reformatting.
 - If there is no obvious language, use `txt` as the language (`txt` or `text` is
   generally more widely recognized and supported by syntax highlighters like
   GitHub Linguist, highlight.js, and Prism compared to `plain`).
+- When producing a code block for markdown (`markdown` or `md`), use 4
+  backticks instead of 3 so any inner code blocks do not break rendering (see
+  [`../shared/MARKDOWN-CODE-BLOCKS.md`](../shared/MARKDOWN-CODE-BLOCKS.md)).
 
 ````md
 ```txt
@@ -69,13 +72,13 @@ prefixes like `Note:`, `Warning:`, or `Tip:`.
 
 Supported types: `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`.
 
-```md
+````md
 > [!NOTE]
 > Useful information that users should know, even when skimming.
 
 > [!WARNING]
 > Urgent info that needs immediate user attention to avoid problems.
-```
+````
 
 ## Linting
 

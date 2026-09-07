@@ -145,6 +145,9 @@ paths, no code snippets** (those live in the plan).
 - Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
+- If including Mermaid diagrams, follow
+  [`conventions-mermaid`](../conventions-mermaid/SKILL.md) and validate with
+  `mmdc`.
 - Render all Given/When/Then acceptance criteria in GitHub Flavoured Markdown
   fenced `gherkin` code blocks. Never render scenarios as plain prose or
   Markdown headings.

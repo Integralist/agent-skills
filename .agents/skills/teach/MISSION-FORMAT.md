@@ -4,7 +4,7 @@
 
 ## Template
 
-```md
+````md
 # Mission: {Topic}
 
 ## Why
@@ -20,7 +20,7 @@
 
 ## Out of scope
 - {Adjacent topics the user explicitly does not want to chase right now — protects the zone of proximal development}
-```
+````
 
 ## Rules
 

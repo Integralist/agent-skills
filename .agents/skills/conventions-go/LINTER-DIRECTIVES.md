@@ -43,10 +43,10 @@ func call1() {
 really_long_key: "................................................................................"
 ```
 
-```markdown
+````markdown
 <!--alex ignore host-hostess-->
 The host greets each guest at the door.
-```
+````
 
 Reference: revive directive docs —
 https://github.com/mgechev/revive?tab=readme-ov-file#comment-directives

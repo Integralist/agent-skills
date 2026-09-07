@@ -161,7 +161,7 @@ type Logger interface {
 
 ## README.md
 
-```markdown
+````markdown
 # internal/logx
 
 Structured logging wrapper using Go's `log/slog` package.
@@ -249,4 +249,4 @@ logx.AppVersion = "abc123"
 - Use `err` (not `error`) for error values
 - Use `slog.LogAttrs` for better performance
 - Create scoped loggers with `.With()` for request-specific context
-```
+````

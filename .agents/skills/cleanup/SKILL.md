@@ -205,7 +205,7 @@ After the interactive apply step, create the output directory with
 `mkdir -p docs/reports`, then write the report to
 `docs/reports/<YYYY-MM-DD-HHMM>-cleanup.md`:
 
-```markdown
+````markdown
 ## Cleanup Report
 
 - **Date:** YYYY-MM-DD HH:MM
@@ -225,7 +225,7 @@ changed.]
 
 [Proposed fixes the user declined or deferred. Each item: file,
 line, description, why it matters, the proposed fix.]
-```
+````
 
 Print a short summary and the file path in the conversation.
 

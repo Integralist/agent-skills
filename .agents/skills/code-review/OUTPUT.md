@@ -5,7 +5,7 @@ Adherence" only when `--plan` was requested.
 
 ## Remote PR
 
-```markdown
+````markdown
 ## PR #<number> Review Summary: "<title>"
 
 **Overall assessment:** [1-2 sentence summary]
@@ -22,13 +22,13 @@ snippet, impact, and smallest viable correction.]
 ### Open Questions
 
 [Unknowns that materially constrained the review and the evidence needed.]
-```
+````
 
 ## Local
 
 Use the same sections as remote PR output with this header:
 
-```markdown
+````markdown
 ## Code Review: <branch-name or "uncommitted" or path>
 
 - **Date:** YYYY-MM-DD HH:MM
@@ -36,14 +36,14 @@ Use the same sections as remote PR output with this header:
 - **Branch:** <branch-name>
 - **Base:** <merge-base-ref> (if applicable)
 - **Files reviewed:** <count>
-```
+````
 
 ## Plan Adherence
 
 Present plan findings under "Informational / No Action Needed" unless the user
 requested strict scope enforcement:
 
-```markdown
+````markdown
 ### Plan Adherence
 
 **Plan / Tasks:** `projects/<slug>/plan.md` or `projects/<slug>/tasks.md`
@@ -52,7 +52,7 @@ requested strict scope enforcement:
 - **Missing implementation:** ...
 - **Scope excess:** ...
 - **Plan drift:** ...
-```
+````
 
 If no plan or task list was located, state "Plan adherence: none located,
 skipped" once.

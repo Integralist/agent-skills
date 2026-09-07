@@ -52,7 +52,7 @@ Before finalizing, confirm each `path:line` still resolves.
 Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and
 [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 
-```markdown
+````markdown
 # {Incident Title}
 
 - **Date:** {date +%F}
@@ -117,7 +117,7 @@ missing alert, absent integration test, no canary. What closes them.}
 ## Notes & Caveats
 
 - {Open questions, unrelated findings, unverified assumptions.}
-```
+````
 
 ## Finish
 

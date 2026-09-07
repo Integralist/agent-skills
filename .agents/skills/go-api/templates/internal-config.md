@@ -121,7 +121,7 @@ func (cfg *Config) Validate() error {
 
 ## README.md
 
-```markdown
+````markdown
 # internal/config
 
 This package handles configuration loading and validation.
@@ -144,4 +144,4 @@ if err := cfg.Validate(); err != nil {
 1. Add the field to the `Config` struct with JSON tags
 2. Add validation in `Validate()` if required
 3. Update the local config file in `local/config/api.json`
-```
+````

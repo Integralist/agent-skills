@@ -48,7 +48,7 @@ install-pi: install-tools
 	@$(STEP) "nord-contrast.json → ~/.pi/agent/themes/" cp .pi/agent/themes/nord-contrast.json ~/.pi/agent/themes/nord-contrast.json
 	@$(OPINJECT) "mcp.json → ~/.pi/agent/mcp.json" .pi/agent/mcp.json.tmpl ~/.pi/agent/mcp.json
 
-# Regenerate .claude/rules/{go,markdown,python,sql}.md from their canonical
+# Regenerate .claude/rules/{go,markdown,mermaid,python,sql}.md from their canonical
 # skills. The skill SKILL.md bodies are the single source of truth; rules differ
 # only by frontmatter (paths: globs). Run this after editing a conventions-*
 # skill and before committing, since the rules are committed.

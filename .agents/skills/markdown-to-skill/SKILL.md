@@ -135,7 +135,7 @@ as `/<skill-name>`, e.g. `/fastly-docs:getting-started`).
 
 **Source** `docs/deployment-guide.md`:
 
-```markdown
+````markdown
 ---
 author: Jane Doe
 date: 2024-01-15
@@ -145,11 +145,11 @@ date: 2024-01-15
 
 This guide covers the steps to deploy our application to production.
 ...
-```
+````
 
 **Output** `<skills-dir>/deployment-guide/SKILL.md`:
 
-```markdown
+````markdown
 ---
 name: deployment-guide
 description: Deploying to Production - This guide covers the steps to deploy our application to production.
@@ -159,7 +159,7 @@ description: Deploying to Production - This guide covers the steps to deploy our
 
 This guide covers the steps to deploy our application to production.
 ...
-```
+````
 
 With website scoping, `docs.fastly.com/guides/getting-started.md`
 becomes `<skills-dir>/fastly-docs:getting-started/SKILL.md` with

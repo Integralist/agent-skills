@@ -412,7 +412,7 @@ include:
 
 Suggested skeleton:
 
-```markdown
+````markdown
 ## MySQL Index Audit
 
 **Scope:** <path | branch-diff | uncommitted>
@@ -439,7 +439,7 @@ Suggested skeleton:
 
 - `internal/search/builder.go:120` — WHERE clause built conditionally; columns
   unknown statically.
-```
+````
 
 ### Verify with EXPLAIN
 

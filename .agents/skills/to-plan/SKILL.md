@@ -338,6 +338,9 @@ standalone `/to-plan` runs.
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
   load-bearing detail (paths, constraints, acceptance criteria).
+- If including Mermaid diagrams, follow
+  [`conventions-mermaid`](../conventions-mermaid/SKILL.md) and validate with
+  `mmdc`.
 - Render all Given/When/Then examples and acceptance criteria in GitHub
   Flavoured Markdown fenced `gherkin` code blocks.
 
