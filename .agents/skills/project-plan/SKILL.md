@@ -82,12 +82,17 @@ The **spec** owns the acceptance criteria — the plan links them from its
   passing the spec's scenarios and language, for its **scaffold tasks** (add the
   runner dependency, create `features/*.feature`, wire the suite, stub steps).
   Fold these into the slice that first exercises them.
-- **Non-code plan** → the spec's prose criteria are verified by checkable
-  assertions (grep, command output, file state); no executable scaffolding.
+- **Non-code plan** → criteria are still written in Gherkin syntax
+  (` ```gherkin `), but verified by checkable assertions (grep, command output,
+  file state) rather than executable runner scaffolding.
 - **No spec** (standalone, or a plan discussed in chat) → you must run
   [`to-spec`](../to-spec/SKILL.md) first to generate `spec.md` in the project
   directory (`projects/<yyyy-mm-dd>-<slug>/spec.md`). This ensures a stable
   specification file exists.
+
+Whenever acceptance criteria or Given/When/Then scenarios are authored, render
+them inside a GitHub Flavoured Markdown fenced code block (` ```gherkin `).
+Never format them as loose Markdown prose, lists, or headings.
 
 ## Plan document
 
@@ -333,6 +338,8 @@ standalone `/project-plan` runs.
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
   load-bearing detail (paths, constraints, acceptance criteria).
+- Render all Given/When/Then examples and acceptance criteria in GitHub
+  Flavoured Markdown fenced `gherkin` code blocks.
 
 ## Execution hand-off (Just-in-Time tasks)
 
