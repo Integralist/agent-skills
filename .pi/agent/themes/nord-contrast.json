@@ -21,7 +21,8 @@
     "toolPendingBg": "#353d4d",
     "toolSuccessBg": "#353d4d",
     "toolErrorBg": "#4d343b",
-    "customMessageBg": "#3d3a4d"
+    "customMessageBg": "#4d3b5e",
+    "skillLabel": "#d8a0d4"
   },
   "colors": {
     "accent": "frost1",
@@ -40,7 +41,7 @@
     "userMessageText": "snowStorm2",
     "customMessageBg": "customMessageBg",
     "customMessageText": "snowStorm1",
-    "customMessageLabel": "purple",
+    "customMessageLabel": "skillLabel",
     "toolPendingBg": "toolPendingBg",
     "toolSuccessBg": "toolSuccessBg",
     "toolErrorBg": "toolErrorBg",
