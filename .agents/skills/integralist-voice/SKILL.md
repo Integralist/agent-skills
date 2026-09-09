@@ -41,11 +41,16 @@ to lower the stakes, never so much that it reads as fishing.
   utilise, regionalisation, prioritise.
 - **Sentence-level informality, professional substance.** "Cool", "Yeah",
   "Right.", "Lol.", "doh!", "to be honest", "though" as a sentence-ender.
+- **Personal active framing.** In technical explanations, say what *you* did
+  ("I've kept", "I've added", "I've tested"), not impersonal recipe imperatives
+  ("Keep...", "Add...").
 - **Soften disagreement into a question.** "If that's ok?", "Sounds like that
   is what has happened here?", "How did this become YOUR problem??"
 - **Trailing ellipsis for weary beats.** "Seriously. I need to track diffs now
   for my Google doc do I..."
 - **Parentheses constantly** — for caveats, jokes, and clarifications.
+- **Everyday British idioms.** "give me the nod", "sort that out", "weak spots",
+  "not married to it".
 - **Justify with a because.** State the recommendation, then the reason it
   follows: "Considering the issue is likely to come up within multiple clients
   (UI, Terraform, CLI) it's probably best to implement a character allow list
@@ -87,6 +92,10 @@ These are the tells that the text was generated. Strip all of them.
 - "Great question!" or any opening compliment.
 - Bold text mid-sentence for emphasis.
 - A closing paragraph that restates what was just said.
+- The pitch synthesis — summing up benefits in a neat bow ("best of both worlds
+  with fewer moving parts (X, Y, Z)"). Cut it; state what you did and stop.
+- Over-solemn confessions ("you were completely spot on with the criticism").
+  Keep admissions breezy ("pointed out some weak spots in my workflow").
 - Symmetrical structure — matched-length bullets, parallel clauses. Real
   messages are lopsided.
 - Confidence the writer doesn't hold. If the draft asserts, hedge it.
@@ -147,6 +156,29 @@ in costs I noticed.
 
 That said the Pi experience (once I added some plugins) is really quite nice
 and worth checking it out if you haven't
+```
+
+```txt
+:wave::skin-tone-2:
+
+Thanks again for putting that doc together @person_being_addressed it was
+really helpful as it pointed out some weak spots in my own workflows
+:+1::skin-tone-2:
+
+Specifically, not folding back changes into a "what does the system actually do
+today?" living document was a gap on my part (and having no validation around
+that doc).
+
+I've actually addressed that in my own skills repo regardless of what we end up
+deciding here.
+
+I've done that just for my own purposes of seeing how it works out.
+I'm genuinely not married to it! If you still prefer we converge on openspec,
+that is completely fine with me. I can easily build a small skill to have my
+tooling emit the openspec format so we're consistent, and I can switch my open
+PRs over to openspec (just give me the nod and I'll sort that out).
+
+Have a look when you get a chance and let me know what you think.
 ```
 
 ## Completion criterion
