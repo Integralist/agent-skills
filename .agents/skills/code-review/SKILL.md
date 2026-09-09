@@ -57,8 +57,11 @@ unclear, they report an unknown rather than infer a defect.
 Spawn one subagent per dimension (roles below are descriptions, not agent names
 — use your platform's primitives). Run each on the cheapest model tier adequate
 to its dimension (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)). Each
-prompt must include:
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)). Set
+`max_turns: 40` (or platform equivalent) so deep reading and cross-file checks
+do not hit turn limits prematurely. When your platform distinguishes named agent
+files from inline characters, prefer saved agent files if configured, or launch
+the subagent inline. Each prompt must include:
 
 - The review dimension and focus area
 - `DIFF_PATH`, `CONTEXT_PATH`, and `FILE_LIST`, with instructions to read both

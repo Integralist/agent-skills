@@ -98,3 +98,29 @@ Never silently downgrade work touching product-code correctness or
 design/debug judgment. Disclose the downgrade at the gate that approves the
 work — the verified-pattern exemplar, or a direct prompt — and let the user
 veto. Mechanical, read-only, git, and docs delegation needs no prompt.
+
+## Turn budgets for the subagent
+
+Every tool call (reading a file, running grep, executing a command) consumes a
+turn. When a subagent runs with an unconfigured or low default limit (often 20
+turns), deep searches and multi-file audits trigger wrap-up warnings or abort
+prematurely.
+
+Set the turn limit to match the task's scope:
+
+- **Mechanical lookups and quick scans** — 15–20 turns.
+- **Audits, code reviews, and diagnostics** — 30–50 turns (e.g. `max_turns: 40`).
+- **Adversarial verification** — 40–50 turns to allow extensive caller searches.
+
+## Named vs. inline subagent launch
+
+When the harness distinguishes saved agent definitions from inline characters
+(such as `spawn_named_subagent` and `spawn_inline_subagent`):
+
+- **Named / saved subagent** — Use when pre-configured, reviewed agent files
+  exist in the project or user environment (`.pi/agents/*.md`). The agent runs
+  under its saved configuration (system prompt, tools, model, turn limit).
+- **Inline subagent** — Use when the skill defines an inline character, custom
+  system prompt, or temporary persona. Supply all required fields (`name`,
+  `system_prompt`, `prompt`, `description`) and explicit execution settings
+  (`model`, `thinking`, `max_turns`).
