@@ -65,11 +65,21 @@ change, or decline it before writing the document.
 Absence of a project plan or delivery mapping never implies a single PR. A
 stack layer may contain any number of related tasks.
 
-### Language
+### Language & convention skills
 
 Auto-detect the primary language from the files the plan touches; proceed unless
-the user corrects you. If Go, load [`conventions-go`](../conventions-go/SKILL.md)
-before emitting any Go so embedded code follows the style guide.
+the user corrects you.
+
+Explicitly load convention and testing skills before emitting tasks or code:
+
+- **Markdown (always):** Load [`conventions-markdown`](../conventions-markdown/SKILL.md).
+- **Go:** If Go, load [`conventions-go`](../conventions-go/SKILL.md) and
+  [`go-testing`](../go-testing/SKILL.md) for verbatim code and `Test (red)` tasks.
+- **Python:** If Python, load [`conventions-python`](../conventions-python/SKILL.md).
+- **SQL:** If schema or migrations are involved, load
+  [`conventions-sql`](../conventions-sql/SKILL.md).
+- **Mermaid:** If diagrams are included, load
+  [`conventions-mermaid`](../conventions-mermaid/SKILL.md).
 
 ## The bar
 

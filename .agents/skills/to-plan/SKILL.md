@@ -57,8 +57,18 @@ Planning in Go (detected). Tell me if the snippets should use a
 different language.
 ```
 
-If the language is Go, load [`conventions-go`](../conventions-go/SKILL.md)
-before producing any Go snippets, so embedded code follows the style guide.
+### Load convention and testing skills
+
+Explicitly load convention and testing skills before drafting the plan:
+
+- **Markdown (always):** Load [`conventions-markdown`](../conventions-markdown/SKILL.md).
+- **Go:** If Go, load [`conventions-go`](../conventions-go/SKILL.md) and
+  [`go-testing`](../go-testing/SKILL.md) for signatures, stubs, and test strategy.
+- **Python:** If Python, load [`conventions-python`](../conventions-python/SKILL.md).
+- **SQL:** If schema or migrations are involved, load
+  [`conventions-sql`](../conventions-sql/SKILL.md).
+- **Mermaid:** If diagrams are included, load
+  [`conventions-mermaid`](../conventions-mermaid/SKILL.md).
 
 ### Gather context
 
