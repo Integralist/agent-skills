@@ -166,8 +166,7 @@ single-layer or non-code work — see "Slicing the work".
 
 ### Documentation
 
-- [ ] Seed or update living spec (`docs/specs/<capability>.md`) with behaviour
-  contracts
+- [ ] Seed or update `docs/specs/<capability>.md` with behaviour contracts
 - [ ] Update `**/README.md` for packages whose public API changed
 - [ ] Update `docs/**/*.md` for user-facing behaviour changes
 

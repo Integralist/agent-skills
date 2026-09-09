@@ -135,7 +135,7 @@ paths, no code snippets** (those live in the plan).
 
 ## Capability Spec
 
-- Living spec: `docs/specs/<capability>.md` (seed if new, update if existing)
+- `docs/specs/<capability>.md`
 
 ## Research
 
@@ -162,3 +162,16 @@ paths, no code snippets** (those live in the plan).
 - Render all Given/When/Then acceptance criteria in GitHub Flavoured Markdown
   fenced `gherkin` code blocks. Never render scenarios as plain prose or
   Markdown headings.
+
+## Standing capability specs in `docs/specs/`
+
+Standing specs live in `docs/specs/<capability>.md` and define current truth:
+
+- **Title:** `# {Capability Name}` (e.g. `# Deployment`). Never append "Living
+  Specification" or "Spec" — the directory already declares what it is.
+- **Content:** Lasting contracts, invariants, and Given/When/Then scenarios.
+  Omit transient project metadata (Problem Statement, Out of Scope, author,
+  dates).
+- **Reference in project spec:** Under `## Capability Spec`, cite only the path
+  `- docs/specs/<capability>.md`. Do not copy instructional text into the
+  document.
