@@ -166,6 +166,8 @@ single-layer or non-code work — see "Slicing the work".
 
 ### Documentation
 
+- [ ] Seed or update living spec (`docs/specs/<capability>.md`) with behaviour
+  contracts
 - [ ] Update `**/README.md` for packages whose public API changed
 - [ ] Update `docs/**/*.md` for user-facing behaviour changes
 
@@ -334,6 +336,9 @@ standalone `/to-plan` runs.
   `Produces`) and behavioral deliverables. Avoid embedding verbatim test code
   or full function bodies — detailed TDD steps are compiled just-in-time per
   slice via [`to-tasks`](../to-tasks/SKILL.md).
+- Name the target living spec (`docs/specs/<capability>.md`) in the
+  Documentation section (seed if new, update if existing) so behavioural
+  contracts fold forward when the plan ships.
 - Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
   needless words — see
   [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not

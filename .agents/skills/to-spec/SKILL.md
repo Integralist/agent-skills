@@ -37,7 +37,9 @@ blocking on it. Non-code work → language is `N/A`.
 Read any existing project research (`projects/<project-dir>/research.md` or
 `docs/research/*.md`). Explore the codebase to understand current state, using
 the project's domain vocabulary, and read `docs/adr/` so the spec does not
-contradict a decision already made.
+contradict a decision already made. Inspect `docs/specs/` for an existing living
+spec covering the capability; if present, read it as current truth. If absent,
+the codebase is current truth and this project will seed the living spec.
 
 ## Identify testing seams
 
@@ -64,8 +66,13 @@ for the plan — they are implementation, not spec.
 
 ## Write the spec
 
-Write to `projects/<yyyy-mm-dd>-<slug>/spec.md`. Date from `date +%F`,
-author from `git config user.name`. A new spec's `Status` is `Draft`.
+Write the initiative-scoped delta spec to
+`projects/<yyyy-mm-dd>-<slug>/spec.md`. Date from `date +%F`, author from
+`git config user.name`. A new spec's `Status` is `Draft`. This document records
+the delta—problem, proposed solution, and acceptance criteria for this
+initiative. Net behaviour changes fold into the living spec at
+`docs/specs/<capability>.md` when the implementation ships (seed if new,
+update if existing).
 
 ````markdown
 # {Feature Name} — Specification
@@ -125,6 +132,10 @@ paths, no code snippets** (those live in the plan).
 ## Out of Scope
 
 - {Explicitly excluded, to bound the work.}
+
+## Capability Spec
+
+- Living spec: `docs/specs/<capability>.md` (seed if new, update if existing)
 
 ## Research
 
