@@ -1,4 +1,4 @@
-.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp
+.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
 
 # Every action runs through scripts/step.sh, which prints one status line and
 # swallows the command's output unless it fails — see that file for the modes.
@@ -172,6 +172,10 @@ check-google-workspace-mcp:
 update-google-workspace-mcp:
 	@$(STEP) --section "Google Workspace MCP"
 	@bash scripts/workspace-mcp.sh update $(ARGS)
+
+# Validate active project specs, plans, and living capability specs.
+check-specs:
+	@bash scripts/validate-specs.sh
 
 install: install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp
 	@printf '\n✨ All set.\n'
