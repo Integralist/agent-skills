@@ -58,8 +58,8 @@ the project directory, the spec, and the research context. It writes the plan to
 `projects/<yyyy-mm-dd>-<slug>/plan.md`, decomposes the work into vertical slices
 with interface contracts (`Consumes` / `Produces`) and Blocked-by edges, points
 to `./spec.md` for acceptance criteria, and extracts ADRs via
-[`to-adr`](../to-adr/SKILL.md) into `projects/<yyyy-mm-dd>-<slug>/adr-<title>.md`.
-Run it to completion.
+[`to-adr`](../to-adr/SKILL.md) (as `adr.md` for a single decision, or
+`adr-<title>.md` for multiple). Run it to completion.
 
 ## Offer a PRD
 
@@ -71,8 +71,8 @@ user wants stakeholder-facing framing; otherwise skip it.
 Then present:
 
 1. **Compile first slice into tasks** — delegate to
-   [`to-tasks`](../to-tasks/SKILL.md) for Slice 1 (`projects/<yyyy-mm-dd>-<slug>/tasks-slice-1.md`)
-   to begin execution.
+   [`to-tasks`](../to-tasks/SKILL.md) for Slice 1 (`tasks-slice-1.md`, or
+   `tasks.md` for a single-slice plan) to begin execution.
 1. **Research another topic** — loop back to Phase 1.
 1. **Create another plan** — delegate to `to-plan` again.
 

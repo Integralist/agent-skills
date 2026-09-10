@@ -110,18 +110,28 @@ works top to bottom. Each task carries:
 - **Verify** — a runnable check with its expected output: usually the test
   going green; otherwise a build, `grep`, or lint result.
 
-Every vertical slice task list should conclude with an **Integration / Boundary Verification Task** exercising the completed slice without mocks.
+Every vertical slice task list should conclude with an
+**Integration / Boundary Verification Task** exercising the completed slice
+without mocks.
 
 Not every task is code. A dependency add or a config wire has no test — give it
 a `Verify` that is still a runnable check (build succeeds, `grep` matches).
 
 ## Write the document
 
-Write to `projects/<yyyy-mm-dd>-<plan-slug>/tasks-slice-<n>.md` when scoped to a
-plan slice (e.g. `projects/2026-08-28-redis-rate-limiter/tasks-slice-1.md`), or
-`projects/<yyyy-mm-dd>-<feature-slug>/tasks.md` for standalone tasks (date from
-`date +%F`, author from `git config user.name`). A new task list's `Status` is
-always `Ready`; the transition to `Complete` and the move to
+When writing task lists under `projects/<yyyy-mm-dd>-<slug>/`:
+
+- **Single-slice plan (or standalone tasks)**: If the plan has only one slice
+  in total (or the tasks are standalone without a multi-slice plan), write to
+  `tasks.md`.
+- **Multi-slice plan**: Write each slice to `tasks-slice-<n>.md` (e.g.
+  `tasks-slice-1.md`, `tasks-slice-2.md`), even when compiling only one slice.
+- **Subsequent slice added / compiled**: If `tasks.md` already exists when
+  compiling another slice for the same project directory, rename `tasks.md` to
+  `tasks-slice-1.md` before writing the new `tasks-slice-<n>.md`.
+
+Date from `date +%F`, author from `git config user.name`. A new task list's
+`Status` is always `Ready`; the transition to `Complete` and the move to
 `projects/completed/<yyyy-mm-dd>-<slug>/` happen at commit time — see
 [`commit`](../commit/SKILL.md).
 

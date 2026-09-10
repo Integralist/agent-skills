@@ -364,8 +364,9 @@ Do not generate verbatim TDD code for all slices upfront, as early slices may
 alter implementation details for later ones. Instead, compile each slice into
 tasks just-in-time:
 
-1. Run `/to-tasks <plan-path> slice-1` to generate
-   `projects/<yyyy-mm-dd>-<slug>/tasks-slice-1.md`.
+1. Run `/to-tasks <plan-path>` (producing `tasks.md` for a single-slice plan) or
+   `/to-tasks <plan-path> slice-1` (producing `tasks-slice-1.md` for
+   multi-slice plans).
 1. Execute Slice 1 via `/next-task`, `/next-slice`, or a delegated subagent.
 1. Once Slice 1 is verified and merged, run `/to-tasks <plan-path> slice-2` to
    compile Slice 2 against the updated codebase.

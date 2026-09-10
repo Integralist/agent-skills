@@ -45,10 +45,18 @@ decision**, not one giant ADR.
 
 ## Write the ADR(s)
 
-When extracted from a project plan or scoped to an initiative, write to
-`projects/<project-slug>/adr-<short-title>.md`. For system-wide architectural
-standards, write to `docs/adr/<yyyy-mm-dd>-<short-title>.md`. Date from
-`date +%F`, author from `git config user.name`.
+When extracted from a project plan or scoped to an initiative, write under
+`projects/<project-slug>/`:
+
+- **Single ADR**: Write to `adr.md`.
+- **Multiple ADRs**: Write to `adr-<short-title>.md`.
+- **Subsequent ADRs**: If `adr.md` already exists when adding another decision,
+  rename it to `adr-<short-title>.md` (derived from its original title) before
+  saving the new `adr-<short-title>.md`.
+
+For system-wide architectural standards, write to
+`docs/adr/<yyyy-mm-dd>-<short-title>.md`. Date from `date +%F`, author from
+`git config user.name`.
 
 Template — Nygard skeleton with mandatory **Options Considered**:
 
