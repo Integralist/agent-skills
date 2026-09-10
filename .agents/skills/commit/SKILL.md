@@ -148,8 +148,8 @@ special handling:
   freely — a half-implemented plan or task list is a valid checkpoint.
 - **Completed** (implementation tasks done — remaining unchecked items are
   post-deploy/operational only): update the document's `Status` field (e.g.
-  `Planning` or `Ready` → `Complete`), then move the project directory to
-  `projects/completed/<slug>/` (or legacy `docs/plans/completed/` /
+  `Draft`, `Planning`, or `Ready` → `Complete`), then move the project directory
+  to `projects/completed/<slug>/` (or legacy `docs/plans/completed/` /
   `docs/tasks/completed/`) and commit. Create the directory if it doesn't exist.
   If unsure whether the document qualifies as complete, ask.
 

@@ -68,11 +68,12 @@ for the plan — they are implementation, not spec.
 
 Write the initiative-scoped delta spec to
 `projects/<yyyy-mm-dd>-<slug>/spec.md`. Date from `date +%F`, author from
-`git config user.name`. A new spec's `Status` is `Draft`. This document records
-the delta—problem, proposed solution, and acceptance criteria for this
-initiative. Net behaviour changes fold into the living spec at
-`docs/specs/<capability>.md` when the implementation ships (seed if new,
-update if existing).
+`git config user.name`. A new spec's `Status` is `Draft`; the transition to
+`Complete` and the move to `projects/completed/<yyyy-mm-dd>-<slug>/` happen at
+commit time — see [`commit`](../commit/SKILL.md). This document records the
+delta—problem, proposed solution, and acceptance criteria for this initiative.
+Net behaviour changes fold into the living spec at `docs/specs/<capability>.md`
+when the implementation ships (seed if new, update if existing).
 
 ````markdown
 # {Feature Name} — Specification
