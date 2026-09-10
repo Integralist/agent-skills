@@ -45,6 +45,7 @@ install-pi: install-tools
 	@mkdir -p ~/.pi/agent/themes
 	@$(STEP) "AGENTS.md → ~/.pi/agent/AGENTS.md" cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md
 	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
+	@$(STEP) "keybindings.json → ~/.pi/agent/keybindings.json" cp .pi/agent/keybindings.json ~/.pi/agent/keybindings.json
 	@$(STEP) "nord-contrast.json → ~/.pi/agent/themes/" cp .pi/agent/themes/nord-contrast.json ~/.pi/agent/themes/nord-contrast.json
 	@$(OPINJECT) "mcp.json → ~/.pi/agent/mcp.json" .pi/agent/mcp.json.tmpl ~/.pi/agent/mcp.json
 
