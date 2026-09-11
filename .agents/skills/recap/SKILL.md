@@ -16,4 +16,6 @@ Structure the recap under three headings, each a short bullet list:
 
 Lead with state, not narration. Keep the whole thing to ~10 lines;
 omit a heading that has nothing under it. If arguments name a specific
-task or thread, recap only that.
+task or thread, recap only that. Keep state visible without working memory
+burden — see
+[`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).

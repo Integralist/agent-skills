@@ -85,3 +85,5 @@ Once verified (tests pass, work done), mark it complete before finishing:
 - When the task is complete and verified, mark its checkbox `- [x]`.
 - One task per invocation. Don't chain multiple tasks.
 - One task per invocation controls work scope, not PR boundaries.
+- Anchor multi-turn progress and lead with state — see
+  [`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).
