@@ -3,13 +3,13 @@ name: architect
 description: >-
   Design and plan a feature from idea to actionable artifacts. Use when
   architecting a feature, exploring a design before planning, or coordinating
-  research, spec, and plan phases.
+  research, spec, grill, and plan phases.
 ---
 
 # Architect
 
 Design-and-plan coordinator: turn an idea into the artifacts that support
-building it. Four phases — **bootstrap → research → spec → plan** — each
+building it. Five phases — **bootstrap → research → spec → grill → plan** — each
 delegated to its own skill. This file only sequences them; the depth lives in
 the delegates.
 
@@ -43,15 +43,25 @@ Delegate to [`to-spec`](../to-spec/SKILL.md), passing the build goal, the
 project slug, and the Phase 1 research context. It writes the problem, solution,
 user stories, acceptance criteria (via
 [`behaviour-spec`](../behaviour-spec/SKILL.md)), testing seams, and scope to
-`projects/<yyyy-mm-dd>-<slug>/spec.md`. Run it to completion, then present:
+`projects/<yyyy-mm-dd>-<slug>/spec.md`. Run it to completion, then proceed to
+Phase 3: Grill. If the user explicitly asks to refine the spec or research more
+first, loop back to Phase 1 or 2.
 
-1. **Grill and stress-test the design** — delegate to
-   [`grill-with-docs`](../grill-with-docs/SKILL.md) to interview the user, pin
-   down domain terms, and record ADRs before planning.
-1. **Refine the spec or research more** — loop back to Phase 1 or 2.
-1. **Create a plan** — proceed to Phase 3.
+## Phase 3: Grill
 
-## Phase 3: Plan
+Delegate to [`grill-with-docs`](../grill-with-docs/SKILL.md). Grilling is a
+mandatory phase before planning. Conduct a relentless interview to stress-test
+the design tree against the spec, resolve unstated assumptions and open
+questions, pin down domain vocabulary in `CONTEXT.md`, and record ADRs under
+`docs/adr/`.
+
+If the interview reshapes any decisions, testing seams, or acceptance criteria,
+update `projects/<yyyy-mm-dd>-<slug>/spec.md` with the settled changes.
+
+Run the grilling session to completion (the question frontier is empty and the
+user explicitly confirms shared understanding), then proceed to Phase 4: Plan.
+
+## Phase 4: Plan
 
 Delegate to [`to-plan`](../to-plan/SKILL.md), passing the build goal,
 the project directory, the spec, and the research context. It writes the plan to
@@ -80,6 +90,8 @@ Then present:
 
 - This skill is a thin coordinator. Research depth lives in
   [`research`](../research/SKILL.md); the spec's structure and acceptance
-  criteria in [`to-spec`](../to-spec/SKILL.md); slice, Blocked-by, and
-  parallel-execution guidance in [`to-plan`](../to-plan/SKILL.md).
+  criteria in [`to-spec`](../to-spec/SKILL.md); interview mechanics, domain
+  vocabulary, and ADRs in [`grill-with-docs`](../grill-with-docs/SKILL.md);
+  slice, Blocked-by, and parallel-execution guidance in
+  [`to-plan`](../to-plan/SKILL.md).
 - Wrap all Markdown output at 80 columns.

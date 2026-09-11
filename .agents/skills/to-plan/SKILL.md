@@ -75,13 +75,21 @@ Explicitly load convention and testing skills before drafting the plan:
 Read the spec (above), any project research (`./research.md`), and relevant
 `docs/research/*.md`. These are the foundation for the plan.
 
-### Resolve decision frontier
+### Grill and resolve decision frontier (Mandatory)
 
-Before drafting slices, inspect the technical choices, interface contracts, and
-external dependencies for open branches or unverified assumptions. If key
-decisions remain unsettled (and were not already resolved in chat), delegate to
-[`grill-with-docs`](../grill-with-docs/SKILL.md) to run a grilling interview,
-capture domain terms, and record ADRs before writing the document.
+Before drafting slices, grilling is a mandatory step to focus in on what is
+being planned. Delegate to [`grill-with-docs`](../grill-with-docs/SKILL.md) to
+run a relentless interview, stress-test technical choices, interface contracts,
+and external dependencies, capture domain terms in `CONTEXT.md`, and record
+ADRs under `docs/adr/`.
+
+Do not skip this step. Even if the feature was discussed in chat or specified
+in a spec document, you must run the grilling interview to stress-test
+assumptions and solidify the design tree. The only exception is if `to-plan` was
+invoked as Phase 4 of [`architect`](../architect/SKILL.md) and Phase 3 (Grill)
+was already completed in the current workflow. Run the grilling session to
+completion (until the question frontier is empty and the user confirms shared
+understanding) before drafting the plan slices.
 
 ## Acceptance criteria & scaffolding
 

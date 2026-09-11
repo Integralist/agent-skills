@@ -164,6 +164,12 @@ paths, no code snippets** (those live in the plan).
   fenced `gherkin` code blocks. Never render scenarios as plain prose or
   Markdown headings.
 
+## Next step
+
+Once the spec is complete, proceed to grilling via
+[`grill-with-docs`](../grill-with-docs/SKILL.md) to stress-test the design
+before planning.
+
 ## Standing capability specs in `docs/specs/`
 
 Standing specs live in `docs/specs/<capability>.md` and define current truth:
