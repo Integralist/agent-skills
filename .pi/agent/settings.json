@@ -4,7 +4,6 @@
   "defaultThinkingLevel": "high",
   "hideThinkingBlock": true,
   "theme": "nord-contrast",
-  "tuiMode": "fullscreen",
   "packages": [
     "git:github.com/Integralist/pi-statusbar",
     "npm:@shuv1337/pi-mcp-adapter",
