@@ -27,3 +27,5 @@ and ask only for what is missing.
 ## Confirm and proceed
 
 Restate the completed fields back to the user, then continue with the task.
+Bound clarifying questions to prevent cognitive overload — see
+[`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).

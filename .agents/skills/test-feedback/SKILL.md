@@ -75,3 +75,6 @@ for the rule this follows.
 - The diagnosis subagent is read-only — it diagnoses, never edits.
 - Apply fixes in the main thread so each stays steerable.
 - Never weaken assertions to make tests pass.
+- Cap iterative fixes at 3, avoid fabricated root causes, and lead with
+  actionable diffs — see
+  [`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).

@@ -169,3 +169,5 @@ Signs you're doing it right:
 ## Integration with Other Skills
 
 - **go-testing**: create a test that reproduces the bug before fixing.
+- Halt debug spirals after 3 failures and state errors matter-of-factly — see
+  [`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).
