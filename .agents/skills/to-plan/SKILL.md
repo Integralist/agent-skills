@@ -114,6 +114,9 @@ Never format them as loose Markdown prose, lists, or headings.
 
 ## Plan document
 
+Ensure `projects/README.md` exists. If missing, create it from
+[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md).
+
 Write to `projects/<yyyy-mm-dd>-<slug>/plan.md`. Date from `date +%F`, author
 from `git config user.name`. A new plan's `Status` is always `Planning`; the
 transition to `Complete` and the move to `projects/completed/<yyyy-mm-dd>-<slug>/`

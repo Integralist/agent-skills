@@ -66,6 +66,9 @@ for the plan — they are implementation, not spec.
 
 ## Write the spec
 
+Ensure `projects/README.md` exists. If missing, create it from
+[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md).
+
 Write the initiative-scoped delta spec to
 `projects/<yyyy-mm-dd>-<slug>/spec.md`. Date from `date +%F`, author from
 `git config user.name`. A new spec's `Status` is `Draft`; the transition to
