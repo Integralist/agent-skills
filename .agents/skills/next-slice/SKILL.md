@@ -60,17 +60,15 @@ per invocation.
    - Run `make test` when done.
    - Update `docs/**/*.md` or `**/README.md` if the change alters
      behavior, public APIs, or usage patterns.
-   - Do NOT mark any checkbox complete yet.
+   - Mark the task's checkbox `- [x]` as soon as verified (and check any parent
+     whose subtasks are now all checked), before moving to the next task.
    - Respect layer separation: handlers -> service -> repository.
 
 ## Completion
 
-Once the whole slice is verified (tests pass, every task done), mark it complete
-before finishing:
+Once all tasks in the slice are verified, wrap up the slice:
 
-1. Change each task's checkbox in the slice from `- [ ]` to `- [x]` in the plan
-   or task file.
-1. Check any parent whose subtasks are now all checked.
+1. Run the full test suite (`make test`) to ensure the slice as a whole passes.
 1. If working from a per-slice task list (`projects/<slug>/tasks-slice-<n>.md`),
    mark the corresponding slice complete in the parent plan
    (`projects/<slug>/plan.md`).
@@ -88,6 +86,8 @@ before finishing:
 - Confirm the plan choice before proceeding.
 - Do the implementation work directly in the main thread — do NOT spawn
   subagents.
-- When the slice is complete and verified, mark every task's checkbox `- [x]`.
+- Mark each task's checkbox `- [x]` as soon as it is verified, before moving to
+  the next task.
+- Commit once for the whole slice at the end, not per task.
 - One slice per invocation. Don't chain multiple slices.
 - One slice per invocation controls work scope, not PR boundaries.

@@ -56,7 +56,6 @@ Resume work from a project plan, in the main thread.
    - Run `make test` when done.
    - Update `docs/**/*.md` or `**/README.md` if the change alters
      behavior, public APIs, or usage patterns.
-   - Do NOT mark the checkbox complete yet.
    - Respect layer separation: handlers -> service -> repository.
 
 ## Completion
