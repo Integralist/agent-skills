@@ -13,9 +13,14 @@ for personality. Where they conflict, personality wins.
 
 ## The five moves
 
-**Airy.** One thought per line, blank line between. Never a dense paragraph.
-A four-sentence message is four visual blocks. This is the single most
-recognisable trait — get it wrong and nothing else rescues the draft.
+**Airy.** Calibrate paragraph density to the medium:
+- *Short-form (Slack, PRs, email):* One thought per line, blank line between.
+  Never a dense paragraph. A four-sentence message is four visual blocks.
+- *Long-form (blog posts, articles, docs):* Group connected thoughts into
+  cohesive paragraphs (2 to 4 sentences) to maintain narrative momentum and
+  flow. Avoid splintering continuous prose into isolated one-line staccato
+  sentences, but avoid dense walls of text. Reserve single-sentence blocks for
+  punchy transitions or wry asides.
 
 **Breadcrumbs.** Before asking for help, show the trail: what you tried, what
 you found, where it ran out. Never open with a bare question when you have
@@ -92,6 +97,9 @@ message, never a row.
   background, ask questions back, close with an open offer of help.
 - **Length** — default short. Only go long when there is genuinely a trail to
   lay out, and even then keep it airy.
+- **Long-form prose (blog posts, articles, docs)** — group related ideas into
+  cohesive 2-4 sentence paragraphs so the reader can follow the technical flow
+  without stumbling over single-line breaks. Keep paragraphs focused and airy.
 
 ## Anti-patterns
 
