@@ -1,8 +1,8 @@
 # Project Planning Workspace
 
-This directory contains planning artifacts for repository changes that need
-more than a single implementation step. These documents are working material,
-not product or user-facing documentation.
+This directory contains planning artifacts for repository changes that need more
+than a single implementation step. These documents are working material, not
+product or user-facing documentation.
 
 ## Structure
 
@@ -30,9 +30,9 @@ Use the artifacts in this order:
 1. Execute tasks in order with tests and boundary verification.
 1. Review and commit the completed slice before compiling the next one.
 
-The task list is the executor's contract. It names the files, commands,
-expected failures, implementation boundaries, and verification checks required
-to complete that slice without re-designing it during execution.
+The task list is the executor's contract. It names the files, commands, expected
+failures, implementation boundaries, and verification checks required to
+complete that slice without re-designing it during execution.
 
 ## Living specifications
 
@@ -45,6 +45,23 @@ its relevant living specs and describe what each one owns. If the project does
 not change durable behaviour, say that no living capability spec applies and
 link to the relevant operational documentation instead.
 
+## Behavioural deltas
+
+When a project changes an existing durable contract, add a
+`## Behavioural Delta` section to `spec.md`. Pin the baseline living-spec path
+and commit, then use generic operation headings as needed:
+
+- `### ADDED`
+- `### MODIFIED`
+- `### REMOVED`
+- `### RENAMED`
+
+Keep behavior snapshots in fenced `gherkin` blocks. For `MODIFIED`, show the
+baseline and updated behavior. For `REMOVED`, record the reason and migration.
+For a new capability with no baseline, state that explicitly and use `ADDED` for
+the new behavior. Keep the historical acceptance criteria intact; later changes
+belong in a follow-on project rather than rewriting a completed project.
+
 ## Status
 
 - **Planning** — scope or implementation slices are still being defined.
@@ -54,5 +71,5 @@ link to the relevant operational documentation instead.
   to `projects/completed/`.
 
 Keep planning documents scoped to the project they describe. Put durable
-repository usage instructions in the relevant README or `docs/` document
-instead of leaving them only in a project plan.
+repository usage instructions in the relevant README or `docs/` document instead
+of leaving them only in a project plan.
