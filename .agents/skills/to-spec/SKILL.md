@@ -60,7 +60,7 @@ Confirm the seams with the user before writing them into the spec.
 
 Delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md), passing the feature
 description and language (`N/A` for non-code or operational work). Take its
-**acceptance-criteria block** (rendered in a fenced ` ```gherkin ` code block)
+**acceptance-criteria block** (rendered in a fenced ```` ```gherkin ```` code block)
 for the spec's `## Acceptance Criteria` section. Leave its **scaffold tasks**
 for the plan — they are implementation, not spec.
 
@@ -137,9 +137,16 @@ paths, no code snippets** (those live in the plan).
 
 - {Explicitly excluded, to bound the work.}
 
-## Capability Spec
+## Living Specifications
 
-- `docs/specs/<capability>.md`
+This project spec records the historical change. Current behaviour belongs in
+one or more living specifications under `docs/specs/`:
+
+- `docs/specs/<capability>.md` — {the current behaviour this project changes}
+
+If the project changes no durable application or operational behaviour, say so
+here and point to the relevant operational documentation instead. Do not copy
+the living specification into the project document.
 
 ## Research
 
@@ -182,6 +189,9 @@ Standing specs live in `docs/specs/<capability>.md` and define current truth:
 - **Content:** Lasting contracts, invariants, and Given/When/Then scenarios.
   Omit transient project metadata (Problem Statement, Out of Scope, author,
   dates).
-- **Reference in project spec:** Under `## Capability Spec`, cite only the path
-  `- docs/specs/<capability>.md`. Do not copy instructional text into the
-  document.
+- **Reference in project spec:** Under `## Living Specifications`, explain that
+  the project records historical change and cite each relevant
+  `docs/specs/<capability>.md` path with the behaviour it owns. If no durable
+  behaviour changes, say that no living capability spec applies and point to
+  the operational documentation instead. Do not copy instructional text into
+  the project document.

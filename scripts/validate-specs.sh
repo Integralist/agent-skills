@@ -78,6 +78,7 @@ validate_project_document() {
     grep -q '^## Problem Statement' "$file" || { error "$file: missing '## Problem Statement'"; file_errors=$((file_errors + 1)); }
     grep -q '^## Solution' "$file" || { error "$file: missing '## Solution'"; file_errors=$((file_errors + 1)); }
     grep -q '^## Acceptance Criteria' "$file" || { error "$file: missing '## Acceptance Criteria'"; file_errors=$((file_errors + 1)); }
+    grep -q '^## Living Specifications' "$file" || { error "$file: missing '## Living Specifications'"; file_errors=$((file_errors + 1)); }
     if ! validate_gherkin "$file"; then file_errors=$((file_errors + 1)); fi
     if ! validate_doc_references "$file"; then file_errors=$((file_errors + 1)); fi
   elif [[ "$(basename "$file")" == "plan.md" ]]; then

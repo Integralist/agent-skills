@@ -34,6 +34,17 @@ The task list is the executor's contract. It names the files, commands,
 expected failures, implementation boundaries, and verification checks required
 to complete that slice without re-designing it during execution.
 
+## Living specifications
+
+Project documents record the history of a change. Current behaviour belongs in
+`docs/specs/<capability>.md`, which is the living source of truth after the
+project is complete.
+
+Each project `spec.md` should use a `## Living Specifications` section to name
+its relevant living specs and describe what each one owns. If the project does
+not change durable behaviour, say that no living capability spec applies and
+link to the relevant operational documentation instead.
+
 ## Status
 
 - **Planning** — scope or implementation slices are still being defined.
