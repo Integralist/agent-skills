@@ -12,8 +12,8 @@ allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
 A **spec** is the engineering source-of-truth: *what* to build and the
 definition of done. It is stable — it outlives plan revisions — because it
 carries **no file paths and no code snippets**. Those go stale, so they belong
-to the [`plan`](../to-plan/SKILL.md), where they can be kept current. Spec
-is the stable *what*; the plan is the volatile *how*.
+to the [`plan`](../to-plan/SKILL.md), where they can be kept current. Spec is
+the stable *what*; the plan is the volatile *how*.
 
 Normally invoked by [`architect`](../architect/SKILL.md) after research; also
 runs standalone.
@@ -60,9 +60,9 @@ Confirm the seams with the user before writing them into the spec.
 
 Delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md), passing the feature
 description and language (`N/A` for non-code or operational work). Take its
-**acceptance-criteria block** (rendered in a fenced ```` ```gherkin ```` code block)
-for the spec's `## Acceptance Criteria` section. Leave its **scaffold tasks**
-for the plan — they are implementation, not spec.
+**acceptance-criteria block** (rendered in a fenced ```` ```gherkin ```` code
+block) for the spec's `## Acceptance Criteria` section. Leave its **scaffold
+tasks** for the plan — they are implementation, not spec.
 
 ## Write the spec
 
@@ -77,6 +77,16 @@ commit time — see [`commit`](../commit/SKILL.md). This document records the
 delta—problem, proposed solution, and acceptance criteria for this initiative.
 Net behaviour changes fold into the living spec at `docs/specs/<capability>.md`
 when the implementation ships (seed if new, update if existing).
+
+When the project changes an existing living contract, add a
+`## Behavioural Delta` section. Pin the baseline living-spec path and commit,
+then use generic `### ADDED`, `### MODIFIED`, `### REMOVED`, or `### RENAMED`
+headings. Keep every behaviour snapshot in a fenced `gherkin` block. For
+`MODIFIED`, show baseline and updated blocks; for `REMOVED`, record the reason
+and migration. The baseline is the behaviour accepted immediately before this
+project, not whatever the living spec says after later projects. For a project
+with no existing capability, state that the baseline is absent and use `ADDED`
+for the new behaviour.
 
 ````markdown
 # {Feature Name} — Specification
@@ -117,6 +127,39 @@ Feature: {capability}
     When {an action occurs}
     Then {an observable outcome holds}
     And {another observable outcome}
+```
+
+## Behavioural Delta
+
+<!-- Include this section when the project changes an existing durable contract.
+Pin the baseline path and commit. Use ADDED, MODIFIED, REMOVED, or RENAMED
+headings and fenced Gherkin snapshots. Omit it for a new capability with no
+baseline. -->
+
+**Baseline:** `{path}` at `{commit}`
+
+### MODIFIED
+
+**Baseline:**
+
+```gherkin
+Feature: {capability before this project}
+
+  Scenario: {existing behaviour}
+    Given {starting state}
+    When {action}
+    Then {observable outcome}
+```
+
+**Updated:**
+
+```gherkin
+Feature: {capability after this project}
+
+  Scenario: {updated behaviour}
+    Given {starting state}
+    When {action}
+    Then {observable outcome}
 ```
 
 ## Testing Seams
@@ -192,6 +235,6 @@ Standing specs live in `docs/specs/<capability>.md` and define current truth:
 - **Reference in project spec:** Under `## Living Specifications`, explain that
   the project records historical change and cite each relevant
   `docs/specs/<capability>.md` path with the behaviour it owns. If no durable
-  behaviour changes, say that no living capability spec applies and point to
-  the operational documentation instead. Do not copy instructional text into
-  the project document.
+  behaviour changes, say that no living capability spec applies and point to the
+  operational documentation instead. Do not copy instructional text into the
+  project document.
