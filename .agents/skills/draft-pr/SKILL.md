@@ -14,7 +14,7 @@ clear **Problem** and **Solution**.
 If the fields below show commands rather than output, run each one first.
 
 - Branch: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
-- Default branch: !`git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo "(unknown — detect in step 2)"`
+- Default branch: !`git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo "(unknown — detect in step 3)"`
 - Status: !`git status --short 2>/dev/null`
 - Recent commits: !`git log --oneline -15 2>/dev/null`
 - Existing PR: !`gh pr view --json url,state,isDraft 2>/dev/null || echo "(none)"`
@@ -27,19 +27,19 @@ If the fields below show commands rather than output, run each one first.
    stop. `gh stack submit` creates or updates the complete PR chain and its
    base branches.
 
-1. **Check preconditions.**
+2. **Check preconditions.**
 
    - Not a git repo, or branch is the base branch itself → stop and say so. A PR
      needs a feature branch distinct from base.
    - If an open PR already exists for this branch, stop and ask whether to
      update its description instead of opening a new one.
 
-1. **Determine the base branch.** Use the default branch from Context. If
+3. **Determine the base branch.** Use the default branch from Context. If
    unknown, run `git symbolic-ref --short refs/remotes/origin/HEAD`, falling
    back to `main`, then `master`. Confirm with the user if still ambiguous (e.g.
    the branch was cut from something else).
 
-1. **Read the full branch diff** against the base:
+4. **Read the full branch diff** against the base:
 
    ```bash
    base=$(git merge-base HEAD origin/<base>)
@@ -50,7 +50,7 @@ If the fields below show commands rather than output, run each one first.
    Don't rely on diffstat alone; Problem/Solution must reflect the actual hunks.
    Read commit messages for intent the diff doesn't reveal.
 
-1. **Write the description** using the Template.
+5. **Write the description** using the Template.
 
    - **Problem:** what was wrong or missing and why it matters — the observable
      symptom or gap, not the implementation. Reference the linked issue/ticket
@@ -66,7 +66,7 @@ If the fields below show commands rather than output, run each one first.
    - Add `## Notes` only for testing done, a migration step, a risk, or a
      follow-up worth flagging. Omit otherwise.
 
-1. **Draft the title:**
+6. **Draft the title:**
    - **Title = consequence/why (outcome/benefit/prevention), NOT diff mechanics
      (what was typed).** A reviewer reading only the title should learn what
      improves without opening the PR.
@@ -97,10 +97,10 @@ If the fields below show commands rather than output, run each one first.
    GOOD (WHY):  fix(fetch): retry transient 502s so the nightly import completes
    ```
 
-1. **Show the title and description to the user and wait for approval.** Do not
+7. **Show the title and description to the user and wait for approval.** Do not
    open the PR before then.
 
-1. **Push if needed,** then open the PR:
+8. **Push if needed,** then open the PR:
 
    - `git push -u origin <branch>` if the branch has no upstream.
    - `gh pr create --base <base> --title <title> --body-file -` piping the
@@ -108,7 +108,7 @@ If the fields below show commands rather than output, run each one first.
      not hard-wrap at 80 columns (see Style).
    - Open ready-for-review by default. Add `--draft` only if the user asked.
 
-1. **Report the PR URL** from `gh`'s output.
+9. **Report the PR URL** from `gh`'s output.
 
 ## Template
 

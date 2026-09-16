@@ -52,6 +52,7 @@ Every step ends on a **completion criterion** — the condition that tells the a
 
 - **Clarity** — can the agent tell done from not-done? A vague bound ("understanding reached") invites **premature completion**: ending the step before it is genuinely done, attention slipping to _being done_. The visible steps still ahead — the **post-completion steps** — supply the pull; the criterion's clarity is the resistance. Defend in order: **sharpen the bound first** (local and cheap); only if it is irreducibly fuzzy _and_ you observe the rush, hide the later steps by splitting the sequence — and hiding only works across a real context boundary (a hand-off or a subagent dispatch; an inline call leaves the later steps in context and clears nothing).
 - **Demand** — how much it requires. "Every modified model accounted for" forces thorough work where "produce a change list" does not. Demand drives **legwork** — the digging the agent does within the work, latent in the wording rather than written as its own step — and it is not step-bound: "every rule applied" binds a body of flat reference just as "every step done" binds a sequence, which is how an all-reference document still carries an exhaustiveness bar.
+- **Sequential numbering** — write ordered steps as literal `1., 2., 3.`, never repeating `1.`. Distinct sequential numbers provide positional anchors in the model's attention window, preserve step references ("repeat Step 2"), and anchor progress tracking (`Step X/Y`).
 
 The strongest criteria are both checkable and exhaustive.
 

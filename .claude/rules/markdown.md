@@ -8,9 +8,17 @@ inclusive language.
 
 ## Formatting
 
-- Use the formatter tool `mdformat` to automatically format Markdown files.
+- Use `mdformat --number` to automatically format Markdown files while
+  preserving consecutive numbering on ordered lists.
 - Wrap text at 80 columns manually, do not use `mdformat --wrap 80` as it breaks
   GitHub flavoured quote blocks (e.g. `> [!NOTE]`).
+- **AI-facing files exception:** NEVER run `mdformat` on Skill files (`SKILL.md`,
+  `**/skills/**`), prompt files (e.g. `**/prompts/**`), agent instructions
+  (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`), or any Markdown consumed by an AI.
+  Automated formatters collapse 4-backtick Markdown blocks (which protect
+  nested 3-backtick blocks) into 3 backticks, alter prompt formatting, and
+  strip intentional layout. In AI-facing files, format manually and maintain
+  explicit sequential numbering (`1., 2., 3.`).
 
 To install and configure the formatter with the necessary plugins (GitHub
 Flavored Markdown and Frontmatter support):

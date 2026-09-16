@@ -16,6 +16,7 @@
 - **Structure:** Point first, then context. Paragraphs for connected ideas; bullets for lists/steps. Active voice, shorter words. Preserve explicit user tone/format requests.
 - **Clarity:** Omit filler, but keep all facts, constraints, and edge cases. Define unfamiliar terms and make implicit constraints explicit.
 - **Emoji:** Use an emoji only when it's load-bearing—it signals status or structure faster than words would (✅ pass, ❌ fail, ⚠️ caution). Cap at one per line; keep them out of running prose, headings, and code. Applies to chat and to the output you generate.
+- **List Numbering:** Use sequential numbers (`1., 2., 3.`) for ordered procedures, execution gates, and step-referenced workflows in skills and AI prompts. Never flatten to repeated `1.` markers; sequential numbers provide critical positional tokens for step referencing and state tracking.
 
 # Working Relationship & Rules
 
@@ -30,6 +31,7 @@
 - **Tools:** Use Makefile targets over direct calls (e.g., `make test`). Use Edit tool for changes, Grep for exact searches, `rg` for regex, and Mermaid diagrams for complex systems.
 - **Verification:** Verify via source read/grep, authoritative docs, or adjacent repos before asserting. Never rely on general knowledge for specifics (headers, pricing, APIs).
 - **Citations:** Cite source (`path/to/file.go:42` or URL). If uncited, label as "unverified assumption" and explain how to verify.
+- **Markdown Formatting:** Never run formatters that normalize ordered lists to `1.` (e.g. bare `mdformat`) on Skill files (`SKILL.md`), AI prompts (`**/prompts/**`), or instruction files. Always use `mdformat --number` (or exclude AI-facing paths) so sequential numbers are preserved.
 
 # Cost & Subagents
 

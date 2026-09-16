@@ -12,16 +12,17 @@ disable-model-invocation: true
 Orchestrate the "ship my changes" flow. Run the three steps in
 order, stopping if any needs the user's input.
 
+## Stack Check
+
+Read the active plan or task document, then run `gh stack view --json`. If the
+document declares `Stack` or the command finds an active stack:
+
+- Keep the stack-managed branch.
+- Invoke the `commit` skill.
+- Invoke the `stacked-prs` skill to submit or update the stack.
+- Stop.
+
 ## Process
-
-1. **Detect stacked delivery.** Read the active plan or task document, then run
-   `gh stack view --json`. If the document declares `Stack` or the command
-   finds an active stack:
-
-   - Keep the stack-managed branch.
-   - Invoke the `commit` skill.
-   - Invoke the `stacked-prs` skill to submit or update the stack.
-   - Stop.
 
 1. **Branch.** Check the current branch:
 
@@ -37,11 +38,11 @@ order, stopping if any needs the user's input.
      including its prompt to confirm the slug if the intent is
      unclear.
 
-1. **Commit.** Invoke the `commit` skill to stage and commit the
+2. **Commit.** Invoke the `commit` skill to stage and commit the
    changes with intelligent grouping. Follow its process exactly,
    including its prompts for ambiguous grouping.
 
-1. **PR.** Invoke the `draft-pr` skill to push the branch and open
+3. **PR.** Invoke the `draft-pr` skill to push the branch and open
    the pull request. Follow its process, including showing the
    title and description for approval before opening.
 

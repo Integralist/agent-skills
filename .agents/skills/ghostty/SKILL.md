@@ -20,7 +20,7 @@ TUIs, or visual subagents.
 ## When Not to Use
 
 - **Fast or low-output commands:** Single unit tests, `git` commands, file
-  checks, or anything completing in \<3s with \<50 lines of output. Run these
+  checks, or anything completing in `<3s` with `<50` lines of output. Run these
   directly in standard tool execution (`bash`) to avoid AppleScript overhead.
 - **Non-macOS platforms:** Ghostty on Linux does not support AppleScript.
 - **Headless CI or SSH sessions:** Where Ghostty is not the local host terminal.
