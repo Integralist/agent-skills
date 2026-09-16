@@ -4,12 +4,23 @@ This directory contains planning artifacts for repository changes that need more
 than a single implementation step. These documents are working material, not
 product or user-facing documentation.
 
+Each active project directory also has a `README.md` index. Create it from
+[`../.agents/skills/shared/PROJECT-README.md`](../.agents/skills/shared/PROJECT-README.md)
+when a skill first creates `projects/<project>/`. The project README owns
+navigation and current status; the linked artifacts own their content.
+
 ## Structure
 
-Each project uses a date-and-slug directory:
+Each project uses a date-and-slug directory. The first milestone in a PDD
+project may use the unqualified `discovery.md` and `design.md` names; later
+milestones use qualified names such as `discovery-m2.md` and `design-m2.md`.
 
 ```text
 projects/<yyyy-mm-dd>-<slug>/
+├── README.md                  # Project index, links, and current status
+├── project.md                 # PDD project scope, when applicable
+├── discovery[-mN].md          # PDD option evaluation, when applicable
+├── design[-mN].md             # PDD approved blueprint, when applicable
 ├── spec.md                    # Problem, scope, and acceptance criteria
 ├── plan.md                    # Slices, dependencies, and delivery plan
 ├── tasks-slice-<n>.md         # Executable tasks for one implementation slice
@@ -22,13 +33,19 @@ A project may omit artifacts that do not apply. Completed projects move to
 
 ## Workflow
 
-Use the artifacts in this order:
+For a Product-Engineering initiative, use the PDD approval flow first:
 
-1. Define the problem and acceptance criteria in `spec.md`.
-1. Decompose the work into vertical slices in `plan.md`.
-1. Compile one slice at a time into `tasks-slice-<n>.md`.
-1. Execute tasks in order with tests and boundary verification.
-1. Review and commit the completed slice before compiling the next one.
+1. Agree on scope and milestones in `project.md`.
+2. Evaluate solution directions for one milestone in `discovery*.md`.
+3. Approve the system-level solution in `design*.md`.
+4. Translate the approved Design into `spec.md`.
+5. Decompose the work into vertical slices in `plan.md`.
+6. Compile one slice at a time into `tasks-slice-<n>.md`.
+7. Execute tasks in order with tests and boundary verification.
+8. Review and commit the completed slice before compiling the next one.
+
+For an engineering-led project, start at `spec.md` and follow steps 5 through
+8. A project README records which workflow applies and the current next action.
 
 The task list is the executor's contract. It names the files, commands, expected
 failures, implementation boundaries, and verification checks required to

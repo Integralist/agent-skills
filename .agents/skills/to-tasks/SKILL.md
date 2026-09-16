@@ -119,7 +119,11 @@ a `Verify` that is still a runnable check (build succeeds, `grep` matches).
 
 ## Write the document
 
-When writing task lists under `projects/<yyyy-mm-dd>-<slug>/`:
+When writing task lists under `projects/<yyyy-mm-dd>-<slug>/`, ensure the
+project's `README.md` exists. If missing, create it from
+[`../shared/PROJECT-README.md`](../shared/PROJECT-README.md), then add or
+update one document-level row for the task list in its artifact table. Keep
+individual task descriptions and checkboxes only in the task list.
 
 - **Single-slice plan (or standalone tasks)**: If the plan has only one slice
   in total (or the tasks are standalone without a multi-slice plan), write to

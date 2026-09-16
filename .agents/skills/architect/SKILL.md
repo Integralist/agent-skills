@@ -32,7 +32,9 @@ If the answer is vague, delegate to [`clarify`](../clarify/SKILL.md) to elicit i
 Delegate to [`research`](../research/SKILL.md). It detects whether the input is
 a repo or a topic, gathers project metadata for repos, and writes findings to
 `docs/research/<yyyy-mm-dd>-<slug>.md` (or `projects/<yyyy-mm-dd>-<slug>/research.md`
-when scoped to an active project). Run it to completion, then present:
+when scoped to an active project). Pass the project scope when one exists;
+project-scoped research bootstraps and updates that project's README. Run it to
+completion, then present:
 
 1. **Research another topic** — ask what next and loop back to Phase 1.
 1. **Write a spec** — proceed to Phase 2.

@@ -60,6 +60,10 @@ per invocation.
    - Run `make test` when done.
    - Update `docs/**/*.md` or `**/README.md` if the change alters
      behavior, public APIs, or usage patterns.
+   - Ensure the project `README.md` exists, creating it from
+     [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) when needed.
+     Keep task descriptions and checkboxes only in the task file; update the
+     README only when the task artifact's document-level status changes.
    - Mark the task's checkbox `- [x]` as soon as verified (and check any parent
      whose subtasks are now all checked), before moving to the next task.
    - Respect layer separation: handlers -> service -> repository.
@@ -69,6 +73,8 @@ per invocation.
 Once all tasks in the slice are verified, wrap up the slice:
 
 1. Run the full test suite (`make test`) to ensure the slice as a whole passes.
+1. If the task artifact's document-level status changed, update its single
+   README row and coarse next action. Do not copy task progress into the README.
 1. If working from a per-slice task list (`projects/<slug>/tasks-slice-<n>.md`),
    mark the corresponding slice complete in the parent plan
    (`projects/<slug>/plan.md`).
