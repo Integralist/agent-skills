@@ -3,7 +3,7 @@
 - **Status:** Draft
 - **Project:** [{Project name}](./project.md)
 - **Milestone:** {Milestone identifier and name}
-- **Discovery:** [{Discovery document}](./discovery.md)
+- **Discovery:** [{Discovery document}]({discovery-file})
 - **Created:** {YYYY-MM-DD}
 - **Updated:** {YYYY-MM-DD}
 
@@ -88,5 +88,5 @@ without changing the approved decision history.
 ## References
 
 - [{Project Document}](./project.md)
-- [{Discovery Document}](./discovery.md)
+- [{Discovery Document}]({discovery-file})
 - [{Related document or discussion}]({link})

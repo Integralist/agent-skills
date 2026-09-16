@@ -85,9 +85,12 @@ Use the shared template for each PDD artifact:
 - [Design](../shared/PDD-DESIGN-TEMPLATE.md)
 
 Copy the matching template, replace every placeholder, and preserve its
-headings and section order. Add a section only when the project needs material
-that cannot fit the canonical structure; do not invent a different document
-shape for each project.
+headings and section order. Replace path placeholders with the actual relative
+file path: use `discovery.md` for an unqualified single milestone or
+`discovery-mN.md` for a qualified milestone. Never leave a path placeholder or
+assume `discovery.md` when the project uses qualified names. Add a section only
+when the project needs material that cannot fit the canonical structure; do not
+invent a different document shape for each project.
 
 ## Approval language
 
