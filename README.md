@@ -278,6 +278,7 @@ authenticate via SSO on first use.
 | **next-slice**               | Implement and complete every task in the next actionable plan slice.                   |
 | **next-task**                | Implement and complete the next actionable plan or task-list item.                     |
 | **perspectives**             | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.  |
+| **pdd**                      | Run a Product-Engineering initiative through Project, Discovery, and Design approvals. |
 | **polish**                   | Improve a short passage's clarity and concision.                                       |
 | **precedent**                | Align work with patterns established by peer files.                                    |
 | **recap**                    | Summarize what is done, in progress, and next.                                         |
@@ -300,6 +301,108 @@ authenticate via SSO on first use.
 | **unslop**                   | Cut AI tells and machine cadence from prose to restore human voice.                    |
 | **wait-what**                | Re-pitch a message that did not land.                                                  |
 | **writing-for-agents**       | Apply conventions that make skills and instruction files predictable.                  |
+
+## Developer workflows
+
+This guide helps developers choose a workflow from the skills in this
+repository. Start with the narrowest workflow that matches the work; do not
+wrap a small change in the full architecture process.
+
+### Choose a starting point
+
+```mermaid
+flowchart TD
+    Start([Need to change or build something]) --> Scope{What kind of work?}
+
+    Scope -->|Product + Engineering initiative| PDD[pdd]
+    Scope -->|Engineering-led design or unclear implementation| Architect[architect]
+    Scope -->|Known requirements, spec needed| Spec[to-spec]
+    Scope -->|Spec exists, plan needed| Plan[to-plan]
+    Scope -->|One plan slice is ready| Tasks[to-tasks]
+    Scope -->|Small, bounded change| Small[branch → edit/test → commit]
+    Scope -->|Technical documentation| Docs[tech-docs]
+
+    subgraph PDDFlow[Cross-functional PDD]
+        PDD --> Project[Project]
+        Project --> Discovery[Discovery]
+        Discovery --> Design[Design]
+    end
+
+    subgraph EngineeringFlow[Engineering delivery]
+        Architect --> Research[research]
+        Research --> Spec
+        Spec --> Grill[grill-with-docs]
+        Grill --> Plan
+        Plan --> Tasks
+        Tasks --> Execute[next-task or next-slice]
+    end
+
+    Design --> Spec
+    Small --> Delivery[commit → draft-pr or stacked-prs]
+    Execute --> Delivery
+    Docs --> Delivery
+```
+
+Use `pdd` when Product and Engineering need to agree on an initiative's scope,
+milestones, solution direction, and system-level design before implementation.
+Use `architect` for an engineering-led workflow that needs research, a stable
+specification, design stress-testing, and an implementation plan. Use the
+narrower skills when those inputs already exist.
+
+### PDD and engineering handoff
+
+PDD documents answer cross-functional approval questions. Engineering
+artifacts translate the approved Design into executable work:
+
+```mermaid
+flowchart LR
+    subgraph PDD[Product + Engineering approval]
+        Project[project.md] --> Discovery[discovery.md or discovery-mN.md]
+        Discovery --> Design[design.md or design-mN.md]
+    end
+
+    subgraph Delivery[Engineering delivery]
+        Spec[spec.md] --> Plan[plan.md]
+        Plan --> Tasks[tasks.md or tasks-slice-N.md]
+        Tasks --> Execute[next-task or next-slice]
+    end
+
+    Design --> Spec
+```
+
+The Design document is not the same artifact as `plan.md`:
+
+| Artifact | Main question | Audience |
+| --- | --- | --- |
+| `project.md` | What are we doing, why, and when? | Product + Engineering |
+| `discovery-mN.md` | Which option should we choose? | Product + Engineering |
+| `design-mN.md` | What solution are we approving? | Product + Engineering |
+| `spec.md` | What behavior is required? | Engineering |
+| `plan.md` | How will engineering implement it? | Implementers |
+| `tasks-slice-N.md` | What exact work happens next? | Implementer |
+
+For a first or single-milestone PDD project, use `discovery.md` and `design.md`.
+When a second milestone is introduced, rename the existing files to
+`discovery-m1.md` and `design-m1.md`, create the milestone-two files, and update
+all links in the project README. If multiple milestones are known up front, use
+qualified names from the beginning.
+
+After Design is explicitly approved, use `to-spec`, then `to-plan`,
+`to-tasks`, and `next-task` or `next-slice`. Do not run `architect` again by
+default; that duplicates engineering discovery unless substantial technical
+research is still unresolved.
+
+### Project workspaces
+
+Every project under `projects/<project>/` has a `README.md` index. The index
+links the project artifacts, records their current status, and names the next
+action. Skills that create or execute project artifacts keep it current using
+[`PROJECT-README.md`](./.agents/skills/shared/PROJECT-README.md).
+
+The parent [`projects/README.md`](./.agents/skills/shared/PROJECTS-README.md)
+describes the shared project lifecycle. The project-local README is the source
+for that project's navigation and status; `spec.md`, `plan.md`, and the other
+artifacts remain the sources for their own content.
 
 ## Choosing an analysis skill
 
@@ -352,15 +455,27 @@ Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make instal
 
 ## Workflow
 
-Core implementation flow:
+Use one of these flows:
 
 ```txt
-architect (spec → plan) → to-tasks (per slice) → next-task / next-slice → commit → code-review
+Product: pdd (project → discovery → design approval)
+       → to-spec → to-plan → to-tasks → next-task / next-slice
+
+Engineering: architect (research → spec → grill → plan)
+       → to-tasks → next-task / next-slice → commit → code-review
 ```
 
-`architect` creates the specification (`to-spec`) and vertical slice blueprint
-(`to-plan`). Slices are compiled just-in-time into mechanical TDD task
-lists (`to-tasks`), which `next-task` or `next-slice` execute in the main thread.
+`pdd` is the Product-Engineering approval workflow. After Design is approved,
+`to-spec` translates the cross-functional decision into stable engineering
+behavior. `to-plan` then turns that behavior into vertical implementation
+slices.
+
+`architect` is the engineering-led alternative. It coordinates research,
+`to-spec`, design stress-testing, and `to-plan` when a PDD process is not the
+right fit.
+
+Slices are compiled just-in-time into mechanical TDD task lists (`to-tasks`),
+which `next-task` or `next-slice` execute in the main thread.
 
 Plans and task lists can group several tasks into each review unit. When those
 units depend on each other, **stacked-prs** creates and manages the branches and

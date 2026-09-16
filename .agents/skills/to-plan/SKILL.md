@@ -115,7 +115,10 @@ Never format them as loose Markdown prose, lists, or headings.
 ## Plan document
 
 Ensure `projects/README.md` exists. If missing, create it from
-[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md).
+[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md). Ensure the
+project's `README.md` exists too; create it from
+[`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) and add or update
+the plan in its artifact table.
 
 Write to `projects/<yyyy-mm-dd>-<slug>/plan.md`. Date from `date +%F`, author
 from `git config user.name`. A new plan's `Status` is always `Planning`; the

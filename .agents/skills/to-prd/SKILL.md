@@ -45,6 +45,11 @@ framing the spec lacks.
 
 ## Write the PRD
 
+When writing under `projects/<project-slug>/`, ensure the project's `README.md`
+exists. If missing, create it from
+[`../shared/PROJECT-README.md`](../shared/PROJECT-README.md), then add or
+update the PRD in its artifact table.
+
 Write to `projects/<project-slug>/prd.md` (or `docs/prd/<yyyy-mm-dd>-<slug>.md`
 if standalone without a project directory). Date from `date +%F`, author from
 `git config user.name`.

@@ -45,6 +45,11 @@ decision**, not one giant ADR.
 
 ## Write the ADR(s)
 
+When writing under `projects/<project-slug>/`, ensure the project's `README.md`
+exists. If missing, create it from
+[`../shared/PROJECT-README.md`](../shared/PROJECT-README.md), then add or
+update each ADR in its artifact table.
+
 When extracted from a project plan or scoped to an initiative, write under
 `projects/<project-slug>/`:
 

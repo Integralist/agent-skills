@@ -67,7 +67,10 @@ tasks** for the plan — they are implementation, not spec.
 ## Write the spec
 
 Ensure `projects/README.md` exists. If missing, create it from
-[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md).
+[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md). Ensure the
+project's `README.md` exists too; create it from
+[`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) and add the new
+spec to its artifact table.
 
 Write the initiative-scoped delta spec to
 `projects/<yyyy-mm-dd>-<slug>/spec.md`. Date from `date +%F`, author from

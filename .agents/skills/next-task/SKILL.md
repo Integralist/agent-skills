@@ -56,6 +56,10 @@ Resume work from a project plan, in the main thread.
    - Run `make test` when done.
    - Update `docs/**/*.md` or `**/README.md` if the change alters
      behavior, public APIs, or usage patterns.
+   - Ensure the project `README.md` exists, creating it from
+     [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) when needed.
+     Keep task descriptions and checkboxes only in the task file; update the
+     README only when the task artifact's document-level status changes.
    - Respect layer separation: handlers -> service -> repository.
 
 ## Completion
@@ -63,6 +67,8 @@ Resume work from a project plan, in the main thread.
 Once verified (tests pass, work done), mark it complete before finishing:
 
 1. Change the task's checkbox from `- [ ]` to `- [x]` in the task or plan file.
+1. If the task artifact's document-level status changed, update its single
+   README row and coarse next action. Do not copy task progress into the README.
 1. If subtasks group under a parent, check the parent only once all its
    subtasks are checked.
 1. If this was the final task in a per-slice task list
