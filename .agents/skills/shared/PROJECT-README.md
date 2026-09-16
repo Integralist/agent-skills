@@ -41,14 +41,18 @@ individual task state.
 
 | Artifact | Purpose | Status |
 | --- | --- | --- |
-| [project.md](./project.md) | Project scope, milestones, and outcomes | {status} |
-| [spec.md](./spec.md) | Stable behavior and acceptance criteria | {status or —} |
-| [plan.md](./plan.md) | Implementation slices and dependencies | {status or —} |
-| [tasks.md](./tasks.md) | Executable tasks for the next slice | {status or —} |
+| [{artifact filename}](./{artifact filename}) | {purpose} | {status} |
 
-Add one row for each discovery, design, research, ADR, PRD, and slice-specific
-task file as it is created. Remove placeholder rows for artifacts that do not
-apply. These rows track document lifecycle only; do not copy task descriptions,
+Replace the placeholder row with one row for each actual artifact. Remove rows
+for artifacts that do not apply; never leave a placeholder or link to a file
+that does not exist. Use the actual filename for each workflow:
+
+- Single-slice tasks: `tasks.md`
+- Multi-slice tasks: `tasks-slice-N.md`
+- Single-milestone PDD: `discovery.md` and `design.md`
+- Qualified PDD milestones: `discovery-mN.md` and `design-mN.md`
+
+These rows track document lifecycle only; do not copy task descriptions,
 checkboxes, or slice-level progress into this README. The task file remains the
 source of truth for task state.
 
