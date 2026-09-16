@@ -192,19 +192,16 @@ without reopening the rejected alternatives or the system-level approach.
 After Design is explicitly `Approved`, hand off to the engineering workflow:
 
 ```text
-Product: pdd (project → discovery → design)
-                         ↓
-                    to-spec
-                         ↓
-                    to-plan
-                         ↓
-                  to-tasks → next-task / next-slice
+Product: pdd (Project, Discovery, Design)
+       → to-spec → to-plan → to-tasks → next-task / next-slice
 ```
 
 Use [`to-spec`](../to-spec/SKILL.md) to translate the approved Design into
 stable behavior, acceptance criteria, and testing seams. Then use
-[`to-plan`](../to-plan/SKILL.md) for vertical implementation slices and
-[`to-tasks`](../to-tasks/SKILL.md) for executable work.
+[`to-plan`](../to-plan/SKILL.md) for vertical implementation slices. `to-plan`
+invokes [`grill-with-docs`](../grill-with-docs/SKILL.md) internally before
+writing `plan.md`. Finally, use [`to-tasks`](../to-tasks/SKILL.md) for executable
+work.
 
 Do not run [`architect`](../architect/SKILL.md) automatically after an approved
 Design. `architect` is the alternative engineering-led workflow: use it when

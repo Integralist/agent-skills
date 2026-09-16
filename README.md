@@ -323,9 +323,7 @@ flowchart TD
     Scope -->|Technical documentation| Docs[tech-docs]
 
     subgraph PDDFlow[Cross-functional PDD]
-        PDD --> Project[Project]
-        Project --> Discovery[Discovery]
-        Discovery --> Design[Design]
+        PDD["pdd<br/>(Project, Discovery, Design)"]
     end
 
     subgraph EngineeringFlow[Engineering delivery]
@@ -337,7 +335,7 @@ flowchart TD
         Tasks --> Execute[next-task or next-slice]
     end
 
-    Design --> Spec
+    PDD --> Spec
     Small --> Delivery[commit → draft-pr or stacked-prs]
     Execute --> Delivery
     Docs --> Delivery
@@ -356,19 +354,27 @@ artifacts translate the approved Design into executable work:
 
 ```mermaid
 flowchart LR
-    subgraph PDD[Product + Engineering approval]
-        Project[project.md] --> Discovery[discovery.md or discovery-mN.md]
-        Discovery --> Design[design.md or design-mN.md]
+    PDD["pdd<br/>(Project, Discovery, Design)"]
+
+    subgraph Delivery[Engineering skill handoff]
+        ToSpec["to-spec"] --> ToPlan["to-plan"]
+        ToPlan --> ToTasks["to-tasks"]
+        ToTasks --> Execute["next-task / next-slice"]
     end
 
-    subgraph Delivery[Engineering delivery]
-        Spec[spec.md] --> Plan[plan.md]
-        Plan --> Tasks[tasks.md or tasks-slice-N.md]
-        Tasks --> Execute[next-task or next-slice]
-    end
-
-    Design --> Spec
+    PDD --> ToSpec
 ```
+
+`to-plan` invokes `grill-with-docs` internally before producing `plan.md`.
+The arrows above show skill handoffs; the outputs are separate artifacts:
+
+| Skill | Produces or updates |
+| --- | --- |
+| `pdd` | `project.md`, `discovery*.md`, `design*.md` |
+| `to-spec` | `spec.md` |
+| `to-plan` | `plan.md` |
+| `to-tasks` | `tasks.md` or `tasks-slice-N.md` |
+| `next-task` / `next-slice` | Task checkboxes and implementation changes |
 
 The Design document is not the same artifact as `plan.md`:
 
@@ -461,10 +467,10 @@ Regenerate with `make rules` (runs `.claude/scripts/gen-rules.sh`); `make instal
 Use one of these flows:
 
 ```txt
-Product: pdd (project → discovery → design approval)
+Product: pdd (Project, Discovery, Design)
        → to-spec → to-plan → to-tasks → next-task / next-slice
 
-Engineering: architect (research → spec → grill → plan)
+Engineering: architect (research, spec, grill, plan)
        → to-tasks → next-task / next-slice → commit → code-review
 ```
 
