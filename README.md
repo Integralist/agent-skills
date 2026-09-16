@@ -402,7 +402,10 @@ action. Skills that create or execute project artifacts keep it current using
 The parent [`projects/README.md`](./.agents/skills/shared/PROJECTS-README.md)
 describes the shared project lifecycle. The project-local README is the source
 for that project's navigation and status; `spec.md`, `plan.md`, and the other
-artifacts remain the sources for their own content.
+artifacts remain the sources for their own content. PDD documents use the
+canonical [Project](./.agents/skills/shared/PDD-PROJECT-TEMPLATE.md),
+[Discovery](./.agents/skills/shared/PDD-DISCOVERY-TEMPLATE.md), and
+[Design](./.agents/skills/shared/PDD-DESIGN-TEMPLATE.md) templates.
 
 ## Choosing an analysis skill
 

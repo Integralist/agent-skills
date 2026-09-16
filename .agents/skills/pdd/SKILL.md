@@ -76,6 +76,19 @@ When a second milestone is introduced:
 If multiple milestones are known at project creation, use qualified names from
 the start. Keep milestone identifiers stable even if their titles change.
 
+## Canonical templates
+
+Use the shared template for each PDD artifact:
+
+- [Project](../shared/PDD-PROJECT-TEMPLATE.md)
+- [Discovery](../shared/PDD-DISCOVERY-TEMPLATE.md)
+- [Design](../shared/PDD-DESIGN-TEMPLATE.md)
+
+Copy the matching template, replace every placeholder, and preserve its
+headings and section order. Add a section only when the project needs material
+that cannot fit the canonical structure; do not invent a different document
+shape for each project.
+
 ## Approval language
 
 Use approval states, not task-completion language:
@@ -95,7 +108,9 @@ invocation, record `Approved` only after the user explicitly confirms it.
 ## Stage 1: Project document
 
 Set the Project status to `Draft` while writing and `Awaiting approval` when
-all required sections are present. Write or update `project.md` with:
+all required sections are present. Start from the
+[Project template](../shared/PDD-PROJECT-TEMPLATE.md) and write or update
+`project.md` with:
 
 - Preliminary milestones and their intended outcomes
 - Key objectives
@@ -118,7 +133,8 @@ Discovery and reviewers can identify what is deliberately outside the scope.
 
 Discovery applies to one Project milestone. Set its status to `Draft` while
 writing and `Awaiting approval` when the alternatives are ready for review.
-Write or update the matching `discovery*.md` with:
+Start from the [Discovery template](../shared/PDD-DISCOVERY-TEMPLATE.md) and
+write or update the matching `discovery*.md` with:
 
 - Glossary
 - Customer abstraction: what the customer perceives and values
@@ -143,7 +159,9 @@ milestone. Technical leaders or architects should review it before Design.
 
 Design applies to the solution direction approved in the matching Discovery
 artifact. Set its status to `Draft` while writing and `Awaiting approval` when
-it is ready for sign-off. Write or update the matching `design*.md` with:
+it is ready for sign-off. Start from the
+[Design template](../shared/PDD-DESIGN-TEMPLATE.md) and write or update the
+matching `design*.md` with:
 
 - Goals and requirements
 - Out-of-scope items
