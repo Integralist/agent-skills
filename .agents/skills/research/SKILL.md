@@ -8,13 +8,33 @@ description: >-
 
 # Research
 
-Produce a deep reference document for a topic or repository.
-Output goes to `docs/research/<yyyy-mm-dd>-<slug>.md` (date prefix
-from today's date) and serves as the foundation for later
-planning or implementation work.
+Produce a deep reference document for a topic or repository. By default, output
+goes to `docs/research/<yyyy-mm-dd>-<slug>.md` (date prefix from today's date)
+and serves as the foundation for later planning or implementation work.
+
+When research is explicitly scoped to an active project, output goes to
+`projects/<project>/research.md` instead. Project-scoped research also ensures
+the project README exists and indexes the research artifact.
 
 If the request is too vague to research (no clear topic or repo), elicit intent
 first via [`clarify`](../clarify/SKILL.md).
+
+## Determine output scope
+
+Use project scope when the user or a coordinating skill provides an active
+`projects/<project>/` directory. Otherwise use the standalone `docs/research/`
+output. Do not create a project directory merely because research might later
+be useful for planning; ask for the project when the scope is ambiguous.
+
+For project-scoped research:
+
+1. Ensure `projects/README.md` exists, creating it from
+   [`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md) when needed.
+2. Ensure `projects/<project>/README.md` exists, creating it from
+   [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) when needed.
+3. Add one document-level `research.md` row to the project artifact table.
+4. Keep research sections and findings only in `research.md`; do not duplicate
+   them in the project README.
 
 ## Detect research mode
 
@@ -26,8 +46,9 @@ first via [`clarify`](../clarify/SKILL.md).
 
 ## Check for existing research
 
-Before starting either mode, scan `docs/research/` for documents
-that already cover the topic or repo. Match on the slug portion;
+Before starting either mode, scan the active project's `research.md` when
+project scope is provided, and scan `docs/research/` for standalone documents
+that cover the topic or repo. Match on the slug portion;
 ignore the `yyyy-mm-dd-` date prefix — "CI pipeline caching" is
 covered by an existing `*-ci.md` or `*-continuous-integration.md`;
 the `fastly/spotless` repo is covered by `*-spotless.md`.
@@ -169,9 +190,11 @@ The prompt must include:
 
 ### Save findings
 
-Write to `docs/research/<yyyy-mm-dd>-{repo}.md` (date prefix from
-today), or extend the existing document found earlier. The
-document must include a **Project Metadata** section at the top
+Write to `projects/<project>/research.md` when project scope is active;
+otherwise write to `docs/research/<yyyy-mm-dd>-{repo}.md` (date prefix from
+today). Extend an existing document found earlier instead of creating a
+second one. A project-scoped document must be indexed by the project README.
+The document must include a **Project Metadata** section at the top
 with the git diagnostic snapshot (churn hotspots, bus factor, bug
 clusters, commit velocity, crisis patterns, high-risk files). Use
 the Mode B template below.
@@ -195,9 +218,10 @@ organizational knowledge sources" above.
 
 ### Output
 
-Write to `docs/research/<yyyy-mm-dd>-<topic-slug>.md` (date prefix
-from today), or extend the existing document found earlier. Use
-this template:
+Write to `projects/<project>/research.md` when project scope is active;
+otherwise write to `docs/research/<yyyy-mm-dd>-<topic-slug>.md` (date prefix
+from today). Extend an existing document found earlier instead of creating a
+second one. Use this template:
 
 ````markdown
 # {Topic}
