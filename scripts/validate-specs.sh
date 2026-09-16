@@ -87,6 +87,11 @@ validate_project_document() {
       error "$file: missing '### Documentation' section or documentation slice"
       file_errors=$((file_errors + 1))
     fi
+  elif [[ "$(basename "$file")" == "project.md" ]]; then
+    grep -q '^## Preliminary Milestones' "$file" || { error "$file: missing '## Preliminary Milestones'"; file_errors=$((file_errors + 1)); }
+    grep -q '^## Key Objectives' "$file" || { error "$file: missing '## Key Objectives'"; file_errors=$((file_errors + 1)); }
+    grep -q '^## Functional Requirements' "$file" || { error "$file: missing '## Functional Requirements'"; file_errors=$((file_errors + 1)); }
+    grep -q '^## Non-functional Requirements' "$file" || { error "$file: missing '## Non-functional Requirements'"; file_errors=$((file_errors + 1)); }
   fi
 
   return "$file_errors"
@@ -104,7 +109,7 @@ for dir in "${PROJECT_DIRS[@]}"; do
   echo "Checking $dir..."
   project_files=0
 
-  for document in "$dir/spec.md" "$dir/plan.md"; do
+  for document in "$dir/project.md" "$dir/spec.md" "$dir/plan.md"; do
     [[ -f "$document" ]] || continue
     project_files=$((project_files + 1))
     CHECKED=$((CHECKED + 1))
