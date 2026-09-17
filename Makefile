@@ -183,7 +183,7 @@ update-google-workspace-mcp:
 	@$(STEP) --section "Google Workspace MCP"
 	@bash scripts/workspace-mcp.sh update $(ARGS)
 
-# Validate active project specs, plans, and living capability specs.
+# Validate active PDD project documents, project specs, plans, and living capability specs.
 check-specs:
 	@bash scripts/validate-specs.sh
 

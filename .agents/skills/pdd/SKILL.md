@@ -45,6 +45,22 @@ approved before working on it. Do not create Discovery before the Project stage
 is approved. Do not create Design before the matching Discovery stage is
 approved.
 
+## Engineering boundary
+
+PDD stages create and review Product-Engineering artifacts. They do not
+directly change implementation, tooling, or living specifications.
+
+If a PDD discussion reveals a required code, script, or `docs/specs/` change:
+
+1. Stop the PDD-stage change.
+2. Create or route to an engineering-led project.
+3. Create that project's `spec.md` before changing the repository.
+4. Add a `## Behavioural Delta` section when the change affects an existing
+   durable contract.
+5. Resume the PDD stage only after the engineering work has its own scope.
+
+Do not place unrelated engineering changes in the PDD project directory.
+
 ## Project workspace
 
 Keep PDD documents in the project directory:
@@ -189,7 +205,8 @@ without reopening the rejected alternatives or the system-level approach.
 
 ## Handoff to engineering
 
-After Design is explicitly `Approved`, hand off to the engineering workflow:
+After Design is explicitly `Approved`, create `spec.md` before implementation
+or living-spec changes, then hand off to the engineering workflow:
 
 ```text
 Product: pdd (Project, Discovery, Design)
@@ -197,11 +214,15 @@ Product: pdd (Project, Discovery, Design)
 ```
 
 Use [`to-spec`](../to-spec/SKILL.md) to translate the approved Design into
-stable behavior, acceptance criteria, and testing seams. Then use
-[`to-plan`](../to-plan/SKILL.md) for vertical implementation slices. `to-plan`
-invokes [`grill-with-docs`](../grill-with-docs/SKILL.md) internally before
-writing `plan.md`. Finally, use [`to-tasks`](../to-tasks/SKILL.md) for executable
-work.
+stable behavior, acceptance criteria, and testing seams. The project-level
+`spec.md` must exist before implementation, tooling, or `docs/specs/` changes
+begin. If a living specification changes, `spec.md` must contain a
+`## Behavioural Delta` section with `ADDED`, `MODIFIED`, `REMOVED`, or `RENAMED`.
+
+Then use [`to-plan`](../to-plan/SKILL.md) for vertical implementation slices.
+`to-plan` invokes [`grill-with-docs`](../grill-with-docs/SKILL.md) internally
+before writing `plan.md`. Finally, use [`to-tasks`](../to-tasks/SKILL.md) for
+executable work.
 
 Do not run [`architect`](../architect/SKILL.md) automatically after an approved
 Design. `architect` is the alternative engineering-led workflow: use it when
