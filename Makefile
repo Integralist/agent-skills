@@ -105,6 +105,15 @@ install-gemini:
 	else \
 		$(STEP) --skip "settings.json: ~/.gemini does not exist"; \
 	fi
+	@if [ -d ~/.gemini ] && [ -d ~/.pi/agent/git/github.com/fastly/agent-skills-internal ]; then \
+		$(STEP) "Fastly internal skills → ~/.gemini/skills/ (symlinks)" \
+			bash -c 'mkdir -p ~/.gemini/skills && find ~/.pi/agent/git/github.com/fastly/agent-skills-internal/plugins -type f -name "SKILL.md" -exec dirname {} + | while read -r dir; do ln -sfn "$$dir" ~/.gemini/skills/"$$(basename "$$dir")"; done' || exit 1; \
+	elif [ -d ~/.gemini ] && git ls-remote -h git@github.com:fastly/agent-skills-internal.git HEAD >/dev/null 2>&1; then \
+		$(STEP) "Fastly internal skills (npx skills)" \
+			npx -y skills add git@github.com:fastly/agent-skills-internal.git --skill '*' -g -y || exit 1; \
+	else \
+		$(STEP) --skip "Fastly internal skills: no access or source directory found"; \
+	fi
 	@if [ -d ~/.gemini/antigravity-cli ]; then \
 		$(STEP) "statusline.sh → ~/.gemini/antigravity-cli/" cp .gemini/antigravity-cli/statusline.sh ~/.gemini/antigravity-cli/statusline.sh || exit 1; \
 		$(OPINJECT) "settings.json → ~/.gemini/antigravity-cli/" .gemini/antigravity-cli/settings.json.tmpl ~/.gemini/antigravity-cli/settings.json; \
