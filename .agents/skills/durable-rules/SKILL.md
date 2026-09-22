@@ -12,7 +12,7 @@ After producing a plan or completing work, review findings, recent prompts,
 and interaction behaviours for **systemic patterns** that should be codified
 beyond the specific task.
 
-Scope covers coding conventions, anti-patterns, and skill automation.
+Scope covers automated guardrails, coding conventions, anti-patterns, and skill automation.
 Project operating instructions (build/test/lint commands, gotchas) belong
 to [`agents-md`](../agents-md/SKILL.md).
 
@@ -20,7 +20,10 @@ to [`agents-md`](../agents-md/SKILL.md).
 
 1. If nothing durable or automatable surfaced, skip entirely. Do not force it.
 2. Classify each candidate:
+   - **Automated guardrail**: if mechanical (syntax, banned APIs, file structure),
+     propose a linter rule, pre-commit hook, or CI check before writing text documentation.
    - **Coding convention or anti-pattern**:
+     - Reserve for judgment calls where deterministic checks cannot substitute.
      - *Project-specific* → repo's conventions dir or convention skills if
        present; otherwise `.agents/AGENTS.md` via `agents-md`.
      - *Cross-project* → global conventions source (see "Locating global
