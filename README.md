@@ -285,6 +285,7 @@ authenticate via SSO on first use.
 | **redesign**                 | Audit a codebase for redesigns that remove structural complexity.                      |
 | **refactor**                 | Plan a simpler reimplementation of an existing feature.                                |
 | **research**                 | Research a topic or repository and save a sourced reference under `docs/research/`.    |
+| **retro**                    | Audit a coding session for missing guardrails, context bloat, and tool friction.       |
 | **security-review-feedback** | Validate vulnerability findings for reachability and exploitability before fixing.     |
 | **show-me**                  | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.     |
 | **stacked-prs**              | Create and manage dependent PRs with the official `gh stack` extension.                |
