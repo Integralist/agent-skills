@@ -1,0 +1,29 @@
+/*
+ * Bundled export stylesheet for Mermaid CLI.
+ * Set the top-level Mermaid `fontFamily` to `Menlo, monospace` in the diagram
+ * source. The CSS variable lets the stylesheet follow that setting.
+ */
+html,
+body,
+#my-svg {
+  background: #ffffff !important;
+}
+
+#my-svg,
+#my-svg text,
+#my-svg foreignObject,
+#my-svg div,
+#my-svg p,
+#my-svg span,
+#my-svg .nodeLabel,
+#my-svg .edgeLabel,
+#my-svg .cluster-label {
+  font-family: var(--mermaid-font-family, Menlo, monospace) !important;
+}
+
+/* Soft offset shadow used by the exported diagram style. */
+#my-svg .node rect,
+#my-svg .node polygon,
+#my-svg .node circle {
+  filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.10));
+}

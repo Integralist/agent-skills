@@ -44,6 +44,57 @@ mmdc --version
    - Check that text is legible and not clipped.
    - Check that the diagram is not zoomed out into an unreadable thin strip.
 
+## Image Export
+
+Keep image export separate from syntax validation. Render a local image only
+when the user explicitly asks to save the image, save a copy, put it on their
+machine, or uses equivalent wording. Inspection, preview, and validation alone
+do not request a saved image.
+
+When the user requests a saved image:
+
+1. Write the Mermaid source to a unique path under `/tmp/`, such as
+   `/tmp/mermaid-<random-id>.mmd`. Do not overwrite an existing diagram source
+   or image.
+2. Use the bundled stylesheet at
+   `.agents/skills/conventions-mermaid/mermaid.css` as `--cssFile`.
+3. Add a top-level `fontFamily` of `Menlo, monospace` to the Mermaid init
+   configuration. Use only Menlo with the generic `monospace` fallback.
+4. Use `theme: "base"` and `themeVariables` for global colors. Use explicit
+   `style <subgraph-id>` directives for different boundary colors and
+   `classDef` plus `class` for consistent node boxes. Global theme variables do
+   not make individual subgraphs use different colors.
+5. Generate a random output filename under `/tmp/`, for example with
+   `uuidgen`, and always pass `--backgroundColor white`:
+
+   ```bash
+   id="$(uuidgen | tr '[:upper:]' '[:lower:]')"
+   input="/tmp/mermaid-${id}.mmd"
+   output="/tmp/mermaid-${id}.png"
+
+   mmdc \\
+     --input "$input" \\
+     --output "$output" \\
+     --cssFile .agents/skills/conventions-mermaid/mermaid.css \\
+     --backgroundColor white
+
+   printf 'Saved image: %s\\n' "$output"
+   ```
+
+6. Read the generated image and check that text is legible and not clipped.
+7. Add `--scale 2` for a 2x PNG or `--scale 3` for a 3x PNG when the user
+   requests a much larger image. `--scale` increases raster resolution without
+   changing the diagram layout.
+
+Use the top-level Mermaid `fontFamily`, not CSS alone, so Mermaid measures text
+with the selected font before calculating layout. CSS-only font overrides can
+clip labels after layout. Always report the exact random output path to the
+user.
+
+A PNG does not contain the Mermaid source or theme configuration. Exact
+reproduction requires the source, configuration, custom CSS, and compatible
+Mermaid versions.
+
 ## Layout & Structure Guidelines
 
 Mermaid layouts are sensitive to node hierarchy and flow direction. A poorly
