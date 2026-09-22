@@ -286,6 +286,7 @@ authenticate via SSO on first use.
 | **refactor**                 | Plan a simpler reimplementation of an existing feature.                                |
 | **research**                 | Research a topic or repository and save a sourced reference under `docs/research/`.    |
 | **security-review-feedback** | Validate vulnerability findings for reachability and exploitability before fixing.     |
+| **show-me**                  | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.     |
 | **stacked-prs**              | Create and manage dependent PRs with the official `gh stack` extension.                |
 | **summarize-for-adhd**       | Summarise a session, file, or URL with a clear takeaway and short, ADHD-friendly points. |
 | **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
