@@ -247,6 +247,7 @@ authenticate via SSO on first use.
 | **cleanup**                  | Audit AI-generated clutter, then apply approved fixes interactively.                   |
 | **code-review**              | Review changes for correctness, security, reliability, and maintainability.            |
 | **code-review-feedback**     | Verify review feedback before accepting or implementing it.                            |
+| **codebase-design**          | Design deep modules with high leverage, strong locality, and clean seams.              |
 | **commit**                   | Group related changes and create clear Git commits.                                    |
 | **consensus**                | Reach cross-model consensus through gated discussion rounds.                           |
 | **conventions-go**           | Apply Go conventions when editing or reviewing `.go` files.                            |
@@ -271,6 +272,7 @@ authenticate via SSO on first use.
 | **grill-with-docs**          | Grill an idea while updating its glossary and ADRs.                                    |
 | **grilling**                 | Stress-test assumptions through a structured, relentless interview.                    |
 | **handoff**                  | Summarize the current session for another agent.                                       |
+| **improve-codebase-architecture** | Scan a codebase for deepening opportunities, present a visual HTML report, and grill through candidates. |
 | **incident-report**          | Write an incident report from the session's debugging evidence.                        |
 | **jira**                     | Create, edit, assign, transition, search, and verify Jira issues.                      |
 | **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
