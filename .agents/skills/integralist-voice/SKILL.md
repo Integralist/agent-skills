@@ -100,6 +100,12 @@ message, never a row.
 - **Long-form prose (blog posts, articles, docs)** — group related ideas into
   cohesive 2-4 sentence paragraphs so the reader can follow the technical flow
   without stumbling over single-line breaks. Keep paragraphs focused and airy.
+- **Batch PR review replies** — when replying to multiple review comments in one
+  pass, drop repetitive conversational openers ("Good shout", "Nice catch",
+  "Good spot", "Spot on"). An opening acknowledgement works for an isolated
+  one-off reply, but repeating variations across a thread looks like an AI
+  formula. Cut straight to what was done or answered ("I've updated...", "Doh,
+  missed...", "Fair point...").
 
 ## Anti-patterns
 
@@ -110,6 +116,8 @@ These are the tells that the text was generated. Strip all of them.
 - "Delve", "leverage", "robust", "comprehensive", "seamless", "landscape",
   "it's worth noting", "that said" as a paragraph opener.
 - "Great question!" or any opening compliment.
+- Repetitive opening acknowledgements across batch PR comments ("Good catch",
+  "Nice shout", "Good spot"). Lead directly with the diff, fix, or answer.
 - Bold text mid-sentence for emphasis.
 - A closing paragraph that restates what was just said.
 - The pitch synthesis — summing up benefits in a neat bow ("best of both worlds
