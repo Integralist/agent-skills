@@ -6,6 +6,7 @@
 STEP := bash scripts/step.sh
 OPINJECT := bash scripts/op-inject.sh
 PKG_TIMEOUT ?= 30
+PI_MODELS ?= false
 
 ifeq ($(SKIP_AUDIT),1)
 export npm_config_audit := false
@@ -33,9 +34,10 @@ install-tools:
 
 # Install Pi, its configured packages, and global settings. The repository
 # settings are copied last so they remain the source of truth after pi install
-# updates the global package store. mcp.json is templated because it contains
-# the Context7 API key; scripts/op-inject.sh bakes it in, skipping gracefully
-# without Fastly 1Password access.
+# updates the global package store. models.json stays in the repo as a reference
+# and is copied only with PI_MODELS=true. mcp.json is templated because it
+# contains the Context7 API key; scripts/op-inject.sh bakes it in, skipping
+# gracefully without Fastly 1Password access.
 install-pi: install-tools
 	@$(STEP) --section "Pi"
 	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
@@ -45,6 +47,11 @@ install-pi: install-tools
 	@mkdir -p ~/.pi/agent/themes
 	@$(STEP) "AGENTS.md → ~/.pi/agent/AGENTS.md" cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md
 	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
+ifeq ($(PI_MODELS),true)
+	@$(STEP) "models.json → ~/.pi/agent/models.json" cp .pi/agent/models.json ~/.pi/agent/models.json
+else
+	@$(STEP) --skip "models.json: pass PI_MODELS=true to install"
+endif
 	@$(STEP) "keybindings.json → ~/.pi/agent/keybindings.json" cp .pi/agent/keybindings.json ~/.pi/agent/keybindings.json
 	@$(STEP) "nord-contrast.json → ~/.pi/agent/themes/" cp .pi/agent/themes/nord-contrast.json ~/.pi/agent/themes/nord-contrast.json
 	@$(OPINJECT) "mcp.json → ~/.pi/agent/mcp.json" .pi/agent/mcp.json.tmpl ~/.pi/agent/mcp.json
