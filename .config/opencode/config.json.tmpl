@@ -61,20 +61,12 @@
       "enabled": true
     }
   },
-  "model": "amazon-bedrock/global.anthropic.claude-opus-4-6-v1",
+  "model": "amazon-bedrock/global.anthropic.claude-opus-5-5",
   "provider": {
     "amazon-bedrock": {
       "models": {
-        "global.anthropic.claude-opus-5": {
-          "cost": {
-            "input": 5,
-            "output": 25
-          },
-          "limit": {
-            "context": 1000000,
-            "output": 32000
-          },
-          "name": "Claude Opus 5",
+        "global.anthropic.claude-opus-5-5": {
+          "name": "Claude Opus 5.5",
           "reasoningEffort": "high"
         },
         "global.anthropic.claude-opus-4-8": {
@@ -127,7 +119,7 @@
         }
       },
       "whitelist": [
-        "global.anthropic.claude-opus-5",
+        "global.anthropic.claude-opus-5-5",
         "global.anthropic.claude-opus-4-8",
         "global.anthropic.claude-opus-4-6-v1[1m]",
         "global.anthropic.claude-haiku-4-5-20251001-v1:0",
