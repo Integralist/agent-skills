@@ -21,8 +21,9 @@ Most repos have a single context:
 ├── CONTEXT.md
 ├── docs/
 │   └── adr/
-│       ├── 0001-event-sourced-orders.md
-│       └── 0002-postgres-for-write-model.md
+│       ├── README.md        # repo-wide ADR index
+│       ├── ADR-0001.md
+│       └── ADR-0002.md
 └── src/
 ```
 
@@ -33,7 +34,7 @@ where each lives:
 /
 ├── CONTEXT-MAP.md
 ├── docs/
-│   └── adr/                          ← system-wide decisions
+│   └── adr/                          ← system-wide decisions and ADR index
 ├── src/
 │   ├── ordering/
 │   │   ├── CONTEXT.md
@@ -43,8 +44,9 @@ where each lives:
 │       └── docs/adr/
 ```
 
-Create files lazily: a `CONTEXT.md` when the first term is resolved, a
-`docs/adr/` when the first ADR is needed.
+Create files lazily: a `CONTEXT.md` when the first term is resolved; create
+root `docs/adr/README.md` with the first ADR anywhere in the repository, even
+when that ADR is context-specific.
 
 ## During the session
 
