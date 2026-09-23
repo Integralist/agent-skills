@@ -132,10 +132,11 @@ If the fields below show commands rather than output, run each one first.
 
 ## Agent Context Files
 
-Skip these from commits unless the user explicitly asks to include them:
-`.claude/`, `.cursorrules`, `.cursorignore`,
-`.github/copilot-instructions.md`, `.windsurfrules`, `.clinerules`,
-`.gemini/`, `.codex/`, `.omp/`, `.pi/`
+Do not auto-commit user-specific agent state, secrets, or generated files.
+Tracked, repo-owned configuration—including files under `.pi/`, `.claude/`,
+`.gemini/`, and similar directories—is eligible for commit when it belongs to
+the requested change. Inspect each path and ask if its ownership or purpose is
+unclear.
 
 ## Plan and Task Documents
 
