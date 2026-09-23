@@ -56,16 +56,10 @@ Suggest a default by audience; let the user override.
 1. Load the chosen source. If it's a plan doc, also run
    `git diff origin/<main>...HEAD --stat` and flag any drift between what the
    plan promised and what shipped, inline above the summary.
-1. Apply these rules:
-   - Lead with the user-visible problem and outcome — not file or module names.
-   - No file paths, function names, or framework jargon unless unavoidable;
-     when unavoidable, gloss them.
-   - Translate technical decisions into business consequences (e.g. "switched to
-     event sourcing" → "we can now reconstruct any past state, so support can
-     answer 'what did the customer see last Tuesday?'").
-   - Cite the plan doc path and PR/branch URL at the bottom for engineers who
-     want depth.
-1. Render in the chosen format and emit it as the assistant's response, wrapped
+2. Apply the audience-centred writing guidance in
+   [`../product-voice/SKILL.md`](../product-voice/SKILL.md). Cite the plan doc
+   path and PR/branch URL at the bottom for engineers who want depth.
+3. Render in the chosen format and emit it as the assistant's response, wrapped
    in a fenced code block for clean copying.
 
 ## Format templates

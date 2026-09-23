@@ -52,6 +52,11 @@ topic. Make learning clear and enjoyable without watering down important ideas.
 
 ## Teaching and slide design
 
+Apply the audience-centred writing guidance in
+[`../product-voice/SKILL.md`](../product-voice/SKILL.md). Connect each concept's
+mechanics to why it matters to the learner without replacing explanation with
+benefits alone.
+
 - Use a warm, encouraging voice. Explain technical terms when they first
   appear, prefer concrete examples and analogies, and make the learning feel
   inviting rather than childish.
