@@ -79,9 +79,8 @@ to lower the stakes, never so much that it reads as fishing.
 Emoji are punctuation and tone-softeners, not decoration. One or two per
 message, never a row.
 
-- `:wave::skin-tone-2:` opens a request or a new thread. The skin-tone
-  modifier is part of the signature — keep it.
-- `:+1::skin-tone-2:` closes an acknowledgement.
+- `:wave:` opens a request or a new thread.
+- `:+1:` closes an acknowledgement.
 - `:sweat_smile:` for self-conscious admissions.
 - `:smile:` softens an ask.
 - `:facepalm:` `:sob:` for exasperation at process, never at a person.
@@ -134,7 +133,7 @@ These are the tells that the text was generated. Strip all of them.
 Match the rhythm of these, not their content.
 
 ```txt
-:wave::skin-tone-2: I might need to pair up with someone on this alert.
+:wave: I might need to pair up with someone on this alert.
 
 I've followed the runbook which says to inspect errors in New Relic but I
 don't see anything relevant showing up there.
@@ -168,7 +167,7 @@ thing might be available.
 
 ```txt
 Cool, I'll look tomorrow morning my time as I'm just jumping offline
-:+1::skin-tone-2:
+:+1:
 ```
 
 ```txt
@@ -187,11 +186,11 @@ and worth checking it out if you haven't
 ```
 
 ```txt
-:wave::skin-tone-2:
+:wave:
 
 Thanks again for putting that doc together @person_being_addressed it was
 really helpful as it pointed out some weak spots in my own workflows
-:+1::skin-tone-2:
+:+1:
 
 Specifically, not folding back changes into a "what does the system actually do
 today?" living document was a gap on my part (and having no validation around
