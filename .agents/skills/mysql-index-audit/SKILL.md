@@ -267,22 +267,23 @@ join MySQL probes the joined ("driven") table once per driving row, so the join
 columns on the driven side — typically the foreign key — must be indexed, or
 each probe is a full scan. Flag an unindexed join/FK column as MISSING.
 
-### INDEX-MERGE — two indexes doing one index's job
+### INDEX-MERGE — candidate plan, not automatic defect
 
-The query has independent predicates on two columns, each served by its own
-single-column index, so MySQL merges them (`EXPLAIN` shows type `index_merge`
-and `Using union`/`Using intersect(...)`). One index scan is faster than two: a
-single composite index almost always beats a merge, because a B-tree serves
-only **one** range as an access predicate — two independent ranges can't both
-seek.
+MySQL may combine scans from separate indexes: intersection for some `AND`
+predicates and union for some `OR` predicates. An `index_merge` plan is not
+proof of a missing composite index or a bottleneck. Confirm the plan with
+`EXPLAIN`; compare actual rows and timing with `EXPLAIN ANALYZE` where
+available.
 
-```txt
-idx_last (last_name)          <- merged...
-idx_dob  (date_of_birth)      <- ...instead of one composite
-```
+For `AND` predicates, compare an intersection plan with a composite index
+ordered for the query. For `OR` across columns, Index Merge may be appropriate;
+a `UNION` rewrite is a measured alternative, not a default.
 
-Fix: replace the pair with one composite index, most-selective column first.
-Treat a standing `index_merge` plan as a MISSING-composite signal.
+When rewriting `OR`, preserve the original row set and apply global
+`ORDER BY`/`LIMIT` to the combined results. `UNION` removes duplicate result
+tuples, while `UNION ALL` preserves them. Deduplicate by row identity (for
+example, union unique keys) or make branches disjoint so rows matching both
+predicates still appear once.
 
 ### COVERING opportunity
 
@@ -482,6 +483,8 @@ tier adequate to the task (see
   (`Explain.md`, `Indexes.md`, `Virtual Columns.md`)
 - MySQL `EXPLAIN` output:
   <https://dev.mysql.com/doc/refman/8.0/en/explain-output.html>
+- Index Merge optimization:
+  <https://dev.mysql.com/doc/refman/8.0/en/index-merge-optimization.html>
 - Generated columns:
   <https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html>
 - SQL indexing reference (access vs filter predicates, clustered indexes, keyset
