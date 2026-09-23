@@ -28,11 +28,15 @@ the direct answer.
 
 ### 2. Anchor State on Multi-Turn Tasks
 
-The reader cannot track multi-step progress across turns. Anchor the top of
-every status update:
+The reader cannot track multi-step progress across turns. Start every status
+update with a short summary line, then a blank line and the body. Keep the
+summary to one brief clause. Put supporting details and the immediate next
+action in the body; split independent details into separate sentences or
+bullets:
 
 ```txt
-Step 3/5 complete: schema migration applied.
+Step 3/5: Schema migration applied.
+
 Next: backfill legacy rows.
 ```
 
