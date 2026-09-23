@@ -40,6 +40,7 @@ install-tools:
 # gracefully without Fastly 1Password access.
 install-pi: install-tools
 	@$(STEP) --section "Pi"
+	@$(STEP) "Crit Pi skills → ~/.pi/agent/skills/" bash -c 'cd "$$HOME" && crit install pi --force'
 	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 	@for package in git:github.com/Integralist/pi-statusbar npm:@shuv1337/pi-mcp-adapter npm:pi-intercom git:github.com/Integralist/pi-subagents git:github.com/Integralist/pi-btw; do \
 		$(STEP) --timeout $(PKG_TIMEOUT) --optional "$$package" pi install "$$package" --no-approve; \

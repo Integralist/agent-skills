@@ -21,12 +21,6 @@
         "plugins/observability/skills/**",
         "plugins/portal/skills/**"
       ]
-    },
-    {
-      "source": "git:github.com/tomasz-tomczyk/crit",
-      "skills": [
-        "integrations/pi/skills/**"
-      ]
     }
   ],
   "enabledModels": [
