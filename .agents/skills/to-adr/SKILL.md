@@ -45,23 +45,40 @@ decision**, not one giant ADR.
 
 ## Write the ADR(s)
 
-When writing under `projects/<project-slug>/`, ensure the project's `README.md`
+Follow the repo-wide naming, numbering, and registry rules in
+[`ADR-FORMAT.md`](../domain-modeling/ADR-FORMAT.md).
+
+For ADRs under `projects/<project-slug>/`, ensure the project's `README.md`
 exists. If missing, create it from
 [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md), then add or
 update each ADR in its artifact table.
 
-When extracted from a project plan or scoped to an initiative, write under
-`projects/<project-slug>/`:
+Write each ADR as `ADR-<NNNN>.md` in its destination directory:
 
-- **Single ADR**: Write to `adr.md`.
-- **Multiple ADRs**: Write to `adr-<short-title>.md`.
-- **Subsequent ADRs**: If `adr.md` already exists when adding another decision,
-  rename it to `adr-<short-title>.md` (derived from its original title) before
-  saving the new `adr-<short-title>.md`.
+- Project or initiative decisions: `projects/<project-slug>/ADR-<NNNN>.md`.
+- System-wide decisions: `docs/adr/ADR-<NNNN>.md`.
 
-For system-wide architectural standards, write to
-`docs/adr/<yyyy-mm-dd>-<short-title>.md`. Date from `date +%F`, author from
-`git config user.name`.
+Before writing a new ADR, run the legacy-file migration in
+[`ADR-FORMAT.md`](../domain-modeling/ADR-FORMAT.md). Update repository-local
+links and cross-references, project READMEs, and the index with each rename.
+Stop and ask if legacy ADRs have conflicting IDs or their status is unclear;
+tell the user that external links to renamed paths may need manual updates.
+
+After migration, read `docs/adr/README.md` if it exists; otherwise create it
+from the migrated ADR inventory. Scan the repository for `ADR-<NNNN>.md` files,
+including those under `projects/` and context-specific directories. The
+sequence is repository-wide: use one greater than the highest ID found in the
+index or the files. Assign consecutive IDs in source order when one plan yields
+multiple ADRs. Add each new ID, concise summary, and link to the index in the
+same change.
+
+The index is a registry, not a reservation system. IDs in an open PR are
+provisional. After updating from the target branch, check for collisions; if
+another PR has merged the same ID, assign this PR's ADR the next available ID
+and update its filename, references, project README, and index before merge.
+Never renumber or reuse IDs after they have merged.
+
+Set **Date** from `date +%F` and **Deciders** from `git config user.name`.
 
 Template — Nygard skeleton with mandatory **Options Considered**:
 

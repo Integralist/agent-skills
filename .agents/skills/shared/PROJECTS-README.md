@@ -24,7 +24,7 @@ projects/<yyyy-mm-dd>-<slug>/
 ├── spec.md                    # Problem, scope, and acceptance criteria
 ├── plan.md                    # Slices, dependencies, and delivery plan
 ├── tasks-slice-<n>.md         # Executable tasks for one implementation slice
-├── adr-<decision>.md          # Architecture decisions, when needed
+├── ADR-<NNNN>.md              # Architecture decisions, when needed
 └── research.md                # Supporting research, when needed
 ```
 
