@@ -295,6 +295,7 @@ authenticate via SSO on first use.
 | **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
 | **systematic-debugging**     | Find root causes through a four-phase debugging workflow.                              |
 | **teach**                    | Teach a concept using persistent lessons, missions, and progress records.              |
+| **teach-with-slides**        | Teach a topic or concept through an educational slide deck.                            |
 | **tech-docs**                | Write or improve concise, maintainable technical documentation.                        |
 | **test-feedback**            | Diagnose supplied test failures, then fix them interactively.                          |
 | **to-adr**                   | Extract genuine architecture decisions into standalone ADRs.                           |
