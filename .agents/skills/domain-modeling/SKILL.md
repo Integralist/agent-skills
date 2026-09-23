@@ -90,5 +90,5 @@ Only offer an ADR when all three hold:
 1. **The result of a real trade-off** — genuine alternatives existed and
    you picked one for specific reasons.
 
-If any is missing, skip it. Use the format in
+If any is missing, skip it. Follow the naming, migration, and content rules in
 [ADR-FORMAT.md](./ADR-FORMAT.md).

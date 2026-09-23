@@ -58,27 +58,27 @@ Write each ADR as `ADR-<NNNN>.md` in its destination directory:
 - Project or initiative decisions: `projects/<project-slug>/ADR-<NNNN>.md`.
 - System-wide decisions: `docs/adr/ADR-<NNNN>.md`.
 
-Before assigning IDs, scan the repository for existing `ADR-NNNN.md` files,
-including files under `projects/` and context-specific directories. Read
-`docs/adr/README.md` if it exists; otherwise create it and index all existing
-ADRs first, marking unnumbered files as legacy. The sequence is
-repository-wide: use one greater than the highest ID found in either the index
-or the files. Assign consecutive IDs in source order when one plan yields
-multiple ADRs. Create or update the index in the same change with each ID, a
-concise summary, and a link to the ADR.
+Before writing a new ADR, run the legacy-file migration in
+[`ADR-FORMAT.md`](../domain-modeling/ADR-FORMAT.md). Update repository-local
+links and cross-references, project READMEs, and the index with each rename.
+Stop and ask if legacy ADRs have conflicting IDs or their status is unclear;
+tell the user that external links to renamed paths may need manual updates.
+
+After migration, read `docs/adr/README.md` if it exists; otherwise create it
+from the migrated ADR inventory. Scan the repository for `ADR-<NNNN>.md` files,
+including those under `projects/` and context-specific directories. The
+sequence is repository-wide: use one greater than the highest ID found in the
+index or the files. Assign consecutive IDs in source order when one plan yields
+multiple ADRs. Add each new ID, concise summary, and link to the index in the
+same change.
 
 The index is a registry, not a reservation system. IDs in an open PR are
 provisional. After updating from the target branch, check for collisions; if
 another PR has merged the same ID, assign this PR's ADR the next available ID
 and update its filename, references, project README, and index before merge.
-Never renumber or reuse IDs after they have merged. Keep existing unnumbered
-legacy ADR filenames unchanged during ordinary ADR creation; list them in the
-index as legacy entries. Rename them only when the user explicitly requests a
-migration.
+Never renumber or reuse IDs after they have merged.
 
-Create `docs/adr/README.md` with the first ADR anywhere in the repository if
-it does not exist. Populate it with existing ADRs as well as the new one. Set
-**Date** from `date +%F` and **Deciders** from `git config user.name`.
+Set **Date** from `date +%F` and **Deciders** from `git config user.name`.
 
 Template — Nygard skeleton with mandatory **Options Considered**:
 

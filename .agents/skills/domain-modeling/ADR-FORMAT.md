@@ -46,15 +46,36 @@ context-specific directory:
 [adr-0001]: ../../projects/{project}/ADR-0001.md
 
 The index lets readers find a decision from its ID without opening every ADR.
-Keep each summary concise and link to the source file. List existing
-unnumbered ADRs as `Legacy` entries; do not rename them during ordinary ADR
-creation.
+Keep summaries concise and link to the source files.
 
-Before assigning an ID, read the index and scan the repository for existing
-`ADR-NNNN.md` files. Use one greater than the highest ID found in either place.
-For multiple ADRs, assign consecutive IDs in source order. If the index and
-files disagree, use the highest existing ID and repair the index. Never reuse
-gaps or renumber an ADR after it has merged.
+### Migrate existing ADRs
+
+Before creating a new ADR, inventory ADR documents under `docs/adr/`, nested
+context-specific `docs/adr/` directories, and `projects/`, including completed
+projects. Then migrate every noncanonical filename. Reserve IDs already used by
+canonical files, numeric legacy filenames, or the index before assigning IDs to
+unnumbered ADRs:
+
+- Keep `ADR-<NNNN>.md` files and their IDs unchanged.
+- For a legacy filename with a unique numeric ID, such as `0001-title.md`,
+  preserve the ID and rename it to `ADR-0001.md`.
+- For an unnumbered ADR, assign the next unused ID. When migrating several,
+  assign IDs in repository-path order; IDs identify decisions, not chronology.
+- If existing ADRs claim the same ID or a file's status as an ADR is unclear,
+  stop and ask rather than guessing or silently renumbering.
+
+Update repository-local links and cross-references, project READMEs, and the
+index in the same change. Tell the user that external links to renamed paths
+may need manual updates. Do not leave legacy filenames or `Legacy` rows in the
+completed index.
+
+### Assign IDs and handle collisions
+
+After migration, read the index and scan the repository for existing
+`ADR-<NNNN>.md` files. Use one greater than the highest ID found in either
+place. For multiple new ADRs, assign consecutive IDs in source order. If the
+index and files disagree, use the highest existing ID and repair the index.
+Never reuse gaps or renumber an ADR after it has merged.
 
 IDs in open PRs are provisional, not reserved. Parallel PRs can choose the
 same next ID. After updating from the target branch, check for collisions; the
