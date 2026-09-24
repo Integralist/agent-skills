@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Stats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #F7F3EC;
+    --card-bg: #FFFFFF;
+    --card-soft: #FAF7F2;
+    --text-main: #2C241E;
+    --text-muted: #6B5E54;
+    --accent-warm: #D96B27;
+    --accent-dark: #8F4215;
+    --accent-subtle: #F3E9DD;
+    --border-warm: #EADBC8;
+    --grid: rgba(44, 36, 30, 0.08);
+    --shadow: 0 10px 30px -5px rgba(44, 36, 30, 0.08), 0 4px 12px -2px rgba(44, 36, 30, 0.04);
+    --s1: #eb6834; --s2: #2a78d6; --s3: #1baf7a; --s4: #eda100;
+    --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+    --other: #A89A8C;
+    --heat-0: #F3E9DD; --heat-1: #F6C9A4; --heat-2: #EF9B61; --heat-3: #D96B27; --heat-4: #8F4215;
+    --e1: #F6D5BC; --e2: #F2B98E; --e3: #EC9A62; --e4: #E07B3A; --e5: #C45E1F; --e6: #934314; --e7: #5E280B;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1F1915; --card-bg: #2A231E; --card-soft: #332A24;
+      --text-main: #F3EAE0; --text-muted: #BFAE9F;
+      --accent-warm: #E8813F; --accent-dark: #F2A56E; --accent-subtle: #3D3029;
+      --border-warm: #463830; --grid: rgba(243, 234, 224, 0.08);
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+      --s1: #d95926; --s2: #3987e5; --s3: #199e70; --s4: #c98500;
+      --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+      --other: #7D6F63;
+      --heat-0: #3D3029; --heat-1: #6E3B1E; --heat-2: #A8501F; --heat-3: #D96B27; --heat-4: #F2A56E;
+      --e1: #6E3B1E; --e2: #8C4520; --e3: #AE5423; --e4: #D0652A; --e5: #E8813F; --e6: #F2A56E; --e7: #F8CBA8;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1F1915; --card-bg: #2A231E; --card-soft: #332A24;
+    --text-main: #F3EAE0; --text-muted: #BFAE9F;
+    --accent-warm: #E8813F; --accent-dark: #F2A56E; --accent-subtle: #3D3029;
+    --border-warm: #463830; --grid: rgba(243, 234, 224, 0.08);
+    --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+    --s1: #d95926; --s2: #3987e5; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --other: #7D6F63;
+    --heat-0: #3D3029; --heat-1: #6E3B1E; --heat-2: #A8501F; --heat-3: #D96B27; --heat-4: #F2A56E;
+    --e1: #6E3B1E; --e2: #8C4520; --e3: #AE5423; --e4: #D0652A; --e5: #E8813F; --e6: #F2A56E; --e7: #F8CBA8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    line-height: 1.5;
+    padding: 40px 16px 64px;
+  }
+  main { max-width: 1200px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  .badge {
+    display: inline-block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent-warm); background: var(--accent-subtle);
+    padding: 4px 12px; border-radius: 999px; margin-bottom: 12px;
+  }
+  h1 { font-size: 2.1rem; font-weight: 700; line-height: 1.25; }
+  .subtitle { color: var(--text-muted); font-size: 1.02rem; margin-top: 6px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 22px 0 8px; }
+  .toggle { display: inline-flex; border: 1px solid var(--border-warm); border-radius: 10px; overflow: hidden; background: var(--card-bg); }
+  .toggle button {
+    font: inherit; font-size: 0.9rem; font-weight: 600; border: 0; background: transparent;
+    color: var(--text-muted); padding: 8px 16px; cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--accent-subtle); color: var(--accent-dark); }
+  .note { font-size: 0.86rem; color: var(--text-muted); }
+  h2 {
+    font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent-warm); margin: 36px 0 14px;
+  }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--card-bg); border: 1px solid var(--border-warm); border-radius: 14px;
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .kpi .label { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+  .kpi .value { font-size: 1.6rem; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere; }
+  .kpi .value.name { font-size: 1.15rem; line-height: 2.1rem; }
+  .kpi .hint { font-size: 0.78rem; color: var(--text-muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 18px; }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border-warm); border-radius: 16px;
+    padding: 20px 22px; box-shadow: var(--shadow); min-width: 0;
+  }
+  .card.wide { grid-column: 1 / -1; }
+  .card h3 { font-size: 1.05rem; font-weight: 700; color: var(--accent-dark); }
+  .card p { font-size: 0.86rem; color: var(--text-muted); margin: 2px 0 12px; }
+  .chart { position: relative; height: 300px; }
+  .chart.tall { height: 380px; }
+  .heat { overflow-x: auto; padding-bottom: 4px; }
+  .heat table { border-collapse: separate; border-spacing: 3px; font-size: 0.72rem; color: var(--text-muted); }
+  .heat td { width: 14px; height: 14px; border-radius: 3px; padding: 0; }
+  .heat th { font-weight: 500; text-align: right; padding-right: 6px; white-space: nowrap; }
+  .heat.hours td { width: 22px; height: 18px; }
+  .legend-scale { display: flex; gap: 4px; align-items: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; }
+  .legend-scale span.sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+  table.data { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  .table-wrap { overflow-x: auto; }
+  table.data th, table.data td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-warm); white-space: nowrap; }
+  table.data th { color: var(--text-muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .mono {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: var(--accent-subtle);
+    padding: 2px 6px; border-radius: 5px; color: var(--accent-dark);
+  }
+  .empty { padding: 60px 20px; text-align: center; color: var(--text-muted); }
+  footer { margin-top: 40px; font-size: 0.8rem; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="badge">Model stats</span>
+    <h1 id="title">AI model usage</h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="toolbar">
+      <div class="toggle" role="group" aria-label="Measure">
+        <button type="button" data-metric="cost" aria-pressed="true">Cost</button>
+        <button type="button" data-metric="tokens" aria-pressed="false">Tokens</button>
+      </div>
+      <span class="note" id="basis-note"></span>
+    </div>
+  </header>
+
+  <div id="content">
+    <h2>At a glance</h2>
+    <section class="kpis" id="kpis"></section>
+
+    <h2>Mix</h2>
+    <section class="grid">
+      <div class="card"><h3>Providers</h3><p>Which model makers get your usage.</p><div class="chart"><canvas id="c-provider"></canvas></div></div>
+      <div class="card"><h3>Models</h3><p>Top models, with the long tail folded into Other.</p><div class="chart"><canvas id="c-model"></canvas></div></div>
+      <div class="card"><h3>Effort</h3><p>Thinking / reasoning level chosen per request.</p><div class="chart"><canvas id="c-effort"></canvas></div></div>
+      <div class="card"><h3>Harnesses</h3><p>Which CLI the usage came through.</p><div class="chart"><canvas id="c-harness"></canvas></div></div>
+      <div class="card wide"><h3>Models by effort</h3><p>How each model's usage splits across effort levels.</p><div class="chart tall"><canvas id="c-model-effort"></canvas></div></div>
+      <div class="card wide"><h3>Harnesses by provider</h3><p>Which models you reach for in each CLI.</p><div class="chart"><canvas id="c-harness-provider"></canvas></div></div>
+    </section>
+
+    <h2>Over time</h2>
+    <section class="grid">
+      <div class="card wide"><h3 id="timeline-title">Daily usage by provider</h3><p>Stacked by model provider.</p><div class="chart"><canvas id="c-timeline"></canvas></div></div>
+      <div class="card"><h3>Running total</h3><p>Cumulative across the period.</p><div class="chart"><canvas id="c-cumulative"></canvas></div></div>
+      <div class="card"><h3>Weekdays</h3><p>Total by day of the week.</p><div class="chart"><canvas id="c-weekday"></canvas></div></div>
+      <div class="card wide" id="calendar-card"><h3>Calendar</h3><p>One square per day; darker means more.</p><div class="heat" id="calendar"></div><div class="legend-scale" id="calendar-scale"></div></div>
+      <div class="card wide"><h3>When you work</h3><p>Requests by weekday and hour of day (local time).</p><div class="heat hours" id="hours"></div><div class="legend-scale" id="hours-scale"></div></div>
+    </section>
+
+    <h2>Efficiency</h2>
+    <section class="grid">
+      <div class="card wide"><h3>Token mix per model</h3><p>Share of each model's tokens that are fresh input, output, cache reads, and cache writes.</p><div class="chart tall"><canvas id="c-token-mix"></canvas></div></div>
+      <div class="card"><h3>Cache hit rate</h3><p>Cache reads as a share of all input tokens.</p><div class="chart tall"><canvas id="c-cache"></canvas></div></div>
+      <div class="card"><h3>Cost per million tokens</h3><p>Blended rate across input, output, and cache.</p><div class="chart tall"><canvas id="c-rate"></canvas></div></div>
+    </section>
+
+    <h2>Where it went</h2>
+    <section class="grid">
+      <div class="card wide"><h3>Top projects</h3><p>By working directory name.</p><div class="chart tall"><canvas id="c-project"></canvas></div></div>
+      <div class="card wide"><h3>Top sessions</h3><p>The ten biggest sessions in the period.</p><div class="table-wrap"><table class="data" id="sessions"></table></div></div>
+      <div class="card wide"><h3>All models</h3><p>Every model in the period, as a table.</p><div class="table-wrap"><table class="data" id="models"></table></div></div>
+    </section>
+  </div>
+  <footer id="footer"></footer>
+</main>
+
+<script>
+const REPORT = /*__REPORT__*/null;
+
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const SERIES = () => ['--s1', '--s2', '--s3', '--s4', '--s5', '--s6', '--s7', '--s8'].map(css);
+const PROVIDER_SLOT = { Anthropic: 0, OpenAI: 2, Google: 1, Moonshot: 6, Alibaba: 3 };
+const HARNESS_SLOT = { 'Claude Code': 0, pi: 1, OpenCode: 2, 'Gemini CLI': 3, 'Copilot CLI': 6, Codex: 4 };
+const EFFORT_ORDER = ['off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'unknown'];
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const TOP_MODELS = 7;
+
+const usd = v => v >= 100 ? `$${Math.round(v).toLocaleString('en')}` : `$${v.toFixed(2)}`;
+const compact = v => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(v);
+const isoDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const tokensOf = r => r.input + r.output + r.cacheRead + r.cacheWrite;
+let metric = 'cost';
+const valueOf = r => metric === 'cost' ? r.cost : tokensOf(r);
+const fmt = v => metric === 'cost' ? usd(v) : compact(v);
+const axisFmt = v => metric === 'cost' ? `$${compact(v)}` : compact(v);
+
+const rows = REPORT.rows.map(r => Object.fromEntries(REPORT.columns.map((c, i) => [c, r[i]])));
+rows.forEach(r => {
+  const [date, hour] = r.hour.split('T');
+  r.date = date;
+  r.hourOfDay = Number(hour);
+  r.weekday = (new Date(`${date}T12:00:00`).getDay() + 6) % 7;
+});
+
+function sumBy(list, keyFn, valFn = valueOf) {
+  const out = new Map();
+  for (const r of list) out.set(keyFn(r), (out.get(keyFn(r)) || 0) + valFn(r));
+  return out;
+}
+const sortedDesc = map => [...map.entries()].sort((a, b) => b[1] - a[1]);
+
+// Colours follow the entity, fixed once from combined cost+token rank so toggling never repaints.
+const modelRank = sortedDesc(sumBy(rows, r => r.model, r => r.cost * 1e6 + tokensOf(r))).map(([m]) => m);
+const topModels = modelRank.slice(0, TOP_MODELS);
+const modelKey = m => topModels.includes(m) ? m : 'Other';
+const colorFor = (kind, key) => {
+  const s = SERIES();
+  if (key === 'Other' || key === 'unknown') return css('--other');
+  if (kind === 'model') return s[topModels.indexOf(key)] ?? css('--other');
+  if (kind === 'provider') return s[PROVIDER_SLOT[key]] ?? css('--other');
+  if (kind === 'harness') return s[HARNESS_SLOT[key]] ?? css('--other');
+  if (kind === 'effort') {
+    const slot = EFFORT_ORDER.indexOf(key);
+    return slot >= 0 && slot < 7 ? css(`--e${slot + 1}`) : css('--other');
+  }
+  return css('--other');
+};
+
+const charts = [];
+function chart(id, config) {
+  const canvas = document.getElementById(id);
+  const text = css('--text-muted');
+  Chart.defaults.color = text;
+  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.borderColor = css('--grid');
+  config.options = {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    interaction: { mode: 'nearest', intersect: true },
+    ...config.options,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, useBorderRadius: true, borderRadius: 3 } },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label || ctx.label}: ${config.fmt ? config.fmt(ctx.raw) : fmt(ctx.raw)}` } },
+      ...(config.options || {}).plugins,
+    },
+  };
+  charts.push(new Chart(canvas, config));
+}
+
+function doughnut(id, kind, keyFn) {
+  const entries = sortedDesc(sumBy(rows, keyFn)).filter(([, v]) => v > 0);
+  chart(id, {
+    type: 'doughnut',
+    data: {
+      labels: entries.map(([k]) => k),
+      datasets: [{
+        data: entries.map(([, v]) => v),
+        backgroundColor: entries.map(([k]) => colorFor(kind, k)),
+        borderColor: css('--card-bg'), borderWidth: 2,
+      }],
+    },
+    options: {
+      cutout: '58%',
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 12, boxHeight: 12, generateLabels: pctLabels } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} (${pct(ctx.raw, ctx.dataset.data)})` } },
+      },
+    },
+  });
+}
+const pct = (v, all) => `${((100 * v) / (all.reduce((a, b) => a + b, 0) || 1)).toFixed(1)}%`;
+function pctLabels(c) {
+  const data = c.data.datasets[0].data;
+  return Chart.overrides.doughnut.plugins.legend.labels.generateLabels(c)
+    .map(l => ({ ...l, text: `${l.text}  ${pct(data[l.index], data)}` }));
+}
+
+function stackedBar(id, { categories, catKey, series, seriesKey, kind, horizontal = false, percent = false }) {
+  const datasets = series.map(s => {
+    const byCat = sumBy(rows.filter(r => seriesKey(r) === s), catKey);
+    let data = categories.map(c => byCat.get(c) || 0);
+    return { label: s, data, backgroundColor: colorFor(kind, s), borderColor: css('--card-bg'), borderWidth: 1, borderRadius: 4, borderSkipped: false };
+  });
+  if (percent) {
+    const totals = categories.map((_, i) => datasets.reduce((a, d) => a + d.data[i], 0) || 1);
+    datasets.forEach(d => { d.data = d.data.map((v, i) => (100 * v) / totals[i]); });
+  }
+  const axis = { stacked: true, grid: { display: false } };
+  const valueAxis = { stacked: true, max: percent ? 100 : undefined, ticks: { callback: v => percent ? `${v}%` : axisFmt(v) } };
+  chart(id, {
+    type: 'bar',
+    data: { labels: categories, datasets: datasets.filter(d => d.data.some(v => v > 0)) },
+    fmt: percent ? v => `${v.toFixed(1)}%` : undefined,
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      scales: horizontal ? { x: valueAxis, y: axis } : { x: axis, y: valueAxis },
+      interaction: { mode: 'index', axis: horizontal ? 'y' : 'x', intersect: false },
+    },
+  });
+}
+
+function simpleBar(id, entries, { color, format, horizontal = true } = {}) {
+  chart(id, {
+    type: 'bar',
+    data: { labels: entries.map(([k]) => k), datasets: [{ data: entries.map(([, v]) => v), backgroundColor: entries.map(([k]) => color ? color(k) : css('--accent-warm')), borderRadius: 4, borderSkipped: false }] },
+    fmt: format,
+    options: {
+      indexAxis: horizontal ? 'y' : 'x',
+      plugins: { legend: { display: false } },
+      scales: { [horizontal ? 'x' : 'y']: { ticks: { callback: v => (format || axisFmt)(v) } }, [horizontal ? 'y' : 'x']: { grid: { display: false } } },
+    },
+  });
+}
+
+function heatScale(max) {
+  const steps = ['--heat-0', '--heat-1', '--heat-2', '--heat-3', '--heat-4'].map(css);
+  return v => v <= 0 ? steps[0] : steps[Math.min(4, 1 + Math.floor((3 * v) / (max || 1)))];
+}
+function scaleLegend(el) {
+  el.replaceChildren();
+  const less = document.createElement('span'); less.textContent = 'Less';
+  el.append(less);
+  ['--heat-0', '--heat-1', '--heat-2', '--heat-3', '--heat-4'].forEach(n => {
+    const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = css(n); el.append(sw);
+  });
+  const more = document.createElement('span'); more.textContent = 'More';
+  el.append(more);
+}
+
+function calendar() {
+  const card = document.getElementById('calendar-card');
+  const byDate = sumBy(rows, r => r.date);
+  const dates = [...byDate.keys()].sort();
+  if (REPORT.period === 'day' || dates.length === 0) { card.hidden = true; return; }
+  const first = new Date(`${REPORT.since || dates[0]}T12:00:00`);
+  const last = new Date(`${REPORT.generated.slice(0, 10)}T12:00:00`);
+  first.setDate(first.getDate() - ((first.getDay() + 6) % 7));
+  const color = heatScale(Math.max(...byDate.values()));
+  const table = document.createElement('table');
+  const weeks = [];
+  for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 7)) weeks.push(new Date(d));
+  WEEKDAYS.forEach((name, wd) => {
+    const tr = table.insertRow();
+    const th = document.createElement('th'); th.textContent = wd % 2 === 0 ? name : ''; tr.append(th);
+    weeks.forEach(start => {
+      const day = new Date(start); day.setDate(day.getDate() + wd);
+      const td = tr.insertCell();
+      if (day > last) return;
+      const key = isoDate(day);
+      const v = byDate.get(key) || 0;
+      td.style.background = color(v);
+      td.title = `${key}: ${fmt(v)}`;
+    });
+  });
+  document.getElementById('calendar').replaceChildren(table);
+  scaleLegend(document.getElementById('calendar-scale'));
+}
+
+function hours() {
+  const grid = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  rows.forEach(r => { grid[r.weekday][r.hourOfDay] += r.requests; });
+  const color = heatScale(Math.max(...grid.flat()));
+  const table = document.createElement('table');
+  const head = table.insertRow();
+  head.append(document.createElement('th'));
+  for (let h = 0; h < 24; h++) { const th = document.createElement('th'); th.textContent = h % 3 === 0 ? String(h) : ''; th.style.textAlign = 'left'; head.append(th); }
+  WEEKDAYS.forEach((name, wd) => {
+    const tr = table.insertRow();
+    const th = document.createElement('th'); th.textContent = name; tr.append(th);
+    grid[wd].forEach((v, h) => { const td = tr.insertCell(); td.style.background = color(v); td.title = `${name} ${String(h).padStart(2, '0')}:00 — ${v.toLocaleString('en')} requests`; });
+  });
+  document.getElementById('hours').replaceChildren(table);
+  scaleLegend(document.getElementById('hours-scale'));
+}
+
+function table(id, headers, body) {
+  const el = document.getElementById(id);
+  el.replaceChildren();
+  const head = el.createTHead().insertRow();
+  headers.forEach(([label, num]) => { const th = document.createElement('th'); th.textContent = label; if (num) th.className = 'num'; head.append(th); });
+  const tbody = el.createTBody();
+  body.forEach(cells => {
+    const tr = tbody.insertRow();
+    cells.forEach((cell, i) => { const td = tr.insertCell(); td.textContent = cell; if (headers[i][1]) td.className = 'num'; });
+  });
+}
+
+function kpis() {
+  const cost = rows.reduce((a, r) => a + r.cost, 0);
+  const tokens = rows.reduce((a, r) => a + tokensOf(r), 0);
+  const requests = rows.reduce((a, r) => a + r.requests, 0);
+  const days = new Set(rows.map(r => r.date)).size;
+  const sessions = new Set(rows.map(r => `${r.harness}|${r.session}`)).size;
+  const inputs = rows.reduce((a, r) => a + r.input + r.cacheRead + r.cacheWrite, 0);
+  const cacheShare = inputs ? rows.reduce((a, r) => a + r.cacheRead, 0) / inputs : 0;
+  const byDay = sortedDesc(sumBy(rows, r => r.date, r => r.cost));
+  const top = keyFn => {
+    const [entry] = sortedDesc(sumBy(rows, keyFn));
+    const all = rows.reduce((a, r) => a + valueOf(r), 0) || 1;
+    return entry ? [entry[0], `${((100 * entry[1]) / all).toFixed(0)}% of ${metric}`] : ['—', ''];
+  };
+  const tiles = [
+    ['Total cost', usd(cost), 'logged + list-price estimates'],
+    ['Total tokens', compact(tokens), `${compact(requests)} requests`],
+    ['Sessions', sessions.toLocaleString('en'), `across ${days} active day${days === 1 ? '' : 's'}`],
+    ['Cost per active day', usd(days ? cost / days : 0), 'average'],
+    ['Biggest day', byDay[0] ? usd(byDay[0][1]) : '—', byDay[0] ? byDay[0][0] : ''],
+    ['Cache hit rate', `${(100 * cacheShare).toFixed(1)}%`, 'of input tokens read from cache'],
+    ['Top model', ...top(r => r.model), true],
+    ['Top harness', ...top(r => r.harness), true],
+  ];
+  const el = document.getElementById('kpis');
+  el.replaceChildren();
+  tiles.forEach(([label, value, hint, isName]) => {
+    const div = document.createElement('div'); div.className = 'kpi';
+    [['label', label], [isName ? 'value name' : 'value', value], ['hint', hint]].forEach(([cls, text]) => {
+      const s = document.createElement('div'); s.className = cls; s.textContent = text; div.append(s);
+    });
+    el.append(div);
+  });
+}
+
+function basisNote() {
+  const byBasis = sumBy(rows, r => r.basis, tokensOf);
+  const total = [...byBasis.values()].reduce((a, b) => a + b, 0) || 1;
+  const share = b => `${Math.round((100 * (byBasis.get(b) || 0)) / total)}%`;
+  let text = `Cost basis by tokens: ${share('logged')} logged by the harness, ${share('list')} estimated at list price`;
+  if (byBasis.get('unpriced')) text += `, ${share('unpriced')} unpriced (model missing from price list)`;
+  document.getElementById('basis-note').textContent = `${text}.`;
+}
+
+function render() {
+  charts.splice(0).forEach(c => c.destroy());
+  kpis();
+  basisNote();
+  doughnut('c-provider', 'provider', r => r.provider);
+  doughnut('c-model', 'model', r => modelKey(r.model));
+  doughnut('c-effort', 'effort', r => r.effort);
+  doughnut('c-harness', 'harness', r => r.harness);
+
+  const models = [...topModels.filter(m => rows.some(r => r.model === m)), ...(rows.some(r => modelKey(r.model) === 'Other') ? ['Other'] : [])];
+  const efforts = EFFORT_ORDER.filter(e => rows.some(r => r.effort === e));
+  stackedBar('c-model-effort', { categories: models, catKey: r => modelKey(r.model), series: efforts, seriesKey: r => r.effort, kind: 'effort', horizontal: true });
+  const harnesses = sortedDesc(sumBy(rows, r => r.harness)).map(([h]) => h);
+  const providers = sortedDesc(sumBy(rows, r => r.provider)).map(([p]) => p);
+  stackedBar('c-harness-provider', { categories: harnesses, catKey: r => r.harness, series: providers, seriesKey: r => r.provider, kind: 'provider', horizontal: true });
+
+  const hourly = REPORT.period === 'day';
+  const days = dateRange();
+  const weekly = !hourly && days.length > 90;
+  document.getElementById('timeline-title').textContent = `${hourly ? 'Hourly' : weekly ? 'Weekly' : 'Daily'} usage by provider`;
+  const bucket = r => hourly ? `${String(r.hourOfDay).padStart(2, '0')}:00` : weekly ? weekOf(r.date) : r.date;
+  const buckets = hourly ? Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}:00`) : weekly ? [...new Set(days.map(weekOf))] : days;
+  stackedBar('c-timeline', { categories: buckets, catKey: bucket, series: providers, seriesKey: r => r.provider, kind: 'provider' });
+
+  const perBucket = sumBy(rows, bucket);
+  let running = 0;
+  chart('c-cumulative', {
+    type: 'line',
+    data: { labels: buckets, datasets: [{ label: `Cumulative ${metric}`, data: buckets.map(b => (running += perBucket.get(b) || 0)), borderColor: css('--accent-warm'), backgroundColor: css('--accent-subtle'), fill: true, borderWidth: 2, pointRadius: 0, tension: 0.2 }] },
+    options: { plugins: { legend: { display: false } }, interaction: { mode: 'index', intersect: false }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }, y: { ticks: { callback: v => axisFmt(v) } } } },
+  });
+  const byWeekday = sumBy(rows, r => r.weekday);
+  simpleBar('c-weekday', WEEKDAYS.map((d, i) => [d, byWeekday.get(i) || 0]), { horizontal: false });
+  calendar();
+  hours();
+
+  const mixKeys = [['Fresh input', 'input', '--s2'], ['Output', 'output', '--s1'], ['Cache read', 'cacheRead', '--s3'], ['Cache write', 'cacheWrite', '--s4']];
+  const modelsOnly = models.filter(m => m !== 'Other');
+  chart('c-token-mix', {
+    type: 'bar',
+    data: {
+      labels: modelsOnly,
+      datasets: mixKeys.map(([label, key, color]) => {
+        const totals = sumBy(rows, r => r.model, tokensOf);
+        const part = sumBy(rows, r => r.model, r => r[key]);
+        return { label, data: modelsOnly.map(m => (100 * (part.get(m) || 0)) / (totals.get(m) || 1)), backgroundColor: css(color), borderColor: css('--card-bg'), borderWidth: 1, borderRadius: 4, borderSkipped: false };
+      }),
+    },
+    fmt: v => `${v.toFixed(1)}%`,
+    options: { indexAxis: 'y', interaction: { mode: 'index', axis: 'y', intersect: false }, scales: { x: { stacked: true, max: 100, ticks: { callback: v => `${v}%` } }, y: { stacked: true, grid: { display: false } } } },
+  });
+
+  const cache = modelsOnly.map(m => {
+    const mine = rows.filter(r => r.model === m);
+    const read = mine.reduce((a, r) => a + r.cacheRead, 0);
+    const all = mine.reduce((a, r) => a + r.input + r.cacheRead + r.cacheWrite, 0);
+    return [m, all ? (100 * read) / all : 0];
+  });
+  simpleBar('c-cache', cache, { color: m => colorFor('model', m), format: v => `${Number(v).toFixed(0)}%` });
+  const rate = modelsOnly.map(m => {
+    const mine = rows.filter(r => r.model === m && r.basis !== 'unpriced');
+    const t = mine.reduce((a, r) => a + tokensOf(r), 0);
+    return [m, t ? (1e6 * mine.reduce((a, r) => a + r.cost, 0)) / t : 0];
+  }).sort((a, b) => b[1] - a[1]);
+  simpleBar('c-rate', rate, { color: m => colorFor('model', m), format: v => `$${Number(v).toFixed(2)}` });
+
+  simpleBar('c-project', sortedDesc(sumBy(rows, r => r.project)).slice(0, 10));
+
+  const sessions = new Map();
+  rows.forEach(r => {
+    const key = `${r.harness}|${r.session}`;
+    const s = sessions.get(key) || { harness: r.harness, session: r.session, project: r.project, models: new Set(), requests: 0, tokens: 0, cost: 0, last: '' };
+    s.models.add(r.model); s.requests += r.requests; s.tokens += tokensOf(r); s.cost += r.cost;
+    if (r.hour > s.last) s.last = r.hour;
+    sessions.set(key, s);
+  });
+  const topSessions = [...sessions.values()].sort((a, b) => (metric === 'cost' ? b.cost - a.cost : b.tokens - a.tokens)).slice(0, 10);
+  table('sessions', [['Last active'], ['Harness'], ['Project'], ['Models'], ['Requests', true], ['Tokens', true], ['Cost', true]],
+    topSessions.map(s => [s.last.replace('T', ' ') + ':00', s.harness, s.project, [...s.models].join(', '), s.requests.toLocaleString('en'), compact(s.tokens), usd(s.cost)]));
+
+  const perModel = new Map();
+  rows.forEach(r => {
+    const m = perModel.get(r.model) || { provider: r.provider, requests: 0, tokens: 0, cost: 0 };
+    m.requests += r.requests; m.tokens += tokensOf(r); m.cost += r.cost;
+    perModel.set(r.model, m);
+  });
+  table('models', [['Model'], ['Provider'], ['Requests', true], ['Tokens', true], ['Cost', true]],
+    [...perModel.entries()].sort((a, b) => (metric === 'cost' ? b[1].cost - a[1].cost : b[1].tokens - a[1].tokens))
+      .map(([m, s]) => [m, s.provider, s.requests.toLocaleString('en'), compact(s.tokens), usd(s.cost)]));
+}
+
+// Monday of the week containing an ISO date, as an ISO date.
+function weekOf(date) {
+  const d = new Date(`${date}T12:00:00`);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return isoDate(d);
+}
+
+function dateRange() {
+  const dates = [...new Set(rows.map(r => r.date))].sort();
+  const start = new Date(`${REPORT.since || dates[0]}T12:00:00`);
+  const end = new Date(`${REPORT.generated.slice(0, 10)}T12:00:00`);
+  const out = [];
+  for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
+    out.push(isoDate(d));
+  }
+  return out;
+}
+
+const PERIOD_LABEL = { day: 'Today', week: 'Last 7 days', month: 'Last 30 days', all: 'All time' };
+document.getElementById('title').textContent = `AI model usage · ${PERIOD_LABEL[REPORT.period]}`;
+const dates = [...new Set(rows.map(r => r.date))].sort();
+document.getElementById('subtitle').textContent = dates.length
+  ? `${REPORT.since || dates[0]} to ${REPORT.generated.slice(0, 10)}, from local Claude Code, Codex, pi, OpenCode, Gemini CLI, and Copilot CLI logs.`
+  : '';
+document.getElementById('footer').textContent = `Generated ${REPORT.generated.replace('T', ' ')}. Unlogged costs use LiteLLM list prices, which ignore subscriptions, free tiers, and long-context surcharges.`;
+
+if (!rows.length) {
+  const empty = document.createElement('div');
+  empty.className = 'empty';
+  empty.textContent = 'No usage found for this period.';
+  document.getElementById('content').replaceChildren(empty);
+} else {
+  document.querySelectorAll('[data-metric]').forEach(btn => btn.addEventListener('click', () => {
+    metric = btn.dataset.metric;
+    document.querySelectorAll('[data-metric]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    render();
+  }));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+  document.fonts.ready.then(render);
+}
+</script>
+</body>
+</html>

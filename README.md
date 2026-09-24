@@ -276,6 +276,7 @@ authenticate via SSO on first use.
 | **incident-report**          | Write an incident report from the session's debugging evidence.                        |
 | **jira**                     | Create, edit, assign, transition, search, and verify Jira issues.                      |
 | **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
+| **model-stats**              | Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.     |
 | **mysql-index-audit**        | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.               |
 | **next-slice**               | Implement and complete every task in the next actionable plan slice.                   |
 | **next-task**                | Implement and complete the next actionable plan or task-list item.                     |
