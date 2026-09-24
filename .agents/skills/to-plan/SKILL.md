@@ -114,6 +114,10 @@ Never format them as loose Markdown prose, lists, or headings.
 
 ## Plan document
 
+Read [`product-voice`](../product-voice/SKILL.md) when writing the Summary and
+user-observable part of each slice's **Delivers** field. Keep interface
+signatures, dependencies, and implementation tasks exact.
+
 Ensure `projects/README.md` exists. If missing, create it from
 [`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md). Ensure the
 project's `README.md` exists too; create it from

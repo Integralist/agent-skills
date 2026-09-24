@@ -52,6 +52,10 @@ If the fields below show commands rather than output, run each one first.
 
 5. **Write the description** using the Template.
 
+   Read [`product-voice`](../product-voice/SKILL.md) before drafting. Apply it to
+   Problem, Solution, and relevant Notes; explain impact plainly while keeping
+   facts and technical details needed to review the diff.
+
    - **Problem:** what was wrong or missing and why it matters — the observable
      symptom or gap, not the implementation. Reference the linked issue/ticket
      if any.

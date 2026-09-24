@@ -45,6 +45,10 @@ decision**, not one giant ADR.
 
 ## Write the ADR(s)
 
+Read [`product-voice`](../product-voice/SKILL.md) before drafting. Apply it to
+Context and Consequences so readers can follow the problem and trade-offs.
+Keep the chosen decision, alternatives, and technical constraints precise.
+
 Follow the repo-wide naming, numbering, and registry rules in
 [`ADR-FORMAT.md`](../domain-modeling/ADR-FORMAT.md).
 

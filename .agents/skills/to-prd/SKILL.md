@@ -45,6 +45,10 @@ framing the spec lacks.
 
 ## Write the PRD
 
+Read [`product-voice`](../product-voice/SKILL.md) before drafting. Use it for
+problem, goals, audience, and success measures; keep every claim grounded in
+the source spec or plan.
+
 When writing under `projects/<project-slug>/`, ensure the project's `README.md`
 exists. If missing, create it from
 [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md), then add or
