@@ -66,6 +66,10 @@ tasks** for the plan — they are implementation, not spec.
 
 ## Write the spec
 
+Read [`product-voice`](../product-voice/SKILL.md) before drafting the Problem
+Statement, Solution, and User Stories. Keep acceptance criteria, interfaces,
+permissions, and other testable contracts precise.
+
 Ensure `projects/README.md` exists. If missing, create it from
 [`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md). Ensure the
 project's `README.md` exists too; create it from
@@ -236,8 +240,9 @@ Standing specs live in `docs/specs/<capability>.md` and define current truth:
   Omit transient project metadata (Problem Statement, Out of Scope, author,
   dates).
 - **Reference in project spec:** Under `## Living Specifications`, explain that
-  the project records historical change and cite each relevant
-  `docs/specs/<capability>.md` path with the behaviour it owns. If no durable
-  behaviour changes, say that no living capability spec applies and point to the
-  operational documentation instead. Do not copy instructional text into the
-  project document.
+  the project records historical change and link each existing
+  `docs/specs/<capability>.md` file with the behaviour it owns. If no living spec
+  exists yet, say so and mention any planned future path as inline code, not as a
+  Markdown link. If no durable behaviour changes, point to the relevant
+  operational documentation. Do not copy instructional text into the project
+  document.

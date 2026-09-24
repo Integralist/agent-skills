@@ -193,6 +193,7 @@ update-google-workspace-mcp:
 
 # Validate active PDD project documents, project specs, plans, and living capability specs.
 check-specs:
+	@bash scripts/test-validate-specs.sh
 	@bash scripts/validate-specs.sh
 
 install: install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp

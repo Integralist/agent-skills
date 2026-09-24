@@ -57,13 +57,18 @@ validate_doc_references() {
   local reference
   local file_errors=0
 
+  # Check concrete Markdown links only. Inline-code paths may describe a
+  # living spec that the implementation will create later.
   while IFS= read -r reference; do
     [[ -n "$reference" ]] || continue
     if [[ ! -f "$reference" ]]; then
       error "$file: referenced living spec does not exist: $reference"
       file_errors=$((file_errors + 1))
     fi
-  done < <(grep -oE 'docs/specs/[A-Za-z0-9._/-]+' "$file" || true)
+  done < <(
+    grep -oE '\]\([^)]*docs/specs/[A-Za-z0-9._/-]+' "$file" \
+      | grep -oE 'docs/specs/[A-Za-z0-9._/-]+' || true
+  )
 
   return "$file_errors"
 }
