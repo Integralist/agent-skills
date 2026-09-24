@@ -129,6 +129,9 @@ Reason: {Why this section warrants its own document.}
 
 ## Guidelines
 
+- Load [`conventions-markdown`](../conventions-markdown/SKILL.md) before
+  writing or revising Markdown; follow its repository-link rules for
+  cross-references.
 - For reader-facing explanations, read
   [`product-voice`](../product-voice/SKILL.md). Apply it to the overview,
   rationale, and user impact; preserve exact technical contracts and

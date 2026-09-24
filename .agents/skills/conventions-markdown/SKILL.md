@@ -2,12 +2,32 @@
 name: conventions-markdown
 description: >-
   MANDATORY for any work on Markdown files (*.md). Load this before
-  editing or creating any *.md file. Markdown formatting and linting
-  conventions covering wrapping, code blocks, and linting tools.
+  editing or creating any *.md file. Markdown formatting, repository-link,
+  and linting conventions.
 ---
 
 We are peers writing Markdown. Prioritize readability, consistency, and
 inclusive language.
+
+## Repository links
+
+Base links on the repository that will contain the document, not the agent's
+working directory.
+
+- Use repository-relative paths for files in that repository.
+- Link to files, directories, or roots in another GitHub repository with an
+  absolute permalink pinned to the exact full commit SHA inspected:
+  `https://github.com/<owner>/<repo>/blob/<sha>/<path>#L42` for files and
+  `https://github.com/<owner>/<repo>/tree/<sha>/<path>` for directories
+  (omit `/<path>` for the repository root).
+- Get the SHA with `git -C <checkout> rev-parse HEAD`; form the URL from the
+  canonical repository remote as `https://github.com/<owner>/<repo>`. Treat
+  `path:line` guidance in other skills as applying only to the document's own
+  repository.
+- Never publish a sibling-checkout path (`../Northstar/...`) or use a branch,
+  tag, or abbreviated SHA. If the source file is modified or untracked, or its
+  remote/SHA cannot be verified, say it cannot be pinned or ask for a stable
+  revision; do not present HEAD as a permalink to uncommitted content.
 
 ## Formatting
 

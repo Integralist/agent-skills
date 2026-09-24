@@ -245,9 +245,8 @@ Before finishing any invocation:
 ## Guidelines
 
 - Keep Product and Engineering language concrete and shared.
-- Cite source documents and decisions with relative links.
 - Preserve approved content when revising a document; record requested changes
   instead of silently rewriting the decision history.
 - Load [`conventions-markdown`](../conventions-markdown/SKILL.md) before writing
-  Markdown and [`conventions-mermaid`](../conventions-mermaid/SKILL.md) before
-  adding a diagram.
+  Markdown; follow its repository-link rules. Load
+  [`conventions-mermaid`](../conventions-mermaid/SKILL.md) before diagrams.

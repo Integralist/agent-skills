@@ -107,6 +107,14 @@ Run these git commands inside the repo to build a diagnostic
 snapshot. Capture the output and include it in the subagent
 prompt as context.
 
+**Source revision** — record the canonical GitHub remote and exact commit used
+for citations:
+
+```bash
+git -C {repo_path} remote -v
+git -C {repo_path} rev-parse HEAD
+```
+
 **Churn hotspots** — most-changed files in the last year:
 
 ```bash
@@ -262,10 +270,11 @@ and what was given up.}
 
 ## Guidelines
 
-- Cite every factual claim inline — `path/to/file.go:42` for code,
-  URL for external docs. Claims you cannot cite must be labelled
-  "unverified assumption" and include how to verify them.
-- Use specific file paths and line numbers when referencing code.
+- Cite every factual claim inline: use `path/to/file.go:42` for code in the
+  document's repository, a commit-pinned absolute permalink for code in another
+  repository (see [`conventions-markdown`](../conventions-markdown/SKILL.md)),
+  and a URL for external docs. Label uncited claims "unverified assumption"
+  and state how to verify them.
 - Be exhaustive in coverage but concise in prose — omit needless
   words, see [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
   Exhaustive means no fact dropped, not more words per fact.
