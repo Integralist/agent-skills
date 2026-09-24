@@ -31,7 +31,45 @@
       "Bash(tail *)",
       "Bash(wc *)"
     ],
+    "ask": [
+      "Bash(gh repo delete *)",
+      "Bash(gh repo edit *--visibility*)",
+      "Bash(gh repo deploy-key delete *)",
+      "Bash(gh release delete *)",
+      "Bash(gh release delete-asset *)",
+      "Bash(gh secret set *)",
+      "Bash(gh secret delete *)",
+      "Bash(gh variable delete *)",
+      "Bash(gh issue delete *)",
+      "Bash(gh issue transfer *)",
+      "Bash(gh label delete *)",
+      "Bash(gh gist delete *)",
+      "Bash(gh ssh-key delete *)",
+      "Bash(gh gpg-key delete *)",
+      "Bash(git push *--force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * -f*)",
+      "Bash(git push *+*)",
+      "Bash(gh api *-X DELETE*)",
+      "Bash(gh api *-X PUT*)",
+      "Bash(gh api *-X PATCH*)",
+      "Bash(gh api *--method DELETE*)",
+      "Bash(gh api *--method PUT*)",
+      "Bash(gh api *--method PATCH*)",
+      "Bash(gh api graphql *mutation*)",
+      "Bash(gh pr merge *)",
+      "Bash(gh workflow run *)",
+      "Bash(gh run rerun *)",
+      "Bash(gh release create *)",
+      "Bash(gh gist create *)"
+    ],
     "defaultMode": "auto"
+  },
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "gh api or GitHub GraphQL calls that delete, overwrite, or change the visibility or permissions of GitHub resources, however the HTTP method or flags are spelled"
+    ]
   },
   "outputStyle": "concise",
   "model": "claude-opus-5-5",

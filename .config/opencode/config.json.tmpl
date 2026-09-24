@@ -163,7 +163,38 @@
     }
   },
   "permission": {
-    "edit": "ask"
+    "edit": "ask",
+    "bash": {
+      "gh repo delete*": "ask",
+      "gh repo edit *--visibility*": "ask",
+      "gh repo deploy-key delete*": "ask",
+      "gh release delete*": "ask",
+      "gh secret set*": "ask",
+      "gh secret delete*": "ask",
+      "gh variable delete*": "ask",
+      "gh issue delete*": "ask",
+      "gh issue transfer*": "ask",
+      "gh label delete*": "ask",
+      "gh gist delete*": "ask",
+      "gh ssh-key delete*": "ask",
+      "gh gpg-key delete*": "ask",
+      "git push *--force*": "ask",
+      "git push -f*": "ask",
+      "git push * -f*": "ask",
+      "git push *+*": "ask",
+      "gh api *-X DELETE*": "ask",
+      "gh api *-X PUT*": "ask",
+      "gh api *-X PATCH*": "ask",
+      "gh api *--method DELETE*": "ask",
+      "gh api *--method PUT*": "ask",
+      "gh api *--method PATCH*": "ask",
+      "gh api graphql *mutation*": "ask",
+      "gh pr merge*": "ask",
+      "gh workflow run*": "ask",
+      "gh run rerun*": "ask",
+      "gh release create*": "ask",
+      "gh gist create*": "ask"
+    }
   },
   "theme": "catppuccin-frappe"
 }
