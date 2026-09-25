@@ -56,8 +56,9 @@ When the user requests a saved image:
 1. Write the Mermaid source to a unique path under `/tmp/`, such as
    `/tmp/mermaid-<random-id>.mmd`. Do not overwrite an existing diagram source
    or image.
-2. Use the bundled stylesheet at
-   `.agents/skills/conventions-mermaid/mermaid.css` as `--cssFile`.
+2. Use the bundled stylesheet [`mermaid.css`](../skills/conventions-mermaid/mermaid.css)
+   as `--cssFile`. Resolve the link against this file's directory into an
+   absolute path, and set `css=` to it before running `mmdc`.
 3. Add a top-level `fontFamily` of `Menlo, monospace` to the Mermaid init
    configuration. Use only Menlo with the generic `monospace` fallback.
 4. Use `theme: "base"` and `themeVariables` for global colors. Use explicit
@@ -72,13 +73,13 @@ When the user requests a saved image:
    input="/tmp/mermaid-${id}.mmd"
    output="/tmp/mermaid-${id}.png"
 
-   mmdc \\
-     --input "$input" \\
-     --output "$output" \\
-     --cssFile .agents/skills/conventions-mermaid/mermaid.css \\
+   mmdc \
+     --input "$input" \
+     --output "$output" \
+     --cssFile "$css" \
      --backgroundColor white
 
-   printf 'Saved image: %s\\n' "$output"
+   printf 'Saved image: %s\n' "$output"
    ```
 
 6. Read the generated image and check that text is legible and not clipped.

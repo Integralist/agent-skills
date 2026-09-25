@@ -82,7 +82,7 @@ trailing spaces — it's clearer and survives reformatting.
   GitHub Linguist, highlight.js, and Prism compared to `plain`).
 - When producing a code block for markdown (`markdown` or `md`), use 4
   backticks instead of 3 so any inner code blocks do not break rendering (see
-  [`../shared/MARKDOWN-CODE-BLOCKS.md`](../shared/MARKDOWN-CODE-BLOCKS.md)).
+  [`../shared/MARKDOWN-CODE-BLOCKS.md`](../skills/shared/MARKDOWN-CODE-BLOCKS.md)).
 
 ````md
 ```txt

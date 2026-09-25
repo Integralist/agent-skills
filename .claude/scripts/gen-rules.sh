@@ -7,7 +7,12 @@
 # under .claude/rules/, which need a different frontmatter (`paths:` globs)
 # instead of the skill's `name:`/`description:`. This script regenerates each
 # rule by stripping the skill frontmatter and prepending the rule frontmatter,
-# so the body stays byte-identical to the skill.
+# so the body matches the skill apart from relative links.
+#
+# Skill links like `](../shared/X.md)` resolve from .agents/skills/<skill>/, but
+# a rule lives in .claude/rules/ (or ~/.claude/rules/), where `../shared/` does
+# not exist. Both .claude/ and ~/.claude/ carry a `skills` symlink to the skills
+# tree, so rewriting `](../` to `](../skills/` makes the links resolve there.
 #
 # Run via `make rules`. `make install` runs it automatically.
 
@@ -30,7 +35,7 @@ gen() {
 		printf -- 'paths:\n'
 		printf -- "  - '%s'\n" "$glob"
 		printf -- '---\n'
-		strip_frontmatter "$skill"
+		strip_frontmatter "$skill" | sed 's#](\.\./#](../skills/#g'
 	} >"$rule"
 	echo "generated $rule from $skill"
 }
@@ -40,6 +45,7 @@ gen .agents/skills/conventions-markdown/SKILL.md .claude/rules/markdown.md '**/*
 gen .agents/skills/conventions-mermaid/SKILL.md  .claude/rules/mermaid.md  '**/*.{mmd,mermaid}'
 gen .agents/skills/conventions-python/SKILL.md   .claude/rules/python.md   '**/*.py'
 gen .agents/skills/conventions-sql/SKILL.md      .claude/rules/sql.md      '**/*.sql'
+gen .agents/skills/spec-delta/SKILL.md           .claude/rules/spec-delta.md 'docs/specs/**'
 
 # copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md files so relative
 # links in the generated rule resolve. Each copy gets a "generated" banner so a
