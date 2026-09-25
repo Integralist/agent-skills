@@ -45,6 +45,7 @@ gen .agents/skills/conventions-markdown/SKILL.md .claude/rules/markdown.md '**/*
 gen .agents/skills/conventions-mermaid/SKILL.md  .claude/rules/mermaid.md  '**/*.{mmd,mermaid}'
 gen .agents/skills/conventions-python/SKILL.md   .claude/rules/python.md   '**/*.py'
 gen .agents/skills/conventions-sql/SKILL.md      .claude/rules/sql.md      '**/*.sql'
+gen .agents/skills/spec-delta/SKILL.md           .claude/rules/spec-delta.md 'docs/specs/**'
 
 # copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md files so relative
 # links in the generated rule resolve. Each copy gets a "generated" banner so a
