@@ -1,7 +1,7 @@
 ---
 name: draft-pr
 description: Draft a concise, direct pull request with a clear Problem and Solution. Use when the user asks to create, draft, or open a PR.
-allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh repo view:*), Bash(gh stack:*)
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh repo view:*), Bash(gh stack:*), Bash(mmdc:*)
 ---
 
 # Draft PR
@@ -70,7 +70,33 @@ If the fields below show commands rather than output, run each one first.
    - Add `## Notes` only for testing done, a migration step, a risk, or a
      follow-up worth flagging. Omit otherwise.
 
-6. **Draft the title:**
+6. **Decide whether Solution needs a diagram.** Go through the table below
+   against the hunks from step 4, top to bottom. The first row that matches
+   decides.
+
+   | # | The diff…                                                                                                              | Result            |
+   | - | ---------------------------------------------------------------------------------------------------------------------- | ----------------- |
+   | 1 | changes only docs, comments, tests, CI/lint config, dependency/lock files, or renames/formatting                       | Skip              |
+   | 2 | adds, removes, or reorders calls or messages between 3+ participants (functions, services, processes, queues, stores) | `sequenceDiagram` |
+   | 3 | adds or changes a control-flow branch with 2+ outcomes (retry, fallback, error path, guard, feature flag)              | `flowchart`       |
+   | 4 | adds or changes states or transitions in a lifecycle (status field, state machine, job phases)                         | `stateDiagram-v2` |
+   | 5 | matches none of the above                                                                                              | Skip              |
+
+   When the result is a diagram:
+
+   - Read [`show-me`](../show-me/SKILL.md) and follow its Mermaid guidance.
+     Read the file directly: `show-me` can only be started by the user.
+   - Draw the flow as it works after the change. Add ` (new)` or ` (changed)`
+     to the labels on steps the diff touches.
+   - Draw one diagram with at most 12 nodes or messages. If the flow needs
+     more, draw only the segment that changed.
+   - Validate it per [`conventions-mermaid`](../conventions-mermaid/SKILL.md)
+     before showing it.
+   - Put it in Solution, in a `mermaid` block right after the lead paragraph.
+
+   Write down which row decided (e.g. `Diagram: skipped, row 1`) for step 8.
+
+7. **Draft the title:**
    - **Title = consequence/why (outcome/benefit/prevention), NOT diff mechanics
      (what was typed).** A reviewer reading only the title should learn what
      improves without opening the PR.
@@ -101,10 +127,10 @@ If the fields below show commands rather than output, run each one first.
    GOOD (WHY):  fix(fetch): retry transient 502s so the nightly import completes
    ```
 
-7. **Show the title and description to the user and wait for approval.** Do not
-   open the PR before then.
+8. **Show the title, description, and diagram decision from step 6 to the
+   user, then wait for approval.** Do not open the PR before then.
 
-8. **Push if needed,** then open the PR:
+9. **Push if needed,** then open the PR:
 
    - `git push -u origin <branch>` if the branch has no upstream.
    - `gh pr create --base <base> --title <title> --body-file -` piping the
@@ -112,7 +138,7 @@ If the fields below show commands rather than output, run each one first.
      not hard-wrap at 80 columns (see Style).
    - Open ready-for-review by default. Add `--draft` only if the user asked.
 
-9. **Report the PR URL** from `gh`'s output.
+10. **Report the PR URL** from `gh`'s output.
 
 ## Template
 
@@ -126,6 +152,8 @@ if there is one.>
 
 <What the change does to fix it, verifiable against the diff. Lead with
 the key change; note trade-offs.>
+
+<Optional: one Mermaid diagram when step 6 calls for one.>
 
 ## Notes
 
