@@ -20,7 +20,7 @@ catalogue of hypothetical risks.
 
 At the start of every run, record the Unix time with `date +%s`. Immediately
 before writing the final report, record it again and calculate elapsed
-wall-clock time. Include investigation, tool calls, and subagent waits. Report
+wall-clock time. Include investigation and tool calls. Report
 the duration for every outcome, including `UNKNOWN` and no pending changes.
 If no reliable clock is available, report that timing could not be measured;
 do not estimate.
@@ -78,49 +78,14 @@ do not estimate.
 **Done when:** the exact diff and its baseline are identified, or the report
 clearly says why they could not be identified.
 
-## Independent max-effort pass
-
-For every accessible target with a non-empty diff, run one independent,
-read-only subagent pass. Prioritize accuracy by using the active model at its
-highest supported effort. Follow the [shared completion and retry
-protocol](../shared/SUBAGENT-STEERABILITY.md#completion-and-retry).
-
-1. Use the same model as the active session. Leave model selection unset when
-   that inherits the active model; otherwise use its exact active model ID. Set
-   thinking or effort to the model's actual highest supported level. Subagent
-   UIs display the requested level verbatim, so requesting `max` on a model
-   that only supports up to `high` (such as Gemini) displays `(max)` even when
-   the runtime clamps it downward.
-   - Check the active model's supported levels before spawning. Gemini models
-     support up to `high`; extended-thinking Claude models support `max`.
-   - Verify supported levels via `~/.pi/agent/models-store.json` or inspect
-     `$PI_REASONING_LEVEL`. Leaving `thinking` unset inherits the active
-     session's level.
-   - Do not hard-code a provider model name or silently downgrade. Allow a deep
-     review turn budget (around 40 when configurable).
-2. Give the subagent a self-contained prompt with the exact target and baseline,
-   change intent, full diff or readable diff path, and relevant context. Say
-   review-only: do not modify files, post comments, or run state-changing
-   commands. Ask it to independently find and try to refute the worst credible
-   failure path, returning triggers, impacts, evidence, safeguards, and
-   unknowns.
-3. Start the subagent before settling on your own candidate. Analyze in parallel
-   when supported; otherwise finish an independent first pass before reading its
-   findings. Verify each material claim against source, reconcile disagreements,
-   and base the verdict on evidence rather than consensus.
-4. If no subagent tool is available, continue inline and disclose it. If effort
-   controls are unavailable, still use the inherited-model subagent when
-   possible, but disclose that max effort could not be requested. Never claim a
-   same-model or max-effort pass unless the platform supports it.
-
-Do not spawn for an inaccessible or empty target; report `UNKNOWN` or no pending
-changes, as appropriate.
-
 ## Trace the worst credible outcome
 
-1. Read the full relevant diff, change intent, and nearby implementation. Find
-   callers, consumers, invariants, configuration, and deployment or rollback
-   behavior that determine what the change does in production.
+1. Read the full diff, change intent, and the files it touches. Follow a
+   caller, consumer, invariant, configuration, or deployment or rollback path
+   only when it can change the verdict. Scale the investigation to the diff: a
+   few-line change needs a handful of lookups, not a repository survey. Batch
+   independent reads and queries into one step, and reuse evidence already
+   gathered rather than fetching it again.
 
 2. Look for a plausible path to material harm, including data loss or
    corruption, unauthorized access or disclosure, broad availability or
@@ -151,7 +116,9 @@ changes, as appropriate.
 
 **Done when:** each reported failure path has a concrete trigger and causal
 path, safeguards have been checked, and decision-relevant unknowns are explicit.
-If no credible failure path remains, report that directly.
+Stop gathering evidence once the strongest candidate is confirmed or refuted;
+more breadth does not raise confidence in the verdict. If no credible failure
+path remains, report that directly.
 
 ## Verdicts
 
@@ -190,6 +157,9 @@ isolation, code from the PR runs on the test machine. It could read credentials
 stored there or change files available to that account. Run it only in an
 isolated environment without credentials; otherwise, skip it."
 
+For **Model**, report the session's exact model ID and effort level (in Pi,
+read `$PI_REASONING_LEVEL`). Write `effort unknown` when it cannot be read.
+
 Use level-3 headings (`###`) in the report, selecting the template that
 matches the verdict:
 
@@ -201,15 +171,9 @@ matches the verdict:
 🟡 **HOLD** (or 🔴 **STOP**) — <one-sentence recommendation and scope
 reviewed>
 
-- **Independent pass:** <COMPLETE or INCOMPLETE; state reason if incomplete or
-  unavailable>
 - **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
   (high effort)>
 - **Elapsed:** <measured duration, e.g. 2m 30s>
-
-If a subagent hit its turn limit, put the shared `⚠️` warning here,
-immediately after the pass status. Include the retry limit and whether it
-completed.
 
 ### Worst thing that could happen
 
@@ -236,15 +200,9 @@ and blast radius. Cite the relevant code and safeguards.>
 
 🟢 **PROCEED** — <one-sentence recommendation and scope reviewed>
 
-- **Independent pass:** <COMPLETE or INCOMPLETE; state reason if incomplete or
-  unavailable>
 - **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
   (high effort)>
 - **Elapsed:** <measured duration, e.g. 2m 30s>
-
-If a subagent hit its turn limit, put the shared `⚠️` warning here,
-immediately after the pass status. Include the retry limit and whether it
-completed.
 
 ### Why no material risk was found
 
@@ -268,8 +226,6 @@ safe, with path:line citations.>
 
 ⚪ **UNKNOWN** — <one-sentence summary of what could not be assessed>
 
-- **Independent pass:** <COMPLETE or INCOMPLETE; state reason if incomplete or
-  unavailable>
 - **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
   (high effort)>
 - **Elapsed:** <measured duration, e.g. 2m 30s>
@@ -310,8 +266,7 @@ with this line:
 ```
 
 Then include the relevant verdict and the report sections matching that
-verdict (omitting the process lines: **Independent pass**, **Model**, and
-**Elapsed**). Keep file-and-line citations. Exclude process warnings about
-subagent turns, retries, or effort limits; keep actual change risks, safeguards,
-or missing requirements. If the PR cannot be accessed or the comment cannot be
+verdict (omitting the process lines: **Model** and **Elapsed**). Keep
+file-and-line citations and actual change risks, safeguards, or missing
+requirements. If the PR cannot be accessed or the comment cannot be
 posted, explain that rather than claiming it was posted.
