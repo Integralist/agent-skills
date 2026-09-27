@@ -14,6 +14,7 @@
     "git:github.com/Integralist/pi-subagents",
     "git:github.com/Integralist/pi-btw",
     "git:github.com/Integralist/pi-transcript-enhancer",
+    "npm:pi-context-shake",
     {
       "source": "git:github.com/fastly/agent-skills-internal",
       "skills": [
