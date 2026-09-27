@@ -245,7 +245,7 @@ authenticate via SSO on first use.
 | **changelog**                | Add a changelog entry for uncommitted or branch changes.                               |
 | **clarify**                  | Resolve ambiguous requirements before work begins.                                     |
 | **cleanup**                  | Audit AI-generated clutter, then apply approved fixes interactively.                   |
-| **code-review**              | Review changes for correctness, security, reliability, and maintainability.            |
+| **code-review**              | Review diffs for correctness, security, reliability, performance, and maintainability. |
 | **code-review-feedback**     | Verify review feedback before accepting or implementing it.                            |
 | **codebase-design**          | Design deep modules with high leverage, strong locality, and clean seams.              |
 | **commit**                   | Group related changes and create clear Git commits.                                    |
@@ -274,6 +274,7 @@ authenticate via SSO on first use.
 | **handoff**                  | Summarize the current session for another agent.                                       |
 | **improve-codebase-architecture** | Scan a codebase for deepening opportunities, present a visual HTML report, and grill through candidates. |
 | **incident-report**          | Write an incident report from the session's debugging evidence.                        |
+| **integralist-voice**        | Rewrite drafted text in Integralist's voice for Slack, PRs, docs, and email.           |
 | **is-it-safe**               | Assess the worst credible consequence of committing or merging a change.                |
 | **jira**                     | Create, edit, assign, transition, search, and verify Jira issues.                      |
 | **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
@@ -285,6 +286,7 @@ authenticate via SSO on first use.
 | **pdd**                      | Run a Product-Engineering initiative through Project, Discovery, and Design approvals. |
 | **polish**                   | Improve a short passage's clarity and concision.                                       |
 | **precedent**                | Align work with patterns established by peer files.                                    |
+| **product-voice**            | Write reader-facing product and engineering prose in a plain, audience-first voice.    |
 | **recap**                    | Summarize what is done, in progress, and next.                                         |
 | **redesign**                 | Audit a codebase for redesigns that remove structural complexity.                      |
 | **refactor**                 | Plan a simpler reimplementation of an existing feature.                                |
@@ -292,6 +294,7 @@ authenticate via SSO on first use.
 | **retro**                    | Audit a coding session for missing guardrails, context bloat, and tool friction.       |
 | **security-review-feedback** | Validate vulnerability findings for reachability and exploitability before fixing.     |
 | **show-me**                  | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.     |
+| **spec-delta**               | Record a living-spec behaviour change as a project spec with a Behavioural Delta.      |
 | **stacked-prs**              | Create and manage dependent PRs with the official `gh stack` extension.                |
 | **summarize-for-adhd**       | Summarise a session, file, or URL with a clear takeaway and short, ADHD-friendly points. |
 | **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
@@ -419,6 +422,11 @@ artifacts remain the sources for their own content. PDD documents use the
 canonical [Project](./.agents/skills/shared/PDD-PROJECT-TEMPLATE.md),
 [Discovery](./.agents/skills/shared/PDD-DISCOVERY-TEMPLATE.md), and
 [Design](./.agents/skills/shared/PDD-DESIGN-TEMPLATE.md) templates.
+
+Current behaviour lives in living specs under `docs/specs/`; completed projects
+keep the history of how it changed. Every behaviour edit to a living spec goes
+through **spec-delta**, which records it as a project spec with a Behavioural
+Delta. **code-review** checks both kinds of spec whenever a diff touches them.
 
 ## Choosing an analysis skill
 
