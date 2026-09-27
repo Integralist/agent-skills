@@ -17,6 +17,13 @@ Each question should be formatted like so:
 
 Each round the user answers reshapes the tree — settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
-Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent on the cheapest model tier adequate to the lookup (see [`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)) — don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report — ask the rest of the frontier now. The _decisions_ are the user's — put each to them and wait.
+Finding _facts_ is your job, never the user's. When a frontier question needs a
+fact from the environment (filesystem, tools, etc.), dispatch a sub-agent on the
+cheapest model tier adequate to the lookup. Follow the [shared subagent
+guidance](../shared/SUBAGENT-STEERABILITY.md), including its completion and
+retry protocol. Don't ask the user for facts you can look up yourself. Don't
+block on a running exploration: wait only on questions that depend on its
+result, and ask the rest of the frontier now. The _decisions_ are the user's —
+put each to them and wait.
 
 The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.

@@ -12,9 +12,8 @@ description: >-
 
 A read-only background subagent diagnoses test failures; the main
 thread applies the fixes interactively so the user can redirect any
-fix before work piles up. See
-[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
-for the rule this follows.
+fix before work piles up. Follow the completion and retry protocol in
+[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md).
 
 ## Process
 

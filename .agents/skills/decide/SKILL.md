@@ -75,7 +75,9 @@ stay on the ordered list. Don't let the interview wander.
 ## Step 2 — Spawn the Structurer subagent
 
 After the interview, summarise the captured answers and spawn the
-Structurer. Its instructions must include:
+Structurer. Follow the [shared completion and retry
+protocol](../shared/SUBAGENT-STEERABILITY.md#completion-and-retry) for each
+subagent phase. Its instructions must include:
 
 - The full interview transcript (questions and answers).
 - The decision slug (e.g., `hire-vp-eng`, `kill-feature-x`).

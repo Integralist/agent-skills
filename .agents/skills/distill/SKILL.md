@@ -135,10 +135,12 @@ get approval, then write.
 ## Optional rigor: independent audit
 
 For long or high-stakes text, delegate step 3 to a fresh subagent (if
-your harness supports it). Give it *only* the original load-bearing
-inventory and the rewritten text — not the rewriting rationale — and ask
-it to report any inventory item it cannot find. A reviewer unaware of the
-rewriter's intentions catches omissions the rewriter rationalized away.
+your harness supports it). Follow the [shared completion and retry
+protocol](../shared/SUBAGENT-STEERABILITY.md#completion-and-retry). Give it
+*only* the original load-bearing inventory and the rewritten text — not the
+rewriting rationale — and ask it to report any inventory item it cannot find.
+A reviewer unaware of the rewriter's intentions catches omissions the rewriter
+rationalized away.
 
 ## Related skills
 

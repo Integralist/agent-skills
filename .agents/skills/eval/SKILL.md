@@ -147,7 +147,8 @@ Delegating this is safe despite the executor editing files: every edit lands in
 a disposable sandbox, so there is no diff to unwind and nothing to steer
 mid-flight. That is the sandboxed exception to
 [`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md), not
-a loosening of it.
+a loosening of it. Follow its completion and retry protocol; use a clean
+sandbox when retrying an executor that may have changed its case state.
 
 Done when every case in `cases.json` has a transcript file on disk.
 

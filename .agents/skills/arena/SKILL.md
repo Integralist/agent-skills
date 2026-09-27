@@ -30,11 +30,16 @@ The N candidates will receive the same prompt, so the prompt is the contract. Ge
 
 ## Phase B: Fan out
 
-Spawn all N subagents in one message with `run_in_background: true`, each with the task, the path to the shared grounding, its own output path, and instructions to produce both the artifact and a short rationale.
+Spawn all N subagents in one message with `run_in_background: true`. Give each
+the task, shared grounding path, output path, and instructions to produce an
+artifact and short rationale. Follow the [shared subagent
+guidance](../shared/SUBAGENT-STEERABILITY.md) for each run.
 
 The rationale is mandatory. Without it, the parent cannot tell whether a candidate's structure is principled or accidental, which makes Phase E grafting unreliable. Each rationale names the alternatives the candidate considered and what it rejected.
 
-If a candidate fails to produce output, proceed with N-1 and note the dropout in the synthesis record.
+If a candidate hits its turn limit, retry it with a higher limit before
+treating it as a dropout. If the retry still produces no usable output, proceed
+with N-1 and note the dropout in the synthesis record.
 
 ## Phase C: Cross-judge
 
@@ -68,4 +73,6 @@ If verification surfaces a problem the arena did not catch, either Phase A was w
 
 ## Outputs
 
-One synthesized artifact. One short synthesis note alongside, naming the base, the grafts (with source candidate), the rejections, the dropouts if any, and the verification result.
+One synthesized artifact and one short synthesis note naming the base, grafts
+(with source), rejections, turn-limit warnings after affected run summaries,
+dropouts, and verification result.

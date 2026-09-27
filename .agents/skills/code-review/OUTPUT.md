@@ -10,6 +10,11 @@ Adherence" only when `--plan` was requested.
 
 **Overall assessment:** [1-2 sentence summary]
 
+**Subagent pass:** [complete, or incomplete with remaining work]
+
+[If a subagent hit its turn limit, immediately follow this line with a `⚠️`
+warning stating the original and retry limits and whether the retry completed.]
+
 ### Actionable Items
 
 [Confirmed findings ordered High, Medium, Low. Include file and line, relevant

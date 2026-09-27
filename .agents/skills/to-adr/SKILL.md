@@ -123,7 +123,8 @@ When a plan yields several decisions, this is a
 [verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): draft the
 **first** ADR, confirm its shape with the user, then fan out subagents to draft
 the rest — one per decision, each passed only its decision and the approved
-skeleton. The value gate above still applies per decision.
+skeleton. Follow the shared completion and retry protocol for each ADR. The
+value gate above still applies per decision.
 
 ## Report
 

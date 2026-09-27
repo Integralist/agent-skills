@@ -36,8 +36,8 @@ prioritize empirically.
 
 Spawn a single subagent (exploration / investigation role) on the cheapest
 model tier adequate to the investigation (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)).
-Its prompt must include:
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md),
+including its completion and retry protocol). Its prompt must include:
 
 - The feature or area to investigate.
 - The current working directory.

@@ -32,7 +32,8 @@ templates — a
 **one representative file** first (e.g. `internal/api`) with placeholders
 resolved, and confirm the substitutions and layout with the user. Once
 approved, fan out subagents to instantiate the remaining templates in
-parallel — the placeholder map is fixed, so the work is mechanical.
+parallel — the placeholder map is fixed, so the work is mechanical. Follow the
+shared completion and retry protocol for each dispatched file.
 
 ## Project Structure
 

@@ -475,6 +475,7 @@ single-agent harness, run the steps sequentially — the result is identical.
 Both inventory steps are mechanical file reads — run them on the cheapest model
 tier adequate to the task (see
 [`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)).
+Apply its completion and retry protocol before correlating the results.
 
 ## References
 

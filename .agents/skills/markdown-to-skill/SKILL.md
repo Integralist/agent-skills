@@ -98,8 +98,9 @@ the **first** file in the main thread and show the user the result. Once
 they confirm the derived name, description, and frontmatter, the rest is
 mechanical: fan out one subagent per file (or per batch) to apply the
 identical Step 5 rules, each writing its own skill dir and reporting back.
-Conflicts still skip per Step 5. The user approves the transform once, not
-each file.
+Follow the shared completion and retry protocol for each file; retry only the
+unfinished file after a turn-limit interruption. Conflicts still skip per Step
+5. The user approves the transform once, not each file.
 
 ### Step 6: Report results
 

@@ -49,4 +49,8 @@
 # Cost & Subagents
 
 - **Model Selection:** Default subagents to the cheapest adequate model (see `.agents/skills/shared/SUBAGENT-STEERABILITY.md`).
+- **Completion:** Whenever spawning subagents, follow
+  `.agents/skills/shared/SUBAGENT-STEERABILITY.md#completion-and-retry`:
+  verify completion and retry incomplete work with a higher turn limit. Report
+  turn-limit exhaustion with `⚠️` after the affected pass summary.
 - **Downgrade Prompts:** Prompt before running software engineering (code edits, design, debugging) on downgraded models. No prompt needed for mechanical, read-only, git, or docs work.

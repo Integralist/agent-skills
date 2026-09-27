@@ -57,8 +57,9 @@ unclear, they report an unknown rather than infer a defect.
 Spawn one subagent per dimension (roles below are descriptions, not agent names
 — use your platform's primitives). Run each on the cheapest model tier adequate
 to its dimension (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)). Set
-`max_turns: 40` (or platform equivalent) so deep reading and cross-file checks
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md),
+including its completion and retry protocol). Set `max_turns: 40` (or platform
+equivalent) so deep reading and cross-file checks
 do not hit turn limits prematurely. When your platform distinguishes named agent
 files from inline characters, prefer saved agent files if configured, or launch
 the subagent inline. Each prompt must include:
@@ -77,6 +78,7 @@ the subagent inline. Each prompt must include:
 
 ```json
 {
+  "status": "COMPLETE | INCOMPLETE",
   "files_reviewed": ["path/to/file"],
   "files_skipped": [
     {
@@ -178,10 +180,11 @@ to refute** the finding, not confirm it:
 - **Default to refuted** when the finding cannot be positively confirmed from
   the code. The bar is "demonstrably real," not "plausible."
 
-Each verifier returns:
+Each verifier returns the shared completion status along with its verdict:
 
 ```json
 {
+  "status": "COMPLETE | INCOMPLETE",
   "isReal": true,
   "confidence": "high | medium | low",
   "reason": "what confirms or refutes it",

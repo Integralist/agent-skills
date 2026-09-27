@@ -15,7 +15,10 @@ AppleScript (`osascript`).
 
 Reserve out-of-band splits and new tabs for heavy tasks: long-running suites
 (`make test-integration`, e2e, Docker builds), dev servers/watchers, interactive
-TUIs, or visual subagents.
+TUIs, or visual subagents. When launching a subagent in a pane, follow the
+[shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md), especially its
+completion and retry protocol. Verify completion from its recorded output
+before reporting success.
 
 ## When Not to Use
 

@@ -112,6 +112,33 @@ Set the turn limit to match the task's scope:
 - **Audits, code reviews, and diagnostics** — 30–50 turns (e.g. `max_turns: 40`).
 - **Adversarial verification** — 40–50 turns to allow extensive caller searches.
 
+## Completion and retry
+
+A turn budget is a limit, not evidence that a subagent finished its assignment.
+The parent agent owns checking completion, retrying interrupted work, and
+reporting any incomplete pass.
+
+1. Define the assigned scope and completion criteria in every subagent prompt.
+   Require a final status of `COMPLETE` or `INCOMPLETE`, with unfinished work
+   listed for the latter. A completion marker does not replace checking required
+   files, findings, or other outputs.
+2. Check the platform's stop reason and the subagent's status. Treat an explicit
+   turn-limit stop, `INCOMPLETE` status, missing status, or missing required
+   output as incomplete. If the platform hides the stop reason, report that
+   completion could not be verified rather than claiming the turn limit was hit.
+3. Retry incomplete work once with a materially higher turn limit, ideally
+   double the original. Keep the same task and model settings; pass the partial
+   result and remaining work so the retry can continue. For work with side
+   effects, use a clean sandbox or verified checkpoint to avoid repeating them.
+4. Verify the retry against the original completion criteria. If it remains
+   incomplete, continue in the main thread when feasible; otherwise mark the
+   result incomplete and do not rely on it as a finished review.
+5. Report turn-limit exhaustion with `⚠️` immediately after the relevant
+   subagent-pass summary, even if the retry completed. State the original limit,
+   retry limit, and retry outcome. If completion is unverifiable, use the same
+   placement but describe the uncertainty accurately. For example:
+   `⚠️ Initial pass hit 40 turns; retry at 80 completed.`
+
 ## Named vs. inline subagent launch
 
 When the harness distinguishes saved agent definitions from inline characters

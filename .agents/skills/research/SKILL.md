@@ -175,8 +175,8 @@ Don't guess. Stop and ask the user if:
 
 Spawn a single general-purpose subagent on the cheapest model tier
 adequate to the research (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)).
-The prompt must include:
+[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md),
+including its completion and retry protocol). The prompt must include:
 
 - The repo path (`~/code/{org}/{repo}`).
 - A statement that this is **read-only research**: investigate and

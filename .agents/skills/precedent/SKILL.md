@@ -111,5 +111,5 @@ stays steerable.
 
 Read-only peer-finding across a large path may fan out — dispatch it to
 subagents on the cheapest adequate model, then report and apply in the main
-thread. See
+thread. Follow the completion and retry protocol in
 [`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md).

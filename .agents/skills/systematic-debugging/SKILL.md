@@ -33,8 +33,10 @@ Before touching any code:
 
 On a gnarly bug, delegate this evidence-gathering and prior-occurrence
 search to a read-only diagnostic subagent that reports findings —
-review-only; do not modify code or run tools that change state. Phase 4
-implementation stays in the main thread so each fix is steerable.
+review-only; do not modify code or run tools that change state. Follow the
+[shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md), including its
+completion and retry protocol. Phase 4 implementation stays in the main thread
+so each fix is steerable.
 
 **Root-cause tracing technique:**
 

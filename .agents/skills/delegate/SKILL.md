@@ -49,7 +49,7 @@ For those, prefer a primitive the user can talk to mid-flight — a
 named teammate (below) if the harness supports it, otherwise keep
 the work in the main thread rather than a sealed subagent. See
 [`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
-for the full rule.
+for the full rule, including completion and retry after a turn-limit stop.
 
 ## Agent teams (if your harness supports it)
 

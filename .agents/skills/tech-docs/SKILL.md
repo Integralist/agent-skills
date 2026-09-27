@@ -37,7 +37,8 @@ If neither flag is given, infer from context. If still ambiguous, ask.
 For a *set* of docs sharing the same problems, this is a
 [verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): rewrite **one**
 and present its change summary; once the user approves the pillar-transform, fan
-out subagents to apply the same transform to the siblings. Single-doc
+out subagents to apply the same transform to the siblings. Follow the shared
+completion and retry protocol for every dispatched document. Single-doc
 improvement stays inline.
 
 **Writing (`--new`):**

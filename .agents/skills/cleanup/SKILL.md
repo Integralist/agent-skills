@@ -25,7 +25,7 @@ one pass, but every edit lands in the main thread where you can
 veto or adjust it as it happens — no large diff to unwind at the
 end. See
 [`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
-for the general rule this follows.
+for the general rule this follows, including its completion and retry protocol.
 
 ## Input
 
