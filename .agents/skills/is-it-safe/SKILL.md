@@ -16,6 +16,15 @@ This is an adversarial impact analysis, not a general code review or a risk
 matrix. Focus the report on the strongest evidence-backed concern, not a long
 catalogue of hypothetical risks.
 
+## Timing
+
+At the start of every run, record the Unix time with `date +%s`. Immediately
+before writing the final report, record it again and calculate elapsed
+wall-clock time. Include investigation, tool calls, and subagent waits. Report
+the duration for every outcome, including `UNKNOWN` and no pending changes.
+If no reliable clock is available, report that timing could not be measured;
+do not estimate.
+
 ## Resolve the change under review
 
 1. **No argument:** inspect the current branch and local worktree. Use the
@@ -37,9 +46,29 @@ catalogue of hypothetical risks.
    the intended target.
 
 2. **PR URL or number:** retrieve the PR metadata and actual diff using
-   available read-only GitHub tools such as `gh`. Review that PR, not the
-   current checkout as a substitute. If the PR or diff cannot be accessed,
-   return `UNKNOWN` and say what access or input is missing.
+   read-only GitHub tools. Prefer these commands for PR metadata and the diff:
+
+   ```sh
+   gh pr view "$PR" --json \
+     number,title,state,baseRefName,headRefName,baseRefOid,headRefOid,url
+   gh pr diff "$PR"
+   ```
+
+   Review that PR, not the current checkout as a substitute.
+
+   Use `gh api` only when the needed information is not available through those
+   commands. Check the endpoint and its response semantics before interpreting
+   errors. Encode slash-containing branch names when they are a single REST
+   path parameter, or list branches and filter for an exact name. A 404 from a
+   branch-protection endpoint can mean the branch is not protected; do not
+   treat every 404 as proof that a branch or PR is missing. Prefer the PR's
+   reported head metadata over assuming a branch exists.
+
+   Use valid jq string escapes. For literal substring matches, use
+   `contains("text")`; `"\."` is invalid in a jq string. Treat a failed API
+   request or jq expression as a failed query, not evidence about the change.
+   Correct the query if the result matters. If the PR or diff still cannot be
+   accessed, return `UNKNOWN` and say what access or input is missing.
 
 3. **Commit, range, or base ref:** assess exactly the requested target. For an
    explicit commit range, do not silently add unrelated worktree changes. For a
@@ -159,8 +188,9 @@ Use this structure:
 
 🟢 **PROCEED** — <one-sentence recommendation and scope reviewed>
 
-**Independent pass:** <COMPLETE or INCOMPLETE; model/effort used, or why the
-pass was unavailable>
+- **Independent pass:** <COMPLETE or INCOMPLETE; model/effort used, or why the
+  pass was unavailable>
+- **Elapsed:** 2m 30s (example; replace with the measured duration)
 
 If a subagent hit its turn limit, put the shared `⚠️` warning here,
 immediately after the pass status. Include the retry limit and whether it
