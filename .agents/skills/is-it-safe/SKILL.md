@@ -157,8 +157,9 @@ isolation, code from the PR runs on the test machine. It could read credentials
 stored there or change files available to that account. Run it only in an
 isolated environment without credentials; otherwise, skip it."
 
-For **Model**, report the session's exact model ID and effort level (in Pi,
-read `$PI_REASONING_LEVEL`). Write `effort unknown` when it cannot be read.
+For **Model**, report the session's exact model ID and effort level. Read
+effort from `$CLAUDE_EFFORT` in Claude Code or `$PI_REASONING_LEVEL` in Pi.
+Write `effort unknown` only when neither can be read.
 
 Use level-3 headings (`###`) in the report, selecting the template that
 matches the verdict:
@@ -259,14 +260,14 @@ After finishing the report for a PR, end by asking:
 
 Wait for the user's answer. Post nothing unless they explicitly approve. If
 approved, post one top-level PR comment, not inline comments. Start the comment
-with this line:
+with this line, filling in the model ID and effort from the report's **Model**:
 
 ```txt
-🤖 This review was written by an LLM agent.
+🤖 This review was written by an LLM agent (`<model ID>`, <effort> effort).
 ```
 
 Then include the relevant verdict and the report sections matching that
-verdict (omitting the process lines: **Model** and **Elapsed**). Keep
+verdict, omitting **Model** and **Elapsed**. Keep
 file-and-line citations and actual change risks, safeguards, or missing
 requirements. If the PR cannot be accessed or the comment cannot be
 posted, explain that rather than claiming it was posted.
