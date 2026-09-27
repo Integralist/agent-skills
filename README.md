@@ -274,6 +274,7 @@ authenticate via SSO on first use.
 | **handoff**                  | Summarize the current session for another agent.                                       |
 | **improve-codebase-architecture** | Scan a codebase for deepening opportunities, present a visual HTML report, and grill through candidates. |
 | **incident-report**          | Write an incident report from the session's debugging evidence.                        |
+| **is-it-safe**               | Assess the worst credible consequence of committing or merging a change.                |
 | **jira**                     | Create, edit, assign, transition, search, and verify Jira issues.                      |
 | **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
 | **model-stats**              | Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.     |
@@ -424,6 +425,7 @@ canonical [Project](./.agents/skills/shared/PDD-PROJECT-TEMPLATE.md),
 | Skill            | Use when                                                                                   | Primary output                                               |
 | ---------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
 | **code-review**  | Code or a diff exists and you want defects identified                                      | Verified findings and open questions                         |
+| **is-it-safe**   | You need the worst credible outcome of committing or merging a change                     | Verdict and evidence-backed impact path                       |
 | **precedent**    | Work is correct and you want it to match the project's own patterns                        | Divergences citing the peer that sets each pattern           |
 | **decide**       | You must choose between consequential options                                              | Durable decision memo and recommendation                     |
 | **consensus**    | A complex design or implementation needs independent cross-model review and approval gates | Reviewed assessment or implementation with dissent preserved |
