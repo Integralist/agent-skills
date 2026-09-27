@@ -87,9 +87,17 @@ protocol](../shared/SUBAGENT-STEERABILITY.md#completion-and-retry).
 
 1. Use the same model as the active session. Leave model selection unset when
    that inherits the active model; otherwise use its exact active model ID. Set
-   thinking or effort to `max`, or the highest supported level. Do not hard-code
-   a provider model name or silently downgrade. Allow a deep review turn budget
-   (around 40 when configurable).
+   thinking or effort to the model's actual highest supported level. Subagent
+   UIs display the requested level verbatim, so requesting `max` on a model
+   that only supports up to `high` (such as Gemini) displays `(max)` even when
+   the runtime clamps it downward.
+   - Check the active model's supported levels before spawning. Gemini models
+     support up to `high`; extended-thinking Claude models support `max`.
+   - Verify supported levels via `~/.pi/agent/models-store.json` or inspect
+     `$PI_REASONING_LEVEL`. Leaving `thinking` unset inherits the active
+     session's level.
+   - Do not hard-code a provider model name or silently downgrade. Allow a deep
+     review turn budget (around 40 when configurable).
 2. Give the subagent a self-contained prompt with the exact target and baseline,
    change intent, full diff or readable diff path, and relevant context. Say
    review-only: do not modify files, post comments, or run state-changing
@@ -182,15 +190,22 @@ isolation, code from the PR runs on the test machine. It could read credentials
 stored there or change files available to that account. Run it only in an
 isolated environment without credentials; otherwise, skip it."
 
-Use this structure:
+Use level-3 headings (`###`) in the report, selecting the template that
+matches the verdict:
 
+### Template for 🟡 HOLD or 🔴 STOP
+
+````markdown
 ### Verdict
 
-🟢 **PROCEED** — <one-sentence recommendation and scope reviewed>
+🟡 **HOLD** (or 🔴 **STOP**) — <one-sentence recommendation and scope
+reviewed>
 
-- **Independent pass:** <COMPLETE or INCOMPLETE; model/effort used, or why the
-  pass was unavailable>
-- **Elapsed:** 2m 30s (example; replace with the measured duration)
+- **Independent pass:** <COMPLETE or INCOMPLETE; state reason if incomplete or
+  unavailable>
+- **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
+  (high effort)>
+- **Elapsed:** <measured duration, e.g. 2m 30s>
 
 If a subagent hit its turn limit, put the shared `⚠️` warning here,
 immediately after the pass status. Include the retry limit and whether it
@@ -198,26 +213,76 @@ completed.
 
 ### Worst thing that could happen
 
-<State the consequence in plain language, or say no concrete material failure
-path was found. Name who or what would be affected.>
+<State the consequence in plain language. Name who or what would be affected.>
 
 ### How it could happen
 
-<Trigger → changed behavior → impact, including important preconditions and
-blast radius. Cite the relevant code and safeguards.>
+<Trigger → changed behavior → impact, including important preconditions
+and blast radius. Cite the relevant code and safeguards.>
 
 ### Before commit or merge
 
-<State the smallest useful mitigation, decision, or verification. For
-`PROCEED`, omit this section when no action is needed.>
+<State the smallest useful mitigation, decision, or verification.>
 
 ### What I couldn't confirm
 
 <List only unknowns that could change the verdict. Omit when none remain.>
+````
 
-For `UNKNOWN`, use the worst-outcome section to explain why the target or
-critical evidence could not be assessed and what input or access is needed.
-Do not silently switch to a different target.
+### Template for 🟢 PROCEED
+
+````markdown
+### Verdict
+
+🟢 **PROCEED** — <one-sentence recommendation and scope reviewed>
+
+- **Independent pass:** <COMPLETE or INCOMPLETE; state reason if incomplete or
+  unavailable>
+- **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
+  (high effort)>
+- **Elapsed:** <measured duration, e.g. 2m 30s>
+
+If a subagent hit its turn limit, put the shared `⚠️` warning here,
+immediately after the pass status. Include the retry limit and whether it
+completed.
+
+### Why no material risk was found
+
+<Explain why no concrete material failure path is reachable. Name what was
+checked and why the changed behavior remains bounded.>
+
+### Verified safeguards
+
+<Cite code, tests, configuration, or execution guards that keep the change
+safe, with path:line citations.>
+
+### What I couldn't confirm
+
+<List only unknowns that could change the verdict. Omit when none remain.>
+````
+
+### Template for ⚪ UNKNOWN
+
+````markdown
+### Verdict
+
+⚪ **UNKNOWN** — <one-sentence summary of what could not be assessed>
+
+- **Independent pass:** <COMPLETE or INCOMPLETE; state reason if incomplete or
+  unavailable>
+- **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
+  (high effort)>
+- **Elapsed:** <measured duration, e.g. 2m 30s>
+
+### Why this could not be assessed
+
+<Explain why the target, source, or critical behavior could not be evaluated
+reliably. Name the missing access, unresolvable ref, or unavailable evidence.>
+
+### What is needed to proceed
+
+<State the specific input, permission, or command needed to unblock review.>
+````
 
 ## Boundaries
 
@@ -244,8 +309,9 @@ with this line:
 🤖 This review was written by an LLM agent.
 ```
 
-Then give the relevant verdict and concise, evidence-backed feedback: what
-could happen, how, and what to do before merge. Keep file-and-line citations.
-Exclude process warnings about subagent turns, retries, or effort limits; keep
-actual change risks and mitigations. If the PR cannot be accessed or the
-comment cannot be posted, explain that rather than claiming it was posted.
+Then include the relevant verdict and the report sections matching that
+verdict (omitting the process lines: **Independent pass**, **Model**, and
+**Elapsed**). Keep file-and-line citations. Exclude process warnings about
+subagent turns, retries, or effort limits; keep actual change risks, safeguards,
+or missing requirements. If the PR cannot be accessed or the comment cannot be
+posted, explain that rather than claiming it was posted.
