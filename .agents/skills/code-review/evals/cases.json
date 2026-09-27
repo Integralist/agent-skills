@@ -1,0 +1,174 @@
+[
+  {
+    "id": "blast-radius-broken-caller",
+    "prompt": "Review my branch before I open a PR.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "cat > users.py <<'EOF'\ndef find_user(users, name):\n    for u in users:\n        if u[\"name\"] == name:\n            return u\n    raise KeyError(name)\nEOF",
+      "cat > billing.py <<'EOF'\nfrom users import find_user\n\n\ndef charge(users, name, amount):\n    user = find_user(users, name)\n    return {\"email\": user[\"email\"], \"amount\": amount}\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b quiet-lookup",
+      "cat > users.py <<'EOF'\ndef find_user(users, name):\n    for u in users:\n        if u[\"name\"] == name:\n            return u\n    return None\nEOF",
+      "git commit -q -am 'return None for missing users'"
+    ],
+    "checks": [
+      "Diffs the branch against the merge base with main",
+      "Reports a finding located in billing.py, a file the diff leaves unchanged",
+      "The billing.py finding explains that charge now indexes into None when the user is missing",
+      "Leaves the working tree clean — git status shows no changes after the review"
+    ]
+  },
+  {
+    "id": "sql-injection-high",
+    "prompt": "Can you review the changes on this branch?",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "cat > db.py <<'EOF'\ndef get_order(conn, order_id):\n    return conn.execute(\"SELECT id, status FROM orders WHERE id = ?\", (order_id,)).fetchone()\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b order-search",
+      "cat >> db.py <<'EOF'\n\n\ndef search_orders(conn, status):\n    return conn.execute(f\"SELECT id FROM orders WHERE status = '{status}'\").fetchall()\nEOF",
+      "cat > api.py <<'EOF'\nfrom db import search_orders\n\n\ndef handle_search(request, conn):\n    return search_orders(conn, request.args[\"status\"])\nEOF",
+      "git add . && git commit -q -m 'add order search endpoint'"
+    ],
+    "checks": [
+      "Reports SQL injection in search_orders as a High severity actionable item",
+      "The injection finding cites db.py with a line reference",
+      "The suggested fix uses a parameterized query, matching get_order"
+    ]
+  },
+  {
+    "id": "performance-n-plus-one",
+    "prompt": "Review my branch.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "cat > reports.py <<'EOF'\ndef order_count(conn):\n    return conn.execute(\"SELECT COUNT(*) FROM orders\").fetchone()[0]\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b order-totals",
+      "cat >> reports.py <<'EOF'\n\n\ndef order_totals(conn, order_ids):\n    totals = {}\n    for oid in order_ids:\n        row = conn.execute(\"SELECT SUM(amount) FROM items WHERE order_id = ?\", (oid,)).fetchone()\n        totals[oid] = row[0]\n    return totals\nEOF",
+      "git commit -q -am 'add order totals report'"
+    ],
+    "checks": [
+      "Reports the query issued per order inside the loop (N+1) as an actionable item",
+      "Attributes the N+1 finding to the reliability, performance, and rollout dimension",
+      "Suggests a single grouped query in place of the loop"
+    ]
+  },
+  {
+    "id": "rollout-unsafe-migration",
+    "prompt": "Please review this branch, it's a small rename.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "mkdir -p migrations",
+      "cat > migrations/001_create_users.sql <<'EOF'\nCREATE TABLE users (\n    id BIGINT PRIMARY KEY,\n    full_name TEXT NOT NULL\n);\nEOF",
+      "cat > app.py <<'EOF'\ndef greeting(conn, user_id):\n    row = conn.execute(\"SELECT full_name FROM users WHERE id = ?\", (user_id,)).fetchone()\n    return f\"Hello, {row[0]}\"\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b rename-display-name",
+      "cat > migrations/002_rename_full_name.sql <<'EOF'\nALTER TABLE users DROP COLUMN full_name;\nALTER TABLE users ADD COLUMN display_name TEXT NOT NULL DEFAULT '';\nEOF",
+      "sed -i.bak 's/full_name/display_name/' app.py && rm app.py.bak",
+      "git add . && git commit -q -m 'rename full_name to display_name'"
+    ],
+    "checks": [
+      "Loads the conventions-sql skill",
+      "Reports that dropping full_name breaks the previous app version while old and new versions run side by side",
+      "Reports that the migration discards existing full_name data and cannot be undone",
+      "Suggests an expand-then-contract sequence: add and backfill display_name before dropping full_name"
+    ]
+  },
+  {
+    "id": "consistency-two-peers",
+    "prompt": "Review my branch for anything that doesn't fit the codebase.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "mkdir -p handlers",
+      "cat > errors.py <<'EOF'\nclass NotFoundError(Exception):\n    pass\nEOF",
+      "cat > handlers/orders.py <<'EOF'\nfrom errors import NotFoundError\n\n\ndef get_order(store, order_id):\n    order = store.get(order_id)\n    if order is None:\n        raise NotFoundError(f\"order {order_id}\")\n    return order\nEOF",
+      "cat > handlers/invoices.py <<'EOF'\nfrom errors import NotFoundError\n\n\ndef get_invoice(store, invoice_id):\n    invoice = store.get(invoice_id)\n    if invoice is None:\n        raise NotFoundError(f\"invoice {invoice_id}\")\n    return invoice\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b refunds",
+      "cat > handlers/refunds.py <<'EOF'\ndef get_refund(store, refund_id):\n    refund = store.get(refund_id)\n    if refund is None:\n        return {\"error\": \"not found\"}, 404\n    return refund\nEOF",
+      "git add . && git commit -q -m 'add refund handler'"
+    ],
+    "checks": [
+      "Loads the conventions-python skill",
+      "Reports that get_refund returns an error tuple where sibling handlers raise NotFoundError",
+      "The consistency finding cites handlers/orders.py with a line reference",
+      "The consistency finding cites handlers/invoices.py with a line reference"
+    ]
+  },
+  {
+    "id": "clean-change",
+    "prompt": "Review my branch.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "cat > age.py <<'EOF'\ndef is_child(age):\n    return age < 13\nEOF",
+      "cat > test_age.py <<'EOF'\nfrom age import is_child\n\n\ndef test_is_child():\n    assert is_child(12)\n    assert not is_child(13)\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b adult-check",
+      "cat >> age.py <<'EOF'\n\n\ndef is_adult(age):\n    return age >= 18\nEOF",
+      "cat > test_age.py <<'EOF'\nfrom age import is_adult, is_child\n\n\ndef test_is_child():\n    assert is_child(12)\n    assert not is_child(13)\n\n\ndef test_is_adult():\n    assert is_adult(18)\n    assert not is_adult(17)\nEOF",
+      "git add . && git commit -q -m 'add is_adult'"
+    ],
+    "checks": [
+      "Reports zero High or Medium actionable items",
+      "Report header lists Mode as branch-diff and names the merge-base ref",
+      "Report states an overall assessment"
+    ]
+  },
+  {
+    "id": "spec-conflict-completed-project",
+    "prompt": "Review my branch — it finishes the manual dev deploy project.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "mkdir -p .github/workflows docs/specs",
+      "cat > .github/workflows/deploy-app.yml <<'EOF'\nname: deploy-app\non:\n  push:\n    paths: ['app/**']\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - run: ./deploy.sh dev app\nEOF",
+      "cat > .github/workflows/deploy-config.yml <<'EOF'\nname: deploy-config\non:\n  push:\n    paths: ['config/**']\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - run: ./deploy.sh dev config\nEOF",
+      "cat > docs/specs/deployment.md <<'EOF'\n# Deployment\n\n```gherkin\nScenario: Push deploys to dev\n  Given an engineer pushes to a feature branch\n  Then the change deploys to dev automatically\n```\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b manual-dev-deploy",
+      "mkdir -p projects/completed/2026-01-10-manual-dev-deploy",
+      "cat > projects/completed/2026-01-10-manual-dev-deploy/spec.md <<'EOF'\n# Manual Dev Deploy\n\n- **Status:** Complete\n\n## Problem Statement\n\nEvery push deploys to the shared dev environment, so a broken branch breaks dev for everyone.\n\n## Acceptance Criteria\n\n```gherkin\nScenario: Dev deploys only on manual dispatch\n  Given an engineer pushes to a feature branch\n  Then no deployment to dev occurs\n  And dev deploys only when an engineer dispatches the workflow manually\n```\n\n## Behavioural Delta\n\nBaseline: docs/specs/deployment.md\n\n### MODIFIED\n\nScenario \"Push deploys to dev\" becomes \"Dev deploys only on manual dispatch\".\n\n## Living Specifications\n\n- docs/specs/deployment.md — owns dev deployment triggers\nEOF",
+      "cat > .github/workflows/deploy-app.yml <<'EOF'\nname: deploy-app\non:\n  workflow_dispatch:\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - run: ./deploy.sh dev app\nEOF",
+      "cat > docs/specs/deployment.md <<'EOF'\n# Deployment\n\n```gherkin\nScenario: App code deploys to dev on manual dispatch\n  Given an engineer pushes app code to a feature branch\n  Then dev deploys only when an engineer dispatches the workflow manually\n```\nEOF",
+      "cat > docs/DEPLOY.md <<'EOF'\n# Deploying\n\nApp changes deploy to dev when you run the deploy-app workflow by hand.\nConfig-only changes still deploy to dev on push.\nEOF",
+      "git add . && git commit -q -m 'deploy app to dev by manual dispatch'"
+    ],
+    "checks": [
+      "Runs the spec and plan adherence reviewer without --plan being passed",
+      "Treats projects/completed/2026-01-10-manual-dev-deploy/spec.md as this change's contract rather than history",
+      "Reports that config-only pushes still deploy to dev, contradicting the project spec's manual-dispatch-only criterion",
+      "The contradiction finding cites .github/workflows/deploy-config.yml, a file the diff leaves unchanged",
+      "The contradiction finding cites the project spec with a line reference",
+      "The correction offers both resolutions: gate deploy-config behind manual dispatch, or amend the spec to allow the exception",
+      "Report includes a Dropped by Verification section that lists each dropped finding with a reason or states None"
+    ]
+  },
+  {
+    "id": "empty-source",
+    "prompt": "Review my uncommitted changes.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "printf 'def ok():\\n    return True\\n' > ok.py",
+      "git add . && git commit -q -m 'initial commit'"
+    ],
+    "checks": [
+      "Reports that there are no changes to review",
+      "Stops before spawning any reviewer subagents"
+    ]
+  }
+]

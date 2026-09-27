@@ -2,7 +2,8 @@
 
 Always load "Select The Source," the selected source section, "Large Diffs,"
 and "Empty Source." Local branch and all-local modes also load "Local Default
-Branch." When requested, load "Plan Modifier."
+Branch." Load "Spec and Plan Adherence" when `--plan` is passed or the diff
+touches `projects/` or `docs/specs/`.
 
 ## Select The Source
 
@@ -21,8 +22,8 @@ Never combine remote and local revisions silently.
 Use the GitHub CLI (`gh`) or equivalent:
 
 1. `gh pr view <number> --repo <owner>/<repo> --json title,body,baseRefName,headRefName,headRefOid,additions,deletions`
-1. `gh pr diff <number> --repo <owner>/<repo> --name-only`
-1. `gh pr diff <number> --repo <owner>/<repo> > "$DIFF_PATH"`
+2. `gh pr diff <number> --repo <owner>/<repo> --name-only`
+3. `gh pr diff <number> --repo <owner>/<repo> > "$DIFF_PATH"`
 
 The remote PR head is authoritative. Fetch full-file context from
 `headRefOid`. A local checkout may be used only when its `HEAD` equals
@@ -32,8 +33,8 @@ If the checked-out PR branch has local commits or working-tree changes absent
 from the remote PR, prompt the user to choose:
 
 1. Review the remote PR exactly as published.
-1. Review the local branch, including committed-but-unpushed changes.
-1. Review all local changes, including uncommitted changes.
+2. Review the local branch, including committed-but-unpushed changes.
+3. Review all local changes, including uncommitted changes.
 
 For local choices, use the PR's `baseRefName` as `DEFAULT_BRANCH`. Choice 2 uses
 branch-diff mode; choice 3 uses all-local mode.
@@ -43,8 +44,8 @@ branch-diff mode; choice 3 uses all-local mode.
 Run these in order until one succeeds; store the result as `DEFAULT_BRANCH`:
 
 1. `git rev-parse --verify main` — use `main`
-1. `git rev-parse --verify master` — use `master`
-1. `git symbolic-ref refs/remotes/origin/HEAD` — parse the branch name
+2. `git rev-parse --verify master` — use `master`
+3. `git symbolic-ref refs/remotes/origin/HEAD` — parse the branch name
 
 ## Local Branch (`--diff`)
 
@@ -94,28 +95,54 @@ must concern changed behavior.
 Use `headRefOid` for remote PR files, `HEAD` for branch-diff files, and the
 working tree for uncommitted, all-local, or explicit-path files.
 
-## Plan Modifier (`--plan[=<path>]`)
+## Spec and Plan Adherence
 
-Resolve the plan or task list in this order:
+Runs when `--plan[=<path>]` is passed, or automatically when the diff touches
+`projects/` or `docs/specs/`.
+
+Repositories following the `spec-delta` workflow keep two kinds of spec:
+
+- **Project spec** — `projects/<date>-<slug>/spec.md`: this change's
+  acceptance criteria and `## Behavioural Delta`. A finished project moves to
+  `projects/completed/`, often in the same PR that delivers it.
+- **Living spec** — `docs/specs/<capability>.md`: current behavior once the
+  change merges.
+
+Resolve intent documents in this order, adding every one found to
+`CONTEXT_PATH` under its path:
 
 1. `--plan=<path>`
-1. A PR body link under `projects/`, `docs/plans/`, or `docs/tasks/`
-1. The newest file matching `projects/*/{plan,tasks,tasks-slice-*}.md` (or legacy
-   `docs/plans/*.md` / `docs/tasks/*.md`) by modification time, excluding
-   `README.md`, `projects/completed/`, `docs/plans/completed/`, and
+2. Project files in the diff, including under `projects/completed/`. A project
+   the diff adds or moves is this change's contract, not history.
+3. A PR body link under `projects/`, `docs/plans/`, or `docs/tasks/`
+4. With a bare `--plan` and nothing found above: the newest file matching
+   `projects/*/{plan,tasks,tasks-slice-*}.md` (or legacy `docs/plans/*.md` /
+   `docs/tasks/*.md`) by modification time, excluding `README.md`,
+   `projects/completed/`, `docs/plans/completed/`, and
    `docs/tasks/completed/`
 
-When found, add its contents to `CONTEXT_PATH` and spawn the Plan Adherence
-reviewer. Its focus is:
+Then add each living spec named in a found project spec's
+`## Living Specifications` section, and every `docs/specs/` file the diff
+changes. A completed project outside the diff is history; the living spec
+supersedes it.
+
+When any intent document is found, spawn the Spec and Plan Adherence reviewer.
+Its focus is:
 
 - **Unplanned files** — changed files absent from the plan or task list
 - **Missing implementation** — planned or tasked work absent from the diff
 - **Scope excess** — adjacent work beyond the stated goal
 - **Plan drift** — implementation contradicting the stated approach or verbatim
   task specification
+- **Spec conflict** — the project spec, living spec, operational docs, PR body,
+  and code disagree about behavior, including unchanged code bound by a
+  contract the diff changes
+- **Delta sync** — each `## Behavioural Delta` scenario appears in the living
+  spec it names, and each behavioral edit to a `docs/specs/` file appears in a
+  delta
 
-Report scope excess without judging it. If no plan or task list is found, skip
-this reviewer and note that once in the summary.
+Report scope excess without judging it. If `--plan` was passed and no intent
+document is found, skip this reviewer and note that once in the summary.
 
 ## Empty Source
 

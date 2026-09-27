@@ -2,29 +2,29 @@
 name: code-review
 description: >-
   Code review using specialized subagents. Analyzes behavior and tests,
-  security, reliability, and maintainability. Use when reviewing a remote PR or
-  local code, including unpushed/uncommitted changes. Pass --plan or
-  --plan=<path> to check the diff against an implementation plan or task list.
+  security, reliability and performance, and maintainability. Use when
+  reviewing a remote PR or local code, including unpushed/uncommitted changes.
+  Pass --plan or --plan=<path> to check the diff against an implementation plan
+  or task list.
 argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan[=<path>]]'
 ---
 
 # Code Review Skill
 
-Review code with four specialized subagents in parallel (five with `--plan`),
-each focused on a different dimension. Works against GitHub PRs or local
-changes, including committed-but-unpushed and uncommitted work.
+Review code with four specialized subagents in parallel, plus a fifth for spec
+and plan adherence when it applies. Works against GitHub PRs or local changes,
+including committed-but-unpushed and uncommitted work.
 
 > [!NOTE]
 > Some platforms cap concurrent subagents; the four dimensions fit a common
-> limit of 4. With `--plan`, run the Plan Adherence subagent
-> as a fifth — sequentially after the first four if the cap prevents a parallel
-> spawn.
+> limit of 4. Run the Spec and Plan Adherence subagent as a fifth —
+> sequentially after the first four if the cap prevents a parallel spawn.
 
 ## Input
 
 Follow the loading instructions in [`MODES.md`](MODES.md) for the selected
-source and optional Plan Modifier. Complete source gathering before spawning
-reviewers.
+source and for Spec and Plan Adherence. Complete source gathering before
+spawning reviewers.
 
 ## Gather the diff once
 
@@ -38,7 +38,9 @@ Create a second temp file, `CONTEXT_PATH`, containing:
 - The stated purpose of the change
 - PR title and body, when available
 - Relevant repository instructions
-- The plan, specification, or task list, when provided
+- Intent documents — project specs, plans, task lists, and living specs —
+  resolved by "Spec and Plan Adherence" in `MODES.md`, each labelled with its
+  path
 - Available test results
 
 Record for the subagent prompts:
@@ -46,11 +48,26 @@ Record for the subagent prompts:
 - `DIFF_PATH` — absolute path to the diff file just written
 - `CONTEXT_PATH` — absolute path to the review-context file
 - `FILE_LIST` — changed files, one per line
-- `HAS_GO` — true if any changed file ends in `.go`
+- `CONVENTIONS` — every conventions skill matching a changed file (table below)
 - `LARGE_DIFF` — true if the diff exceeds ~3000 lines (see "Large diffs")
+
+| Changed file                                         | Conventions skill      |
+| ---------------------------------------------------- | ---------------------- |
+| `*.go`                                               | `conventions-go`       |
+| `*.py`                                               | `conventions-python`   |
+| `*.sql`                                              | `conventions-sql`      |
+| `*.md`                                               | `conventions-markdown` |
+| `*.mmd`, `*.mermaid`, or a `mermaid` fence in a diff | `conventions-mermaid`  |
 
 Reviewers must judge changes against `CONTEXT_PATH`. When intent remains
 unclear, they report an unknown rather than infer a defect.
+
+**Intent sources can disagree.** The PR body, project spec, living spec,
+operational docs, and code each state intended behavior. When two disagree,
+report the contradiction and cite both locations — settling it by trusting one
+source hides the question the author must answer. A demonstrated contradiction
+is a finding whose correction names both resolutions (change the code, or
+amend the spec); wording too ambiguous to demonstrate one is an unknown.
 
 ## Spawn Subagents
 
@@ -115,43 +132,77 @@ defect unless the code demonstrates one.
 - **High** — likely security compromise, data loss, outage, or violation of a
   core contract
 - **Medium** — demonstrated defect under plausible conditions
-- **Low** — concrete maintainability or testability cost, not a style preference
+- **Low** — contained cost with no user-visible impact: a minor defect, or a
+  concrete maintainability or testability cost. Not a style preference.
 
 Severity reflects impact and likelihood, not reviewer confidence.
 
 ### Review Dimensions
 
-1. **Behavior and Tests Review** — intended behavior, regressions, edge cases,
-   error paths, compatibility, and whether tests prove the changed behavior and
-   important failure modes. Specifically check: (a) do new public functions or
-   error branches lack unit tests? (b) do new API endpoints or workflow slices
-   lack integration tests? (c) are assertions falsifiable (checking actual
-   mutated state/payloads rather than vacuous `assert.NoError`)?
+Each dimension owns one question. A defect belongs to the dimension whose
+question it answers; the others hand it off. Include the owning question and
+hand-offs in each subagent prompt.
 
-1. **Security and Abuse Resistance Review** — trust boundaries,
-   authentication/authorization, injection, information leakage, unsafe
-   dependencies, unbounded work, resource exhaustion, and fail-open behavior.
-   **Use the most capable model available** because security findings are
-   highest-stakes and least tolerant of misses.
+1. **Behavior and Tests Review** — *Does the change do what `CONTEXT_PATH`
+   says, and do the tests prove it?*
+   - Owns: intended behavior, logic and computation errors, edge cases,
+     regressions, and the contract callers rely on.
+   - Blast radius: for every changed exported symbol, signature, or observable
+     behavior, search for its callers and confirm each still holds. A caller
+     the change breaks is a finding against the change, even when the caller's
+     file is unchanged. The same holds for contracts: when the diff changes a
+     spec, doc, or policy statement, check the unchanged code that must now
+     satisfy it.
+   - Tests: (a) new public functions or error branches lacking unit tests; (b)
+     new API endpoints or workflow slices lacking integration tests; (c)
+     assertions that are not falsifiable — they must check mutated state or
+     payloads, not a vacuous `assert.NoError`.
+   - Hands off: behavior under failure, concurrency, load, or deployment
+     (Reliability); attacker-driven misuse (Security).
 
-1. **Reliability and Data Correctness Review** — computations, state
-   transitions, concurrency, context propagation, retries, partial failures,
-   resource lifecycle, leaks, double-close, and error-path completeness.
+2. **Security and Abuse Resistance Review** — *Can an attacker or untrusted
+   input make this code do something it should not?*
+   - Owns: trust boundaries, authentication and authorization, injection,
+     information leakage, unsafe dependencies, fail-open behavior, and work or
+     resource use an attacker can inflate.
+   - Hands off: cost under ordinary load (Reliability).
+   - **Use the most capable model available** — security findings are
+     highest-stakes and least tolerant of misses.
 
-1. **Maintainability and Conventions Review** — project consistency,
-   readability, API design, observability, naming, error handling, and
-   language idioms. For consistency findings the subagent MUST load
-   `precedent` (`.agents/skills/precedent/SKILL.md`) and cite the peer
-   `file:line` establishing each pattern it claims the change departs from — a
-   finding with no cited sibling is an invention. When `HAS_GO`, the subagent
-   MUST first load the
-   `conventions-go` skill (`.agents/skills/conventions-go/SKILL.md`) and judge
-   changed Go against project rules rather than generic conventions. For other
-   languages, use the repository's corresponding instructions when available.
+3. **Reliability, Performance, and Rollout Review** — *Does it keep working
+   under failure, concurrency, load, and deployment?*
+   - Failure and state: state transitions, concurrency, context propagation,
+     retries, partial failures, atomicity, resource lifecycle, leaks,
+     double-close, and whether every error path is handled.
+   - Performance: a query or remote call per item in a loop (N+1), work that
+     grows faster than its input, allocation in hot paths, missing pagination
+     or indexes, and blocking calls on latency-sensitive paths.
+   - Rollout: migrations that lock or rewrite large tables or cannot be undone;
+     schema, API, config, or message changes that break while old and new
+     versions run side by side; changes with no rollback path. When
+     `CONVENTIONS` includes `conventions-sql`, load it first.
+   - Hands off: error-handling style and wrapping (Maintainability).
 
-1. **Plan Adherence Review** *(only when `--plan` is active and a plan or task
-   list was located)* — see "Plan Modifier" in `MODES.md`. The prompt must
-   additionally include the plan or task file contents.
+4. **Maintainability and Conventions Review** — *What does this cost the next
+   person who changes it?*
+   - Owns: consistency with project precedent, readability, API ergonomics,
+     naming, error-handling style, observability conventions (log keys,
+     metrics, spans), language idioms, and comments or docs the change left
+     stale.
+   - Load every skill in `CONVENTIONS` first and judge changed files against
+     project rules rather than generic ones. For file types with no
+     conventions skill, use the repository's instructions when available.
+   - For consistency findings, load the `precedent` skill and cite at least
+     two peer `file:line` locations that establish the pattern the change
+     departs from. One peer is a coincidence; a finding with fewer than two
+     citations is an invention.
+   - Hands off: whether errors are handled at all (Reliability).
+
+5. **Spec and Plan Adherence Review** *(when `--plan` is active or the diff
+   touches `projects/` or `docs/specs/`, and an intent document was located)*
+   — *Does the change deliver what its specs and plan promise, and do those
+   documents agree?* See "Spec and Plan Adherence" in `MODES.md`. The prompt
+   must additionally include the intent document contents.
 
 Collect all results before verification. Do not advance until every reviewer
 has accounted for every file and every changed file was reviewed by at least
@@ -173,12 +224,24 @@ to refute** the finding, not confirm it:
 
 - Read the cited `file`/`line` and enough surrounding context from `DIFF_PATH`
   and the selected source described in `MODES.md`.
-- Look for reasons it is wrong or moot: code not actually changed by the diff; a
-  guard/caller/invariant already prevents it; the behavior is intended; the
-  claim misreads language/library semantics; the line reference doesn't match
-  real code.
+- Look for reasons it is wrong or moot: code neither changed by the diff nor
+  bound by a contract the diff changes; a guard/caller/invariant already
+  prevents it; the behavior is intended; the claim misreads language/library
+  semantics; the line reference doesn't match real code.
+- "Intended" refutes a finding only when you cite the `CONTEXT_PATH` source
+  that states the intent and no other source contradicts it. When sources
+  disagree, the contradiction is real: confirm it as one.
+- For a consistency finding, open each cited peer and confirm at least two
+  show the claimed pattern; refute the finding otherwise.
+- When running code settles a finding, leave the working tree untouched: run
+  Python as `python3 -B` (or with `PYTHONDONTWRITEBYTECODE=1`), keep scratch
+  state in memory or a temp directory, and confirm `git status` is unchanged
+  afterwards.
 - **Default to refuted** when the finding cannot be positively confirmed from
   the code. The bar is "demonstrably real," not "plausible."
+- Exception: a High security finding you can neither confirm nor refute
+  returns `isReal: false` with `unresolved: true`. An unproven attack path is
+  an open question, not a dismissal.
 
 Each verifier returns the shared completion status along with its verdict:
 
@@ -186,24 +249,28 @@ Each verifier returns the shared completion status along with its verdict:
 {
   "status": "COMPLETE | INCOMPLETE",
   "isReal": true,
+  "unresolved": false,
   "confidence": "high | medium | low",
   "reason": "what confirms or refutes it",
   "correctedSeverity": "High | Medium | Low (omit if unchanged)"
 }
 ```
 
-Keep only findings with `isReal: true`; apply any `correctedSeverity`. Note the
-dropped count in the summary. Keep unknowns separate and deduplicate them; do
-not send them through defect verification unless they assert a defect.
+Keep only findings with `isReal: true`; apply any `correctedSeverity`. Move
+each finding marked `unresolved` to unknowns, stating the evidence that would
+settle it. Record each dropped finding with the verifier's reason; the summary
+lists them so a reader can catch a wrong refutation. Keep unknowns separate and
+deduplicate them; do not send them through defect verification unless they
+assert a defect.
 
 ## Compile Summary
 
 Deduplicate confirmed findings — if multiple subagents flag the same file/line,
 combine them into one item citing all relevant dimensions. Sort by severity
-(High → Medium → Low). Optionally note how many findings verification dropped.
+(High → Medium → Low). List dropped findings under "Dropped by Verification".
 List unresolved unknowns after findings and identify what evidence would answer
-each one. Load "Remote PR" or "Local" from [`OUTPUT.md`](OUTPUT.md), plus "Plan
-Adherence" when applicable, and render the consolidated review. Completion
+each one. Load "Remote PR" or "Local" from [`OUTPUT.md`](OUTPUT.md), plus "Spec
+and Plan Adherence" when that reviewer ran, and render the consolidated review. Completion
 requires every changed file accounted for, every retained finding verified, and
 every unknown separated from defects.
 

@@ -1,7 +1,7 @@
 # Review Output
 
-Load "Remote PR" for PR mode or "Local" for every local mode. Add "Plan
-Adherence" only when `--plan` was requested.
+Load "Remote PR" for PR mode or "Local" for every local mode. Add "Spec and
+Plan Adherence" only when that reviewer ran.
 
 ## Remote PR
 
@@ -27,6 +27,11 @@ snippet, impact, and smallest viable correction.]
 ### Open Questions
 
 [Unknowns that materially constrained the review and the evidence needed.]
+
+### Dropped by Verification
+
+[One line per dropped finding: `file:line` — claim — why the verifier refuted
+it. Write "None" when verification dropped nothing.]
 ````
 
 ## Local
@@ -43,15 +48,17 @@ Use the same sections as remote PR output with this header:
 - **Files reviewed:** <count>
 ````
 
-## Plan Adherence
+## Spec and Plan Adherence
 
-Present plan findings under "Informational / No Action Needed" unless the user
-requested strict scope enforcement:
+Spec conflicts and delta-sync gaps are findings: verify them and rank them in
+"Actionable Items" with the rest. Present the plan categories below under
+"Informational / No Action Needed" unless the user requested strict scope
+enforcement:
 
 ````markdown
-### Plan Adherence
+### Spec and Plan Adherence
 
-**Plan / Tasks:** `projects/<slug>/plan.md` or `projects/<slug>/tasks.md`
+**Intent documents:** `projects/<slug>/spec.md`, `docs/specs/<capability>.md`
 
 - **Unplanned files:** ...
 - **Missing implementation:** ...
@@ -59,8 +66,8 @@ requested strict scope enforcement:
 - **Plan drift:** ...
 ````
 
-If no plan or task list was located, state "Plan adherence: none located,
-skipped" once.
+If `--plan` was passed and no intent document was located, state "Plan
+adherence: none located, skipped" once.
 
 When actionable findings exist, offer to address them. Otherwise, end with the
 assessment and open questions.
