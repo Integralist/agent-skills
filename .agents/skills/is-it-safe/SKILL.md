@@ -260,7 +260,8 @@ After finishing the report for a PR, end by asking:
 
 Wait for the user's answer. Post nothing unless they explicitly approve. If
 approved, post one top-level PR comment, not inline comments. Start the comment
-with this line, filling in the model ID and effort from the report's **Model**:
+with this line, filling in the model ID (kept in backticks) and effort from the
+report's **Model**:
 
 ```txt
 🤖 This review was written by an LLM agent (`<model ID>`, <effort> effort).
