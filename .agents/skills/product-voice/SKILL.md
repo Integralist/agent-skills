@@ -4,8 +4,11 @@ description: >-
   Use when drafting or revising reader-facing prose in product or engineering
   documents. Trigger for PR descriptions, ADR context and consequences, spec
   problem/solution/user stories, plan summaries/deliverables, and technical
-  documentation—even if the user does not request a particular voice. Keep
-  technical contracts and acceptance criteria precise.
+  documentation—even if the user does not request a particular voice. Also use
+  when the user asks to rewrite a message in product voice or to use
+  product-voice for all replies. Keep technical contracts and acceptance
+  criteria precise.
+argument-hint: "[--all | --off | text to rewrite]"
 ---
 
 # Product Voice
@@ -13,6 +16,12 @@ description: >-
 Write for the person using or learning the thing, not just the team that built
 it. Make clear why it matters while keeping the underlying facts and mechanisms
 accurate.
+
+## Modes
+
+Pick the mode from [`../shared/VOICE-MODES.md`](../shared/VOICE-MODES.md):
+one-off (default), persistent (`--all`), or off (`--off`). In persistent mode,
+apply the voice rules below to every reply.
 
 ## Apply selectively
 
@@ -28,6 +37,8 @@ Use this skill for the explanatory prose in mixed technical documents:
 
 Do not simplify away API behaviour, permissions, assumptions, or uncertainty.
 Gherkin, schemas, signatures, and implementation steps need exact wording.
+
+## Voice rules
 
 - Start with the reader's problem, question, or desired outcome.
 - Explain technical choices through their effects: what changes, for whom, and

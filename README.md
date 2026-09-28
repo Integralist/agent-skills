@@ -235,6 +235,7 @@ authenticate via SSO on first use.
 
 | Skill                        | Description                                                                            |
 | ---------------------------- | -------------------------------------------------------------------------------------- |
+| **adhd-voice**               | Reply in an ADHD-friendly shape once, or for the whole session with `--all`.           |
 | **agents-md**                | Make `AGENTS.md` canonical and point `CLAUDE.md` and `GEMINI.md` to it.                |
 | **architect**                | Turn an idea into research, a specification, and an implementation plan.               |
 | **arena**                    | Spawn N parallel candidates, pick the strongest, and graft in the best of the rest.    |
@@ -274,7 +275,7 @@ authenticate via SSO on first use.
 | **handoff**                  | Summarize the current session for another agent.                                       |
 | **improve-codebase-architecture** | Scan a codebase for deepening opportunities, present a visual HTML report, and grill through candidates. |
 | **incident-report**          | Write an incident report from the session's debugging evidence.                        |
-| **integralist-voice**        | Rewrite drafted text in Integralist's voice for Slack, PRs, docs, and email.           |
+| **integralist-voice**        | Write in Integralist's voice once, or for the whole session with `--all`.              |
 | **is-it-safe**               | Assess the worst credible consequence of committing or merging a change.                |
 | **jira**                     | Create, edit, assign, transition, search, and verify Jira issues.                      |
 | **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
@@ -286,7 +287,7 @@ authenticate via SSO on first use.
 | **pdd**                      | Run a Product-Engineering initiative through Project, Discovery, and Design approvals. |
 | **polish**                   | Improve a short passage's clarity and concision.                                       |
 | **precedent**                | Align work with patterns established by peer files.                                    |
-| **product-voice**            | Write reader-facing product and engineering prose in a plain, audience-first voice.    |
+| **product-voice**            | Write in a plain, audience-first voice once, or for the whole session with `--all`.    |
 | **recap**                    | Summarize what is done, in progress, and next.                                         |
 | **redesign**                 | Audit a codebase for redesigns that remove structural complexity.                      |
 | **refactor**                 | Plan a simpler reimplementation of an existing feature.                                |
