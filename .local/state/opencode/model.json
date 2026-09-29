@@ -41,7 +41,7 @@
   "variant": {
     "amazon-bedrock/anthropic.claude-haiku-4-5-20251001-v1:0": "default",
     "amazon-bedrock/anthropic.claude-opus-4-6-v1": "high",
-    "amazon-bedrock/anthropic.claude-sonnet-5": "medium",
+    "amazon-bedrock/global.anthropic.claude-sonnet-5-5": "medium",
     "amazon-bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0": "default",
     "amazon-bedrock/global.anthropic.claude-opus-4-6-v1": "high",
     "amazon-bedrock/global.anthropic.claude-opus-4-8": "high",

@@ -105,16 +105,20 @@
           "name": "Claude Opus 4.6",
           "reasoningEffort": "high"
         },
-        "global.anthropic.claude-sonnet-5": {
+        "global.anthropic.claude-sonnet-5-5": {
           "cost": {
             "input": 2,
-            "output": 10
+            "output": 10,
+            "cache": {
+              "read": 0.2,
+              "write": 2.5
+            }
           },
           "limit": {
-            "context": 200000,
-            "output": 16000
+            "context": 1000000,
+            "output": 128000
           },
-          "name": "Claude Sonnet 5",
+          "name": "Claude Sonnet 5.5",
           "reasoningEffort": "high"
         }
       },
@@ -123,7 +127,7 @@
         "global.anthropic.claude-opus-4-8",
         "global.anthropic.claude-opus-4-6-v1[1m]",
         "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-        "global.anthropic.claude-sonnet-5"
+        "global.anthropic.claude-sonnet-5-5"
       ],
       "options": {
         "region": "us-east-2"

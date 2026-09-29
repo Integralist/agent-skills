@@ -65,6 +65,7 @@ def test_normalize_model(raw: str, expected: str) -> None:
     ("model", "provider"),
     [
         ("claude-sonnet-5", "Anthropic"),
+        ("claude-sonnet-5-5", "Anthropic"),
         ("gpt-6-astra", "OpenAI"),
         ("o3", "OpenAI"),
         ("gemini-3.8-flash", "Google"),
