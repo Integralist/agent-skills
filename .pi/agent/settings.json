@@ -1,9 +1,10 @@
 {
   "defaultProvider": "github-copilot",
-  "defaultModel": "gpt-6-luna",
+  "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "high",
   "modelThinkingLevels": {
-    "github-copilot/gpt-6-luna": "high"
+    "github-copilot/gpt-6-luna": "high",
+    "github-copilot/gpt-6.1-sol": "high"
   },
   "hideThinkingBlock": true,
   "theme": "nord-contrast",
@@ -31,6 +32,7 @@
     "github-copilot/gpt-6-astra",
     "github-copilot/gpt-6-luna",
     "github-copilot/gpt-6-sol",
+    "github-copilot/gpt-6.1-sol",
     "github-copilot/kimi-k3",
     "google-vertex/gemini-3.1-pro-preview",
     "google-vertex/gemini-3.8-flash"
