@@ -67,6 +67,16 @@ When designing an interface, ask:
 - **The interface is the test surface.** Callers and tests cross the same seam. If you want to test *past* the interface, the module is probably the wrong shape.
 - **One adapter means a hypothetical seam. Two adapters means a real one.** Don't introduce a seam unless something actually varies across it.
 
+- **Redesign from first principles.** When integrating a new requirement,
+  read the affected modules and ask: "If this requirement had been foundational
+  from day one, what interface and implementation would we build?"
+  Compare that design with extending the current one; use the comparison to
+  choose the smallest coherent change, not to mandate a rewrite.
+  Plan the whole affected change, then deliver it incrementally.
+  Preserve existing behaviour except where the requirement explicitly changes
+  it. Propagate the chosen design through every affected reference: types,
+  callers, tests, docs, examples, and rationale.
+
 ## Designing for testability
 
 Good interfaces make testing natural:
