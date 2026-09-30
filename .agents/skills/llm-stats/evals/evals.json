@@ -1,0 +1,23 @@
+{
+  "skill_name": "llm-stats",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Use llm-stats to create an Artificial Analysis Intelligence Index preview I can share as one offline HTML file.",
+      "expected_output": "Replace /tmp/llm-stats.html with clearly marked synthetic data, muted warm surfaces, bright distinct model lines, hover/click highlighting, fuzzy selection, URL state, and downloadable saved views.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Create an llm-stats chart from the supplied synthetic CSV, using its DeepSWE and Avg Cost per Task columns. Show Anthropic, OpenAI, and Google initially, and label the data as a demo.",
+      "expected_output": "Inspect the supplied CSV header; map score/cost columns explicitly, preserve percentage and USD units, label the values as synthetic, and output a portable /tmp HTML with provider defaults.",
+      "files": ["evals/deepswe-demo.csv"]
+    },
+    {
+      "id": 3,
+      "prompt": "Use llm-stats to fetch current intelligence scores and generate an offline HTML. I haven't configured an API key yet.",
+      "expected_output": "Reuse a compatible complete cache, or read the configured 1Password item and fetch all Free API pages. Plot reported Intelligence Index cost per task, preserve version metadata, and retain the previous cache/report on any failure."
+      "files": []
+    }
+  ]
+}

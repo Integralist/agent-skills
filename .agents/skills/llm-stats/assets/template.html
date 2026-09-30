@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>LLM Stats · Model trade-offs</title>
+<style>/*__STYLE__*/</style>
+</head>
+<body>
+<main>
+  <header class="page-header">
+    <div><p class="eyebrow">A personal model atlas</p><h1>Intelligence, with perspective.</h1>
+    <p class="intro">Compare model scores, cost, and effort. Find the trade-off that works for you.</p></div>
+    <span class="offline-badge">Self-contained · works offline</span>
+  </header>
+  <div id="demo-banner" class="demo-banner" hidden>DEMO DATA — invented values for exploring the interface. Not Artificial Analysis benchmark results.</div>
+  <section class="toolbar" aria-label="Chart controls">
+    <div class="picker">
+      <button id="models-toggle" aria-expanded="false" aria-controls="models-panel">Models</button>
+      <div id="models-panel" class="picker-panel" hidden>
+        <label class="search-label" for="model-search">Search models</label>
+        <input id="model-search" type="search" placeholder="Try “cld ops” or “Gemini high”" autocomplete="off">
+        <div id="model-options" class="model-options"></div>
+        <p id="search-count" class="muted small" aria-live="polite"></p>
+        <div class="picker-actions">
+          <button id="clear-models">Clear</button>
+          <button id="select-matches">Select matches</button>
+          <button id="reset-models">Reset defaults</button>
+        </div>
+      </div>
+    </div>
+    <label>Preset<select id="preset"><option value="">Choose preset…</option></select></label>
+    <label>Benchmark<select id="benchmark"></select></label>
+    <label>Compare against<select id="x-metric">
+      <option value="cost">Cost per task</option>
+      <option value="tokens">Output tokens per task</option>
+      <option value="time">Output-generation time per task</option>
+      <option value="price">Token price · blended $/1M</option>
+      <option value="speed">Output speed · tokens/s</option>
+    </select></label>
+    <button id="save-html" class="primary">Save HTML view</button>
+  </section>
+  <section class="chart-card" aria-labelledby="chart-title">
+    <div class="chart-heading">
+      <div><p class="eyebrow" id="chart-kicker">MODEL TRADE-OFFS</p><h2 id="chart-title">Model comparison</h2></div>
+      <div class="chart-actions"><button id="clear-highlight">Clear highlight</button><span id="point-count" class="muted small"></span></div>
+    </div>
+    <p id="metric-note" class="metric-note"></p>
+    <div id="warnings" class="warning" role="status" hidden></div>
+    <div class="chart-scroll">
+      <svg id="chart" viewBox="0 0 1280 660" aria-label="Model comparison chart"></svg>
+    </div>
+    <div id="tooltip" class="tooltip" role="status" hidden></div>
+    <p id="empty-state" class="empty-state" hidden></p>
+    <div id="legend" class="legend" aria-label="Model families"></div>
+    <div class="chart-foot"><p>Hover to explore. Click an effort node to pin its line; click it again to release. Tab + Enter works too.</p><span id="pin-status" aria-live="polite">No line pinned</span></div>
+  </section>
+  <section class="bottom-bar" aria-label="Sharing and data">
+    <p>Bookmark this file’s URL to return to a view. To share your selection, use <strong>Save HTML view</strong>.</p>
+    <div class="export-actions"><button id="copy-link">Copy view URL</button><button id="export-csv">Export chart CSV</button><button id="export-json">Export all JSON</button></div>
+  </section>
+  <div id="link-fallback" hidden><label for="view-url">View URL — copy this link<input id="view-url" readonly></label></div>
+  <p id="action-status" class="muted small" aria-live="polite"></p>
+  <footer>
+    <p>Benchmark source: <a href="https://artificialanalysis.ai/" target="_blank" rel="noopener noreferrer">Artificial Analysis</a>. Data use and sharing remain subject to their <a href="https://artificialanalysis.ai/terms-of-use" target="_blank" rel="noopener noreferrer">terms</a>. This is an independent viewer, not an Anthropic product.</p>
+    <p id="provenance" class="muted small"></p>
+  </footer>
+  <noscript>Enable JavaScript to use the chart. All scripts and data are included in this file.</noscript>
+</main>
+<script id="report-data" type="application/json">/*__DATA__*/</script>
+<script>/*__APP__*/</script>
+</body>
+</html>

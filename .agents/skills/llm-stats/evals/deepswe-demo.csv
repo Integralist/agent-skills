@@ -1,0 +1,7 @@
+Model,Slug,Creator,DeepSWE,Avg Cost per Task
+"Claude Example [DEMO] (High Effort)",demo-claude-example-high,Anthropic,68%,$4.20
+"Claude Example [DEMO] (Max Effort)",demo-claude-example-max,Anthropic,73%,$8.50
+"GPT Example [DEMO] (High Effort)",demo-gpt-example-high,OpenAI,69%,$3.60
+"GPT Example [DEMO] (Max Effort)",demo-gpt-example-max,OpenAI,76%,$8.20
+"Gemini Example [DEMO] (High Effort)",demo-gemini-example-high,Google,65%,$2.10
+"Gemini Example [DEMO] (Max Effort)",demo-gemini-example-max,Google,72%,$4.50
