@@ -95,6 +95,9 @@ the test. This rule ships inside the document — see `TEMPLATE.md`.
 
 ## Task anatomy
 
+Load [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) before drafting
+verbatim tests.
+
 Order tasks so each is executable once all prior tasks are done; the executor
 works top to bottom. Each task carries:
 

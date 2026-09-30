@@ -155,8 +155,9 @@ hand-offs in each subagent prompt.
      satisfy it.
    - Tests: (a) new public functions or error branches lacking unit tests; (b)
      new API endpoints or workflow slices lacking integration tests; (c)
-     assertions that are not falsifiable — they must check mutated state or
-     payloads, not a vacuous `assert.NoError`.
+     assertions that cannot detect a contract violation. Before dispatch, load
+     [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) and include its contents
+     in this reviewer's prompt.
    - Hands off: behavior under failure, concurrency, load, or deployment
      (Reliability); attacker-driven misuse (Security).
 

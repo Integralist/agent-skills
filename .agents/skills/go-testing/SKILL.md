@@ -36,7 +36,8 @@ assertion. Follow the 3-step cycle:
 
 ## What Each Test Proves
 
-Applies to all test styles:
+Load [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) before writing or changing
+tests. Apply it alongside these Go-specific rules for every test style.
 
 - **One behavior per case:** The case `name` states the exact behavior proven.
   If a case proves two things, split it into two cases.
