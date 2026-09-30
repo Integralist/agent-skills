@@ -1,10 +1,10 @@
 {
   "defaultProvider": "github-copilot",
   "defaultModel": "gpt-6.1-sol",
-  "defaultThinkingLevel": "high",
+  "defaultThinkingLevel": "xhigh",
   "modelThinkingLevels": {
-    "github-copilot/gpt-6-luna": "high",
-    "github-copilot/gpt-6.1-sol": "high"
+    "github-copilot/gpt-6-luna": "xhigh",
+    "github-copilot/gpt-6.1-sol": "xhigh"
   },
   "hideThinkingBlock": true,
   "theme": "nord-contrast",
