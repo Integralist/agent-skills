@@ -9,7 +9,6 @@
   "theme": "nord-contrast",
   "packages": [
     "git:github.com/Integralist/pi-statusbar",
-    "npm:@shuv1337/pi-mcp-adapter",
     "npm:pi-intercom",
     "git:github.com/Integralist/pi-subagents",
     "git:github.com/Integralist/pi-btw",
