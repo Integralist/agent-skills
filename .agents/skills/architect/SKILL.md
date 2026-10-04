@@ -83,9 +83,9 @@ user wants stakeholder-facing framing; otherwise skip it.
 
 Then present:
 
-1. **Compile first slice into tasks** — delegate to
-   [`to-tasks`](../to-tasks/SKILL.md) for Slice 1 (`tasks-slice-1.md`, or
-   `tasks.md` for a single-slice plan) to begin execution.
+1. **Compile first slice into tasks** — tell the user to run
+   `/to-tasks <plan-path> slice-1` (`/to-tasks <plan-path>` for a
+   single-slice plan) to create `tasks-slice-1.md` or `tasks.md`.
 1. **Research another topic** — loop back to Phase 1.
 1. **Create another plan** — delegate to `to-plan` again.
 

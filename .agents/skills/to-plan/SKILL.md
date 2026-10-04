@@ -348,11 +348,10 @@ warranted. A PRD, when warranted, is offered separately by `architect` via
 
 ## Surface durable rules
 
-After extracting decisions, delegate to
-[`durable-rules`](../durable-rules/SKILL.md). It codifies systemic patterns from
-the investigation as conventions or anti-patterns and skips entirely when
-nothing durable surfaced. Delegating here reaches both the `architect` flow and
-standalone `/to-plan` runs.
+After extracting decisions, if systemic patterns surfaced, tell the user to
+run `/durable-rules` as a separate follow-up to codify them. It is
+user-invoked and requires confirmation before writing. Skip the hand-off when
+nothing durable surfaced.
 
 ## Guidelines
 
@@ -380,15 +379,16 @@ standalone `/to-plan` runs.
 ## Execution hand-off (Just-in-Time tasks)
 
 Do not generate verbatim TDD code for all slices upfront, as early slices may
-alter implementation details for later ones. Instead, compile each slice into
-tasks just-in-time:
+alter implementation details for later ones. Instead, hand off one slice at a
+time to the user:
 
-1. Run `/to-tasks <plan-path>` (producing `tasks.md` for a single-slice plan) or
-   `/to-tasks <plan-path> slice-1` (producing `tasks-slice-1.md` for
-   multi-slice plans).
-1. Execute Slice 1 via `/next-task`, `/next-slice`, or a delegated subagent.
-1. Once Slice 1 is verified and merged, run `/to-tasks <plan-path> slice-2` to
-   compile Slice 2 against the updated codebase.
+1. Tell the user to run `/to-tasks <plan-path>` for a single-slice plan, or
+   `/to-tasks <plan-path> slice-1` for the first slice of a multi-slice plan.
+2. Once the task list is ready, tell the user to run `/next-task` or
+   `/next-slice` to execute Slice 1.
+3. After Slice 1 is verified and merged, tell the user to run
+   `/to-tasks <plan-path> slice-2` to compile Slice 2 against the updated
+   codebase.
 
 ## Agent teams (if your harness supports it)
 

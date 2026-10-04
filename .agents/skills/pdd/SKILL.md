@@ -221,8 +221,9 @@ begin. If a living specification changes, `spec.md` must contain a
 
 Then use [`to-plan`](../to-plan/SKILL.md) for vertical implementation slices.
 `to-plan` invokes [`grill-with-docs`](../grill-with-docs/SKILL.md) internally
-before writing `plan.md`. Finally, use [`to-tasks`](../to-tasks/SKILL.md) for
-executable work.
+before writing `plan.md`. Once the plan is ready, tell the user to run
+`/to-tasks <plan-path> slice-1` (`/to-tasks <plan-path>` for a single-slice
+plan) to compile the first executable work.
 
 Do not run [`architect`](../architect/SKILL.md) automatically after an approved
 Design. `architect` is the alternative engineering-led workflow: use it when

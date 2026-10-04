@@ -6,4 +6,6 @@ description: >-
   domain models and capturing architectural decisions.
 ---
 
-Run a `/grilling` session, using the `/domain-modeling` skill.
+Read and follow [grilling](../grilling/SKILL.md) for the interview. Use
+[domain-modeling](../domain-modeling/SKILL.md) to keep the glossary and ADRs
+current as terms and decisions settle.
