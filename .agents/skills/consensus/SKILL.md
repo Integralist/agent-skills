@@ -74,8 +74,10 @@ surfaced material gaps. Stop at the first round with no new findings.
 
 If the plan has fuzzy terminology or hasn't been stress-tested against the
 project's domain model, explicitly invoke `grill-with-docs` here. It's a
-host-side, user-interactive step — it sharpens vocabulary against `CONTEXT.md`
-and surfaces unstated assumptions before consultants see anything.
+host-side, user-interactive step — it sharpens vocabulary against
+`GLOSSARY.md` and surfaces unstated assumptions before consultants see
+anything. If only legacy `CONTEXT.md` exists, use it and show the user a
+`⚠️` warning to rename it to `GLOSSARY.md`.
 
 **A2. Write the assessment** as a concrete artifact:
 

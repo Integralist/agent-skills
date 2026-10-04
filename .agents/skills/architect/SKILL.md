@@ -54,8 +54,9 @@ first, loop back to Phase 1 or 2.
 Delegate to [`grill-with-docs`](../grill-with-docs/SKILL.md). Grilling is a
 mandatory phase before planning. Conduct a relentless interview to stress-test
 the design tree against the spec, resolve unstated assumptions and open
-questions, pin down domain vocabulary in `CONTEXT.md`, and record ADRs under
-`docs/adr/`.
+questions, pin down domain vocabulary in `GLOSSARY.md`, and record ADRs
+under `docs/adr/`. If only legacy `CONTEXT.md` exists, use it in place and
+show the user a `⚠️` warning to rename it to `GLOSSARY.md`.
 
 If the interview reshapes any decisions, testing seams, or acceptance criteria,
 update `projects/<yyyy-mm-dd>-<slug>/spec.md` with the settled changes.

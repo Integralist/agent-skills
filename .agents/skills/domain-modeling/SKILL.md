@@ -1,6 +1,11 @@
 ---
 name: domain-modeling
-description: Build and sharpen a project's domain model. Use when creating or editing a `CONTEXT.md` or ADR, even if the request is simply to write or update the file; when the user wants to pin down domain terminology or a ubiquitous language, record an architectural decision; or when another skill needs to maintain the domain model.
+description: >-
+  Build and sharpen a project's domain model. Use when creating or editing a
+  `GLOSSARY.md`, updating a legacy `CONTEXT.md`, or writing an ADR, even when
+  the request is simply to write or update the file; when the user wants to
+  pin down domain terminology or a ubiquitous language, record an architectural
+  decision; or when another skill needs to maintain the domain model.
 ---
 
 # Domain Modeling
@@ -8,53 +13,44 @@ description: Build and sharpen a project's domain model. Use when creating or ed
 The *active* discipline of building the domain model as you design:
 challenging terms, inventing edge-case scenarios, and writing the
 glossary and decisions down the moment they crystallise. (Merely
-*reading* `CONTEXT.md` for vocabulary is a one-line habit any skill can
-do — not this skill. This skill is for changing the model, not consuming
-it.)
+*reading* `GLOSSARY.md` (or a legacy `CONTEXT.md`) for vocabulary is a
+one-line habit any skill can do — not this skill. This skill is for
+changing the model, not consuming it.)
 
 ## File structure
 
-Most repos have a single context:
+Keep one root `GLOSSARY.md` for the project. Group terms for different
+domain areas under subheadings instead of splitting the glossary across
+files.
 
 ```txt
 /
-├── CONTEXT.md
-├── docs/
-│   └── adr/
-│       ├── README.md        # repo-wide ADR index
-│       ├── ADR-0001.md
-│       └── ADR-0002.md
-└── src/
+├── GLOSSARY.md
+└── docs/
+    └── adr/
+        ├── README.md        # repo-wide ADR index
+        ├── ADR-0001.md
+        └── ADR-0002.md
 ```
 
-A `CONTEXT-MAP.md` at the root means multiple contexts; the map points to
-where each lives:
+Use the root `GLOSSARY.md` when it exists. If it does not exist but a root
+`CONTEXT.md` does, use that file in place rather than creating a duplicate.
+On the first fallback in a task, warn the user:
 
-```txt
-/
-├── CONTEXT-MAP.md
-├── docs/
-│   └── adr/                          ← system-wide decisions and ADR index
-├── src/
-│   ├── ordering/
-│   │   ├── CONTEXT.md
-│   │   └── docs/adr/                 ← context-specific decisions
-│   └── billing/
-│       ├── CONTEXT.md
-│       └── docs/adr/
-```
+> ⚠️ This project uses legacy `CONTEXT.md`; rename it to `GLOSSARY.md`.
+> I’ll continue using the existing file for now.
 
-Create files lazily: a `CONTEXT.md` when the first term is resolved; create
-root `docs/adr/README.md` with the first ADR anywhere in the repository, even
-when that ADR is context-specific.
+If neither file exists, create a root `GLOSSARY.md` lazily when the first
+term is resolved. Create root `docs/adr/README.md` with the first ADR
+anywhere in the repository.
 
 ## During the session
 
 ### Challenge against the glossary
 
-When a term conflicts with the existing language in `CONTEXT.md`, call it
-out immediately. "Your glossary defines 'cancellation' as X, but you seem
-to mean Y — which is it?"
+When a term conflicts with the active glossary, call it out immediately.
+"Your glossary defines 'cancellation' as X, but you seem to mean Y — which
+is it?"
 
 ### Sharpen fuzzy language
 
@@ -73,11 +69,11 @@ When the user states how something works, check whether the code agrees.
 Surface contradictions: "Your code cancels entire Orders, but you just
 said partial cancellation is possible — which is right?"
 
-### Update CONTEXT.md inline
+### Update the glossary inline
 
-When a term is resolved, update `CONTEXT.md` right there — don't batch.
-Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md). Keep
-`CONTEXT.md` devoid of implementation details: it is a glossary, not a
+When a term is resolved, update the active glossary right there — don't
+batch. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md). Keep
+the glossary devoid of implementation details: it is a glossary, not a
 spec, scratch pad, or decision log.
 
 ### Offer ADRs sparingly

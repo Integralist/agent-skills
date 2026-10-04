@@ -80,8 +80,9 @@ Read the spec (above), any project research (`./research.md`), and relevant
 Before drafting slices, grilling is a mandatory step to focus in on what is
 being planned. Delegate to [`grill-with-docs`](../grill-with-docs/SKILL.md) to
 run a relentless interview, stress-test technical choices, interface contracts,
-and external dependencies, capture domain terms in `CONTEXT.md`, and record
-ADRs under `docs/adr/`.
+and external dependencies, capture domain terms in `GLOSSARY.md`, and record
+ADRs under `docs/adr/`. If only legacy `CONTEXT.md` exists, use it in place
+and show the user a `⚠️` warning to rename it to `GLOSSARY.md`.
 
 Do not skip this step. Even if the feature was discussed in chat or specified
 in a spec document, you must run the grilling interview to stress-test

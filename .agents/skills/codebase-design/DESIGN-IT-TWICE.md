@@ -29,7 +29,11 @@ Prompt each subagent with a separate technical brief (file paths, coupling detai
 - Agent 3: "Optimise for the most common caller: make the default case trivial."
 - Agent 4 (if applicable): "Design around ports & adapters for cross-seam dependencies."
 
-Include both [SKILL.md](SKILL.md) vocabulary and CONTEXT.md vocabulary in the brief so each subagent names things consistently with the architecture language and the project's domain language.
+Include both [SKILL.md](SKILL.md) vocabulary and the project's
+`GLOSSARY.md` vocabulary in the brief so each subagent names things
+consistently with the architecture language and the project's domain
+language. If only legacy `CONTEXT.md` exists, use it and show the user a
+`⚠️` warning to rename it to `GLOSSARY.md`.
 
 Each subagent outputs:
 

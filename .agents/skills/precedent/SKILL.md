@@ -24,7 +24,8 @@ the question, it is authoritative and this skill defers to it:
 - Mermaid — [`conventions-mermaid`](../conventions-mermaid/SKILL.md)
 - Python — [`conventions-python`](../conventions-python/SKILL.md)
 - SQL — [`conventions-sql`](../conventions-sql/SKILL.md)
-- Domain terms — the nearest `CONTEXT.md` glossary
+- Domain terms — the project `GLOSSARY.md`; if only legacy `CONTEXT.md`
+  exists, use it and show a `⚠️` warning to rename it to `GLOSSARY.md`
 
 This skill owns what no guide writes down: the patterns a codebase grew.
 
