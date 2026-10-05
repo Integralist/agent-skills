@@ -246,9 +246,10 @@ authenticate via SSO on first use.
 | **changelog**                | Add a changelog entry for uncommitted or branch changes.                               |
 | **clarify**                  | Resolve ambiguous requirements before work begins.                                     |
 | **cleanup**                  | Audit AI-generated clutter, then apply approved fixes interactively.                   |
+| **code-module-design**       | Design deep modules with high leverage, strong locality, and clean seams.              |
+| **code-module-review**       | Map code structure and assess module ownership, boundaries, and interactions.         |
 | **code-review**              | Review diffs for correctness, security, reliability, performance, and maintainability. |
 | **code-review-feedback**     | Verify review feedback before accepting or implementing it.                            |
-| **codebase-design**          | Design deep modules with high leverage, strong locality, and clean seams.              |
 | **commit**                   | Group related changes and create clear Git commits.                                    |
 | **consensus**                | Reach cross-model consensus through gated discussion rounds.                           |
 | **conventions-go**           | Apply Go conventions when editing or reviewing `.go` files.                            |
@@ -431,9 +432,10 @@ Delta. **code-review** checks both kinds of spec whenever a diff touches them.
 
 ## Choosing an analysis skill
 
-| Skill            | Use when                                                                                   | Primary output                                               |
-| ---------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| **code-review**  | Code or a diff exists and you want defects identified                                      | Verified findings and open questions                         |
+| Skill                  | Use when                                                                                     | Primary output                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **code-module-review** | Understand a feature's structure and assess module ownership | Mermaid maps and evidence-backed findings                   |
+| **code-review**        | Code or a diff exists and you want defects identified                                        | Verified findings and open questions                         |
 | **is-it-safe**   | You need the worst credible outcome of committing or merging a change                     | Verdict and evidence-backed impact path                       |
 | **precedent**    | Work is correct and you want it to match the project's own patterns                        | Divergences citing the peer that sets each pattern           |
 | **decide**       | You must choose between consequential options                                              | Durable decision memo and recommendation                     |
