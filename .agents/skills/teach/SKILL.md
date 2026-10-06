@@ -70,6 +70,9 @@ lesson is one self-contained HTML file in `./lessons/`, titled
 - Make opening a lesson as easy as possible — ideally a single CLI command that
   opens the HTML in the browser.
 
+When an analogy could clarify an abstract concept, follow the shared
+[analogy guidance](../shared/ANALOGY-GUIDANCE.md).
+
 ## The mission
 
 Every lesson ties to the mission — the user's reason for learning the topic.

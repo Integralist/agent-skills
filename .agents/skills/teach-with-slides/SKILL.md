@@ -58,8 +58,9 @@ mechanics to why it matters to the learner without replacing explanation with
 benefits alone.
 
 - Use a warm, encouraging voice. Explain technical terms when they first
-  appear, prefer concrete examples and analogies, and make the learning feel
-  inviting rather than childish.
+  appear, and make the learning feel inviting rather than childish. Prefer
+  concrete examples. When an analogy would help, follow the shared
+  [analogy guidance](../shared/ANALOGY-GUIDANCE.md).
 - Give each slide one main idea. Use short phrases, sparse bullets, generous
   whitespace, and a clear visual hierarchy. Avoid paragraphs and unexplained
   jargon.
