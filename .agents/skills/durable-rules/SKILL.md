@@ -16,6 +16,11 @@ Scope covers automated guardrails, coding conventions, anti-patterns, and skill 
 Project operating instructions (build/test/lint commands, gotchas) belong
 to [`agents-md`](../agents-md/SKILL.md).
 
+Also look for recurring, avoidable context or tool costs surfaced by the work,
+such as repeated reads, oversized command output, or redundant exploration.
+Capture a reusable fix when warranted; don't require token metrics or turn
+one-off waste into a durable rule.
+
 ## Workflow
 
 1. If nothing durable or automatable surfaced, skip entirely. Do not force it.
