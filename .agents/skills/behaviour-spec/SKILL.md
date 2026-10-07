@@ -95,6 +95,42 @@ When the language is Go, feature-level scenarios run under
 part of `make test` — no separate runner. Layout: `.feature` files live in a
 `features/` directory next to the package test that wires them.
 
+- **Beginner-facing comments.** Explain Godog concepts in the generated Go
+  code, near their first use: how the runner maps Gherkin to step functions,
+  what `ScenarioInitializer` registers, how `sc.Step` matches text and passes
+  regex captures, how optional `context.Context` arguments work, and how step
+  return values affect the scenario. Explain suite options and how shared state
+  passes between steps and resets between scenarios. Explain each concept once
+  so comments teach the reader without narrating every statement.
+- **Scenario-local registration.** Keep all related `sc.Step` registrations in
+  one `ScenarioInitializer` per feature or slice. Put `Background` steps first,
+  then group steps under named `Scenario` comments in feature-file order, so a
+  reader can scan each scenario's setup, action, and assertions together.
+  Register shared steps once at their first use; note their reuse in later
+  scenario blocks. The feature file, not registration order, controls execution.
+- **Small inline steps, named helpers.** Define short setup/action functions
+  inline beside their patterns. Bind substantial setup or assertions to named
+  functions or scenario-world methods; put those helpers below the initializer
+  so it remains a readable map of the scenarios.
+
+The example below illustrates wiring and step grouping. In a real acceptance
+suite, replace the inline withdrawal arithmetic with a call through the
+application boundary under test.
+
+```gherkin
+Feature: Withdraw funds
+  Background:
+    Given I have a balance of 100
+
+  Scenario: Withdraw some funds
+    When I withdraw 30
+    Then my balance should be 70
+
+  Scenario: Withdraw the entire balance
+    When I withdraw 100
+    Then my account should be empty
+```
+
 ```go
 package myapp_test
 
@@ -106,48 +142,75 @@ import (
 	"github.com/cucumber/godog"
 )
 
-// state threads through context.Context between steps.
+// balanceKey identifies the balance shared between steps in one scenario.
+// Godog starts each scenario with its own context; a step's returned context
+// is passed to later steps, so balance changes stay within that scenario.
 type balanceKey struct{}
 
-func iHaveABalanceOf(ctx context.Context, amount int) (context.Context, error) {
-	return context.WithValue(ctx, balanceKey{}, amount), nil
-}
-
-func iWithdraw(ctx context.Context, amount int) (context.Context, error) {
-	balance, _ := ctx.Value(balanceKey{}).(int)
-	if amount > balance {
-		return ctx, fmt.Errorf("insufficient funds: have %d, want %d", balance, amount)
+// TestFeatures runs features/ as go subtests. Godog reads each Gherkin line
+// and calls the matching Go function registered by InitializeScenario.
+func TestFeatures(t *testing.T) {
+	suite := godog.TestSuite{
+		// Name labels output; it does not select feature files.
+		Name: "myapp",
+		// ScenarioInitializer registers the functions that implement steps.
+		ScenarioInitializer: InitializeScenario,
+		Options: &godog.Options{
+			// Format controls console output; "pretty" shows readable steps.
+			Format: "pretty",
+			// Paths selects feature files relative to this test package.
+			Paths: []string{"features"},
+			// TestingT reports scenarios through go test / make test.
+			TestingT: t,
+		},
 	}
-	return context.WithValue(ctx, balanceKey{}, balance-amount), nil
+	// Run returns a status code; non-zero makes the Go test fail too.
+	if suite.Run() != 0 {
+		t.Fatal("non-zero status: feature tests failed")
+	}
 }
 
+// InitializeScenario registers related steps together, in feature-file order.
+// sc.Step matches the text after Given/When/Then/And; the keyword does not
+// affect matching. ^ and $ anchor the regex to the whole sentence.
+// Capture groups become function arguments; (\d+) is converted to an int here.
+// Godog supplies context.Context when requested as the first argument.
+// Returning nil passes a step; an error stops the scenario's remaining steps.
+// Registration builds a lookup table; the feature file decides execution order.
+func InitializeScenario(sc *godog.ScenarioContext) {
+	// Background: runs before every scenario, setting a fresh starting balance.
+	sc.Step(`^I have a balance of (\d+)$`,
+		func(ctx context.Context, amount int) (context.Context, error) {
+			return context.WithValue(ctx, balanceKey{}, amount), nil
+		},
+	)
+
+	// Scenario: Withdraw some funds
+	sc.Step(`^I withdraw (\d+)$`,
+		func(ctx context.Context, amount int) (context.Context, error) {
+			balance, _ := ctx.Value(balanceKey{}).(int)
+			if amount > balance {
+				return ctx, fmt.Errorf("insufficient funds: have %d, want %d",
+					balance, amount)
+			}
+			return context.WithValue(ctx, balanceKey{}, balance-amount), nil
+		},
+	)
+	sc.Step(`^my balance should be (\d+)$`, myBalanceShouldBe)
+
+	// Scenario: Withdraw the entire balance
+	// Reuses the Background and "I withdraw ..." steps registered above.
+	sc.Step(`^my account should be empty$`, func(ctx context.Context) error {
+		return myBalanceShouldBe(ctx, 0)
+	})
+}
+
+// myBalanceShouldBe checks the observable result for both withdrawal scenarios.
 func myBalanceShouldBe(ctx context.Context, expected int) error {
 	if balance, _ := ctx.Value(balanceKey{}).(int); balance != expected {
 		return fmt.Errorf("expected balance %d, got %d", expected, balance)
 	}
 	return nil
-}
-
-func InitializeScenario(sc *godog.ScenarioContext) {
-	sc.Step(`^I have a balance of (\d+)$`, iHaveABalanceOf)
-	sc.Step(`^I withdraw (\d+)$`, iWithdraw)
-	sc.Step(`^my balance should be (\d+)$`, myBalanceShouldBe)
-}
-
-// TestFeatures runs every .feature under features/ as go subtests.
-func TestFeatures(t *testing.T) {
-	suite := godog.TestSuite{
-		Name:                "myapp",
-		ScenarioInitializer: InitializeScenario,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features"},
-			TestingT: t, // integrates with `go test` / `make test`
-		},
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status: feature tests failed")
-	}
 }
 ```
 
