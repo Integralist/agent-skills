@@ -1,0 +1,44 @@
+{
+  "skill_name": "explain-code",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Explain retry-pickups compared with main. I'm new to Pickup Scheduler and don't know how the dashboard, booking API, and Courier Slots fit together. Keep it short and show me the change. Use the supplied offline source snapshot in evals/fixture.md.",
+      "expected_output": "A concise takeaway, Problem, Solution, and one small visual explain the repo's place in pickup booking, the one-time retry of a temporary 503 response, and reduced manual retries. Sources support the explanation. The answer preserves the one-retry limit and does not claim background booking is implemented or offer a PR comment for this local branch.",
+      "files": ["evals/fixture.md"],
+      "assertions": [
+        "Uses Problem and Solution headings and a small visual with plain-language labels.",
+        "Explains how warehouse staff, the dashboard, the booking API, and Courier Slots connect.",
+        "Explains why a one-time retry helps while preserving the 503-only limit.",
+        "Keeps future background booking separate from implemented behaviour and cites sources.",
+        "Does not offer a PR comment for the local branch."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Explain commit 3333333, the variable rename on later-work in the supplied offline source snapshot in evals/fixture.md. Why is this useful, and does it add background booking? I haven't worked in this repo before.",
+      "expected_output": "The answer reads the selected commit rather than attributing earlier retry work to it. Problem/Solution explain that behaviour is unchanged, label any readability benefit as inferred, and do not claim the rename advances an undocumented roadmap. It omits a visual if a simple sentence is sufficient.",
+      "files": ["evals/fixture.md"],
+      "assertions": [
+        "Uses the selected commit and distinguishes it from the earlier retry change.",
+        "States that the commit preserves behaviour and does not implement background booking.",
+        "Labels any inferred motivation rather than presenting it as the author's stated reason.",
+        "Keeps the explanation concise and includes evidence references."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Explain PR https://github.com/example/pickup-scheduler/pull/42 using the supplied offline PR metadata and source snapshot in evals/fixture.md. I'm new to the system. After your explanation, I'll decide whether to ask the author to check our understanding.",
+      "follow_up": "Yes, draft the comment.",
+      "expected_output": "The initial response explains the PR before offering an author-clarification comment and waits. After the user agrees to drafting, the response reads integralist-voice, shows an airy first-person Problem/Solution comment beginning with the requested wave and understanding-check wording, names the PR destination, and requests explicit posting confirmation. It never treats drafting approval as posting approval.",
+      "files": ["evals/fixture.md"],
+      "assertions": [
+        "The initial response completes the explanation before offering to draft a PR comment.",
+        "The initial response does not prematurely draft or post a comment.",
+        "The accepted drafting follow-up reads integralist-voice and shows the exact proposed comment.",
+        "The draft begins with the requested understanding-check opener, retains caveats, and invites the author to correct it.",
+        "The draft names the PR destination and waits for a separate posting confirmation."
+      ]
+    }
+  ]
+}

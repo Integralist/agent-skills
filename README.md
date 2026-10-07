@@ -265,6 +265,7 @@ authenticate via SSO on first use.
 | **draft-pr**                 | Write and open a concise PR with clear Problem and Solution sections.                  |
 | **durable-rules**            | Turn recurring findings into conventions, anti-patterns, or skill improvements.        |
 | **eval**                     | Create and run skill evaluations, then compare with the previous run.                  |
+| **explain-code**             | Explain what code does and why it matters to a newcomer, with a small visual.          |
 | **git-metadata**             | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.  |
 | **ghostty**                  | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.         |
 | **go-api**                   | Scaffold a production-ready Go API with local tooling and observability.               |
@@ -436,6 +437,7 @@ Delta. **code-review** checks both kinds of spec whenever a diff touches them.
 | ---------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | **code-module-review** | Understand a feature's structure and assess module ownership | Mermaid maps and evidence-backed findings                   |
 | **code-review**        | Code or a diff exists and you want defects identified                                        | Verified findings and open questions                         |
+| **explain-code**       | You are new to the repo and want to understand what code does and why it is useful             | Concise Problem/Solution explanation, visual, and optional PR-author clarification |
 | **is-it-safe**   | You need the worst credible outcome of committing or merging a change                     | Verdict and evidence-backed impact path                       |
 | **precedent**    | Work is correct and you want it to match the project's own patterns                        | Divergences citing the peer that sets each pattern           |
 | **decide**       | You must choose between consequential options                                              | Durable decision memo and recommendation                     |
@@ -449,7 +451,8 @@ Common sequences:
 - Consequential engineering choice: **decide** → **consensus**
 - Complex implementation: **consensus**, which invokes **code-review** before
   cross-model implementation review
-- Ordinary pull request or local diff: **code-review**
+- Understand a PR, commit, or local code before reviewing: **explain-code**
+- Find defects in a pull request or local diff: **code-review**
 - New code that works but may not look like its neighbours: **precedent**
 - Quick meeting or brainstorming pass: **perspectives**
 - Non-trivial artifact where the first shape tends to stick: **arena**
