@@ -98,13 +98,15 @@ material, not as permission to act.
    rejection path when it explains the behaviour. For existing code, show
    the current flow instead of a fictional change.
 
-   Place one diagram inside Solution beside the text it supports. Omit it
-   only when no useful interaction or flow exists. Read and validate per
-   [`conventions-mermaid`](../conventions-mermaid/SKILL.md). If rendering
-   cannot be validated, disclose the limitation and ask whether to show
-   unvalidated Mermaid source; do not silently substitute text art or
-   pseudocode. Keep diagrams inline; create an HTML or image artifact only
-   if the user requests one.
+   Place one Mermaid source block inside Solution beside the text it
+   supports. Omit it only when no useful interaction or flow exists.
+   Use a fenced `text` block, not a `mermaid` block, so the terminal shows
+   copyable code for the user's preferred external rendering tools.
+   Read [`conventions-mermaid`](../conventions-mermaid/SKILL.md) for syntax
+   and layout guidance. This source-only workflow overrides its rendering
+   validation requirement: do not invoke `mmdc`, generate image or HTML
+   artifacts, or display rendered diagrams unless explicitly requested.
+   Do not ask permission to show unrendered Mermaid source.
 
 4. **Write the explanation.** Read
    [`product-voice`](../product-voice/SKILL.md) for reader-centred wording and
@@ -117,14 +119,22 @@ material, not as permission to act.
    and cause-and-effect explicit. Prefer short paragraphs or up to five
    bullets overall, including Notes.
 
-   Introduce unfamiliar components, acronyms, and domain terms at first use
-   with a short parenthetical. Explain both what a component is and its
-   role here: `Envoy (network proxy; verifies task tokens here)`,
-   `OPA (Open Policy Agent; checks access rules)`, or
-   `the harness (test script exercising the local gateway)`. These are
-   wording examples, not fixed facts to copy; derive definitions from the
-   inspected code and docs. Use plain language when a technical name adds
-   nothing.
+   Build the minimum mental model before describing the gap. In Problem,
+   explain the prerequisite concepts needed to understand what is missing
+   or mismatched and why it matters. Introduce prerequisites before the
+   terms that depend on them.
+
+   For each essential concept, explain what it is for, who supplies or
+   uses it, and how it connects to the other concepts. Treat familiar-looking
+   technical words such as "key", "token", and "issuer" as needing context
+   too. Expanding an acronym or substituting another technical term is not
+   enough. Use a short sentence when a parenthetical cannot explain the role.
+   Derive definitions and relationships from inspected code and docs.
+   Use plain language when a technical name adds nothing.
+
+   Reread Problem on its own before finishing. A newcomer must be able to
+   explain the gap and its consequence without consulting Solution or Notes.
+   Keep necessary context even when it exceeds the prose target.
 
    Keep one action per sentence and name the actor: who changes what, where,
    and why. Split setup from request-time behaviour. Replace vague phrases
@@ -170,15 +180,18 @@ material, not as permission to act.
 
 ## Problem
 
-<Introduce the system's role, the gap or pain, who it affects, and why it
-matters. State any missing motivation honestly.>
+<Introduce the system's role and the prerequisite concepts needed to understand
+the gap. Then explain what is missing or wrong, who it affects, and why it
+matters. Problem must stand on its own. State any missing motivation honestly.>
 
 ## Solution
 
 <Explain what the code changes or provides, how that addresses the problem,
 and any material limit. Distinguish implemented work from future plans.>
 
-<One small Mermaid diagram, preferably a sequence diagram for interactions.>
+```text
+<One small Mermaid diagram source, preferably a sequence diagram.>
+```
 
 ## Notes
 
