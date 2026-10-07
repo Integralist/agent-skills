@@ -15,7 +15,8 @@ endif
 install-agents:
 	@$(STEP) --section "Agents"
 	@mkdir -p ~/.agents
-	@$(STEP) ".agents/ → ~/.agents/" cp -r .agents/ ~/.agents/
+	@$(STEP) "AGENTS.md → ~/.agents/AGENTS.md" cp .agents/AGENTS.md ~/.agents/AGENTS.md
+	@$(STEP) "skills/ → ~/.agents/skills/ (preserving synced/)" rsync -a --delete --exclude='/synced/' .agents/skills/ ~/.agents/skills/
 
 # Shared CLI tools driven by skills in more than one harness. crit (inline
 # code-review CLI) is used by both Claude Code and Pi. Installed via Homebrew;
