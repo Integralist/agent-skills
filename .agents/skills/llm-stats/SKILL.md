@@ -43,7 +43,7 @@ offline without a server or browser-side credentials.
    [Makefile](Makefile); no secret value is stored there. For a preview, run
    `make -C <skill-base-dir> preview` instead.
 
-   It atomically replaces `/tmp/llm-stats.html`, prints that path on stdout,
+   It atomically replaces `$HOME/llm-stats.html`, prints that path on stdout,
    and opens it in the browser. The previous HTML remains intact if generation
    fails. Use `--no-open` when opening a browser is inappropriate. Read stderr
    for warnings; a nonzero exit means generation failed and no successful
@@ -78,10 +78,10 @@ Analysis `eval-cost`, `eval-token-usage`, and `eval-speed` aliases described in
 
 Use **Save HTML view** to share the current selection and pinned node with
 someone else. URL state alone does not travel with an email attachment.
-Bookmark `file:///tmp/llm-stats.html` with the desired query parameters. Each
-successful run updates the data at that same path. The system may clear `/tmp`;
-rerun the skill to recreate it. Export all JSON or chart CSV to reuse the data
-in another graphing tool.
+Bookmark the generated `$HOME/llm-stats.html` page with the desired query
+parameters. Each successful run updates the data at that same persistent path.
+When updating an existing bookmark, keep its query parameters on the new URL.
+Export all JSON or chart CSV to reuse the data in another graphing tool.
 
 ## Interactions
 
@@ -95,8 +95,9 @@ The model dropdown supports fuzzy search, checkboxes, Clear, Select matches,
 and Reset defaults. Arrow keys move between results; Escape closes the menu.
 Models missing the chosen score or x metric are omitted with a visible warning
 that lists each model's name and exactly which measurement is missing. Update
-the list when selections or metrics change. Zero is valid, not missing data. Preserve the API's index version
-in reports and exports. Cost tooltips retain the reported four-decimal precision.
+the list when selections or metrics change. Zero is valid, not missing data.
+Preserve the API's index version in reports and exports. Cost tooltips retain
+the reported four-decimal precision.
 An old bookmark with `x=price` still requests token pricing; use `x=cost` for the
 corrected benchmark-cost view.
 

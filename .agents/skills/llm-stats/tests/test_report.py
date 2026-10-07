@@ -1,6 +1,8 @@
 import io
 import json
+import os
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
@@ -507,6 +509,26 @@ def test_index_version_is_embedded_in_shared_report():
     )
     assert '"intelligence_index_version":4.3' in content
     assert "Intelligence Index v4.3" in content
+
+
+@pytest.mark.parametrize("home_name", ["home", "home with spaces"])
+def test_cli_writes_report_to_home(tmp_path: Path, home_name: str) -> None:
+    home = tmp_path / home_name
+    home.mkdir()
+    output = home / "llm-stats.html"
+    output.write_text("Previous report", encoding="utf-8")
+    result = subprocess.run(
+        [sys.executable, str(BASE / "scripts/report.py"), "--demo", "--no-open"],
+        env={**os.environ, "HOME": str(home)},
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=10,
+    )
+    assert result.stdout.strip() == str(output)
+    content = output.read_text(encoding="utf-8")
+    assert content.startswith("<!doctype html>")
+    assert "Previous report" not in content
 
 
 def test_cli_demo_outputs_existing_html(capsys):

@@ -61,9 +61,9 @@ make -C <skill-base-dir> report ARGS="--refresh"
 ```
 
 The default view is Artificial Analysis Intelligence Index versus reported
-weighted benchmark cost per task, for both real data and previews. DeepSWE is an optional benchmark label,
-not the default and not a separate data service. Use the page's selectors to
-choose another available benchmark or metric.
+weighted benchmark cost per task, for both real data and previews. DeepSWE is
+an optional benchmark label, not the default and not a separate data service.
+Use the page's selectors to choose another available benchmark or metric.
 
 ### 1Password account safety
 
@@ -213,8 +213,8 @@ apostrophe. **Export all JSON** retains the entire model catalog.
 
 ## URL state and sharing
 
-The primary query parameters are below. For the corrected default view, use
-`file:///tmp/llm-stats.html?benchmark=intelligence&x=cost`. Existing bookmarks
+The primary query parameters are below. For the corrected default view, open
+`$HOME/llm-stats.html` with `?benchmark=intelligence&x=cost`. Existing bookmarks
 with `x=price` retain their explicit token-price selection; replace that value
 with `x=cost` rather than expecting the new default to override URL state.
 
@@ -248,11 +248,11 @@ generator's defaults. Reset defaults resets model selection only, retaining
 the current benchmark and x metric. Named presets can change those metrics
 when they specify them.
 
-The generator atomically replaces `/tmp/llm-stats.html` after successful
+The generator atomically replaces `$HOME/llm-stats.html` after successful
 rendering. Failed fetches or rendering leave the previous HTML intact; tests
 use isolated output paths so they cannot overwrite a bookmarked report.
-Bookmark `file:///tmp/llm-stats.html` with its current query parameters. A system
-cleanup can remove `/tmp`; rerunning the skill recreates the same path.
+Bookmark the generated page with its current query parameters. Its home-directory
+path survives system temporary-file cleanup.
 
 Local query updates and reloads work in Chrome. A browser that blocks
 `history.replaceState` on `file://` shows a message; **Save HTML view** still

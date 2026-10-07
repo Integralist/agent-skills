@@ -31,7 +31,7 @@ MAX_BYTES = 20 * 1024 * 1024
 CACHE_SECONDS = 86400
 CACHE_SCHEMA = 2
 MAX_API_PAGES = 32
-OUTPUT = Path("/tmp/llm-stats.html")
+OUTPUT = Path.home() / "llm-stats.html"
 X_METRICS = ("cost", "tokens", "time", "price", "speed")
 BENCHMARKS = {
     "intelligence": {
