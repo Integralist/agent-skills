@@ -209,6 +209,34 @@ def test_omitted_model_names_are_safe_text(page: Page) -> None:
     expect(page.locator("#warnings img")).to_have_count(0)
 
 
+def test_family_labels_render_above_lines_and_dim_with_their_series(
+    page: Page, report_file: Path
+) -> None:
+    page.goto(report_file.as_uri())
+    layering = page.locator("#chart").evaluate(
+        """chart => {
+          const series = [...chart.querySelectorAll('.series')];
+          const labels = [...chart.querySelectorAll('.family-label')];
+          return {
+            labelsFollowLines: series.every(group => labels.every(label =>
+              Boolean(group.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING))),
+            labelCount: labels.length,
+            pointerEvents: chart.querySelector('.family-label-layer')
+              ? getComputedStyle(chart.querySelector('.family-label-layer')).pointerEvents
+              : null,
+          };
+        }"""
+    )
+    assert layering == {
+        "labelsFollowLines": True,
+        "labelCount": 4,
+        "pointerEvents": "none",
+    }
+
+    node(page, "demo-claude-opus-high").hover()
+    expect(page.locator(".family-label.is-dim")).to_have_count(3)
+
+
 def test_model_lines_are_bright_and_distinct(page: Page, report_file: Path) -> None:
     page.goto(report_file.as_uri())
     colors = page.locator(".series path").evaluate_all(

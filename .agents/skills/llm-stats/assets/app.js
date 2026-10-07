@@ -240,6 +240,9 @@
       group.classList.toggle("is-dim", Boolean(key && key !== groupKey));
       group.classList.toggle("is-active", key === groupKey);
     }
+    for (const label of $("chart").querySelectorAll(".family-label")) {
+      label.classList.toggle("is-dim", Boolean(key && key !== label.dataset.series));
+    }
     for (const element of $("chart").querySelectorAll(".node")) {
       element.setAttribute("aria-pressed", String(element.dataset.slug === state.pinned));
     }
@@ -347,6 +350,7 @@
     }
     const providerCounts = new Map();
     const labelPositions = [];
+    const familyLabels = [];
     for (const [key, family] of grouped) {
       family.sort((a, b) => effortOrder.indexOf(a.effort) - effortOrder.indexOf(b.effort)
         || valueFor(a, state.benchmark, state.x) - valueFor(b, state.benchmark, state.x)
@@ -408,8 +412,7 @@
       // If the top margin is crowded, move labels below their points.
       if (labelY < 20) labelY = anchor.sy + 42;
       labelPositions.push({ x: labelX, y: labelY, width: halfWidth });
-      svgElement("text", { x: labelX, y: labelY, "text-anchor": "middle",
-        fill: color, class: "family-label" }, group, familyName);
+      familyLabels.push({ key, x: labelX, y: labelY, color, name: familyName });
       const legend = document.createElement("button");
       legend.dataset.series = key;
       legend.setAttribute("aria-label", "Highlight " + anchor.model.series);
@@ -421,6 +424,13 @@
       legend.append(swatch, label);
       legend.addEventListener("click", () => pin(anchor.model.slug));
       $("legend").append(legend);
+    }
+    const labelLayer = svgElement("g", { class: "family-label-layer" }, chart);
+    for (const label of familyLabels) {
+      svgElement("text", {
+        x: label.x, y: label.y, "text-anchor": "middle", fill: label.color,
+        class: "family-label", "data-series": label.key,
+      }, labelLayer, label.name);
     }
     paintHighlight();
   };
