@@ -98,6 +98,10 @@ material, not as permission to act.
    rejection path when it explains the behaviour. For existing code, show
    the current flow instead of a fictional change.
 
+   When diagramming a test, show the input condition, expected response,
+   and harness assertion. A returned response alone does not show
+   what the harness checks. Keep these consistent with the prose.
+
    Place one Mermaid source block inside Solution beside the text it
    supports. Omit it only when no useful interaction or flow exists.
    Use a fenced `text` block, not a `mermaid` block, so the terminal shows
@@ -140,6 +144,12 @@ material, not as permission to act.
    and why. Split setup from request-time behaviour. Replace vague phrases
    such as "shared key configuration" with the actual files, owner, or
    environment; state exactly what changes and what stays unchanged.
+
+   When describing a test, name what the harness sends or supplies,
+   which component handles it, and what returned result it checks.
+   Attach status codes and errors to responses, not input properties.
+   Example: "The harness sends a request with an expired token and
+   checks that the gateway returns HTTP 401."
 
    Explain the mechanism enough to connect the solution to the problem.
    Keep important constraints beside the benefit. For a refactor, say what

@@ -39,6 +39,17 @@
         "The draft begins with the requested understanding-check opener, retains caveats, and invites the author to correct it.",
         "The draft names the PR destination and waits for a separate posting confirmation."
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Explain retry-pickups compared with main, including what the booking test does. I'm new to the system and want to follow the test flow in the diagram. Use evals/fixture.md as the complete offline source; do not execute tests.",
+      "expected_output": "The explanation distinguishes the pickup details supplied by the harness, the mocked Courier Slots responses of 503 then 200, and the harness assertion that the booking API's returned response has status 200. The diagram shows the harness's final check as well as the retry. It describes a test definition, not a passing run or a real Courier Slots request.",
+      "files": ["evals/fixture.md"],
+      "assertions": [
+        "The prose names the harness input, the mocked Courier Slots responses of 503 then 200, and the assertion on the booking API's final returned status of 200.",
+        "The Mermaid diagram identifies the harness, booking API, and mocked Courier Slots, shows the retry, and explicitly marks the harness checking the final response for status 200.",
+        "Describes intended test behaviour without claiming a passing run or requests to the real Courier Slots service."
+      ]
     }
   ]
 }

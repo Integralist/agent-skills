@@ -89,6 +89,20 @@ diff --git a/src/booking.js b/src/booking.js
  }
 ```
 
+## tests/booking.test.js — unchanged at all three revisions
+
+Test definition only; no run result is supplied.
+
+```js
+import { strict as assert } from "node:assert";
+import { bookPickup } from "../src/booking.js";
+
+const replies = [{ status: 503 }, { status: 200 }];
+const courierSlots = { reserve: async () => replies.shift() };
+const response = await bookPickup({ warehouse: "north" }, courierSlots);
+assert.equal(response.status, 200);
+```
+
 ## src/booking.js — at later-work
 
 ```js
