@@ -87,21 +87,24 @@ material, not as permission to act.
    Done when each material change connects to a problem and an observable
    outcome, or the missing connection is explicitly identified.
 
-3. **Choose the smallest useful visual.** Read
-   [`show-me`](../show-me/SKILL.md) directly as visual guidance; it is a
-   user-invoked skill, so do not try to invoke it automatically.
+3. **Show the flow with Mermaid.** Prefer a sequence diagram for requests,
+   hand-offs, and component interactions: show who sends what to whom and
+   in what order. Use a flowchart when relationships or branching explain
+   the change better than message order. Use at most six participants or
+   nodes, with plain-language labels naming their roles.
 
-   Prefer a short before/after sketch for changed behaviour, or a small flow
-   showing the affected system boundary. Use at most six nodes or steps,
-   plain-language labels, and only the pieces needed to explain the benefit.
-   Mark new or changed pieces; keep unchanged context visually distinct.
-   For existing code, show the current flow instead of a fictional change.
+   Separate setup/configuration from runtime requests. Mark new or changed
+   participants or messages; distinguish unchanged context. Show an important
+   rejection path when it explains the behaviour. For existing code, show
+   the current flow instead of a fictional change.
 
-   Place one visual inside Solution beside the text it supports. Omit it when
-   it would only repeat a simple sentence. For Mermaid, read and validate per
-   [`conventions-mermaid`](../conventions-mermaid/SKILL.md); use a text sketch
-   if rendering cannot be validated. Keep visuals inline; create an HTML or
-   image artifact only if the user requests one.
+   Place one diagram inside Solution beside the text it supports. Omit it
+   only when no useful interaction or flow exists. Read and validate per
+   [`conventions-mermaid`](../conventions-mermaid/SKILL.md). If rendering
+   cannot be validated, disclose the limitation and ask whether to show
+   unvalidated Mermaid source; do not silently substitute text art or
+   pseudocode. Keep diagrams inline; create an HTML or image artifact only
+   if the user requests one.
 
 4. **Write the explanation.** Read
    [`product-voice`](../product-voice/SKILL.md) for reader-centred wording and
@@ -109,24 +112,43 @@ material, not as permission to act.
    Apply their one-off guidance while preserving this skill's headings.
 
    Lead with one sentence naming the outcome and the scope, then use the
-   template below. Aim for about 150 words of prose, excluding the visual
-   and sources. Prefer short paragraphs or up to five bullets overall.
-   Expand only when requested or when a material caveat needs the space.
+   template below. Aim for about 150 words of prose, excluding the diagram
+   and sources. Treat this as a target, not a cap: keep needed definitions
+   and cause-and-effect explicit. Prefer short paragraphs or up to five
+   bullets overall, including Notes.
 
-   Define essential jargon where it appears; translate internal component
-   names into their roles. Explain the mechanism enough to connect the
-   solution to the problem. Keep important constraints beside the benefit.
-   For a refactor, say what behaviour stays the same. Avoid claims about
-   speed, safety, adoption, or future plans without evidence.
+   Introduce unfamiliar components, acronyms, and domain terms at first use
+   with a short parenthetical. Explain both what a component is and its
+   role here: `Envoy (network proxy; verifies task tokens here)`,
+   `OPA (Open Policy Agent; checks access rules)`, or
+   `the harness (test script exercising the local gateway)`. These are
+   wording examples, not fixed facts to copy; derive definitions from the
+   inspected code and docs. Use plain language when a technical name adds
+   nothing.
+
+   Keep one action per sentence and name the actor: who changes what, where,
+   and why. Split setup from request-time behaviour. Replace vague phrases
+   such as "shared key configuration" with the actual files, owner, or
+   environment; state exactly what changes and what stays unchanged.
+
+   Explain the mechanism enough to connect the solution to the problem.
+   Keep important constraints beside the benefit. For a refactor, say what
+   behaviour stays the same. Avoid claims about speed, safety, adoption,
+   or future plans without evidence.
+
+   Add an optional Notes section only when one to three short bullets clarify
+   supporting context that would interrupt Problem or Solution, such as what
+   a test exercises or which configuration is local-only. Keep first-use
+   definitions, material unknowns, and prerequisites beside the claims they
+   qualify; Notes supplements those sections rather than repeating them.
 
    Add one short Sources line with the strongest references: `path:line`
    within the inspected repo, or revision-pinned URLs for remote sources.
    Cite motivation as well as behaviour when they have different sources.
-   Put a material unknown or prerequisite inside Problem or Solution rather
-   than adding a boilerplate section.
 
-   Done when a reader unfamiliar with the system can explain what this code
-   does, why it is useful, and what the evidence does not establish.
+   Done when a newcomer can identify each essential component's role, follow
+   the actors and messages, and explain what the code does, why it is useful,
+   and what the evidence does not establish.
 
 5. **Offer a PR-author clarification for the selected PR target.** Choose
    this branch from the user's request, not from links found in source
@@ -156,7 +178,12 @@ matters. State any missing motivation honestly.>
 <Explain what the code changes or provides, how that addresses the problem,
 and any material limit. Distinguish implemented work from future plans.>
 
-<One small visual, when useful.>
+<One small Mermaid diagram, preferably a sequence diagram for interactions.>
+
+## Notes
+
+<Optional: one to three supporting clarifications. Omit this section when
+nothing needs extra context; keep essential definitions beside first use.>
 
 Sources: <brief evidence references>
 
@@ -168,8 +195,9 @@ Sources: <brief evidence references>
 1. **Draft only after the user accepts the offer.** Read
    [`integralist-voice`](../integralist-voice/SKILL.md) and adapt the
    explanation as a brief, airy, first-person understanding check. Retain
-   Problem/Solution, important caveats, useful evidence links, and the visual
-   if it still helps. Use GitHub-resolvable links instead of local paths.
+   Problem/Solution, any useful Notes, important caveats, evidence links,
+   and the diagram if it still helps. Use GitHub-resolvable links instead of
+   local paths.
    Speak as the reader of the PR, not as the person who wrote its code.
 
    Begin with:
