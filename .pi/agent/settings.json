@@ -26,12 +26,12 @@
     }
   ],
   "enabledModels": [
-    "amazon-bedrock/global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    "amazon-bedrock/global.anthropic.claude-opus-5-5",
+    "amazon-bedrock/global.anthropic.claude-haiku-5-5",
     "amazon-bedrock/global.anthropic.claude-sonnet-5-5",
-    "github-copilot/gpt-6-astra",
+    "amazon-bedrock/global.anthropic.claude-opus-5-5",
     "github-copilot/gpt-6-luna",
     "github-copilot/gpt-6-sol",
+    "github-copilot/gpt-6-astra",
     "github-copilot/gpt-6.1-sol",
     "github-copilot/kimi-k3",
     "google-vertex/gemini-3.1-pro-preview",
