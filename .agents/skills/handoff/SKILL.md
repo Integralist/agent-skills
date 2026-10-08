@@ -15,4 +15,9 @@ Redact any sensitive information, such as API keys, passwords, or personally ide
 
 If the user passed arguments, treat them as a description of what the next session will focus on and tailor the doc accordingly.
 
+After saving the document, print its full absolute path in a `txt` code
+block in the final reply. Include every directory segment and expand `~`
+and environment variables. A filename or Markdown link alone is not
+sufficient: the user must be able to copy the path without opening the file.
+
 Omit needless words — see [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
