@@ -108,6 +108,12 @@ part of `make test` — no separate runner. Layout: `.feature` files live in a
   reader can scan each scenario's setup, action, and assertions together.
   Register shared steps once at their first use; note their reuse in later
   scenario blocks. The feature file, not registration order, controls execution.
+- **Step keyword labels.** Put a block comment immediately inside every
+  `.Step(` call, before the regex, naming its Gherkin keyword. Use
+  `/* Given */`, `/* When  */`, `/* Then  */`, `/* And   */`, or `/* But   */`;
+  pad shorter keywords so closing `*/` markers align across adjacent calls.
+  For reused steps, label the keyword at their first feature-file use and
+  register the pattern once. Keep the keyword out of the regex.
 - **Small inline steps, named helpers.** Define short setup/action functions
   inline beside their patterns. Bind substantial setup or assertions to named
   functions or scenario-world methods; put those helpers below the initializer
@@ -179,14 +185,14 @@ func TestFeatures(t *testing.T) {
 // Registration builds a lookup table; the feature file decides execution order.
 func InitializeScenario(sc *godog.ScenarioContext) {
 	// Background: runs before every scenario, setting a fresh starting balance.
-	sc.Step(`^I have a balance of (\d+)$`,
+	sc.Step(/* Given */ `^I have a balance of (\d+)$`,
 		func(ctx context.Context, amount int) (context.Context, error) {
 			return context.WithValue(ctx, balanceKey{}, amount), nil
 		},
 	)
 
 	// Scenario: Withdraw some funds
-	sc.Step(`^I withdraw (\d+)$`,
+	sc.Step(/* When  */ `^I withdraw (\d+)$`,
 		func(ctx context.Context, amount int) (context.Context, error) {
 			balance, _ := ctx.Value(balanceKey{}).(int)
 			if amount > balance {
@@ -196,13 +202,15 @@ func InitializeScenario(sc *godog.ScenarioContext) {
 			return context.WithValue(ctx, balanceKey{}, balance-amount), nil
 		},
 	)
-	sc.Step(`^my balance should be (\d+)$`, myBalanceShouldBe)
+	sc.Step(/* Then  */ `^my balance should be (\d+)$`, myBalanceShouldBe)
 
 	// Scenario: Withdraw the entire balance
 	// Reuses the Background and "I withdraw ..." steps registered above.
-	sc.Step(`^my account should be empty$`, func(ctx context.Context) error {
-		return myBalanceShouldBe(ctx, 0)
-	})
+	sc.Step(/* Then  */ `^my account should be empty$`,
+		func(ctx context.Context) error {
+			return myBalanceShouldBe(ctx, 0)
+		},
+	)
 }
 
 // myBalanceShouldBe checks the observable result for both withdrawal scenarios.
