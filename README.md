@@ -265,6 +265,7 @@ authenticate via SSO on first use.
 | **draft-pr**                 | Write and open a concise PR with clear Problem and Solution sections.                  |
 | **durable-rules**            | Turn recurring findings into conventions, anti-patterns, or skill improvements.        |
 | **eval**                     | Create and run skill evaluations, then compare with the previous run.                  |
+| **execute-plan**             | Compile, delegate, verify, and correct one plan slice at a time without model switching. |
 | **explain-code**             | Explain what code does and why it matters to a newcomer, with a small visual.          |
 | **git-metadata**             | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.  |
 | **ghostty**                  | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.         |
@@ -310,7 +311,7 @@ authenticate via SSO on first use.
 | **to-plan**                  | Write a specification-backed plan with vertical slices, dependencies, and PR grouping. |
 | **to-prd**                   | Extract product goals, scope, and success measures into a PRD.                         |
 | **to-spec**                  | Write an implementation-ready feature spec with scope and acceptance criteria.         |
-| **to-tasks**                 | Compile a plan slice into a mechanical TDD runbook with verbatim code.                 |
+| **to-tasks**                 | Compile a plan slice into a mechanical TDD task document with verbatim code.           |
 | **unslop**                   | Cut AI tells and machine cadence from prose to restore human voice.                    |
 | **wait-what**                | Re-pitch a message that did not land.                                                  |
 | **writing-for-agents**       | Apply conventions that make skills and instruction files predictable.                  |
@@ -505,8 +506,64 @@ slices.
 `to-spec`, design stress-testing, and `to-plan` when a PDD process is not the
 right fit.
 
-Slices are compiled just-in-time into mechanical TDD task lists (`to-tasks`),
-which `next-task` or `next-slice` execute in the main thread.
+Plans track coarse outcomes under `Slice N Milestones` with stable keys such
+as `M1.1`, not executable `Task N.N` steps. Precise interfaces, dependencies,
+and approved design choices remain in the plan or linked design/spec; full
+acceptance criteria live in the spec. `to-tasks` inspects that context and live
+code, then compiles the selected slice into mechanical TDD tasks. Each task's
+`Supports` field maps to source milestones; several tasks may support one
+milestone, and one task may support several. Task IDs and commits stay separate
+from milestone IDs. The task document contains files, tests/code, and commands;
+`execution.md` records outcome evidence, mappings, and implementation history.
+See [workflow terminology](./GLOSSARY.md).
+
+`next-task` or `next-slice` executes compiled tasks in the main thread, or
+performs inline TDD from plan outcomes in manual mode. Existing plans with
+legacy `Task N.N` checkboxes remain valid; preserve their labels/state rather
+than renumbering them. Plan milestones are checked only after outcome
+verification, not because a similarly numbered task finished.
+
+### Automated plan execution
+
+After either workflow produces a plan, keep your premium session open and run:
+
+```text
+Pi:          /skill:execute-plan projects/<date>-<slug>/plan.md
+Claude Code: /execute-plan projects/<date>-<slug>/plan.md
+```
+
+[`execute-plan`](./.agents/skills/execute-plan/SKILL.md) compiles only the next
+unblocked slice into a task document and delegates one task at a time to a
+cheap subagent. The premium coordinator inspects each task's actual changes,
+runs checks, and commits its tests, implementation, and required documentation
+together before assigning another task. It reviews the whole slice before
+compiling the next one. Later review fixes receive separate correction commits.
+The selected session model owns decisions, commits, and final review. It
+records evidence and task-to-commit mappings in `execution.md` beside the plan,
+protects existing work, and displays every commit's short hash and title,
+grouped by slice and task, when reporting completion or a blocker.
+The [model policy](./.agents/skills/shared/EXECUTION-MODELS.md) configures Luna
+for Pi/Copilot and Haiku for Claude Code, both at `xhigh`, never `max`.
+
+Install the shared skill with `make install-agents`. Pi also needs the updated
+`pi-subagents` extension exposing `allow_model_fallback`; see its
+[adapter setup](./.agents/skills/execute-plan/references/pi-subagents.md).
+Claude Code needs the [plan-executor](./.claude/agents/plan-executor.md) definition
+installed through `make install-claude`; see its
+[readiness/verification gate](./.agents/skills/execute-plan/references/claude-code.md).
+Native model/effort substitutions or unavailable telemetry can block execution.
+PDD approvals, permissions, and separately authorized delivery operations
+remain explicit gates. Startup confirmation authorizes coordinator-owned
+per-task and evidence/status commits on the named branch; the workflow never
+automatically pushes or deploys. Manual `next-slice` keeps one commit per slice.
+See [task-commit safety and review indexing](./.agents/skills/execute-plan/references/task-commits.md).
+
+`to-tasks` and `next-slice` keep their manual invocation behavior and share
+plain-file compilation/execution procedures with the coordinator. Validate
+wiring and model-definition consistency with `make check-execute-plan`. The
+bundled simulations exercise workflow decisions, not live provider execution;
+see [validation results](./.agents/skills/execute-plan/evals/RESULTS.md) for
+coverage and limits.
 
 Plans and task lists can group several tasks into each review unit. When those
 units depend on each other, **stacked-prs** creates and manages the branches and

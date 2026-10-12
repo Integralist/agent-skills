@@ -221,7 +221,10 @@ begin. If a living specification changes, `spec.md` must contain a
 
 Then use [`to-plan`](../to-plan/SKILL.md) for vertical implementation slices.
 `to-plan` invokes [`grill-with-docs`](../grill-with-docs/SKILL.md) internally
-before writing `plan.md`. Once the plan is ready, tell the user to run
+before writing `plan.md`. Once the plan is ready, offer
+[`execute-plan`](../execute-plan/SKILL.md) with that plan path for premium
+coordination and cheap slice implementation. This is opt-in and does not
+bypass PDD approval gates. For manual execution, tell the user to run
 `/to-tasks <plan-path> slice-1` (`/to-tasks <plan-path>` for a single-slice
 plan) to compile the first executable work.
 

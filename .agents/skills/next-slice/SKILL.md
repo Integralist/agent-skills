@@ -27,17 +27,15 @@ per invocation.
    OK, or did you have a different plan in mind?
    ```
 
-1. **Read the file** and find the first actionable slice (a `### Slice N:`
-   heading with at least one unchecked task `- [ ]`) in document order. A slice
-   is actionable unless its `- **Blocked by**:` line names a slice that still has
-   unchecked tasks — skip a blocked slice and keep scanning. Plans without
-   `Blocked by` (older phase-based plans) never block, so the first slice with an
-   unchecked task wins. A flat task list with no `### Slice` headings is treated
-   as a single slice — take all its actionable unchecked tasks. If every
-   remaining slice is blocked, report which slice is next and what it waits on,
-   then stop.
+2. **Read the file** and select the first actionable slice in document order.
+   For a plan, inspect milestone outcomes under `### Slice N:`; for a task
+   document, inspect executable task checkboxes. An unchecked outcome is not
+   itself a compiled task. Preserve legacy `Task N.N` plan labels as outcome
+   keys rather than renaming them. Respect Blocked-by edges and verify completed
+   dependency outcomes before skipping them. Flat checklists are one slice.
+   If all remaining work is blocked, report its dependency and stop.
 
-1. **Prepare its delivery branch.** Read `Pull Request Delivery` when present
+3. **Prepare its delivery branch.** Read `Pull Request Delivery` when present
    and map the selected slice to its layer.
 
    - Stay on the current branch when it matches the layer's declared branch.
@@ -47,40 +45,36 @@ per invocation.
    - For older documents without delivery metadata, follow the existing
      single-branch workflow. Never infer one branch per slice.
 
-1. **Announce the slice:**
+4. **Announce the slice:** use milestone counts for plan inputs and executable
+   task counts for task documents. The example below is a task-document input:
 
    ```txt
    Next up: Slice 2 — Cross-team route isolation (3 tasks)
    ```
 
-1. **Execute every unchecked task in the slice directly in the main thread,** in
-   document order:
-
-   - Write tests first (no code without a failing test).
-   - Run `make test` when done.
-   - Update `docs/**/*.md` or `**/README.md` if the change alters
-     behavior, public APIs, or usage patterns.
-   - Ensure the project `README.md` exists, creating it from
-     [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) when needed.
-     Keep task descriptions and checkboxes only in the task file; update the
-     README only when the task artifact's document-level status changes.
-   - Mark the task's checkbox `- [x]` as soon as verified (and check any parent
-     whose subtasks are now all checked), before moving to the next task.
-   - Respect layer separation: handlers -> service -> repository.
+5. **Implement the selected slice directly in the main thread.** For a plan,
+   derive inline TDD work from its remaining milestone outcomes and linked spec;
+   for a task document, follow its actual tasks and `Supports` mapping. Read
+   [the slice execution procedure](EXECUTE.md) in manual mode, supplying
+   the confirmed file, selected slice, repository root, instructions, and
+   validation commands. Ensure the project `README.md` exists, creating it from
+   [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) when needed.
+   Keep task descriptions and checkboxes only in the task file.
 
 ## Completion
 
-Once all tasks in the slice are verified, wrap up the slice:
+Once the selected work and all slice outcomes are verified, wrap up the slice:
 
 1. Run the full test suite (`make test`) to ensure the slice as a whole passes.
-1. If the task artifact's document-level status changed, update its single
+2. If the task artifact's document-level status changed, update its single
    README row and coarse next action. Do not copy task progress into the README.
-1. If working from a per-slice task list (`projects/<slug>/tasks-slice-<n>.md`),
-   mark the corresponding slice complete in the parent plan
-   (`projects/<slug>/plan.md`).
-1. Report that the slice is done and the plan updated.
-1. Ask whether to commit. If yes, invoke `/commit`.
-1. Advise on next steps:
+3. Check parent-plan milestones only after verifying their outcome evidence,
+   including linked criteria and all supporting tasks. A finished task list
+   alone does not prove every milestone. Preserve legacy labels and mark the
+   corresponding slice accepted only when every required outcome is verified.
+4. Report that the slice is done and the plan updated.
+5. Ask whether to commit. If yes, invoke `/commit`.
+6. Advise on next steps:
    - If more slices remain in the parent plan, prompt to run
      `/to-tasks <plan-path> slice-<n+1>` to compile the next slice against the
      freshly updated code.
@@ -92,8 +86,8 @@ Once all tasks in the slice are verified, wrap up the slice:
 - Confirm the plan choice before proceeding.
 - Do the implementation work directly in the main thread — do NOT spawn
   subagents.
-- Mark each task's checkbox `- [x]` as soon as it is verified, before moving to
-  the next task.
+- Mark compiled task checkboxes after task verification; mark plan milestone
+  checkboxes only after their outcomes are verified, never by task counts.
 - Commit once for the whole slice at the end, not per task.
 - One slice per invocation. Don't chain multiple slices.
 - One slice per invocation controls work scope, not PR boundaries.

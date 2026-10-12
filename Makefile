@@ -194,6 +194,10 @@ update-google-workspace-mcp:
 	@$(STEP) --section "Google Workspace MCP"
 	@bash scripts/workspace-mcp.sh update $(ARGS)
 
+.PHONY: check-execute-plan
+check-execute-plan:
+	@node --test .agents/skills/execute-plan/tests/contracts.test.mjs
+
 # Validate active PDD project documents, project specs, plans, and living capability specs.
 check-specs:
 	@bash scripts/test-validate-specs.sh

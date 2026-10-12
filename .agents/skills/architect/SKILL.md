@@ -81,13 +81,16 @@ focused product framing (goals, success metrics, audience) sourced from the
 spec, written to `projects/<yyyy-mm-dd>-<slug>/prd.md`. Produce it only if the
 user wants stakeholder-facing framing; otherwise skip it.
 
-Then present:
+Ask the user to choose one next action:
 
-1. **Compile first slice into tasks** — tell the user to run
-   `/to-tasks <plan-path> slice-1` (`/to-tasks <plan-path>` for a
-   single-slice plan) to create `tasks-slice-1.md` or `tasks.md`.
-1. **Research another topic** — loop back to Phase 1.
-1. **Create another plan** — delegate to `to-plan` again.
+1. **Execute the plan — choose one route:**
+   - **Automated:** offer [`execute-plan`](../execute-plan/SKILL.md) with the
+     plan path. Keep this session's model as coordinator.
+   - **Manual:** run `/to-tasks <plan-path> slice-1`, or
+     `/to-tasks <plan-path>` for a single-slice plan.
+   Start only the selected route, after explicit user authorization.
+2. **Research another topic** — loop back to Phase 1.
+3. **Create another plan** — delegate to `to-plan` again.
 
 ## Guidelines
 

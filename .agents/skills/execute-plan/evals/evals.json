@@ -1,0 +1,113 @@
+{
+  "skill_name": "execute-plan",
+  "evals": [
+    {
+      "id": 1,
+      "name": "jit-correction-before-next-slice",
+      "prompt": "Simulate a coordinator executing projects/demo/plan.md. Do not edit files, invoke workers, run checks, or contact providers; use these declared tool results. Return JSON with status COMPLETE, an ordered trace array (action, slice, actor, model, effort, outcome), final_plan_status, and unresolved. Environment: Pi/Copilot, parent github-copilot/gpt-6.1-sol at xhigh, current pi-subagents schema supports allow_model_fallback, gpt-6-luna is available and supports xhigh, effective model/effort metadata can be verified, repository permissions allow the already-authorized in-scope edits. User explicitly authorized the whole existing plan, Luna/xhigh implementation, and coordinator-owned per-task commits on feature/demo, but not pushes. Original plan/spec: Slice 1 delivers normalization with a produced normalize(value) interface; Slice 2, blocked by Slice 1, adds a handler consuming that interface. Each has focused and real boundary checks. Baseline make test passes. No tasks documents exist initially. The compiler creates two task keys for Slice 1. The worker assigned only slice-1/task-1 returns COMPLETE, but the parent independently finds its empty-input check fails. A bounded Luna correction fixes it; focused checks then pass, and the coordinator's Git commit succeeds with an observed subject/hash. Only then may slice-1/task-2 implement the real boundary check; its focused, boundary and full checks pass and its coordinator commit succeeds. Accepted code contains normalize(value), and Slice 2's task document must be generated from that live code only after acceptance. Slice 2 task implementation, coordinator commit, and independent review pass, and all final spec/documentation checks pass. The Git records supplied for the final report include observed hashes/subjects; do not fabricate exact values not supplied in this scenario. Explain the next actions in order, distinguishing worker claims from acceptance and preserving the parent model. Stop after the evidence-based final report.",
+      "expected_output": "Compile only Slice 1 on the premium parent; delegate one task at a time to Luna/xhigh with fallback disabled; independently verify and commit each task before the next; correct defects, review/accept the full slice, then compile Slice 2 against accepted code and audit the original plan/spec. Report commit mappings without fabricated Git identities. No push or model-switch action.",
+      "files": [],
+      "assertions": [
+        "Slice 2 compilation follows Slice 1 correction, revalidation, and acceptance.",
+        "Implementation/corrections use Luna at xhigh with model fallback disabled; parent compilation/review stays on Sol.",
+        "A final original-plan/spec audit occurs and a task-grouped commit report is required; no push or automatic model switching occurs."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "old-extension-refuses-premium-fallback",
+      "prompt": "Simulate an execute-plan preflight, without modifying files or invoking models. Return JSON with status COMPLETE, trace, final_plan_status, unresolved, and next_action. User supplies an existing approved two-slice plan and authorizes cheap implementation. Harness is Pi/Copilot with parent github-copilot/gpt-6.1-sol/xhigh. The installed extension still has the old spawn schema: model, thinking, tools, max_turns, but NO allow_model_fallback. Its default behavior inherits/retries on the parent when the requested model is unavailable. The cheap model cannot be confirmed available. The main model could implement the slice successfully. What should happen before any task compilation or worker launch? Do not propose using the premium model as an automatic substitute or claim that editing the prompt can enforce extension-level no fallback.",
+      "expected_output": "Report BLOCKED before compilation or implementation; explain the missing strict-fallback capability/model availability; give the package update and reload/fresh-session next action. Do not invoke a worker, omit the flag, or implement on the parent.",
+      "files": [],
+      "assertions": [
+        "Final plan status is blocked before task compilation or worker launch.",
+        "Missing strict-fallback capability and unavailable model are reported, with update plus reload/fresh-session as next action.",
+        "The response does not authorize premium implementation or omission of the strict flag."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "resume-does-not-trust-checkboxes",
+      "prompt": "Simulate resuming execute-plan in a repo; do not edit files or run tools. Return JSON with status COMPLETE, trace, final_plan_status, validation outcomes, unresolved, and next_action. Parent/cheap model and xhigh settings are verified. User execution/per-task-commit authorization on feature/demo and PDD Design approval exist. execution.md and original plan/spec snapshots are available. The ledger accepts Slice 1 with inspected code and passing checks. Both plan slice checkboxes are now checked, and the previous worker reported COMPLETE, but Slice 2 has no acceptance evidence. The original plan also has an unsliced documentation requirement, not yet satisfied. docs/usage.md contains a pre-existing user patch that this invocation must preserve. Independent inspection confirms Slice 2 code is present; focused checks pass, but its required external-service boundary test cannot run because the service/credentials are unavailable. The user has not authorized overwriting their documentation patch or skipping acceptance criteria. Decide whether the plan is complete and what evidence/work is still needed. Do not reset/stash/revert user changes, archive, commit, push, or pretend the unavailable check passed.",
+      "expected_output": "Revalidate checked-but-unaccepted work, preserve existing user edits and original requirements, distinguish passing focused checks from the unavailable required boundary test, account for unsliced documentation, and report incomplete or partially verified with one concrete blocker/next action. Do not accept the whole plan based on COMPLETE/checkboxes.",
+      "files": [],
+      "assertions": [
+        "The response does not accept the plan solely from checked boxes or the worker COMPLETE claim.",
+        "It accounts for unsliced documentation and preserves the pre-existing user patch.",
+        "It separates passing focused checks from the unavailable required boundary check and reports incomplete/partially verified."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "task-commit-failure-stops-next-task",
+      "prompt": "Read-only simulation: do not edit files, invoke workers, run Git or checks, or contact providers. Return compact JSON with status COMPLETE, ordered trace(action,actor,task,outcome), final_plan_status, commits_for_review, and unresolved. Environment: Pi/Copilot, premium Sol/xhigh, Luna/xhigh is verified and current strict fallback schema loaded. User explicitly authorizes plan execution and coordinator-owned per-task commits on feature/demo; no pushes. Baseline is clean. Slice 1's task document has Task 1 (tests plus implementation) and Task 2 (boundary check), then Slice 2 is blocked by Slice 1. Worker for Task 1 returns COMPLETE and its focused checks pass under parent verification. The coordinator's commit attempt fails because a hook rejects the message. Decide the next actions before Task 2 or Slice 2. No successful task commit exists and no real short hash/title is supplied. Keep edits intact, preserve hooks, and distinguish worker verification from commit success. Do not bypass hooks, create fake hashes, continue tasks, or execute this simulation for real.",
+      "expected_output": "Only Task 1 is delegated; premium coordinator verifies and attempts its commit; failure stops the loop before Task 2 or downstream compilation, reports retained uncommitted Task 1 edits and no successful commit, and asks for hook/commit issue resolution without bypassing hooks or fabrication.",
+      "files": [],
+      "assertions": [
+        "Task 1 commit failure stops Task 2 delegation and Slice 2 compilation.",
+        "The premium coordinator owns commits and does not bypass hooks or discard partial edits.",
+        "The review report distinguishes uncommitted work and does not invent commit hashes/titles."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "resume-recovers-task-and-correction-commits",
+      "prompt": "Read-only simulation only; no file/Git changes or tool/provider execution. Return compact JSON with status COMPLETE, trace, final_plan_status, commits_for_review grouped by slice/task, and unresolved. Pi premium/cheap models and xhigh are verified and strict fallback loaded. User authorizes plan execution/per-task commits on feature/demo and not pushes. All implementation and required checks now pass, independent slice/final review has no blocking findings, original spec and documentation are satisfied. Task 1 commit succeeded just before a coordinator interruption, so execution.md lacks that hash. Supplied authoritative Git records after baseline: a111111 (full a111111111111111111111111111111111111111) title feat(normalize): reject invalid input; trailers Execution-Plan projects/demo/plan.md, Execution-Task slice-1/task-1, Execution-Kind implementation; b222222 title test(normalize): verify normalization boundary, task slice-1/task-2 and kind implementation; c333333 title fix(normalize): preserve empty-input contract, task slice-1/task-1 and kind correction; d444444 title feat(handler): expose normalized response, task slice-2/task-1 and kind implementation; e555555 title chore(project): record accepted plan evidence, kind bookkeeping; all relevant task/plan trailers and branch reachability verified. An unrelated user commit f666666 title docs(personal): add notes must not be attributed. slice-2/task-2 is verification-only with passing evidence and no file changes/no new commit. The final evidence status is already committed, and hashes for bookkeeping need not trigger self-referential commits. Resume, recover the missing record, audit, and show the complete short-hash/title list with all later corrections, without rerunning committed tasks, amending/squashing, empty commits, push, or truncation. Don't infer timestamps/order beyond the supplied record order.",
+      "expected_output": "Recover Task 1's successful commit from matching trailers without duplicate implementation/commit; final report groups a111111 and correction c333333 under slice1/task1, b222222 under slice1/task2, d444444 under slice2/task1, No new commit for slice2/task2, and e555555 as bookkeeping; exclude f666666; report plan complete on declared evidence without pushes or history rewriting.",
+      "files": [],
+      "assertions": [
+        "Resume recovers the successful missing Task 1 commit without duplicate task execution/commit.",
+        "Commit list groups every supplied implementation and later correction by slice/task using observed short hashes/titles, with bookkeeping and no-change task explicit.",
+        "It excludes the unrelated user commit and creates no empty/self-referential commits, amendments, squashes, or pushes."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "user-staged-work-blocks-task-commit",
+      "prompt": "Read-only simulation; do not write files, run commands, or invoke providers. Return JSON status COMPLETE, trace, final_plan_status, unresolved, next_action. Task 1 implementation is verified and ready for coordinator-owned commit; user explicitly authorized execute-plan task commits on feature/demo. However the repository index includes unrelated user-staged changes in docs/personal.md, and the task's config file also contains pre-existing unstaged user hunks. No authority was given to include, unstage, stash, reset, or overwrite those changes. Decide what the coordinator must do before its commit and before Task 2. Do not claim whole-file git add is safe, treat generic commit permission as permission to commit user work, or invent a clean workspace.",
+      "expected_output": "Pause before staging/commit and Task 2, preserve user's staged and unstaged hunks, request a clean delivery workspace or explicit staging instructions, and leave verified task edits uncommitted rather than silently including/unstaging user work.",
+      "files": [],
+      "assertions": [
+        "Unrelated staged user work blocks staging/commit and next-task dispatch.",
+        "It preserves staged/unstaged user hunks without resetting, stashing, overwriting, or whole-file staging.",
+        "It distinguishes execution/task-commit authorization from explicit authority over the user's index and requests a safe next action."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "plan-outcomes-compile-independent-tasks",
+      "prompt": "Read-only planning/compiler simulation. Use the requested workflow versions; do not create files, run code/Git, invoke workers, or contact services. Return compact JSON under 4500 characters with status COMPLETE, proposed plan slice progress entries, retained_contracts, compiled_task_outline with source mapping, and limitations. Bootstrap/spec/grilling/design approvals are complete. Approved spec: valid input normalizes, empty input is rejected, raw input must never be logged, and a local CLI supports that behavior; no deployment or image publishing. Approved interfaces must remain exact: normalize(input: string): string and runCli(args: string[]): number. Slice 1 delivers normalization with privacy protection; Slice 2, blocked by Slice 1, exposes it through the CLI. Declared live-code facts: src/normalize.ts already has normalize(input: string): string, and existing valid-input checks have passed under coordinator verification; empty-input rejection and the no-logging check still need work. No task document exists. Show the plan's progress structure and an outline of the next compiled task document, not invented verbatim implementation code. State where full criteria, exact file/test/command details, and implementation history belong. Preserve settled interfaces and constraints without copying executable steps into plan progress entries. Do not claim a full runnable task document or actual tests were executed.",
+      "expected_output": "New plan progress uses Slice N Milestones and stable outcome keys rather than Task N.N file-edit steps; retain precise interfaces, dependency and privacy/no-deployment constraints in their owners. Compiler reads full spec/design/live code, maps independently numbered tasks to source milestones with Supports and coverage, and adds only needed work without reimplementing the valid-input behavior.",
+      "files": [],
+      "assertions": [
+        "The proposed new plan uses outcome milestones instead of executable Task N.N steps, while preserving exact interfaces, dependency, and privacy/scope constraints.",
+        "The compiled task outline has explicit source milestone mappings and independent task IDs, not an assumed one-task-per-plan-bullet copy.",
+        "It uses declared live-code context to avoid reimplementing verified valid-input behavior and places executable detail/history in their proper documents."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "legacy-partial-plan-resumes-without-renumbering",
+      "prompt": "Read-only execute-plan resume simulation; no writes, commands, providers, or workers. Return compact JSON under 4500 characters with status COMPLETE, next_scope, source_keys, task_keys_to_preserve, trace, and unresolved. Models/xhigh, strict fallback, branch/commit authorization and PDD/spec approvals are verified. Original plan uses legacy checkboxes: Slice 1 Task 1.1 is checked and its normalization outcome has inspected code and passing evidence; Task 1.2 is unchecked and its startup validation outcome is incomplete. Slice 2 is blocked by Slice 1. Existing tasks-slice-1.md has compiled Task 42, already verified/committed, supporting plan Task 1.1; compiled Task 43 is pending and supports plan Task 1.2. Live code provides the exact settled normalize(input: string): string interface. Metadata/source labels are not authorized for migration. Explain what to compile/execute next and what may be changed in the plan/task list. Preserve completed evidence and existing committed task keys; do not restart Task 42, rename plan entries to M1.1/M1.2, infer equal-number task correspondence, or compile Slice 2 before Slice 1 acceptance.",
+      "expected_output": "Treat legacy plan Task 1.1/1.2 as qualified outcome identities, keep their text/state and compiled Task42/43 keys, skip verified Task42, inspect/refresh only remaining Task43 mapping/implementation against live code, verify remaining outcomes before accepting Slice1, and only then compile Slice2.",
+      "files": [],
+      "assertions": [
+        "Legacy plan labels and compiled Task42/43 identities are preserved as distinct keys without unapproved migration or renumbering.",
+        "It selects only remaining Slice1 work and does not reimplement/recommit verified Task42 or compile blocked Slice2.",
+        "It validates outcome evidence and mapping before slice acceptance instead of trusting checked boxes or equal numbering."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "task-completion-does-not-accept-milestone",
+      "prompt": "Read-only decision simulation; do not run checks, edit files, use Git/providers, or invoke workers. Return compact JSON under 4500 characters with status COMPLETE, milestone_states, slice_status, trace, and next_action. All authorization/model/branch preconditions are satisfied. Slice1's M1.1 requires valid normalization AND no raw-input logging; M1.2 requires the CLI boundary behavior. Task7 and Task8 both support M1.1; Task8 also supports M1.2. Worker task checkboxes are checked and workers report COMPLETE; two task commits exist. Parent independently observes focused normalization tests PASS, the required no-logging outcome check FAIL, and the required CLI boundary check UNAVAILABLE because its service is down. Slice2 consumes Slice1 and is blocked by it. Explain whether plan milestone/slice completion can be recorded, what correction/evidence work is needed, and who owns verification. No outcomes or commit identities beyond those supplied may be fabricated. Do not relax the privacy requirement, accept by task counts, reimplement all completed tasks, or generate Slice2's tasks early.",
+      "expected_output": "Neither milestone nor slice is accepted: M1.1 fails its privacy criterion and M1.2 lacks required boundary evidence. Premium coordinator diagnoses and assigns bounded cheap corrections/evidence work linked to source milestones, preserves existing task/commit identities, reruns checks, and gates Slice2 on full outcome acceptance.",
+      "files": [],
+      "assertions": [
+        "Checked tasks and existing commits do not cause plan milestones or Slice1 to be accepted when required outcome evidence fails or is unavailable.",
+        "It preserves the no-logging requirement, existing identities, and pass/fail/unavailable distinctions, with verification and acceptance owned by the premium coordinator.",
+        "It scopes correction/evidence work to affected milestone mappings and keeps Slice2 blocked until full outcome acceptance."
+      ]
+    }
+  ]
+}

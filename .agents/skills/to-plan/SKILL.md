@@ -8,12 +8,12 @@ description: >-
 
 # To Plan
 
-Produce a precise, actionable implementation guide: the volatile *how*. The
-stable *what* and the definition of done live in the
-[`spec`](../to-spec/SKILL.md); this plan links them and turns them into ordered,
-demoable vertical slices carrying interface contracts — actual signatures,
-types, and import paths. Detailed TDD execution steps (verbatim tests and code)
-are compiled just-in-time per slice via [`to-tasks`](../to-tasks/SKILL.md).
+Produce a precise delivery plan: ordered, demoable slices, outcome milestones,
+dependencies, and approved interface contracts. The stable behavior and full
+acceptance criteria live in the [`spec`](../to-spec/SKILL.md). Keep signatures,
+types, import paths, design decisions, and scope constraints precise;
+implementation details belong in the task document compiled just-in-time via
+[`to-tasks`](../to-tasks/SKILL.md), not a duplicate executable checklist here.
 
 Normally invoked by [`architect`](../architect/SKILL.md) after the spec, but it
 is the single way to produce a plan document and is often run standalone.
@@ -98,9 +98,11 @@ The **spec** owns the acceptance criteria — the plan links them from its
 `## Specification` section, it does not restate them.
 
 - **Code plan** → delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md),
-  passing the spec's scenarios and language, for its **scaffold tasks** (add the
-  runner dependency, create `features/*.feature`, wire the suite, stub steps).
-  Fold these into the slice that first exercises them.
+  passing the spec's scenarios and language, to identify the required runner
+  and verification seams. Record the chosen dependency in Prerequisites and
+  an outcome milestone for runnable acceptance verification in the first
+  relevant slice. Compile dependency/file/wiring/stub steps later via
+  `to-tasks`; do not paste a scaffold task list into the plan.
 - **Non-code plan** → criteria are still written in Gherkin syntax
   (` ```gherkin `), but verified by checkable assertions (grep, command output,
   file state) rather than executable runner scaffolding.
@@ -116,8 +118,9 @@ Never format them as loose Markdown prose, lists, or headings.
 ## Plan document
 
 Read [`product-voice`](../product-voice/SKILL.md) when writing the Summary and
-user-observable part of each slice's **Delivers** field. Keep interface
-signatures, dependencies, and implementation tasks exact.
+user-observable part of each slice's **Delivers** field and milestones. Keep
+interfaces, dependencies, approved design decisions, and scope constraints
+exact. Reserve executable tasks for the compiled task document.
 
 Ensure `projects/README.md` exists. If missing, create it from
 [`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md). Ensure the
@@ -161,7 +164,7 @@ conscious choice.}
 
 ## Implementation
 
-Vertical slices for multi-layer features; a flat task list for
+Vertical slices for multi-layer features; a flat milestone checklist for
 single-layer or non-code work — see "Slicing the work".
 
 ### Slice 1: {what it delivers, end to end}
@@ -177,8 +180,10 @@ single-layer or non-code work — see "Slicing the work".
 // Key interface or type signatures produced by this slice
 ```
 
-- [ ] **Task 1.1**: {milestone / high-level step}
-- [ ] **Task 1.2**: {milestone / high-level step}
+#### Slice 1 Milestones
+
+- [ ] **M1.1**: {verifiable outcome; link relevant spec criteria}
+- [ ] **M1.2**: {verifiable outcome; link relevant spec criteria}
 
 ### Slice 2: {what it delivers}
 
@@ -191,7 +196,9 @@ single-layer or non-code work — see "Slicing the work".
 // Key interface or type signatures produced by this slice
 ```
 
-- [ ] **Task 2.1**: {milestone / high-level step}
+#### Slice 2 Milestones
+
+- [ ] **M2.1**: {verifiable outcome; link relevant spec criteria}
 
 ### Documentation
 
@@ -256,6 +263,31 @@ A slice handed to a subagent sees only its own section, so this block is the
 only way its implementer learns the names and types its neighbours use.
 **Delivers** describes behaviour; it does not carry types.
 
+### Slice milestones, not implementation tasks
+
+Use `#### Slice N Milestones` with stable `MN.K` keys, such as `M1.1` and
+`M1.2`, for outcome checkpoints. Preserve keys once assigned. Keep milestones
+coarse and verifiable: "Identity discovery satisfies the specified privacy
+constraints", not a sequence of file edits, API calls, test functions, and
+commands. Link full criteria in the spec rather than restating them here.
+
+Keep exact public interfaces in `Consumes`/`Produces`, approved implementation
+choices in the design/ADRs, file ownership in File Changes, and prerequisites
+or scope constraints in their named sections. Moving those details out of a
+milestone must not delete or weaken a requirement. Keep implementation history
+and acceptance evidence in `execution.md`, not in the milestone's description.
+
+A slice milestone is not a PDD initiative milestone, an executable task, or a
+commit boundary. `to-tasks` maps independently numbered tasks to milestone
+keys after inspecting live code; the relationship need not be one-to-one.
+Check a plan milestone only when its outcome has evidence, not when one task
+has finished. `execute-plan` additionally requires slice-level acceptance.
+
+For flat/single-layer plans, use a `#### Milestones` checklist with `M1.K`
+keys and the same outcome bar. Existing plans with `Task N.N` checkboxes remain
+valid legacy input: preserve their identifiers and completion state unless the
+user approves a migration. Do not reinterpret existing requirements as optional.
+
 ### Module seams and encapsulation
 
 A vertical slice cuts across layers, but it must respect **deep module
@@ -273,8 +305,8 @@ boundaries** along that path:
 Not everything slices vertically:
 
 - **Single-layer or non-code work** (one package, a doc set, config) has no
-  layers to cut — use a flat task list or group by concern, but keep the
-  Blocked-by edges.
+  layers to cut — use a flat milestone checklist or group outcomes by concern,
+  keeping Blocked-by edges. Compile executable steps later via `to-tasks`.
 - **Wide mechanical refactors** (a rename or API change across many call sites)
   use **expand–contract**:
   1. **Expand** — introduce the new form alongside the old; nothing breaks.
@@ -292,7 +324,9 @@ in the generated plan.
 
 The delivery graph and the `Blocked by` graph answer different questions:
 delivery groups review units into PRs, while `Blocked by` controls work order.
-A PR layer may contain several tasks or slices.
+A PR layer may contain several tasks or slices. Before task compilation,
+express the plan's delivery units in slices or milestone keys, not guessed
+future task numbers. The compiler maps actual tasks to those confirmed units.
 
 ## Parallel execution
 
@@ -324,18 +358,22 @@ dispatch. Fix what you find inline and move on; there is no second pass.
 1. **Spec coverage** — walk each requirement in the spec and name the slice
    that implements it. A requirement with no slice is a missing slice, not a
    line in Notes & Caveats.
-1. **Citations resolve** — grep or read each `path:line` you cited and confirm
+2. **Citations resolve** — grep or read each `path:line` you cited and confirm
    the symbol still exists. A citation pointing at the wrong line is worse
    than none.
-1. **Type consistency** — every symbol a slice invents is spelled identically
+3. **Type consistency** — every symbol a slice invents is spelled identically
    everywhere later slices use it. `clearLayers()` in Slice 1 against
    `clearFullLayers()` in Slice 4 is a bug shipped into the plan. Diff the
    Consumes and Produces blocks against each other first; mismatches surface
    there.
-1. **Encapsulation boundaries** — verify each slice only consumes public module
+4. **Encapsulation boundaries** — verify each slice only consumes public module
    APIs. If a slice lists edits to internal files of established modules it
    only needs to consume, push those changes back behind that module's public
    interface.
+5. **Milestone boundary** — check stable outcome keys and spec links. Keep
+   file-edit/test/command sequences in the later task document, preserve all
+   approved decisions and exact interfaces, and avoid numbering plan bullets
+   as executable tasks.
 
 ## Extract decisions
 
@@ -379,8 +417,12 @@ nothing durable surfaced.
 ## Execution hand-off (Just-in-Time tasks)
 
 Do not generate verbatim TDD code for all slices upfront, as early slices may
-alter implementation details for later ones. Instead, hand off one slice at a
-time to the user:
+alter implementation details for later ones. Offer
+[`execute-plan`](../execute-plan/SKILL.md) with the plan path to automate the
+premium compile → cheap execution → premium review loop. It compiles each next
+slice only after accepting the previous implementation; execution is opt-in.
+
+For the existing manual workflow, hand off one slice at a time to the user:
 
 1. Tell the user to run `/to-tasks <plan-path>` for a single-slice plan, or
    `/to-tasks <plan-path> slice-1` for the first slice of a multi-slice plan.
