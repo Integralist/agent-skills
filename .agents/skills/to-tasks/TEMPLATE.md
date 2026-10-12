@@ -16,6 +16,10 @@ numbers. For legacy plans, preserve their existing labels as source keys.
 - **Language:** {detected language}
 - **Source:** {plan/research doc paths, or "in-session planning"}
 
+## Summary
+
+{Reader-facing summary of this slice.}
+
 ## Pull Request Delivery
 
 - **Mode:** {Single PR | Stack | Independent PRs}
@@ -54,8 +58,6 @@ Before marking the whole list done:
   tests you expected to flip.
 
 ## Context for the executor
-
-{One paragraph: what the finished change does.}
 
 Existing code the tasks build on (verified — do not re-explore):
 

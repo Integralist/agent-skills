@@ -190,6 +190,12 @@ Date from `date +%F`, author from `git config user.name`. A new task list's
 `projects/completed/<yyyy-mm-dd>-<slug>/` happen at commit time — see
 [`commit`](../commit/SKILL.md).
 
+Load [`product-voice`](../product-voice/SKILL.md) and write `Summary` immediately
+above `Pull Request Delivery`. In 2–3 sentences, explain this slice's problem,
+what changes for whom, and why that outcome matters. Ground it in the selected
+plan slice or in-session scope, without inventing benefits. Keep implementation
+details in `Context for the executor`.
+
 Follow the scaffold and worked example in [`TEMPLATE.md`](TEMPLATE.md): an
 execution protocol the executor follows, a "Context for the executor" section
 serializing the exploration (goal, existing signatures, paths, conventions, and
