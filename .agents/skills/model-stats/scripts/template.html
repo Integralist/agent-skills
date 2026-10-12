@@ -25,8 +25,8 @@
     --s1: #eb6834; --s2: #2a78d6; --s3: #1baf7a; --s4: #eda100;
     --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
     --other: #A89A8C;
-    --heat-0: #F3E9DD; --heat-1: #F6C9A4; --heat-2: #EF9B61; --heat-3: #D96B27; --heat-4: #8F4215;
-    --e1: #F6D5BC; --e2: #F2B98E; --e3: #EC9A62; --e4: #E07B3A; --e5: #C45E1F; --e6: #934314; --e7: #5E280B;
+    --heat-0: #E5E7EB; --heat-1: #7C3AED; --heat-2: #0072B2; --heat-3: #00856A; --heat-4: #A67C00;
+    --e1: #64748B; --e2: #A67C00; --e3: #0072B2; --e4: #00856A; --e5: #D55E00; --e6: #7C3AED; --e7: #C0392B;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -39,8 +39,8 @@
       --s1: #d95926; --s2: #3987e5; --s3: #199e70; --s4: #c98500;
       --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
       --other: #7D6F63;
-      --heat-0: #3D3029; --heat-1: #6E3B1E; --heat-2: #A8501F; --heat-3: #D96B27; --heat-4: #F2A56E;
-      --e1: #6E3B1E; --e2: #8C4520; --e3: #AE5423; --e4: #D0652A; --e5: #E8813F; --e6: #F2A56E; --e7: #F8CBA8;
+      --heat-0: #374151; --heat-1: #A78BFA; --heat-2: #56B4E9; --heat-3: #2DD4BF; --heat-4: #FACC15;
+      --e1: #94A3B8; --e2: #FACC15; --e3: #56B4E9; --e4: #2DD4BF; --e5: #F59E0B; --e6: #C4B5FD; --e7: #F87171;
     }
   }
   :root[data-theme="dark"] {
@@ -53,8 +53,8 @@
     --s1: #d95926; --s2: #3987e5; --s3: #199e70; --s4: #c98500;
     --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
     --other: #7D6F63;
-    --heat-0: #3D3029; --heat-1: #6E3B1E; --heat-2: #A8501F; --heat-3: #D96B27; --heat-4: #F2A56E;
-    --e1: #6E3B1E; --e2: #8C4520; --e3: #AE5423; --e4: #D0652A; --e5: #E8813F; --e6: #F2A56E; --e7: #F8CBA8;
+    --heat-0: #374151; --heat-1: #A78BFA; --heat-2: #56B4E9; --heat-3: #2DD4BF; --heat-4: #FACC15;
+    --e1: #94A3B8; --e2: #FACC15; --e3: #56B4E9; --e4: #2DD4BF; --e5: #F59E0B; --e6: #C4B5FD; --e7: #F87171;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -159,8 +159,8 @@
       <div class="card wide"><h3 id="timeline-title">Daily usage by provider</h3><p>Stacked by model provider.</p><div class="chart"><canvas id="c-timeline"></canvas></div></div>
       <div class="card"><h3>Running total</h3><p>Cumulative across the period.</p><div class="chart"><canvas id="c-cumulative"></canvas></div></div>
       <div class="card"><h3>Weekdays</h3><p>Total by day of the week.</p><div class="chart"><canvas id="c-weekday"></canvas></div></div>
-      <div class="card wide" id="calendar-card"><h3>Calendar</h3><p>One square per day; darker means more.</p><div class="heat" id="calendar"></div><div class="legend-scale" id="calendar-scale"></div></div>
-      <div class="card wide"><h3>When you work</h3><p>Requests by weekday and hour of day (local time).</p><div class="heat hours" id="hours"></div><div class="legend-scale" id="hours-scale"></div></div>
+      <div class="card wide" id="calendar-card"><h3>Calendar</h3><p>Each square is one day’s total: dollars in Cost mode, tokens in Tokens mode. Columns are weeks; rows are weekdays. Hover for the date and exact total.</p><p>Grey means zero. Purple → blue → teal → yellow means more, relative to each chart’s highest value.</p><div class="heat" id="calendar"></div><div class="legend-scale" id="calendar-scale"></div></div>
+      <div class="card wide"><h3>When you work</h3><p>Each square counts requests for a weekday/hour across the whole period, in local time. Monday at 10 combines every Monday’s 10:00–10:59 requests. This counts requests, not hours worked, and ignores the Cost/Tokens switch.</p><p>Grey means zero. Purple → blue → teal → yellow means more, relative to each chart’s highest value.</p><div class="heat hours" id="hours"></div><div class="legend-scale" id="hours-scale"></div></div>
     </section>
 
     <h2>Efficiency</h2>

@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
+from colorsys import rgb_to_hsv
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
+from itertools import combinations
 from pathlib import Path
 from unittest import mock
 
@@ -367,6 +370,68 @@ def test_render_html_embeds_report_and_escapes_script_close() -> None:
     html = report.render_html({"project": "</script>"}, f"<script>const R = {report.PLACEHOLDER};</script>")
     assert '{"project":"<\\/script>"}' in html
     assert html.count("</script>") == 1
+
+
+@pytest.mark.parametrize("selector", [":root", ':root:not([data-theme="light"])', ':root[data-theme="dark"]'])
+def test_render_html_effort_levels_use_distinct_hues(selector: str) -> None:
+    data = report.build_report([usage()], {}, "all", NOW)
+    html = report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8"))
+    style = re.search(rf"{re.escape(selector)}\s*\{{([^}}]+)\}}", html)
+    order = re.search(r"const EFFORT_ORDER = (\[[^\]]+\]);", html)
+    assert style is not None and order is not None
+    levels = json.loads(order[1].replace("'", '"'))
+    colours = dict(re.findall(r"--(e\d):\s*#([0-9a-fA-F]{6})", style[1]))
+    assert len(set(colours.values())) == 7
+    hues = {}
+    for level in ("low", "high", "xhigh"):
+        colour = colours[f"e{levels.index(level) + 1}"]
+        rgb = tuple(int(colour[i : i + 2], 16) / 255 for i in (0, 2, 4))
+        hue, saturation, _ = rgb_to_hsv(*rgb)
+        assert saturation >= 0.25, f"{level} needs a visible hue"
+        hues[level] = hue
+    for first, second in combinations(hues, 2):
+        gap = abs(hues[first] - hues[second])
+        assert min(gap, 1 - gap) * 360 >= 45, f"{first} and {second} need distinct hues"
+
+
+@pytest.mark.parametrize("selector", [":root", ':root:not([data-theme="light"])', ':root[data-theme="dark"]'])
+def test_render_html_heatmap_bands_use_distinct_hues(selector: str) -> None:
+    data = report.build_report([usage()], {}, "month", NOW)
+    html = report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8"))
+    style = re.search(rf"{re.escape(selector)}\s*\{{([^}}]+)\}}", html)
+    assert style is not None
+    colours = dict(re.findall(r"--heat-(\d):\s*#([0-9a-fA-F]{6})", style[1]))
+    assert len(set(colours.values())) == 5
+    hues = {}
+    for band in range(5):
+        colour = colours[str(band)]
+        rgb = tuple(int(colour[i : i + 2], 16) / 255 for i in (0, 2, 4))
+        hue, saturation, _ = rgb_to_hsv(*rgb)
+        if band == 0:
+            assert saturation <= 0.35, "No activity needs a neutral colour"
+            continue
+        assert saturation >= 0.4, f"Activity band {band} needs a visible hue"
+        hues[band] = hue
+    for first, second in combinations(hues, 2):
+        gap = abs(hues[first] - hues[second])
+        assert min(gap, 1 - gap) * 360 >= 25, f"Activity bands {first} and {second} need distinct hues"
+    assert "darker means more" not in html
+
+
+@pytest.mark.parametrize(
+    ("heading", "explanation"),
+    [
+        ("Calendar", "Each square is one day’s total: dollars in Cost mode, tokens in Tokens mode. Columns are weeks; rows are weekdays. Hover for the date and exact total."),
+        ("When you work", "Each square counts requests for a weekday/hour across the whole period, in local time. Monday at 10 combines every Monday’s 10:00–10:59 requests. This counts requests, not hours worked, and ignores the Cost/Tokens switch."),
+    ],
+)
+def test_render_html_explains_heatmaps(heading: str, explanation: str) -> None:
+    data = report.build_report([usage()], {}, "month", NOW)
+    html = report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8"))
+    caption = re.search(rf'<h3>{re.escape(heading)}</h3>(.*?)<div class="heat', html, re.DOTALL)
+    assert caption is not None
+    assert explanation in caption[1]
+    assert "Grey means zero. Purple → blue → teal → yellow means more, relative to each chart’s highest value." in caption[1]
 
 
 def test_render_html_requires_placeholder() -> None:
