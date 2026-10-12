@@ -303,6 +303,7 @@ authenticate via SSO on first use.
 | **summarize-for-adhd**       | Summarise a session, file, or URL with a clear takeaway and short, ADHD-friendly points. |
 | **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
 | **systematic-debugging**     | Find root causes through a four-phase debugging workflow.                              |
+| **talking-points**           | Rank recurring Slack topics from you and your team for a retro or 1:1.                 |
 | **teach**                    | Teach a concept using persistent lessons, missions, and progress records.              |
 | **teach-with-slides**        | Teach a topic or concept through an educational slide deck.                            |
 | **tech-docs**                | Write or improve concise, maintainable technical documentation.                        |
