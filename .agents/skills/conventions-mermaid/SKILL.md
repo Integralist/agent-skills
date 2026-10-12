@@ -9,6 +9,19 @@ description: >-
 We write clean, readable Mermaid diagrams that communicate system structure
 without awkward rendering artifacts.
 
+## Syntax compatibility
+
+Use commas or separate sentences instead of semicolons in diagram labels,
+messages, and notes. Put each Mermaid statement on its own line.
+
+Sequence diagrams treat raw semicolons as statement separators, which can
+break rendering in Mermaid Live.
+
+```mermaid
+sequenceDiagram
+    N-->>D: Unsupported, no handler runs
+```
+
 ## Verification with `mmdc`
 
 Always validate Mermaid diagrams with the Mermaid CLI (`mmdc`) before inserting
