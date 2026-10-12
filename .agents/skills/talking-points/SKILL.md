@@ -48,17 +48,18 @@ Path: `${XDG_CONFIG_HOME:-$HOME/.config}/talking-points/config.json`.
 2. **Load settings.** Read the settings file. Skip to Step 3 when it parses,
    holds a non-empty `slack_user_id` and at least one channel, and `--edit` is
    absent. Otherwise:
-   1. Ask for the user's name or Slack username (show current values when
-      editing). Resolve it with the Slack user-search tool; when several users
-      match, list them and let the user pick.
-   2. Ask for the team channels as a comma-separated list. Resolve each to a
-      channel ID with the Slack channel-search tool; report any that fail to
-      resolve and ask again for those only.
-   3. Ask for teammates the user talks to directly (optional). Resolve each
-      with the Slack user-search tool, as in Step 2.1.
-   4. Show the resolved settings, confirm, then write the file (create the
+   1. Ask for all three values in one message, as a numbered list; when
+      editing, show each current value beside its item:
+      1. Your name or Slack username.
+      2. Team channels, comma-separated.
+      3. Teammates you talk to directly, comma-separated (optional).
+   2. Resolve all values in parallel: people with the Slack user-search tool,
+      channels with the Slack channel-search tool. In one follow-up message,
+      list any person matching several users (let the user pick) and any
+      value that failed to resolve (ask again for those only).
+   3. Show the resolved settings, confirm, then write the file (create the
       directory with `mkdir -p`; set file mode `600`).
-   5. With `--edit`, print the saved path and stop.
+   4. With `--edit`, print the saved path and stop.
 3. **Search.** Compute `after:` as today minus `--days`. Run these searches in
    parallel, excluding bots, paging with `cursor` until results run out or 100
    messages per search:
