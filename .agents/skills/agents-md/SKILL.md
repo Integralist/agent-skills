@@ -58,6 +58,11 @@ directly.
 
 ## Bootstrap template (the rubric)
 
+Before Reconcile/Bootstrap or a full Update/Audit, read
+[project stewardship](../shared/PROJECT-STEWARDSHIP.md). Use it to capture
+project direction within WHY and audit instruction conflicts; `--learn`
+remains session-lessons only.
+
 This is **both** the template for fresh files and the scoring rubric for
 choosing between existing files. A good AGENTS.md covers exactly three
 things:
