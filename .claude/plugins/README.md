@@ -5,9 +5,9 @@ hooks. `make install-claude` copies each one to `~/.claude/mods/`, and
 `CLAUDE_CODE_PLUGIN_DIRS` in `.claude/settings.json.tmpl` loads them in every
 session.
 
-| Mod                         | What it does                                                                       |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| [`auto-model`](auto-model/) | Picks the main conversation's model for each typed prompt; caps effort at `xhigh`. |
+| Mod                         | What it does                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------- |
+| [`auto-model`](auto-model/) | Picks the main conversation's model for each typed prompt or skill; caps effort at `xhigh`. |
 
 ## How a mod works
 
@@ -121,10 +121,24 @@ To try a mod without installing it, run
   lines that the `/config` model row offers. A 10-second toast names the new
   model.
 - **Skills:** running a skill by slash command uses the tier its `SKILL.md`
-  declares in `metadata.model-tier`, read from the project's
-  `.claude/skills/` first, then `~/.claude/skills/`. A skill without one, or
-  a plugin's skill, is sorted once by its description, and that tier is kept
-  until the description changes. See
+  declares, read from the project's `.claude/skills/` first, then
+  `~/.claude/skills/`:
+
+  ```yaml
+  metadata:
+    model-tier: trivial # trivial | moderate | complex | frontier
+  ```
+
+  | Tier       | Model line |
+  | ---------- | ---------- |
+  | `trivial`  | `haiku`    |
+  | `moderate` | `sonnet`   |
+  | `complex`  | `opus`     |
+  | `frontier` | `fable`    |
+
+  A skill without a tier, or a plugin's skill, is sorted once by its
+  description, and that tier is kept until the description changes. For how to
+  pick a tier, see
   [model tier](../../.agents/skills/writing-for-agents/SKILL-MECHANICS.md#model-tier).
 - **When it leaves the model alone:** short replies (fewer than four words, or
   replies such as "yes" or "keep going"), built-in slash commands, messages
