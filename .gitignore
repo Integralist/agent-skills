@@ -1,3 +1,6 @@
 .claude/settings.local.json
 .playwright-mcp/
 .evals-sandbox/
+# Type declarations and tsconfig Claude Code lays beside a loaded mod
+.claude/plugins/*/.claude-plugin/types/
+.claude/plugins/*/tsconfig.json

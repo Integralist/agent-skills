@@ -54,8 +54,8 @@ make install-agents
 # Pi: installs Pi, configured packages, shared instructions, and settings
 make install-pi
 
-# Claude Code (pulls in install-agents): copies CLAUDE.md, rules, agents, and
-# scripts to ~/.claude/, then symlinks ~/.claude/skills → ~/.agents/skills
+# Claude Code (pulls in install-agents): copies CLAUDE.md, rules, agents,
+# scripts, and mods to ~/.claude/, then symlinks ~/.claude/skills → ~/.agents/skills
 make install-claude
 
 # Gemini Antigravity CLI status line (no-op if ~/.gemini/antigravity-cli absent)
@@ -108,6 +108,7 @@ the update touches and why only stable releases are tracked.
 .claude/                            # Claude Code
 ├── CLAUDE.md                       # @-import pointer to ~/.agents/AGENTS.md
 ├── agents/                         # Custom sub-agent definitions
+├── plugins/                        # Mods → ~/.claude/mods/ (see its README)
 ├── rules/                          # Conventions auto-loaded by file glob
 ├── scripts/                        # statusline.sh + session-cost helpers
 └── skills -> ../.agents/skills     # Symlink — single source of truth

@@ -88,6 +88,7 @@ install-claude: install-agents rules install-tools
 	@$(STEP) "rules/ → ~/.claude/rules/" cp -r .claude/rules/ ~/.claude/rules/
 	@$(STEP) "agents/ → ~/.claude/agents/" cp -r .claude/agents/ ~/.claude/agents/
 	@$(STEP) "scripts/ → ~/.claude/scripts/" cp -r .claude/scripts/ ~/.claude/scripts/
+	@$(STEP) "plugins/ → ~/.claude/mods/ (mods; see .claude/plugins/README.md)" rsync -a --delete --exclude='/README.md' --exclude='.claude-plugin/types/' --exclude='tsconfig.json' .claude/plugins/ ~/.claude/mods/
 	@rm -rf ~/.claude/skills
 	@$(STEP) "~/.claude/skills → ~/.agents/skills (symlink)" ln -s ~/.agents/skills ~/.claude/skills
 	@$(OPINJECT) "settings.json → ~/.claude/settings.json" .claude/settings.json.tmpl ~/.claude/settings.json
