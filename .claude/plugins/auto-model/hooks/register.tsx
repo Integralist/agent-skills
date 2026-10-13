@@ -13,6 +13,8 @@ import {
   isShortReply,
   lineOf,
   parseLevel,
+  skillPaths,
+  tierFromFrontmatter,
 } from './logic'
 
 const COMMAND = 'automodel'
@@ -48,6 +50,37 @@ async function classify($: $, text: string, smallest: string): Promise<AutoModel
   } catch {
     return guessLevel(text)
   }
+}
+
+/** The `model-tier` the skill's own SKILL.md declares, project copy first. */
+async function declaredTier($: $, name: string): Promise<AutoModelLevel | undefined> {
+  for (const path of skillPaths(name, await $.session.cwd(), await $.env.get('HOME'))) {
+    try {
+      return tierFromFrontmatter(await $.fs.read(path))
+    } catch {
+      // No skill file here; try the next place.
+    }
+  }
+  return undefined
+}
+
+/**
+ * The tier for a slash command: the skill's `metadata.model-tier`, else its
+ * description, classified once and kept until the description changes.
+ * Built-in and MCP commands, and this mod's own, have none.
+ */
+async function commandLevel($: $, command: string, smallest: string): Promise<AutoModelLevel | undefined> {
+  if (command === COMMAND) return undefined
+  const info = (await $.command.list()).find(c => c.name === command)
+  if (info === undefined || (info.source !== 'user' && info.source !== 'plugin')) return undefined
+  const declared = await declaredTier($, info.name)
+  if (declared !== undefined) return declared
+  const key = `skill:${info.name}:${info.description}`
+  const kept = await $.store.get(key)
+  if (typeof kept === 'string' && parseLevel(kept) !== undefined) return parseLevel(kept)
+  const level = await classify($, `/${info.name}: ${info.description}`, smallest)
+  await $.store.set(key, level)
+  return level
 }
 
 /** Switches to the best line for `level` the plan accepts; quiet when already there. */
@@ -146,6 +179,20 @@ export const register: Register = on => {
       }
     } catch (err) {
       $.ui.log(`auto-model: prompt.submit: ${String(err)}`, { to: 'debug' })
+    }
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
+  // A skill (`/commit`) switches by its level; typed prompts are handled above.
+  on('command.run', async ($, e, next) => {
+    try {
+      if (e.origin.kind === 'composer' && (await read($, isOn))) {
+        const lines = availableLines((await modelRow($))?.options)
+        const level = lines.length > 0 ? await commandLevel($, e.command, lines[0] ?? 'haiku') : undefined
+        if (level !== undefined) await switchTo($, level, await $.session.model(), lines)
+      }
+    } catch (err) {
+      $.ui.log(`auto-model: command.run: ${String(err)}`, { to: 'debug' })
     }
     return next(e)
   }).catch(($, e, next) => next(e))

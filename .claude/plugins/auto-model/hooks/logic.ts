@@ -1,23 +1,23 @@
 import type { AutoModelLevel } from '../types'
 
-export const LEVELS: readonly AutoModelLevel[] = ['small', 'everyday', 'strong', 'strongest']
+export const LEVELS: readonly AutoModelLevel[] = ['trivial', 'moderate', 'complex', 'frontier']
 
 // The four model lines, smallest first, as the /config model row names them.
 // Aliases, not dated ids, so they follow whatever this install ships.
 export const LINES = ['haiku', 'sonnet', 'opus', 'fable'] as const
 
 export const CLASSIFIER_SYSTEM = [
-  'Sort the request into exactly one level. Answer with the one word only.',
-  'small: quick, simple jobs. Summarize, sort, extract, rename, translate, reformat, a short factual answer.',
-  'everyday: an email, a post, a short draft, a small edit, a simple question about one file, a quick chart.',
-  'strong: the default for anything that matters. Building or changing software, multi-step projects, research, analysis, long documents, planning, anything touching several files or tools.',
-  'strongest: only the very hardest. Deep research that runs for hours, a very large build or migration, a problem the strong model would likely fall short on.',
-  'When unsure, say strong.',
+  'Sort the request into exactly one tier. Answer with the one word only.',
+  'trivial: quick, mechanical jobs. Commit, branch, summarize, sort, extract, rename, translate, reformat, a short factual answer.',
+  'moderate: short writing or a small, contained task. An email, a post, a PR body, a ticket, a small edit, a simple question about one file.',
+  'complex: the default for anything that matters. Building or changing software, debugging, research, analysis, long documents, planning, anything touching several files or tools.',
+  'frontier: only the very hardest. Deep research that runs for hours, a very large build or migration, a problem the complex tier would likely fall short on.',
+  'When unsure, say complex.',
 ].join('\n')
 
-/** Reads the classifier's one-word answer; undefined when it named no level. */
+/** Reads the classifier's one-word answer; undefined when it named no tier. */
 export function parseLevel(text: string): AutoModelLevel | undefined {
-  const word = text.toLowerCase().match(/\b(strongest|strong|everyday|small)\b/)
+  const word = text.toLowerCase().match(/\b(trivial|moderate|complex|frontier)\b/)
   return word ? (word[1] as AutoModelLevel) : undefined
 }
 
@@ -36,18 +36,18 @@ export function isShortReply(text: string): boolean {
   return plain.split(' ').length < 4
 }
 
-const STRONGEST = /\b(migrat\w*|deep research|for hours|entire (codebase|repo\w*|system)|whole (codebase|repo\w*)|large[- ]scale|re-?architect\w*|ground[- ]up|from scratch)\b/i
-const STRONG = /\b(build|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|research|analy[sz]\w*|plan\w*|design\w*|architect\w*|review\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|spec|doc(ument)?s?)\b/i
-const EVERYDAY = /\b(email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
-const SMALL = /\b(summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was))\b/i
+const FRONTIER = /\b(migrat\w*|deep research|for hours|entire (codebase|repo\w*|system)|whole (codebase|repo\w*)|large[- ]scale|re-?architect\w*|ground[- ]up|from scratch)\b/i
+const COMPLEX = /\b(build|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|research|analy[sz]\w*|plan\w*|design\w*|architect\w*|review\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|spec|doc(ument)?s?)\b/i
+const MODERATE = /\b(email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
+const TRIVIAL = /\b(summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was))\b/i
 
-/** The word-based guess used when the quick check fails; strong when in doubt. */
+/** The word-based guess used when the quick check fails; complex when in doubt. */
 export function guessLevel(text: string): AutoModelLevel {
-  if (STRONGEST.test(text)) return 'strongest'
-  if (STRONG.test(text)) return 'strong'
-  if (EVERYDAY.test(text)) return 'everyday'
-  if (SMALL.test(text)) return 'small'
-  return 'strong'
+  if (FRONTIER.test(text)) return 'frontier'
+  if (COMPLEX.test(text)) return 'complex'
+  if (MODERATE.test(text)) return 'moderate'
+  if (TRIVIAL.test(text)) return 'trivial'
+  return 'complex'
 }
 
 /** The model lines this install offers, smallest first. */
@@ -87,4 +87,19 @@ export function clampEffort<T>(effort: T): T | 'xhigh' {
 /** `/effort max` (in any case) is rewritten to `/effort xhigh`. */
 export function clampEffortArgs(args: string): string {
   return args.replace(/\bmax\b/gi, 'xhigh')
+}
+
+/** The `metadata.model-tier` a SKILL.md declares; undefined when absent or unknown. */
+export function tierFromFrontmatter(text: string): AutoModelLevel | undefined {
+  const frontmatter = text.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1]
+  const metadata = frontmatter?.match(/^metadata:[ \t]*\r?\n((?:[ \t]+.*(?:\r?\n|$))*)/m)?.[1]
+  const value = metadata?.match(/^[ \t]+model-tier:[ \t]*["']?([A-Za-z]+)["']?[ \t]*$/m)?.[1]?.toLowerCase()
+  return LEVELS.find(level => level === value)
+}
+
+/** Where a skill named `name` may live, project first; none for a non-plain name. */
+export function skillPaths(name: string, cwd: string, home: string | undefined): string[] {
+  if (!/^[A-Za-z0-9_-]+$/.test(name)) return []
+  const file = `.claude/skills/${name}/SKILL.md`
+  return home === undefined ? [`${cwd}/${file}`] : [`${cwd}/${file}`, `${home}/${file}`]
 }

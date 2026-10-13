@@ -1,4 +1,4 @@
-export type AutoModelLevel = 'small' | 'everyday' | 'strong' | 'strongest'
+export type AutoModelLevel = 'trivial' | 'moderate' | 'complex' | 'frontier'
 
 declare module 'claude-code' {
   interface PluginState {
