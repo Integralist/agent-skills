@@ -4,6 +4,8 @@ description: >-
   MANDATORY for any work on agent-facing documents. Load this before creating
   or editing a skill, or modifying AGENTS.md, CLAUDE.md, or GEMINI.md.
   Reference for the levers that make an agent-facing document predictable.
+metadata:
+  model-tier: complex
 ---
 
 Reference for writing any document an agent consumes — a skill, a context file (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`), a doc reached by a pointer. The packaging differs; the writing does not: the same levers make each one predictable — the agent taking the same _process_ every run, not producing the same output.

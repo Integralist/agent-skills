@@ -7,6 +7,8 @@ description: >-
   to projects/<slug>/tasks-slice-<n>.md or projects/<slug>/tasks.md.
 disable-model-invocation: true
 argument-hint: "[slice scope or plan path]"
+metadata:
+  model-tier: complex
 ---
 
 # To Tasks

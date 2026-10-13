@@ -7,6 +7,8 @@ description: >-
   engineering specification and implementation planning.
 disable-model-invocation: true
 argument-hint: "[project path or milestone]"
+metadata:
+  model-tier: complex
 ---
 
 # Project, Discovery, Design

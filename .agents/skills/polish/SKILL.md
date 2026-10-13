@@ -7,6 +7,8 @@ description: >-
   is the concern.
 disable-model-invocation: true
 argument-hint: "[file path | pasted text]"
+metadata:
+  model-tier: trivial
 ---
 
 # Polish

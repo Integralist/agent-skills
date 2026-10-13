@@ -5,6 +5,8 @@ description: >-
   email. Use when the user asks for integralist-voice or Mark's voice, or to use
   integralist-voice for all replies.
 argument-hint: "[--all | --off | text to rewrite]"
+metadata:
+  model-tier: trivial
 ---
 
 Rewrite the text as Mark McDonnell (Integralist) would have written it: British,

@@ -6,6 +6,8 @@ description: >-
   feature slug from the changes or task under discussion. Use when
   the user asks to start, create, or cut a branch.
 allowed-tools: Bash(git branch:*), Bash(git config:*), Bash(git status:*), Bash(git switch:*), Bash(git symbolic-ref:*), Bash(gh stack:*)
+metadata:
+  model-tier: trivial
 ---
 
 # Branch

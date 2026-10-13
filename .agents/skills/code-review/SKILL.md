@@ -7,6 +7,8 @@ description: >-
   Automatically checks relevant specs, plans, and task lists. Pass
   --plan=<path> to select a specific plan or task list.
 argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan=<path>]'
+metadata:
+  model-tier: complex
 ---
 
 # Code Review Skill

@@ -5,6 +5,8 @@ description: >-
   when framing product goals, user personas, and success metrics for
   stakeholders.
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Read, Write
+metadata:
+  model-tier: complex
 ---
 
 # To PRD

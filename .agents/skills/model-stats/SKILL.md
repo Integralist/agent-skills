@@ -3,6 +3,8 @@ name: model-stats
 description: Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.
 disable-model-invocation: true
 argument-hint: "[day|week|month|all]"
+metadata:
+  model-tier: trivial
 ---
 
 # Model stats

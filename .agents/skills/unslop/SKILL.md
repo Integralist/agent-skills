@@ -6,6 +6,8 @@ description: >-
   authentic human voice. Use when asked to remove AI tells, humanize text,
   or when the user invokes /unslop.
 argument-hint: "[file path | pasted text | (empty for latest message)]"
+metadata:
+  model-tier: moderate
 ---
 
 # Unslop

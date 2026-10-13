@@ -4,6 +4,8 @@ description: >-
   Teach a topic or concept through a visual, beginner-friendly slide deck.
 disable-model-invocation: true
 argument-hint: Optional topic to teach
+metadata:
+  model-tier: complex
 ---
 
 Create a concise, warm, educational slide deck that helps the user understand a

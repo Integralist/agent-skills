@@ -8,6 +8,8 @@ description: >-
   reversibility rating.
 disable-model-invocation: true
 argument-hint: '[short description of the decision]'
+metadata:
+  model-tier: complex
 ---
 
 # /decide — Decision Memo + Contrarian Check

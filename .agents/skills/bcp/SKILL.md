@@ -5,6 +5,8 @@ description: >-
   branch off the current base, commits the changes, then drafts
   and opens a pull request.
 disable-model-invocation: true
+metadata:
+  model-tier: moderate
 ---
 
 # Branch → Commit → PR

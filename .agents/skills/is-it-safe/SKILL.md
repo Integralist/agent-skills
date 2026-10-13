@@ -6,6 +6,8 @@ description: >-
   pull request.
 disable-model-invocation: true
 argument-hint: "[PR URL | PR number | commit/range | base ref]"
+metadata:
+  model-tier: complex
 ---
 
 # Is It Safe?

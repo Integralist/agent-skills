@@ -2,6 +2,8 @@
 name: consensus
 description: Cross-model consensus review with discussion rounds and user gates.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Consensus

@@ -4,6 +4,8 @@ description: >-
   Semantic code search with grepai. Use when searching by intent
   or concept rather than exact text (e.g. "where is rate limiting
   implemented" when you don't know the naming conventions).
+metadata:
+  model-tier: trivial
 ---
 
 # grepai — semantic code search

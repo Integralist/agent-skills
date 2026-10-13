@@ -9,6 +9,8 @@ description: >-
   product-voice for all replies. Keep technical contracts and acceptance
   criteria precise.
 argument-hint: "[--all | --off | text to rewrite]"
+metadata:
+  model-tier: moderate
 ---
 
 # Product Voice

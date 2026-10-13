@@ -6,6 +6,8 @@ description: >-
   user asks whether a change fits the codebase, when another skill needs to
   judge project conformance, or on /precedent.
 argument-hint: "[path | --uncommitted]"
+metadata:
+  model-tier: complex
 ---
 
 # Precedent

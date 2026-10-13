@@ -5,6 +5,8 @@ description: >-
   reduce friction. Use when a session ran slow, hit repetitive errors, or had
   tool or context friction.
 disable-model-invocation: true
+metadata:
+  model-tier: moderate
 ---
 
 # Retro

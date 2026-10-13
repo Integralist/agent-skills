@@ -6,6 +6,8 @@ description: >-
   running commands or tests out-of-band in a separate pane, spawning visible
   subagents or interactive tools, sending keystrokes or text to a pane, or
   inspecting active Ghostty terminals.
+metadata:
+  model-tier: trivial
 ---
 
 # Ghostty Terminal Automation

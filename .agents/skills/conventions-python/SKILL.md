@@ -5,6 +5,8 @@ description: >-
   reviewing, or creating any *.py file. Python coding conventions and style
   guide covering modern typing, tooling (ruff, mypy, uv), project structure,
   error handling, and testing.
+metadata:
+  model-tier: complex
 ---
 
 > [!NOTE]

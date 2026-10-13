@@ -5,6 +5,8 @@ description: >-
   request is too vague to act on, when another skill hits a vague request and
   needs to clarify it, or when the user says "help me with this", "I need
   something", "let's work on...", or /clarify.
+metadata:
+  model-tier: trivial
 ---
 
 # Clarify

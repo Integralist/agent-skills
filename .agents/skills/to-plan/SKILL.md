@@ -4,6 +4,8 @@ description: >-
   Write an implementation plan. Use when creating a feature implementation
   plan, persisting a plan discussed in chat, or when another skill needs to plan
   a change.
+metadata:
+  model-tier: complex
 ---
 
 # To Plan

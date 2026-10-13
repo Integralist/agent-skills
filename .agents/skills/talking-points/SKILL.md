@@ -3,6 +3,8 @@ name: talking-points
 description: Rank recurring topics from your Slack messages, team channels, and DMs for a retro or 1:1.
 disable-model-invocation: true
 argument-hint: "[--edit] [--days N]"
+metadata:
+  model-tier: moderate
 ---
 
 # Talking points

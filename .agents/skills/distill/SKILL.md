@@ -8,6 +8,8 @@ description: >-
   instructions, or any prose too long or hard to follow.
 disable-model-invocation: true
 argument-hint: "[file path | pasted text]"
+metadata:
+  model-tier: moderate
 ---
 
 # Distill

@@ -5,6 +5,8 @@ description: >-
   acceptance criteria. Use when specifying a feature or when another skill
   needs the spec phase before planning.
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
+metadata:
+  model-tier: complex
 ---
 
 # To Spec

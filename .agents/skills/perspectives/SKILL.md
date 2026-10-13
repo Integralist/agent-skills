@@ -6,6 +6,8 @@ description: >-
   trade-offs.
 user-invocable: true
 argument-hint: '[topic or proposal] [optional: perspective]'
+metadata:
+  model-tier: complex
 ---
 
 # Perspectives

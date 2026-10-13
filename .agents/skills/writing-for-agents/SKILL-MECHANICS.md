@@ -13,6 +13,24 @@ Pick model-invocation only when the agent must reach the skill on its own, or an
 
 Shared reference that two user-invoked skills both need can live in neither — with no descriptions, neither can fire the other. Push it to a plain file outside the skill system: external reference any skill can point at.
 
+## Model tier
+
+Every skill declares `metadata.model-tier`, so a model-picking harness (the Claude Code `auto-model` mod, Pi's `pi-auto-model`) switches to the right model when the skill runs instead of guessing from the description:
+
+```yaml
+metadata:
+  model-tier: complex
+```
+
+Pick the tier from the hardest work the skill does, not from its length:
+
+- `trivial` — mechanical jobs: commit, branch, recap, reformat.
+- `moderate` — short writing or one contained task: a PR body, a ticket, a rewrite.
+- `complex` — building or changing software, debugging, research, planning, multi-file work. Also any skill driven by short replies (an interview): those replies keep the skill's model.
+- `frontier` — only work `complex` would fall short on: codebase-wide redesigns, very large migrations.
+
+Write one lowercase value. When unsure, choose `complex`.
+
 ## Splitting by invocation
 
 The invocation cut of splitting (the sequence cut lives in `SKILL.md`): split off a model-invoked skill when you have a distinct leading word that should trigger it on its own — a trigger word you actually use in your prompts — or another skill must reach it. You pay context load for the new always-loaded description, so that independent reach has to be worth it.

@@ -5,6 +5,8 @@ description: >-
   reviewing, or creating any *.go file. Go coding conventions and style
   guide covering naming, error handling, testing, HTTP handlers, caching,
   concurrency, and observability.
+metadata:
+  model-tier: complex
 ---
 
 > [!NOTE]

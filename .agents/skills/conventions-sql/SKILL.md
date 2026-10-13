@@ -4,6 +4,8 @@ description: >-
   MANDATORY for any work on SQL files (*.sql). Load this before editing or
   creating any *.sql file. SQL migration conventions covering simple DDL,
   idempotency, batching ALTER statements, comments, and formatting.
+metadata:
+  model-tier: complex
 ---
 
 > [!NOTE]

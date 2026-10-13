@@ -6,6 +6,8 @@ description: >-
   sources. Lead with the bottom line, then short key points and one relevant
   next action. Output in chat, not a file.
 argument-hint: "[session | file path | URL] [optional focus or format]"
+metadata:
+  model-tier: trivial
 ---
 
 # Summarize for ADHD

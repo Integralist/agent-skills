@@ -4,6 +4,8 @@ description: >-
   Generate Gherkin behavioural specifications and acceptance criteria.
   Use when defining user stories, executable BDD specifications, or
   acceptance criteria for a feature or plan.
+metadata:
+  model-tier: complex
 ---
 
 # Behaviour Spec

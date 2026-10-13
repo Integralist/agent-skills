@@ -7,6 +7,8 @@ description: >-
   should own it, or how the code could be reshaped. Produce focused Mermaid
   views of ownership, interactions, and the relevant call path; recommend a
   target shape only when code evidence supports it.
+metadata:
+  model-tier: complex
 ---
 
 # Code Module Review

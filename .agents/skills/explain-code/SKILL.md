@@ -8,6 +8,8 @@ description: >-
   not defect-finding, merge approval, or a stakeholder update. For PRs, offer
   an author-clarification comment, then draft and post only with separate
   user approvals.
+metadata:
+  model-tier: complex
 ---
 
 # Explain Code

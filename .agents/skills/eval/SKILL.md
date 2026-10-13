@@ -5,6 +5,8 @@ description: >-
   the result against the previous run.
 disable-model-invocation: true
 argument-hint: "[skill-name]"
+metadata:
+  model-tier: complex
 ---
 
 # Eval

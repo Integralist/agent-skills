@@ -4,6 +4,8 @@ description: >-
   Create a new Go API service with complete boilerplate, local
   development, and observability.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Go API Service

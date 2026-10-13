@@ -4,6 +4,8 @@ description: >-
   MANDATORY for any work on Mermaid files (*.mmd, *.mermaid) or Mermaid
   diagram blocks in Markdown. Load this before creating, editing, or
   validating Mermaid diagrams.
+metadata:
+  model-tier: moderate
 ---
 
 We write clean, readable Mermaid diagrams that communicate system structure

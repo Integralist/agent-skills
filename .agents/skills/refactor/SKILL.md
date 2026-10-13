@@ -6,6 +6,8 @@ description: >-
   "If we started over, what would we do differently?"
 disable-model-invocation: true
 argument-hint: <feature or area to refactor>
+metadata:
+  model-tier: complex
 ---
 
 # Refactor

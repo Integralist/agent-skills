@@ -4,6 +4,8 @@ description: >-
   Design and plan a feature from idea to actionable artifacts. Use when
   architecting a feature, exploring a design before planning, or coordinating
   research, spec, grill, and plan phases.
+metadata:
+  model-tier: complex
 ---
 
 # Architect

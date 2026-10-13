@@ -2,6 +2,8 @@
 name: arena
 description: Spawn parallel candidate attempts at a task and synthesize the strongest parts into a final artifact.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Arena

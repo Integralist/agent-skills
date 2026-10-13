@@ -4,6 +4,8 @@ description: >-
   Write unit and integration tests for Go services. Use when
   creating, editing, or updating tests, test helpers, mocks, fuzz
   tests, or benchmarks in Go projects.
+metadata:
+  model-tier: complex
 ---
 
 # Go Testing

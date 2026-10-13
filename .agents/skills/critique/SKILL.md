@@ -4,6 +4,8 @@ description: >-
   Critique a document for logical fallacies and weaknesses.
   Identifies issues and provides actionable fixes.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Critique

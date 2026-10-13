@@ -2,6 +2,8 @@
 name: jira
 description: Create, edit, assign, transition, search, and verify Jira issues via the Atlassian MCP server.
 disable-model-invocation: true
+metadata:
+  model-tier: moderate
 ---
 
 # Jira

@@ -5,6 +5,8 @@ description: >-
   or discussion. Use when recording an architectural decision with rejected
   alternatives.
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Read, Write
+metadata:
+  model-tier: complex
 ---
 
 # To ADR

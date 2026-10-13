@@ -4,6 +4,8 @@ description: >-
   Git-history diagnostic snapshot — churn hotspots, bus factor,
   bug clusters, commit velocity, and crisis patterns.
 disable-model-invocation: true
+metadata:
+  model-tier: trivial
 ---
 
 # Git Metadata

@@ -7,6 +7,8 @@ description: >-
   writing new documentation from scratch, or editing, or reviewing and rewriting
   existing documents for clarity and quality.
 argument-hint: --new <topic> | --improve <file>
+metadata:
+  model-tier: moderate
 ---
 
 # Technical Documentation

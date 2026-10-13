@@ -6,6 +6,8 @@ description: >-
   task, commit verified work, review the slice, then compile the next slice.
 disable-model-invocation: true
 argument-hint: "<plan-path>"
+metadata:
+  model-tier: complex
 ---
 
 # Execute Plan

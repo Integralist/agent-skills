@@ -4,6 +4,8 @@ description: >-
   MANDATORY for any work on Markdown files (*.md). Load this before
   editing or creating any *.md file. Markdown formatting, repository-link,
   and linting conventions.
+metadata:
+  model-tier: moderate
 ---
 
 We are peers writing Markdown. Prioritize readability, consistency, and

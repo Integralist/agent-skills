@@ -6,6 +6,8 @@ description: >-
   the request is simply to write or update the file; when the user wants to
   pin down domain terminology or a ubiquitous language, record an architectural
   decision; or when another skill needs to maintain the domain model.
+metadata:
+  model-tier: complex
 ---
 
 # Domain Modeling

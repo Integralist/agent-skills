@@ -6,6 +6,8 @@ description: >-
   ADHD-friendly reply or rewrite, or to use adhd-voice for all replies. For
   summarising a session, file, or URL, use summarize-for-adhd instead.
 argument-hint: "[--all | --off | text to rewrite]"
+metadata:
+  model-tier: trivial
 ---
 
 # ADHD Voice

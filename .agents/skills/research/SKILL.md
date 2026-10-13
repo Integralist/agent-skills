@@ -4,6 +4,8 @@ description: >-
   Research a topic, pattern, or codebase deeply and produce a reference
   document. Use when investigating a topic, exploring an external repository,
   or conducting architecture research.
+metadata:
+  model-tier: complex
 ---
 
 # Research

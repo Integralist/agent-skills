@@ -8,6 +8,8 @@ description: >-
   analysis of schema + query code; reports EXPLAIN follow-ups.
 disable-model-invocation: true
 argument-hint: '[path | --diff | --uncommitted]'
+metadata:
+  model-tier: complex
 ---
 
 # MySQL Index Audit

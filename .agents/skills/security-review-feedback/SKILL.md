@@ -4,6 +4,8 @@ description: >-
   Validate security review findings and vulnerability reports before fixing.
   Use when triaging security findings, vulnerability scanner output, or audit
   reports.
+metadata:
+  model-tier: complex
 ---
 
 # Security Review Reception

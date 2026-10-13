@@ -3,6 +3,8 @@ name: recap
 description: Recap the current session — what's done, in progress, and next.
 disable-model-invocation: true
 argument-hint: (optional) a specific thread or task to recap
+metadata:
+  model-tier: trivial
 ---
 
 Summarise the current session in chat. Do not write a file — for a

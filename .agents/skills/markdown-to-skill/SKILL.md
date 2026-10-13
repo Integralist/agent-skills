@@ -2,6 +2,8 @@
 name: markdown-to-skill
 description: Convert Markdown files from a directory into agent skills.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Markdown to Skill Converter
@@ -85,10 +87,15 @@ Skip conflicts unless the user confirms overwrite. For each file:
    ---
    name: <skill-name>
    description: <extracted-description>
+   metadata:
+     model-tier: <tier>
    ---
 
    <original content, minus old frontmatter>
    ```
+
+   Choose `<tier>` by the
+   [model tier rules](../writing-for-agents/SKILL-MECHANICS.md#model-tier).
 
 ### Parallel apply (optional)
 
@@ -154,6 +161,8 @@ This guide covers the steps to deploy our application to production.
 ---
 name: deployment-guide
 description: Deploying to Production - This guide covers the steps to deploy our application to production.
+metadata:
+  model-tier: moderate
 ---
 
 # Deploying to Production

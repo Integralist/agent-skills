@@ -8,6 +8,8 @@ description: >-
   would make a redesign unsafe. Produces a phased redesign plan
   with mandatory test-pinning before any structural change.
 disable-model-invocation: true
+metadata:
+  model-tier: frontier
 ---
 
 # Redesign

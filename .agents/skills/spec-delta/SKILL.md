@@ -4,6 +4,8 @@ description: >-
   MANDATORY before creating, editing, or deleting any file under docs/specs/.
   Records the change as a projects/<date>-<slug>/ spec with a Behavioural
   Delta. Use when a bug fix, refactor, or ad-hoc change touches a living spec.
+metadata:
+  model-tier: complex
 ---
 
 # Spec Delta

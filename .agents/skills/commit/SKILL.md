@@ -5,6 +5,8 @@ description: >-
   committing changes or drafting a commit message.
 argument-hint: '[force | --force]'
 allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
+metadata:
+  model-tier: trivial
 ---
 
 # Commit

@@ -4,6 +4,8 @@ description: >-
   Surface systemic patterns from an investigation as codified
   conventions, anti-patterns, or skill improvements.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Surface Durable Rules

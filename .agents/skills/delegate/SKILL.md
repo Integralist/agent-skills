@@ -3,6 +3,8 @@ name: delegate
 description: Spawn an appropriate subagent to handle a task.
 disable-model-invocation: true
 argument-hint: <task description>
+metadata:
+  model-tier: moderate
 ---
 
 # Delegate to Agent

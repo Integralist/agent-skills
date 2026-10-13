@@ -4,6 +4,8 @@ description: >-
   Continue working through a project plan. Finds the next
   actionable slice and implements every task in it.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Next Slice

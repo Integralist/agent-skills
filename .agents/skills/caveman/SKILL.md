@@ -4,6 +4,8 @@ description: >-
   Ultra-compressed communication mode. Cuts token usage ~75% by speaking like caveman
   while keeping full technical accuracy. Supports intensity levels: lite, full (default), ultra.
   Use when the user says "caveman mode", "talk like caveman", "use caveman", or invokes /caveman.
+metadata:
+  model-tier: trivial
 ---
 
 Respond terse like smart caveman. All technical substance stay. Only fluff die.

@@ -8,6 +8,8 @@ description: >-
   this incident", "write up what happened", "create a postmortem",
   or /incident-report. Captures what broke, when, customer impact,
   root cause, and mitigations/long-term fixes.
+metadata:
+  model-tier: complex
 ---
 
 # Incident Report

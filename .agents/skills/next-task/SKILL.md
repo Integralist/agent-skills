@@ -4,6 +4,8 @@ description: >-
   Continue working through a project plan. Finds the next
   unchecked task and begins implementation.
 disable-model-invocation: true
+metadata:
+  model-tier: complex
 ---
 
 # Next Task

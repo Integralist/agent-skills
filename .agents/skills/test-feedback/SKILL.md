@@ -6,6 +6,8 @@ description: >-
   interactively in the main thread. Use when the user shares
   test output or says "tests fail". Default output path is
   /tmp/output.
+metadata:
+  model-tier: complex
 ---
 
 # Test Feedback

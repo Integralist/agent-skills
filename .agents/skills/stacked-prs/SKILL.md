@@ -6,6 +6,8 @@ description: >-
   the user requests stacked PRs, a plan or task list declares PR layers,
   or work crosses a stack-layer boundary.
 allowed-tools: Bash(git branch:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(gh extension:*), Bash(gh stack:*), Bash(gh pr:*)
+metadata:
+  model-tier: moderate
 ---
 
 # Stacked Pull Requests

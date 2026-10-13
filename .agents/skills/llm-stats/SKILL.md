@@ -5,6 +5,8 @@ description: >-
   with effort-level lines and searchable model selection.
 disable-model-invocation: true
 argument-hint: "[--demo | --input <CSV/JSON> | --refresh] [--benchmark <key>] [--x cost|tokens|time|price|speed]"
+metadata:
+  model-tier: moderate
 ---
 
 # LLM stats

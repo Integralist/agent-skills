@@ -4,6 +4,8 @@ description: >-
   Establish AGENTS.md as the canonical project-instructions file and audit
   existing instructions for drift and learned lessons. Use when onboarding a
   project, auditing AGENTS.md, or updating agent instructions.
+metadata:
+  model-tier: complex
 ---
 
 # Agents-MD
