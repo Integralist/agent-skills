@@ -4,9 +4,9 @@ description: >-
   Code review using specialized subagents. Analyzes behavior and tests,
   security, reliability and performance, and maintainability. Use when
   reviewing a remote PR or local code, including unpushed/uncommitted changes.
-  Pass --plan or --plan=<path> to check the diff against an implementation plan
-  or task list.
-argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan[=<path>]]'
+  Automatically checks relevant specs, plans, and task lists. Pass
+  --plan=<path> to select a specific plan or task list.
+argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan=<path>]'
 ---
 
 # Code Review Skill
@@ -199,8 +199,8 @@ hand-offs in each subagent prompt.
      citations is an invention.
    - Hands off: whether errors are handled at all (Reliability).
 
-5. **Spec and Plan Adherence Review** *(when `--plan` is active or the diff
-   touches `projects/` or `docs/specs/`, and an intent document was located)*
+5. **Spec and Plan Adherence Review** *(when relevant intent documents were
+   located)*
    — *Does the change deliver what its specs and plan promise, and do those
    documents agree?* See "Spec and Plan Adherence" in `MODES.md`. The prompt
    must additionally include the intent document contents.

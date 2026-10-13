@@ -2,8 +2,8 @@
 
 Always load "Select The Source," the selected source section, "Large Diffs,"
 and "Empty Source." Local branch and all-local modes also load "Local Default
-Branch." Load "Spec and Plan Adherence" when `--plan` is passed or the diff
-touches `projects/` or `docs/specs/`.
+Branch." Always load "Spec and Plan Adherence" to resolve intent documents,
+including for code-only diffs.
 
 ## Select The Source
 
@@ -97,8 +97,8 @@ working tree for uncommitted, all-local, or explicit-path files.
 
 ## Spec and Plan Adherence
 
-Runs when `--plan[=<path>]` is passed, or automatically when the diff touches
-`projects/` or `docs/specs/`.
+Resolve intent documents for every review. Use `--plan=<path>` to select a
+specific plan or task list; otherwise discover relevant intent automatically.
 
 Repositories following the `spec-delta` workflow keep two kinds of spec:
 
@@ -115,11 +115,14 @@ Resolve intent documents in this order, adding every one found to
 2. Project files in the diff, including under `projects/completed/`. A project
    the diff adds or moves is this change's contract, not history.
 3. A PR body link under `projects/`, `docs/plans/`, or `docs/tasks/`
-4. With a bare `--plan` and nothing found above: the newest file matching
-   `projects/*/{plan,tasks,tasks-slice-*}.md` (or legacy `docs/plans/*.md` /
-   `docs/tasks/*.md`) by modification time, excluding `README.md`,
-   `projects/completed/`, `docs/plans/completed/`, and
-   `docs/tasks/completed/`
+
+For a found plan or task list, follow its plan/specification links and load
+its sibling `spec.md`, when present, even if unchanged. Resolve relative links
+from the containing document, using the same revision as the reviewed source.
+
+Inspect `docs/specs/` for contracts covering the changed capabilities, even
+when no intent document changed. Match named interfaces, workflows, or behavior;
+report uncertain applicability as an unknown instead of assuming a contract.
 
 Then add each living spec named in a found project spec's
 `## Living Specifications` section, and every `docs/specs/` file the diff
@@ -141,8 +144,8 @@ Its focus is:
   spec it names, and each behavioral edit to a `docs/specs/` file appears in a
   delta
 
-Report scope excess without judging it. If `--plan` was passed and no intent
-document is found, skip this reviewer and note that once in the summary.
+Report scope excess without judging it. If `--plan=<path>` was passed and no
+intent document is found, skip this reviewer and note that once in the summary.
 
 ## Empty Source
 

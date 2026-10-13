@@ -66,8 +66,8 @@ enforcement:
 - **Plan drift:** ...
 ````
 
-If `--plan` was passed and no intent document was located, state "Plan
-adherence: none located, skipped" once.
+If `--plan=<path>` was passed and no intent document was located, state
+"Plan adherence: none located, skipped" once.
 
 When actionable findings exist, offer to address them. Otherwise, end with the
 assessment and open questions.
