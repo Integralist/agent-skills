@@ -43,6 +43,21 @@ contradict a decision already made. Inspect `docs/specs/` for an existing living
 spec covering the capability; if present, read it as current truth. If absent,
 the codebase is current truth and this project will seed the living spec.
 
+### Read-only current-state discovery
+
+When existing research leaves material behavior or contract questions across
+modules, use one read-only investigator under
+[the shared policy](../shared/SUBAGENT-STEERABILITY.md).
+Supply the confirmed feature scope, revision, relevant instructions, code,
+tests, living specs, and ADR paths. Reuse settled research; do not rescan it.
+Grant only verified read-only tools; no edits, test execution, or remote writes.
+Require `COMPLETE` / `INCOMPLETE`, observed behavior, existing test boundaries,
+contract conflicts, unknowns, and path:line evidence. Budget 40 turns; apply
+shared completion/retry. Verify material findings yourself; keep scope,
+acceptance criteria, seam selection/user confirmation, and all spec writes in
+the main thread. Keep small lookups inline; if delegation is unavailable,
+report it and investigate inline.
+
 ## Identify testing seams
 
 Map where the feature's behaviour will be exercised by tests. A **seam** is a

@@ -166,6 +166,20 @@ transcript decided it. Mark `fail` whenever the evidence for a pass is
 absent — ambiguous is fail, and a check too vague to decide is itself the
 finding.
 
+For multiple cases or a substantial transcript, use fresh read-only graders
+under [the shared policy](../shared/SUBAGENT-STEERABILITY.md).
+Assign independent case batches only after their transcripts are complete;
+provide case IDs, fixed checks, and transcript paths, not executor self-grades.
+Grant only verified read-only tools; no case execution, edits, check changes,
+or cleanup. Require `COMPLETE` / `INCOMPLETE` and every assigned check's
+pass/fail with a transcript location and supporting evidence. Budget 30 turns
+per batch; apply shared completion/retry. Missing or ambiguous evidence stays
+`fail`; an incomplete grader is not a completed grading pass. Verify cited
+claims and resolve gaps/disagreements in the main thread, which owns regression
+comparison, reporting, and cleanup. Preserve transcripts until grading is
+complete. Keep short single-case grading inline; if delegation is unavailable,
+report it and grade inline.
+
 Done when every check of every case carries a verdict and a reason.
 
 ## Report

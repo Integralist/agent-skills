@@ -72,6 +72,20 @@ preceding the sink. Vulnerable-looking code is often guarded upstream. Verify
 claimed guards (auth middleware, a "behind requireAdmin" comment) against the
 actual registration — don't trust the claim.
 
+### Read-only trace checks
+
+For a clarified multi-module finding, or several independent finding clusters,
+use read-only investigators under
+[the shared subagent policy](../shared/SUBAGENT-STEERABILITY.md).
+Supply each worker the claim, threat model, revision, scoped paths, and relevant
+instructions. Assign separate clusters; keep straightforward checks inline.
+Grant only verified read-only tools: no edits, test execution, or remote writes.
+Require `COMPLETE` / `INCOMPLETE`, checked paths, source-to-sink and guard
+citations, counterevidence, and unknowns. Budget 40 turns; apply the shared
+completion/retry protocol. Verify critical evidence yourself; keep final
+verdicts, severity, exploit-chain synthesis, user discussion, and fixes in the
+main thread. If suitable delegation is unavailable, report it and trace inline.
+
 ### 4. Run the gate reviews
 
 A finding is a `TRUE POSITIVE` only if it passes **every applicable** gate. The

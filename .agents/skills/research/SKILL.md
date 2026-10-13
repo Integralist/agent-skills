@@ -226,6 +226,22 @@ implementations or prior art. Also search organizational knowledge
 sources — Confluence, Google Drive, and Slack — per "Search
 organizational knowledge sources" above.
 
+### Read-only topic investigators
+
+When a topic contains substantial independent questions, dispatch up to three
+read-only investigators under
+[the shared policy](../shared/SUBAGENT-STEERABILITY.md).
+Give each a distinct question, scope, relevant instructions, source paths or
+excerpts, and citation requirements. Verify source/tool access; do not assume
+children inherit conversation, skills, credentials, or MCP access. Acquire
+unavailable external sources in the main thread and supply relevant excerpts.
+Grant only verified read-only tools; no file writes or external changes.
+Require `COMPLETE` / `INCOMPLETE`, cited findings, conflicting evidence,
+unknowns, and sources checked. Budget 40 turns per worker; apply shared
+completion/retry. Reconcile findings and verify material claims in the main
+thread, which owns synthesis and document writes. Keep quick lookups inline;
+if suitable delegation is unavailable, report it and research inline.
+
 ### Output
 
 Write to `projects/<project>/research.md` when project scope is active;

@@ -111,6 +111,18 @@ clearly says why they could not be identified.
    If you cannot confirm them, skip the test and report why. Passing tests do
    not establish that a change is safe.
 
+   When the strongest candidate depends on cross-module callers or safeguards,
+   use one independent read-only subagent to try to refute that exact path.
+   Follow [the shared policy](../shared/SUBAGENT-STEERABILITY.md); supply the
+   resolved revision/diff, candidate chain, scoped paths, and known evidence.
+   Grant only verified read-only tools; no tests, edits, or remote writes.
+   Require `COMPLETE` / `INCOMPLETE`, inspected paths, cited safeguards and
+   counterevidence, and unknowns. Budget 40 turns; apply the shared
+   completion/retry protocol.
+   Verify decisive evidence yourself and keep the verdict/report in the main
+   thread. Keep small checks inline; if delegation is unavailable, report it
+   and perform the same disproof yourself. Do not widen into a general review.
+
 5. Separate verified facts from assumptions. Cite repository evidence as
    `path/to/file.ext:line`; cite the PR or test evidence when relevant. If
    missing context prevents a sound conclusion, state the specific unknown
