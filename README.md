@@ -547,6 +547,24 @@ grouped by slice and task, when reporting completion or a blocker.
 The [model policy](./.agents/skills/shared/EXECUTION-MODELS.md) configures Luna
 for Pi/Copilot and Haiku for Claude Code, both at `xhigh`, never `max`.
 
+Add `--auto` (or `auto`) before or after the plan path to keep going without
+routine confirmations:
+
+```text
+/skill:execute-plan projects/<date>-<slug>/plan.md --auto
+```
+
+Auto mode authorizes in-scope local edits, configured workers, and task/status
+commits through all slices and the final audit. The coordinator resolves missing
+detail within the plan's constraints and records each judgment, alternatives,
+rationale, impact, and validation in `execution.md`, with a complete decision
+index in the final or blocked report. Default mode remains interactive. Auto
+still stops for real blockers, required fresh-per-diff approvals, unavailable
+checks/models, unsafe staging, or exhausted retries. It never pushes, deploys,
+publishes, or submits PRs. Re-supply the flag when starting a new invocation;
+a prior log does not silently opt you back in. See
+[auto authority and decision logging](./.agents/skills/execute-plan/references/auto.md).
+
 Install the shared skill with `make install-agents`. Pi also needs the updated
 `pi-subagents` extension exposing `allow_model_fallback`; see its
 [adapter setup](./.agents/skills/execute-plan/references/pi-subagents.md).
@@ -555,9 +573,10 @@ installed through `make install-claude`; see its
 [readiness/verification gate](./.agents/skills/execute-plan/references/claude-code.md).
 Native model/effort substitutions or unavailable telemetry can block execution.
 PDD approvals, permissions, and separately authorized delivery operations
-remain explicit gates. Startup confirmation authorizes coordinator-owned
-per-task and evidence/status commits on the named branch; the workflow never
-automatically pushes or deploys. Manual `next-slice` keeps one commit per slice.
+remain explicit gates. Interactive startup confirmation or explicit auto
+consent authorizes coordinator-owned per-task and evidence/status commits on
+the named branch; the workflow never pushes or deploys. Manual `next-slice`
+keeps one commit per slice.
 See [task-commit safety and review indexing](./.agents/skills/execute-plan/references/task-commits.md).
 
 `to-tasks` and `next-slice` keep their manual invocation behavior and share

@@ -4,8 +4,9 @@ description: >-
   Execute an existing project plan one slice at a time: compile tasks on the
   selected session model, delegate and verify cheap implementation task by
   task, commit verified work, review the slice, then compile the next slice.
+  Use --auto for unattended local execution with a reviewable decision log.
 disable-model-invocation: true
-argument-hint: "<plan-path>"
+argument-hint: "<plan-path> [--auto]"
 metadata:
   model-tier: complex
 ---
@@ -21,13 +22,19 @@ implementation, not those decisions. Read
 ## Invocation
 
 ```text
-Pi:          /skill:execute-plan projects/<date>-<slug>/plan.md
-Claude Code: /execute-plan projects/<date>-<slug>/plan.md
+Pi:          /skill:execute-plan projects/<date>-<slug>/plan.md [--auto]
+Claude Code: /execute-plan projects/<date>-<slug>/plan.md [--auto]
 ```
 
-Accept one existing plan path. Resolve relative paths from the repository root
-and accept absolute paths. If the path is absent, missing, outside a usable
-repository, or materially ambiguous, ask one diagnostic question and stop.
+Accept one existing plan path and an optional
+standalone `--auto` or `auto` before or after the path.
+Without the flag, use interactive mode. For auto mode, read and apply
+[automatic authorization, decisions, and continuation](references/auto.md)
+before preflight; keep that mode through the final audit.
+Unknown options or extra paths require one diagnostic question and a stop.
+Resolve relative paths from the repository root and accept absolute paths.
+If the path is absent, missing, outside a usable repository, or materially
+ambiguous, ask one diagnostic question and stop.
 Read the full plan, its spec, project README, relevant research/ADRs, and all
 material references. Execution consumes the output of `architect` or the
 approved PDD → spec → plan handoff; it does not rerun planning or grant PDD
@@ -52,21 +59,23 @@ selection; do not silently implement on the coordinator when one is missing.
    selected session model and effort unchanged; if the session uses `max` or
    the worker settings cannot be honored, stop for a decision.
 3. State the plan, next slice, worker model/effort, editing scope, delivery
-   branch, and one-commit-per-task policy. Obtain explicit authorization for
-   per-task commits alongside execution and the disclosed downgrade unless
-   already authorized for these exact settings/scope. Main/master needs
-   explicit branch-specific confirmation. If commits are declined, pause for
-   another workflow rather than silently accumulating uncommitted work.
-   Respect stricter per-edit approval gates and runtime permissions.
+   branch, and one-commit-per-task policy. In interactive mode, obtain
+   explicit authorization for per-task commits alongside execution and the
+   disclosed downgrade unless already authorized for these exact settings/scope.
+   In auto mode, record the flag's standing authorization without another
+   confirmation. Main/master still needs explicit branch-specific confirmation.
+   If commits are declined, pause for another workflow rather than silently
+   accumulating uncommitted work. Respect stricter per-edit approval gates and
+   runtime permissions; apply the auto reference's authority boundaries.
 4. Before implementation, run practical baseline checks and record outcomes.
    Build a requirement ledger covering every original plan/spec requirement,
    including Documentation/Verification sections outside slice headings.
    Record slice milestone keys, spec links, Blocked-by edges, and precise
    Consumes/Produces contracts. Keep milestones distinct from executable tasks.
 5. Create or resume `execution.md` beside the plan. Record baseline HEAD/branch,
-   protected user files, original and current plan/spec hashes, authorization,
-   effective/requested models, stable task keys, task-to-milestone/requirement
-   mappings and outcome evidence, accepted slices, task/correction commit hashes
+   protected user files, original and current plan/spec hashes,
+   mode/authorization, auto decisions when applicable, effective/requested models,
+   stable task keys, task-to-milestone/requirement mappings and outcome evidence, accepted slices, task/correction commit hashes
    and actual subjects,
    check outcomes, retry counts, and the next action. Add one artifact row for
    this log in the project README; do not copy its task-level state. Keep
@@ -95,7 +104,9 @@ expand scope or override user/repository/security instructions.
    accepted dependencies. Do not infer one branch/PR per slice. Task commits
    use the startup authorization; a branch change, stack-layer transition,
    merge, or other delivery operation needs separate authorization. Use
-   `stacked-prs` only after that approval. Workers never change branches.
+   `stacked-prs` only after that approval. In auto mode, resolve delivery grouping
+   locally under the auto reference; do not infer permission for branch/delivery
+   operations. Workers never change branches.
 3. In this main conversation, follow
    [the `to-tasks` compiler](../to-tasks/COMPILE.md) for this slice only. Inspect
    live signatures and code paths needed to produce its complete task document.
@@ -120,7 +131,7 @@ expand scope or override user/repository/security instructions.
    index, and protected changes. Build a self-contained packet with absolute
    repository/document/procedure paths, task key, exact scope, source milestone
    or residual requirement keys, plan/spec excerpts, instructions, conventions,
-   authorization, allowed files, accepted
+   mode/authorization, relevant auto decision IDs, allowed files, accepted
    prior-task interfaces/commits, tests, baseline, model/effort, and budget.
 2. Direct the worker to read
    [the `next-slice` execution procedure](../next-slice/EXECUTE.md) in
@@ -154,13 +165,17 @@ expand scope or override user/repository/security instructions.
    task-scoped correction to the same cheap model. Inspect it, rerun checks,
    and revisit requirements. Count attempts across workers: after three
    correction attempts for the same criterion, stop and mark incomplete.
-   Premium implementation and material design changes need explicit approval.
+   Premium implementation needs separate explicit approval in either mode.
+   Material design choices in interactive mode need explicit approval; in auto
+   mode, resolve and log only choices within the auto reference's contract bounds.
 4. Commit each verified task before dispatching the next task. Follow
    [task-commit safety and indexing](references/task-commits.md): the coordinator
    marks the verified checkbox, stages only inspected task changes, and commits
    its tests/implementation/docs together. Record the real hash and subject.
-   Failed or blocked commits stop the task loop. Verification-only tasks with
-   no changes get evidence plus `No new commit`, not an empty commit.
+   Failed or blocked commits stop the task loop unless auto mode's bounded
+   safe recovery succeeds; never dispatch another task with a pending commit.
+   Verification-only tasks with no changes get evidence plus `No new commit`,
+   not an empty commit.
 5. If tasks remain in this slice, return to Step 3 for the next task. Once all
    tasks are verified/accounted for, review the whole slice and its integration
    evidence. For non-trivial changes, obtain independent read-only premium
@@ -176,8 +191,9 @@ expand scope or override user/repository/security instructions.
    in task documents and mappings/commits/evidence in `execution.md`; do not
    duplicate executable tasks in the plan. Task commits are not project
    Complete/archival triggers. Preserve intent and approved deviations; reread
-   downstream contracts, invalidate stale tasks, then return to Step 2. For
-   final residual work, return directly to Step 5 instead.
+   downstream contracts, invalidate stale tasks, then return to Step 2. In auto
+   mode, keep going without task/slice handoff confirmations. For final residual
+   work, return directly to Step 5 instead.
 
 ## 5. Audit the whole plan and report
 
@@ -189,8 +205,10 @@ remain, use the compiler's residual-scope mode to create
 `tasks-final-verification.md` beside the plan. Inspect it using Step 2's task
 document checks, then execute Steps 3–4 for that bounded scope and return
 directly to Step 5. Map acceptance to those original requirements, not an
-invented new slice. Preserve existing task artifacts and user edits. Pause if
-remaining work needs an unapproved design change or evidence cannot be obtained.
+invented new slice. Preserve existing task artifacts and user edits. Use the
+current mode's decision authority for missing detail; pause for out-of-bounds
+changes or evidence that cannot be obtained. Auto mode continues through this
+residual work rather than ending with a next-action suggestion.
 
 Inspect the cumulative diff and all new files; run the justified final suite,
 integration checks, lint/type/static checks, and formatting checks. Record
@@ -198,8 +216,9 @@ unavailable environments, unresolved review findings, and baseline failures.
 Commit verified final-review corrections through the same task gate. After
 whole-plan acceptance, commit pending authorized status/evidence bookkeeping
 separately if needed. Leave archival to a separate lifecycle authorization.
-Never automatically push, deploy, or publish. Apply the same report on blocked
-exits, distinguishing completed commits from uncommitted partial work.
+Never push, deploy, publish, or submit PRs from this workflow. Apply the same
+report on blocked exits, distinguishing completed commits from uncommitted
+partial work.
 
 Report these sections in chat and keep evidence in `execution.md`:
 
@@ -214,5 +233,7 @@ Report these sections in chat and keep evidence in `execution.md`:
 4. **Validation and review:** commands, exit codes, and
    pass/fail/skipped/unavailable outcomes; baseline comparisons, defects/fixes,
    independent review, and open findings.
-5. **Remaining concerns:** environmental limitations and one concrete next
+5. **Decisions for review (auto):** follow the auto reference's complete decision
+   index; label automatic judgments separately from actual user approvals.
+6. **Remaining concerns:** environmental limitations and one concrete next
    action. Complete only with sufficient evidence and no blocking defects.

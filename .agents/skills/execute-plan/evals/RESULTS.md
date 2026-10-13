@@ -1,18 +1,23 @@
 # Execute Plan Validation
 
-- **Date:** 2026-10-12
+- **Date:** 2026-10-13
 - **Scope:** source wiring, model policy, and read-only workflow simulations
-- **Simulation model:** requested `github-copilot/gpt-6.1-sol`, `xhigh`
-- **Grading model:** requested `github-copilot/gpt-6-luna`, `xhigh`
+- **Original simulation model:** requested `github-copilot/gpt-6.1-sol`, `xhigh`
+- **Grading and auto simulation model:** requested `github-copilot/gpt-6-luna`,
+  `xhigh`
 
 ## Checks
 
-`make check-execute-plan` passes fourteen checks covering invocation, shared
+`make check-execute-plan` passes nineteen checks covering invocation, shared
 procedures, manual high-level-plan execution, Claude readiness/authorization,
 model drift, review/resume gates, residual routing, task commit safety, Git
 review-index commands, milestone/task separation and mapping, legacy resume,
-and nested-example-aware file/heading links. The task-commit
-requirements failed assertions before implementation. The initial skill stub,
+and nested-example-aware file/heading links. Five auto-mode checks cover
+explicit aliases/default mode, bounded standing authority, durable decision
+records, continuation/blockers/retries, and compiler/worker/adapter handoffs.
+Their assertions failed against the original instructions and auto-reference
+stub before implementation; mutations also detect removed safeguards.
+The task-commit requirements failed assertions before implementation. The initial skill stub,
 broken moved heading link, and manual-mode regression were also reproduced
 before correction. Source-contract checks do not prove an LLM follows every
 instruction.
@@ -93,6 +98,51 @@ reference was not copied; no BDD scaffold or execution depended on it. These
 results establish declared-outcome decisions, not live generated task-table
 consistency, provider/model enforcement, real execution, or statistical
 improvement. Timing, token usage, and realized cost were not measured.
+
+## Auto-mode simulations
+
+Three updated-workflow simulations and three pre-edit comparisons covered full
+local continuation with decisions and safe commit-message recovery, blocked
+user staging/unavailable boundary evidence, and new-invocation/per-diff consent.
+Independent read-only grading produced these declared-outcome results:
+
+| Case | With auto instructions | Pre-edit workflow |
+| --- | --- | --- |
+| Full plan, decision ledger, commit retry, residual docs | 3/3 | 0/3 |
+| Unsafe user staging and unavailable required evidence | 3/3 | 3/3 |
+| Explicit resume mode and fresh-per-diff authority | 3/3 | 2/3 |
+| Total | 9/9 | 5/9 |
+
+The snapshot comes from the verified pre-edit revision
+`f3b6b410eee1faac9cab4afaf25e3d37e93ab49b`, including the original compiler,
+executor, model policy, and commit procedure. The first continuation prompt
+exposed only the chat decision index; it was revised to request simulated
+`execution.md` entries too, then rerun for both versions. The pre-edit simulator
+initially used `INCOMPLETE` for its policy-blocked plan; a same-model retry at
+60 rather than 30 turns clarified simulation status without granting missing
+consent. No turn-limit exhaustion was reported.
+
+The current continuation trace includes every task commit, slice acceptance,
+residual documentation, final audit, and bookkeeping. Its D001–D003 entries
+include alternatives, rationale, impact, validation, and a complete review
+index without claiming user approval. It retries the rejected commit message
+once before dispatching Task 2, preserving hooks and fixed contracts. Both
+versions preserve user work and required evidence in the blocker scenarios;
+those strongly cued assertions do not demonstrate comparative improvement.
+
+These are single-run, declared-outcome simulations, not live plan execution or
+proof of durable file writes, actual staging/hooks, model telemetry, or provider
+behavior. Simulator results and source-contract checks are complementary, not
+runtime guarantees. Timing, token counts, realized cost, and detailed stop
+reasons were not supplied; no performance or statistical claim is made. Outputs,
+grades, snapshots, and the review viewer remain in private temporary storage.
+
+A separate read-only source audit found no material contradiction across the
+coordinator, auto policy, compiler/template, executor, adapters, model policy,
+commit guidance, and README. Required fresh-per-diff approvals remain blockers;
+`--auto` only supplies standing consent where applicable instructions accept it.
+Scoped workflow Markdown lint and woke pass; README retains its pre-existing
+MD028 warning at line 12. `make check-specs` and `git diff --check` pass.
 
 ## Review and limits
 

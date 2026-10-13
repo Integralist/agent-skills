@@ -26,6 +26,12 @@ Honor higher-priority repository rules. A coordinated packet does not bypass
 permissions, PDD approvals, or a repository's per-edit approval requirement.
 When those require a new decision, a coordinated subagent returns it to the
 coordinator; manual execution asks the user in the main conversation.
+A coordinated `mode: auto` packet carries the coordinator's recorded standing
+authorization and decision IDs from
+[the auto policy](../execute-plan/references/auto.md).
+Do not ask again for authority that packet already supplies. Return new
+ambiguity to the coordinator rather than making a worker-side design choice;
+auto does not bypass a fresh-per-diff approval rule or runtime permissions.
 
 ### Manual plan input
 
@@ -63,8 +69,10 @@ Manual mode continues through the whole selected slice.
    task's verification. The test is the contract: correct implementation, not
    the test or its assertions. Stop after three failed correction attempts for
    the same criterion and report the unverified assumption. Material changes
-   to the plan's design need user approval; coordinated workers make no design
-   decisions.
+   to the plan's design need user approval in manual/interactive mode;
+   coordinated workers make no design decisions. An auto coordinator can resolve
+   only the choices permitted by its policy and must supply the recorded choice
+   in a refreshed packet before work resumes.
 4. Update behavior/API/usage documentation required by the tasks. Respect the
    repository's module boundaries; apply handlers → service → repository only
    where that is its established architecture. Seed or modify living specs

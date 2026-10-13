@@ -6,11 +6,13 @@ Manual `next-slice` keeps its one-commit-per-slice completion flow.
 
 ## Authorization and boundaries
 
-Obtain explicit authorization for per-task commits on the named delivery
-branch at startup, alongside execution/model authorization. Pause if it is
-missing or declined; do not silently continue with uncommitted implementation.
-A main/master branch requires explicit branch-specific confirmation. The
-workflow does not authorize pushing, rebasing, resetting, or changing branches.
+In interactive mode, obtain explicit authorization for per-task commits on the
+named delivery branch at startup, alongside execution/model authorization.
+For `--auto`, record [the flag's standing local authority](auto.md) instead of
+requesting repeat consent. Pause if required authority is missing or declined;
+do not silently continue with uncommitted implementation. A main/master branch
+requires explicit branch-specific confirmation in either mode. The workflow
+does not authorize pushing, rebasing, resetting, or changing branches.
 
 Before each task, record HEAD, branch, index, working-tree state, and protected
 user changes. Assign a stable task key from the repository-relative plan path,
@@ -61,6 +63,8 @@ stash, reset, or commit unrelated work to clear the problem.
    post-commit hash update can remain pending until the next task/bookkeeping
    commit; never create an endless sequence of commits recording their own
    hashes. On commit failure, retain edits and stop before the next task.
+   In auto mode, follow the auto policy's safe recovery and retry the commit once;
+   success reopens the task loop, not a bypass of the pending-commit gate.
    A verified-but-uncommitted task remains pending; after resolving the commit
    issue, retry its commit before another task, not its implementation.
    Review hook changes and rerun affected checks; do not bypass hooks.
@@ -105,4 +109,5 @@ After whole-plan acceptance, commit remaining authorized status/evidence
 bookkeeping separately if needed and include it in the report. Leave project
 archival to a separately authorized lifecycle operation. Report the index on
 incomplete/blocked exits too, clearly distinguishing verified task commits from
-uncommitted partial work. Push only with separate explicit authorization.
+uncommitted partial work. Never push from this workflow; any separately
+requested delivery operation belongs outside this execution invocation.

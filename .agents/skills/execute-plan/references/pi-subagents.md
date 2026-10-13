@@ -42,6 +42,8 @@ is below; take the model from the policy, not a fuzzy family query:
 
 Combine it with `name`, `system_prompt`, `prompt`, and `description`. Include
 the self-contained packet, exact task key/scope, and execution-procedure path.
+For auto execution, carry `mode: auto`, recorded standing authorization, and
+relevant decision IDs; this changes no model, fallback, or permission gate.
 Launch for one task or bounded correction, not the entire slice; use a fresh
 packet for each next task because terminal resumption is not a tool here.
 Workers leave checkboxes/staging/commits to the premium coordinator, which

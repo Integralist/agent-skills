@@ -21,6 +21,7 @@ const compilerPath = ".agents/skills/to-tasks/COMPILE.md";
 const executorPath = ".agents/skills/next-slice/EXECUTE.md";
 const agentPath = ".claude/agents/plan-executor.md";
 const commitsPath = ".agents/skills/execute-plan/references/task-commits.md";
+const autoPath = ".agents/skills/execute-plan/references/auto.md";
 const planPath = ".agents/skills/to-plan/SKILL.md";
 const templatePath = ".agents/skills/to-tasks/TEMPLATE.md";
 
@@ -33,6 +34,91 @@ test("explicit invocation leaves the selected parent model in control", () => {
   assert.match(content, /\/skill:execute-plan/);
   assert.match(content, /selected session model/);
   assert.match(content, /relative paths from the repository root/);
+});
+
+function assertAutoInvocation(content) {
+  assert.match(content, /^argument-hint: "<plan-path> \[--auto\]"$/m);
+  assert.match(content, /standalone `--auto` or `auto` before or after the path/);
+  assert.match(content, /Without the flag, use interactive mode/);
+  assert.match(content, /references\/auto\.md/);
+  assert.match(content, /Unknown options or extra paths/);
+}
+
+test("auto is explicit, supports both aliases, and leaves interactive mode as default", () => {
+  const content = read(skillPath);
+  assertAutoInvocation(content);
+  for (const [before, after] of [
+    ["standalone `--auto` or `auto` before or after the path", "infer auto from the plan"],
+    ["Without the flag, use interactive mode", "Without the flag, use auto mode"],
+  ]) assert.throws(() => assertAutoInvocation(content.replace(before, after)));
+});
+
+function assertAutoAuthority(content) {
+  assert.match(content, /explicit standing authorization/);
+  assert.match(content, /configured worker model\/effort/);
+  assert.match(content, /per-task and bookkeeping commits on the recorded branch/);
+  assert.match(content, /fresh approval for each diff/);
+  assert.match(content, /Never push, deploy, publish, or submit PRs/);
+  assert.match(content, /Never amend, squash, rebase, reset, stash, or discard user work/);
+  assert.match(content, /main\/master.*branch-specific authorization/);
+  assert.match(content, /Do not inherit auto mode from `execution\.md`/);
+}
+
+test("auto grants local workflow authority without bypassing safety or resume consent", () => {
+  const content = read(autoPath).replace(/\s+/g, " ");
+  assertAutoAuthority(content);
+  assert.throws(() => assertAutoAuthority(content.replace("Never push, deploy, publish, or submit PRs", "Push on completion")));
+  assert.throws(() => assertAutoAuthority(content.replace("fresh approval for each diff", "no approval rules")));
+  assert.throws(() => assertAutoAuthority(content.replace("Do not inherit auto mode from `execution.md`", "Inherit auto mode")));
+});
+
+function assertDecisionLog(content) {
+  assert.match(content, /## Decisions/);
+  assert.match(content, /`D001`, `D002`/);
+  for (const field of ["Uncertainty", "Options", "Choice and rationale", "Impact", "Validation", "Status"])
+    assert.ok(content.includes(`**${field}:**`), `missing decision field: ${field}`);
+  assert.match(content, /before acting/);
+  assert.match(content, /append a superseding entry/);
+  assert.match(content, /every decision ID/);
+  assert.match(content, /not user-approved/);
+}
+
+test("automatic judgments are durable, reviewable, and not mislabelled as user approval", () => {
+  const content = read(autoPath).replace(/\s+/g, " ");
+  assertDecisionLog(content);
+  assert.throws(() => assertDecisionLog(content.replace("**Options:**", "**Notes:**")));
+  assert.throws(() => assertDecisionLog(content.replace("before acting", "at the end")));
+  assert.throws(() => assertDecisionLog(content.replace("append a superseding entry", "overwrite history")));
+  assert.match(read(skillPath), /Decisions for review/);
+});
+
+function assertAutoLoop(content) {
+  assert.match(content, /Do not end a turn with a next-task suggestion/);
+  assert.match(content, /original-plan\/spec audit/);
+  assert.match(content, /residual verification\/documentation tasks/);
+  assert.match(content, /configured worker becomes unavailable/);
+  assert.match(content, /required evidence is unavailable/);
+  assert.match(content, /three corrections for one criterion/);
+  assert.match(content, /retry the commit once/);
+  assert.match(content, /Preserve explicit requirements, acceptance criteria, exact interfaces/);
+  assert.match(content, /independent tasks or slices/);
+}
+
+test("auto continues through final residual work but cannot invent acceptance or evade retry limits", () => {
+  const content = read(autoPath).replace(/\s+/g, " ");
+  assertAutoLoop(content);
+  assert.throws(() => assertAutoLoop(content.replace("required evidence is unavailable", "treat unavailable evidence as passing")));
+  assert.throws(() => assertAutoLoop(content.replace("three corrections for one criterion", "unlimited corrections")));
+  assert.throws(() => assertAutoLoop(content.replace("Preserve explicit requirements, acceptance criteria, exact interfaces", "Relax the contract")));
+});
+
+test("compiler, executor, adapters and commits carry auto authority without changing manual workflows", () => {
+  for (const relative of [compilerPath, executorPath, commitsPath, piPath, claudePath])
+    assert.match(read(relative), /auto/, `${relative}: missing auto handoff`);
+  assert.match(read(compilerPath), /coordinator.*auto/s);
+  assert.match(read(executorPath), /decision IDs/);
+  assert.match(read(commitsPath), /retry.*once/s);
+  assert.match(read("README.md"), /--auto/);
 });
 
 test("manual commands and coordinator share one compiler and executor", () => {
@@ -269,7 +355,7 @@ test("reference checking ignores nested examples but keeps real instruction link
 });
 
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, planPath, templatePath]) {
+  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, templatePath]) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {

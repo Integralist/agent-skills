@@ -40,7 +40,9 @@ conversation fork that necessarily inherits the main model.
    user to verify the row or report `BLOCKED` rather than claiming certainty.
 3. Only after the cheap model and `xhigh` are verified, resume the same agent
    via `SendMessage` using its ID with the `stage: execute` packet and recorded
-   user authorization. The agent reads the plain
+   user authorization. In auto mode, use the recorded flag authority and
+   decision IDs; no repeat execution confirmation is needed. Keep readiness,
+   runtime verification, and permission gates intact. The agent reads the plain
    [slice execution procedure](../../next-slice/EXECUTE.md), not a preloaded
    user-only `next-slice` skill. Assign one task key/scope from the document.
    It implements only that task and returns evidence without updating

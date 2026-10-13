@@ -90,7 +90,10 @@ If one task spans different declared delivery units, resolve the boundary
 before execution rather than choosing a branch by guess. Otherwise assess
 the tasks directly. When the guide recommends a stack,
 show the proposed task-to-layer grouping and wait for the user to accept,
-change, or decline it before writing the document.
+change, or decline it before writing the document in manual/interactive mode.
+For a coordinated `execute-plan` auto invocation, the coordinator resolves and
+records grouping under [its auto policy](../execute-plan/references/auto.md)
+before compiling; this does not authorize branch changes or stack submission.
 
 Absence of a project plan or delivery mapping never implies a single PR. A
 stack layer may contain any number of related tasks.
