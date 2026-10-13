@@ -156,6 +156,7 @@
 
     <h2>Over time</h2>
     <section class="grid">
+      <div class="card wide"><h3>Cost per month</h3><p>Costs within the selected period, grouped by calendar month. Partial months are not projected to a full month; months with no spend show zero. Always shows USD, even in Tokens mode.</p><div class="chart"><canvas id="c-monthly-cost"></canvas></div></div>
       <div class="card wide"><h3 id="timeline-title">Daily usage by provider</h3><p>Stacked by model provider.</p><div class="chart"><canvas id="c-timeline"></canvas></div></div>
       <div class="card"><h3>Running total</h3><p>Cumulative across the period.</p><div class="chart"><canvas id="c-cumulative"></canvas></div></div>
       <div class="card"><h3>Weekdays</h3><p>Total by day of the week.</p><div class="chart"><canvas id="c-weekday"></canvas></div></div>
@@ -450,6 +451,11 @@ function render() {
   const providers = sortedDesc(sumBy(rows, r => r.provider)).map(([p]) => p);
   stackedBar('c-harness-provider', { categories: harnesses, catKey: r => r.harness, series: providers, seriesKey: r => r.provider, kind: 'provider', horizontal: true });
 
+  const monthlyCosts = REPORT.monthly.map(({ month, cost }) => [
+    new Date(`${month}-01T12:00:00`).toLocaleDateString('en', { month: 'short', year: 'numeric' }), cost,
+  ]);
+  simpleBar('c-monthly-cost', monthlyCosts, { horizontal: false, format: v => `$${Number(v).toFixed(2)}` });
+
   const hourly = REPORT.period === 'day';
   const days = dateRange();
   const weekly = !hourly && days.length > 90;
@@ -543,7 +549,7 @@ function dateRange() {
   return out;
 }
 
-const PERIOD_LABEL = { day: 'Today', week: 'Last 7 days', month: 'Last 30 days', all: 'All time' };
+const PERIOD_LABEL = { day: 'Today', week: 'Last 7 days', month: 'This month', year: 'Last 12 months', all: 'All time' };
 document.getElementById('title').textContent = `AI model usage · ${PERIOD_LABEL[REPORT.period]}`;
 const dates = [...new Set(rows.map(r => r.date))].sort();
 document.getElementById('subtitle').textContent = dates.length

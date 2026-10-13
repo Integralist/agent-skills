@@ -40,7 +40,7 @@ logger = logging.getLogger("model-stats")
 PRICES_URL = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
 PRICES_MAX_AGE = timedelta(days=1)
 PRICES_MAX_BYTES = 20 * 1024 * 1024  # the list is ~1 MB; refuse runaway responses
-PERIODS = ("day", "week", "month", "all")
+PERIODS = ("day", "week", "month", "year", "all")
 UNKNOWN = "unknown"
 TEMPLATE = Path(__file__).with_name("template.html")
 PLACEHOLDER = "/*__REPORT__*/null"
@@ -506,7 +506,11 @@ def period_start(period: str, now: datetime) -> datetime | None:
     if period not in PERIODS:
         raise ValueError(f"period must be one of {', '.join(PERIODS)}, got {period!r}")
     midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    days = {"day": 0, "week": 6, "month": 29}.get(period)
+    if period in ("month", "year"):
+        month_index = now.year * 12 + now.month - 1 - (11 if period == "year" else 0)
+        year, month = divmod(month_index, 12)
+        return midnight.replace(year=year, month=month + 1, day=1)
+    days = {"day": 0, "week": 6}.get(period)
     return None if days is None else midnight - timedelta(days=days)
 
 
@@ -516,7 +520,7 @@ def build_report(
     period: str,
     now: datetime,
 ) -> dict[str, object]:
-    """Aggregate usages into hourly rows per harness, model, effort, and session."""
+    """Aggregate hourly usage and zero-filled monthly costs for the period."""
     start = period_start(period, now)
     rows: dict[tuple[str, ...], list[float]] = {}
     for usage in usages:
@@ -537,10 +541,24 @@ def build_report(
         acc = rows.setdefault(key, [0, 0, 0, 0, 0, 0.0])
         for i, value in enumerate((1, usage.input, usage.output, usage.cache_read, usage.cache_write, cost)):
             acc[i] += value
+
+    by_month: dict[str, float] = {}
+    for row_key, values in rows.items():
+        month_key = row_key[0][:7]
+        by_month[month_key] = by_month.get(month_key, 0.0) + round(values[5], 6)
+    first = start.strftime("%Y-%m") if start else min(by_month, default=now.strftime("%Y-%m"))
+    first_year, first_month = map(int, first.split("-"))
+    monthly: list[dict[str, str | float]] = []
+    for month_index in range(first_year * 12 + first_month - 1, now.year * 12 + now.month):
+        year, month = divmod(month_index, 12)
+        month_key = f"{year:04d}-{month + 1:02d}"
+        monthly.append({"month": month_key, "cost": round(by_month.get(month_key, 0.0), 6)})
+
     return {
         "generated": now.isoformat(timespec="seconds"),
         "period": period,
         "since": start.date().isoformat() if start else None,
+        "monthly": monthly,
         "columns": COLUMNS,
         "rows": [[*key, *acc[:5], round(acc[5], 6)] for key, acc in sorted(rows.items())],
     }

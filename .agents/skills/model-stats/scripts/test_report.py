@@ -1,4 +1,4 @@
-"""Tests for report.py. Run with: uvx pytest <skill-dir>/scripts"""
+"""Tests for report.py. Run with: make -C <skill-dir> test-unit"""
 
 from __future__ import annotations
 
@@ -335,7 +335,8 @@ def test_cost_of_prices_each_token_class_including_1h_cache_writes() -> None:
     [
         ("day", datetime(2026, 9, 24, tzinfo=UTC)),
         ("week", datetime(2026, 9, 18, tzinfo=UTC)),
-        ("month", datetime(2026, 8, 26, tzinfo=UTC)),
+        ("month", datetime(2026, 9, 1, tzinfo=UTC)),
+        ("year", datetime(2025, 10, 1, tzinfo=UTC)),
         ("all", None),
     ],
 )
@@ -345,7 +346,109 @@ def test_period_start(period: str, start: datetime | None) -> None:
 
 def test_period_start_rejects_unknown_period() -> None:
     with pytest.raises(ValueError, match="period must be one of"):
-        report.period_start("year", NOW)
+        report.period_start("fortnight", NOW)
+
+
+@pytest.mark.parametrize(
+    ("now", "start"),
+    [
+        (datetime(2026, 1, 31, tzinfo=UTC), datetime(2025, 2, 1, tzinfo=UTC)),
+        (datetime(2024, 2, 29, tzinfo=UTC), datetime(2023, 3, 1, tzinfo=UTC)),
+    ],
+)
+def test_period_start_year_handles_year_rollover_and_leap_day(now: datetime, start: datetime) -> None:
+    assert "year" in report.PERIODS
+    assert report.period_start("year", now) == start
+
+
+@pytest.mark.parametrize(
+    ("period", "expected"),
+    [
+        ("day", [{"month": "2026-09", "cost": 2.0}]),
+        ("week", [{"month": "2026-09", "cost": 3.0}]),
+        ("month", [{"month": "2026-09", "cost": 73.0}]),
+        ("all", [
+            {"month": "2026-07", "cost": 10.0},
+            {"month": "2026-08", "cost": 20.0},
+            {"month": "2026-09", "cost": 73.0},
+        ]),
+    ],
+)
+def test_build_report_monthly_costs_use_only_the_selected_period(period: str, expected: list[dict[str, object]]) -> None:
+    usages = [
+        usage(at=datetime(2026, 7, 5, tzinfo=UTC), cost=10.0),
+        usage(at=datetime(2026, 8, 1, tzinfo=UTC), cost=20.0),
+        usage(at=datetime(2026, 9, 1, tzinfo=UTC), cost=30.0),
+        usage(at=datetime(2026, 9, 17, tzinfo=UTC), cost=40.0),
+        usage(at=datetime(2026, 9, 18, tzinfo=UTC), cost=1.0),
+        usage(cost=2.0),
+        usage(input=0, output=0, cache_read=0, cache_write=0, cost=99.0),
+    ]
+    got = report.build_report(usages, {}, period, NOW)
+    assert "monthly" in got
+    assert got["monthly"] == expected
+
+
+def test_build_report_monthly_week_can_span_two_partial_months() -> None:
+    now = datetime(2026, 3, 3, 12, tzinfo=UTC)
+    usages = [
+        usage(at=datetime(2026, 2, 24, tzinfo=UTC), cost=100.0),
+        usage(at=datetime(2026, 2, 25, tzinfo=UTC), cost=5.0),
+        usage(at=datetime(2026, 3, 1, tzinfo=UTC), cost=7.0),
+    ]
+    got = report.build_report(usages, {}, "week", now)
+    assert "monthly" in got
+    assert got["monthly"] == [{"month": "2026-02", "cost": 5.0}, {"month": "2026-03", "cost": 7.0}]
+
+
+def test_build_report_monthly_year_has_twelve_months_including_zero_spend() -> None:
+    assert "year" in report.PERIODS
+    usages = [
+        usage(at=datetime(2025, 9, 30, 23, 59, tzinfo=UTC), cost=100.0),
+        usage(at=datetime(2025, 10, 1, tzinfo=UTC), cost=5.0),
+        usage(cost=7.0),
+    ]
+    got = report.build_report(usages, {}, "year", NOW)
+    assert "monthly" in got
+    months = [f"2025-{month:02d}" for month in range(10, 13)] + [f"2026-{month:02d}" for month in range(1, 10)]
+    assert got["monthly"] == [{"month": month, "cost": 5.0 if month == "2025-10" else 7.0 if month == "2026-09" else 0.0} for month in months]
+
+
+@pytest.mark.parametrize("period", ["day", "week", "month", "year", "all"])
+def test_build_report_monthly_empty_period_has_zero_spend(period: str) -> None:
+    assert period in report.PERIODS
+    got = report.build_report([], {}, period, NOW)
+    assert "monthly" in got
+    assert got["rows"] == []
+    assert len(got["monthly"]) == (12 if period == "year" else 1)
+    assert all(month["cost"] == 0.0 for month in got["monthly"])
+    assert got["monthly"][-1]["month"] == "2026-09"
+
+
+def test_build_report_monthly_all_keeps_gaps_and_trailing_zero_months() -> None:
+    usages = [usage(at=datetime(2025, 12, 31, tzinfo=UTC), cost=5.0), usage(at=datetime(2026, 2, 1, tzinfo=UTC), cost=7.0)]
+    got = report.build_report(usages, {}, "all", datetime(2026, 3, 15, tzinfo=UTC))
+    assert "monthly" in got
+    assert got["monthly"] == [
+        {"month": "2025-12", "cost": 5.0},
+        {"month": "2026-01", "cost": 0.0},
+        {"month": "2026-02", "cost": 7.0},
+        {"month": "2026-03", "cost": 0.0},
+    ]
+
+
+def test_build_report_monthly_uses_local_calendar_months_and_price_estimates() -> None:
+    local = timezone(timedelta(hours=-7))
+    now = datetime(2026, 9, 2, 12, tzinfo=local)
+    usages = [
+        usage(at=datetime(2026, 9, 1, 1, tzinfo=UTC), cost=2.0),
+        usage(at=datetime(2026, 9, 1, 8, tzinfo=UTC)),
+        usage(at=now, model="unpriced-model"),
+    ]
+    got = report.build_report(usages, {"claude-opus-5-5": {"input_cost_per_token": 0.01}}, "week", now)
+    assert "monthly" in got
+    assert got["monthly"] == [{"month": "2026-08", "cost": 2.0}, {"month": "2026-09", "cost": 11.5}]
+    assert sum(month["cost"] for month in got["monthly"]) == pytest.approx(sum(row[-1] for row in got["rows"]))
 
 
 def test_build_report_filters_period_and_aggregates_per_hour() -> None:
@@ -439,7 +542,8 @@ def test_render_html_requires_placeholder() -> None:
         report.render_html({}, "<html></html>")
 
 
-def test_main_writes_page_to_tmp_and_prints_path(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+@pytest.mark.parametrize("period", ["day", "week", "month", "year", "all"])
+def test_main_writes_page_to_tmp_and_prints_path(period: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     write_jsonl(
         tmp_path / ".pi/agent/sessions/--w--/s.jsonl",
         [
@@ -452,14 +556,17 @@ def test_main_writes_page_to_tmp_and_prints_path(tmp_path: Path, capsys: pytest.
     )
 
     with mock.patch("subprocess.run") as run:
-        assert report.main(["week", "--home", str(tmp_path), "--offline", "--no-open"]) == 0
+        assert report.main([period, "--home", str(tmp_path), "--offline", "--no-open"]) == 0
     run.assert_not_called()
 
     page = Path(capsys.readouterr().out.strip())
     try:
         assert page.parent == Path("/tmp")  # noqa: S108 # the documented output dir
         assert page.name.startswith("model-stats-") and page.suffix == ".html"
-        assert '"period":"week"' in page.read_text(encoding="utf-8")
+        html = page.read_text(encoding="utf-8")
+        assert f'"period":"{period}"' in html
+        assert '<canvas id="c-monthly-cost">' in html
+        assert '"monthly":[' in html
     finally:
         page.unlink()
 

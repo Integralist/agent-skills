@@ -2,7 +2,7 @@
 name: model-stats
 description: Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.
 disable-model-invocation: true
-argument-hint: "[day|week|month|all]"
+argument-hint: "[day|week|month|year|all]"
 metadata:
   model-tier: trivial
 ---
@@ -13,7 +13,14 @@ Chart which providers, models, effort levels, harnesses, and projects consume yo
 
 ## Steps
 
-1. Pick the period from the argument: `day` (today), `week` (last 7 days), `month` (last 30 days), or `all` (full history). With no argument, use `all`. For any other argument, stop and list the four periods.
+1. Pick the period from the argument. With no argument, use `all`. For any
+   other argument, stop and list these five periods:
+
+   - `day`: today.
+   - `week`: last 7 days, including today.
+   - `month`: current calendar month to date.
+   - `year`: current calendar month and the previous 11 months.
+   - `all`: full history.
 2. Run the script from this skill's base directory:
 
    ```bash
@@ -25,4 +32,7 @@ Chart which providers, models, effort levels, harnesses, and projects consume yo
 
 ## Maintenance
 
-When a harness changes its log format, update its `load_*` function in `scripts/report.py` and its test in `scripts/test_report.py`, then run `uvx pytest <skill-base-dir>/scripts`.
+When a harness changes its log format, update its `load_*` function in
+`scripts/report.py` and its test in `scripts/test_report.py`. For chart changes,
+update `scripts/template.html` and `scripts/test_browser.py`. Run
+`make -C <skill-base-dir> test`; the browser tests require Google Chrome.
