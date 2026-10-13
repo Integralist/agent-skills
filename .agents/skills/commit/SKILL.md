@@ -3,6 +3,7 @@ name: commit
 description: >-
   Create git commits with intelligent file grouping. Use when
   committing changes or drafting a commit message.
+argument-hint: '[force | --force]'
 allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 ---
 
@@ -30,9 +31,11 @@ If the fields below show commands rather than output, run each one first.
    - For untracked files (from `git status --porcelain`), use
      `git add -N <file>` then `git diff` to scan their contents for the
      same secrets.
-   - **If on main or master branch: STOP. Warn the user and wait for
-     explicit confirmation before committing — unless the user passed the
-     `--force` flag, in which case proceed without asking. No exceptions.**
+   - **On `main` or `master`:** If the user passed `force` or `--force`
+     as a skill argument, proceed without branch confirmation. Otherwise,
+     STOP, warn the user, and wait for explicit confirmation.
+     Either argument bypasses only branch confirmation; all other safety
+     checks and hooks still apply.
 
 1. **Assess staging state:**
 
