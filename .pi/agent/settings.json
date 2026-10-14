@@ -28,6 +28,7 @@
     }
   ],
   "enabledModels": [
+    "pi-auto-model/auto",
     "amazon-bedrock/global.anthropic.claude-haiku-5-5",
     "amazon-bedrock/global.anthropic.claude-sonnet-5-5",
     "amazon-bedrock/global.anthropic.claude-opus-5-5",
