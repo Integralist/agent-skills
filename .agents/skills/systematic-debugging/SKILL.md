@@ -20,21 +20,31 @@ Understand WHY something fails before attempting to fix it.
 
 ### Phase 1: Root Cause Investigation
 
-Before touching any code:
+Before changing code:
 
 1. **Read error messages thoroughly** — every word matters.
-1. **Reproduce consistently** — you can't verify a fix you can't reproduce.
-1. **Examine recent changes** — what changed before this started failing?
-1. **Gather diagnostic evidence** — logs, stack traces, state dumps.
-1. **Trace data flow** — follow the call chain to where bad values
-   originate.
-1. **Check for prior occurrences** — search organizational knowledge
+2. **Establish the failure** — record expected versus observed behavior;
+   reproduce where possible and state any limits on verification.
+3. **Examine recent changes** — what changed before this started failing?
+4. **Gather diagnostic evidence** — logs, stack traces, state dumps.
+   Separate observations from interpretations. Record each observation's
+   source, timestamp, environment/version, and collection limits.
+   Missing telemetry alone does not establish that an event never happened.
+5. **Trace data flow** — use observed behavior to guide targeted source
+   inspection. Source shows possible execution paths, not which path ran.
+6. **Check for prior occurrences** — search organizational knowledge
    sources (Slack, Confluence, Jira) for the same error, a known issue,
    or a past incident. See
    [`../shared/KNOWLEDGE-SOURCES.md`](../shared/KNOWLEDGE-SOURCES.md).
 
+For production investigations, collect evidence through authorized, bounded,
+read-only queries. If access or telemetry is missing, state the gap and request
+the specific evidence needed.
+
 On a gnarly bug, delegate this evidence-gathering and prior-occurrence
-search to a read-only diagnostic subagent that reports findings —
+search to a read-only diagnostic subagent. Ask it to report evidence,
+contradictions, competing explanations, and missing evidence rather than
+endorse a favored hypothesis. Keep its work
 review-only; do not modify code or run tools that change state. Follow the
 [shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md), including its
 completion and retry protocol. Phase 4 implementation stays in the main thread
@@ -55,29 +65,48 @@ to the original trigger.
 
 ### Phase 2: Pattern Analysis
 
-1. **Locate working examples** — similar code that works correctly.
-1. **Compare implementations completely** — don't just skim.
-1. **Identify differences** — what differs between working and broken?
-1. **Understand dependencies** — what does this code depend on?
+1. **Identify a working control** — a comparable successful case.
+2. **Compare conditions** — inputs, configuration, versions, load, timing,
+   environment, and dependencies, not just implementations.
+3. **Identify differences** — record uncontrolled differences that could
+   explain the result before attributing causality.
+4. **Inspect relevant code and dependencies** — explain the observed
+   differences and identify assumptions to test.
 
 ### Phase 3: Hypothesis and Testing
 
 Apply the scientific method:
 
-1. **Formulate ONE clear hypothesis** — "the error occurs because X".
-1. **Design a minimal test** — change ONE variable at a time.
-1. **Predict the outcome** — what happens if the hypothesis is correct?
-1. **Run the test** — execute and observe.
-1. **Verify results** — did it behave as predicted?
-1. **Iterate or proceed** — refine if wrong, implement if right.
+1. **Select ONE hypothesis to test** — "the error occurs because X".
+   Record plausible alternatives without testing them all at once.
+2. **Define a falsifier** — what observation would disprove the hypothesis?
+3. **Design a discriminating test** — change ONE variable. Predict results
+   under the hypothesis and plausible alternatives before running it.
+4. **Run the test** — execute and record the observed result.
+5. **Check against the evidence** — reject or revise hypotheses that
+   contradict reliable observations. Supporting evidence alone does not
+   establish a unique cause.
+6. **Iterate or proceed** — gather more evidence if the result is ambiguous;
+   implement only when a discriminating test supports the proposed cause
+   and no reliable observation contradicts it.
+
+When no hypothesis fits, check evidence quality, name the unresolved question,
+and collect the smallest signal that distinguishes explanations. Inspect
+application, dependency, network, or OS boundaries as justified by that
+question, rather than expanding unsupported guesses.
 
 ### Phase 4: Implementation
 
-1. **Create a failing test case** — captures the bug behavior.
-1. **Implement a single fix** — address root cause, not symptoms.
-1. **Verify the test passes** — confirms the fix works.
-1. **Run the full test suite** — ensure no regressions.
-1. **If the fix fails, STOP** — re-evaluate the hypothesis.
+1. **Create a failing test case** — reproduce the reported behavior and
+   confirm it fails on the intended assertion before the fix, not on setup
+   or compilation. Check that fixtures and mocks do not assume the suspected
+   cause. If reproduction is unavailable, report the verification gap before
+   claiming a fix.
+2. **Implement a single fix** — address root cause, not symptoms.
+3. **Verify the same test passes** — keep its behavioral assertion intact.
+4. **Run the full test suite** — ensure no regressions and recheck the
+   working control.
+5. **If the fix fails, STOP** — re-evaluate the hypothesis.
 
 **Critical rule:** if THREE or more fixes fail consecutively, STOP. This
 signals architectural problems requiring discussion, not more patches.
