@@ -31,6 +31,10 @@
 - **TDD:** Stub first, prove failure on assertion (not compilation), write minimum code to pass; clean dead code immediately. Unit test every public function and error branch; integration test every feature slice. Assert behavior, not implementation—delete assertions that survive an inverted requirement.
 - **Code Edits:** Propose diffs in chat and get explicit approval before invoking code-editing tools. A question is an inquiry, not an instruction to edit—answer it. Keep changes scoped to what was asked.
 - **Large Diffs:** If >40 lines, prompt with a 1-line summary first; let user choose to view full diff or proceed to edits.
+- **Auto Execution:** Explicit `execute-plan --auto` (or `auto`) satisfies
+  **Code Edits**, **Large Diffs**, and **Downgrade Prompts** approvals within the
+  named plan’s scope. Retain the skill’s boundaries, stricter project approvals,
+  and runtime permissions.
 
 # Tooling & Verification
 
