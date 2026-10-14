@@ -354,8 +354,30 @@ import (
 
 ## Comments
 
-Preserve inherited comments unless they are stale or redundant. The rules
-below apply when editing comments.
+Preserve inherited comments unless they are stale or redundant. Apply the
+rules below when writing or editing comments; function documentation is a
+behavior contract, not just something to preserve.
+
+### Writing function comments
+
+- Document every exported function and method, and every non-trivial
+  unexported function or method.
+- Start with what the function does and its result or observable effect.
+  Describe behavior, not the implementation steps.
+- Add why it exists or why it behaves this way when that context is
+  non-obvious and helps callers or maintainers understand a constraint,
+  invariant, policy, or surprising side effect. Keep straightforward pure
+  functions to the behavior sentence; do not invent a rationale.
+- Make the comment specific enough to add information beyond the identifier
+  name. For exported identifiers, start the comment with the identifier name.
+
+```go
+// RefreshToken renews the session token before it expires. This avoids
+// forcing active clients to reauthenticate during long requests.
+func (s *Session) RefreshToken(ctx context.Context) error {
+	// ...
+}
+```
 
 ### Always preserve
 
