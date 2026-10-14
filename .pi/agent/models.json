@@ -1,5 +1,12 @@
 {
   "providers": {
+    "google-vertex": {
+      "modelOverrides": {
+        "gemini-4-argon": {
+          "reasoning": false
+        }
+      }
+    },
     "github-copilot": {
       "modelOverrides": {
         "gpt-6.1-sol": {
