@@ -151,11 +151,11 @@ scripts/                            # Makefile helpers (not installed anywhere)
 ## Components
 
 **Pi** — installed by `make install-pi` with the `pi-statusbar`,
-`pi-mcp-adapter`, `pi-intercom`, `pi-subagents`, and `pi-btw` packages. The
-repository provides a Gemini Flash default, a curated enabled-model list, hidden
-thinking blocks, the custom `nord-contrast` theme, and an `mcp.json` (templated
-for the Context7 API key) wiring the
-Atlassian, fastly, google-workspace, gopls, and Context7 MCP servers.
+`pi-mcp-adapter`, `pi-intercom`, `pi-subagents`, `pi-btw` and `pi-auto-model`
+packages. The repository provides a Gemini Flash default, a curated
+enabled-model list, hidden thinking blocks, the custom `nord-contrast` theme,
+and an `mcp.json` (templated for the Context7 API key) wiring the Atlassian,
+fastly, google-workspace, gopls, and Context7 MCP servers.
 
 **Skills** — reusable instructions that extend an agent with a task, pattern, or
 specialized knowledge. Depending on frontmatter, agents discover them from the
@@ -234,89 +234,89 @@ authenticate via SSO on first use.
 
 ## Skill reference
 
-| Skill                        | Description                                                                            |
-| ---------------------------- | -------------------------------------------------------------------------------------- |
-| **adhd-voice**               | Reply in an ADHD-friendly shape once, or for the whole session with `--all`.           |
-| **agents-md**                | Make `AGENTS.md` canonical and point `CLAUDE.md` and `GEMINI.md` to it.                |
-| **architect**                | Turn an idea into research, a specification, and an implementation plan.               |
-| **arena**                    | Spawn N parallel candidates, pick the strongest, and graft in the best of the rest.    |
-| **bcp**                      | Create a branch, commit changes, and open a PR or submit its stack.                    |
-| **behaviour-spec**           | Write Gherkin acceptance criteria and Go test scaffolding.                             |
-| **branch**                   | Create a feature branch named from the current task.                                   |
-| **caveman**                  | Use technically accurate, token-saving caveman speech.                                 |
-| **changelog**                | Add a changelog entry for uncommitted or branch changes.                               |
-| **clarify**                  | Resolve ambiguous requirements before work begins.                                     |
-| **cleanup**                  | Audit AI-generated clutter, then apply approved fixes interactively.                   |
-| **code-module-design**       | Design deep modules with high leverage, strong locality, and clean seams.              |
-| **code-module-review**       | Map code structure and assess module ownership, boundaries, and interactions.         |
-| **code-review**              | Review diffs for correctness, security, reliability, performance, and maintainability. |
-| **code-review-feedback**     | Verify review feedback before accepting or implementing it.                            |
-| **commit**                   | Group related changes and create clear Git commits.                                    |
-| **consensus**                | Reach cross-model consensus through gated discussion rounds.                           |
-| **conventions-go**           | Apply Go conventions when editing or reviewing `.go` files.                            |
-| **conventions-markdown**     | Apply Markdown conventions when editing or reviewing `.md` files.                      |
-| **conventions-mermaid**      | Apply Mermaid conventions when creating or editing diagram files or blocks.           |
-| **conventions-python**       | Apply Python conventions when editing or reviewing `.py` files.                        |
-| **conventions-sql**          | Apply SQL conventions when editing or creating migration files.                        |
-| **critique**                 | Find logical weaknesses in a document and suggest fixes.                               |
-| **decide**                   | Compare consequential options and record a reasoned decision.                          |
-| **delegate**                 | Choose and dispatch the right subagent for a task.                                     |
-| **distill**                  | Shorten long prose without losing essential information.                               |
-| **domain-modeling**          | Define shared domain language and record architecture decisions.                       |
-| **draft-pr**                 | Write and open a concise PR with clear Problem and Solution sections.                  |
-| **durable-rules**            | Turn recurring findings into conventions, anti-patterns, or skill improvements.        |
-| **eval**                     | Create and run skill evaluations, then compare with the previous run.                  |
-| **execute-plan**             | Compile, delegate, verify, and correct one plan slice at a time without model switching. |
-| **explain-code**             | Explain what code does and why it matters to a newcomer, with a small visual.          |
-| **git-metadata**             | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.  |
-| **ghostty**                  | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.         |
-| **go-api**                   | Scaffold a production-ready Go API with local tooling and observability.               |
-| **go-testing**               | Write Go unit, integration, fuzz, and benchmark tests.                                 |
-| **grepai**                   | Search code semantically when exact names are unknown.                                 |
-| **grill-me**                 | Start a grilling session for a plan, decision, or idea.                                |
-| **grill-with-docs**          | Grill an idea while updating its glossary and ADRs.                                    |
-| **grilling**                 | Stress-test assumptions through a structured, relentless interview.                    |
-| **handoff**                  | Summarize the current session for another agent.                                       |
+| Skill                             | Description                                                                                              |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **adhd-voice**                    | Reply in an ADHD-friendly shape once, or for the whole session with `--all`.                             |
+| **agents-md**                     | Make `AGENTS.md` canonical and point `CLAUDE.md` and `GEMINI.md` to it.                                  |
+| **architect**                     | Turn an idea into research, a specification, and an implementation plan.                                 |
+| **arena**                         | Spawn N parallel candidates, pick the strongest, and graft in the best of the rest.                      |
+| **bcp**                           | Create a branch, commit changes, and open a PR or submit its stack.                                      |
+| **behaviour-spec**                | Write Gherkin acceptance criteria and Go test scaffolding.                                               |
+| **branch**                        | Create a feature branch named from the current task.                                                     |
+| **caveman**                       | Use technically accurate, token-saving caveman speech.                                                   |
+| **changelog**                     | Add a changelog entry for uncommitted or branch changes.                                                 |
+| **clarify**                       | Resolve ambiguous requirements before work begins.                                                       |
+| **cleanup**                       | Audit AI-generated clutter, then apply approved fixes interactively.                                     |
+| **code-module-design**            | Design deep modules with high leverage, strong locality, and clean seams.                                |
+| **code-module-review**            | Map code structure and assess module ownership, boundaries, and interactions.                            |
+| **code-review**                   | Review diffs for correctness, security, reliability, performance, and maintainability.                   |
+| **code-review-feedback**          | Verify review feedback before accepting or implementing it.                                              |
+| **commit**                        | Group related changes and create clear Git commits.                                                      |
+| **consensus**                     | Reach cross-model consensus through gated discussion rounds.                                             |
+| **conventions-go**                | Apply Go conventions when editing or reviewing `.go` files.                                              |
+| **conventions-markdown**          | Apply Markdown conventions when editing or reviewing `.md` files.                                        |
+| **conventions-mermaid**           | Apply Mermaid conventions when creating or editing diagram files or blocks.                              |
+| **conventions-python**            | Apply Python conventions when editing or reviewing `.py` files.                                          |
+| **conventions-sql**               | Apply SQL conventions when editing or creating migration files.                                          |
+| **critique**                      | Find logical weaknesses in a document and suggest fixes.                                                 |
+| **decide**                        | Compare consequential options and record a reasoned decision.                                            |
+| **delegate**                      | Choose and dispatch the right subagent for a task.                                                       |
+| **distill**                       | Shorten long prose without losing essential information.                                                 |
+| **domain-modeling**               | Define shared domain language and record architecture decisions.                                         |
+| **draft-pr**                      | Write and open a concise PR with clear Problem and Solution sections.                                    |
+| **durable-rules**                 | Turn recurring findings into conventions, anti-patterns, or skill improvements.                          |
+| **eval**                          | Create and run skill evaluations, then compare with the previous run.                                    |
+| **execute-plan**                  | Compile, delegate, verify, and correct one plan slice at a time without model switching.                 |
+| **explain-code**                  | Explain what code does and why it matters to a newcomer, with a small visual.                            |
+| **git-metadata**                  | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.                    |
+| **ghostty**                       | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.                           |
+| **go-api**                        | Scaffold a production-ready Go API with local tooling and observability.                                 |
+| **go-testing**                    | Write Go unit, integration, fuzz, and benchmark tests.                                                   |
+| **grepai**                        | Search code semantically when exact names are unknown.                                                   |
+| **grill-me**                      | Start a grilling session for a plan, decision, or idea.                                                  |
+| **grill-with-docs**               | Grill an idea while updating its glossary and ADRs.                                                      |
+| **grilling**                      | Stress-test assumptions through a structured, relentless interview.                                      |
+| **handoff**                       | Summarize the current session for another agent.                                                         |
 | **improve-codebase-architecture** | Scan a codebase for deepening opportunities, present a visual HTML report, and grill through candidates. |
-| **incident-report**          | Write an incident report from the session's debugging evidence.                        |
-| **integralist-voice**        | Write in Integralist's voice once, or for the whole session with `--all`.              |
-| **is-it-safe**               | Assess the worst credible consequence of committing or merging a change.                |
-| **jira**                     | Create, edit, assign, transition, search, and verify Jira issues.                      |
-| **markdown-to-skill**        | Convert a directory of Markdown documents into agent skills.                           |
-| **model-stats**              | Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.     |
-| **mysql-index-audit**        | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.               |
-| **next-slice**               | Implement and complete every task in the next actionable plan slice.                   |
-| **next-task**                | Implement and complete the next actionable plan or task-list item.                     |
-| **perspectives**             | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.  |
-| **pdd**                      | Run a Product-Engineering initiative through Project, Discovery, and Design approvals. |
-| **polish**                   | Improve a short passage's clarity and concision.                                       |
-| **precedent**                | Align work with patterns established by peer files.                                    |
-| **product-voice**            | Write in a plain, audience-first voice once, or for the whole session with `--all`.    |
-| **recap**                    | Summarize what is done, in progress, and next.                                         |
-| **redesign**                 | Audit a codebase for redesigns that remove structural complexity.                      |
-| **refactor**                 | Plan a simpler reimplementation of an existing feature.                                |
-| **research**                 | Research a topic or repository and save a sourced reference under `docs/research/`.    |
-| **retro**                    | Audit a coding session for missing guardrails, context bloat, and tool friction.       |
-| **security-review-feedback** | Validate vulnerability findings for reachability and exploitability before fixing.     |
-| **show-me**                  | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.     |
-| **spec-delta**               | Record a living-spec behaviour change as a project spec with a Behavioural Delta.      |
-| **stacked-prs**              | Create and manage dependent PRs with the official `gh stack` extension.                |
-| **summarize-for-adhd**       | Summarise a session, file, or URL with a clear takeaway and short, ADHD-friendly points. |
-| **summarize-for-product**    | Translate engineering changes into a non-technical update.                             |
-| **systematic-debugging**     | Find root causes through a four-phase debugging workflow.                              |
-| **talking-points**           | Rank recurring Slack topics from you and your team for a retro or 1:1.                 |
-| **teach**                    | Teach a concept using persistent lessons, missions, and progress records.              |
-| **teach-with-slides**        | Teach a topic or concept through an educational slide deck.                            |
-| **tech-docs**                | Write or improve concise, maintainable technical documentation.                        |
-| **test-feedback**            | Diagnose supplied test failures, then fix them interactively.                          |
-| **to-adr**                   | Extract genuine architecture decisions into standalone ADRs.                           |
-| **to-plan**                  | Write a specification-backed plan with vertical slices, dependencies, and PR grouping. |
-| **to-prd**                   | Extract product goals, scope, and success measures into a PRD.                         |
-| **to-spec**                  | Write an implementation-ready feature spec with scope and acceptance criteria.         |
-| **to-tasks**                 | Compile a plan slice into a mechanical TDD task document with verbatim code.           |
-| **unslop**                   | Cut AI tells and machine cadence from prose to restore human voice.                    |
-| **wait-what**                | Re-pitch a message that did not land.                                                  |
-| **writing-for-agents**       | Apply conventions that make skills and instruction files predictable.                  |
+| **incident-report**               | Write an incident report from the session's debugging evidence.                                          |
+| **integralist-voice**             | Write in Integralist's voice once, or for the whole session with `--all`.                                |
+| **is-it-safe**                    | Assess the worst credible consequence of committing or merging a change.                                 |
+| **jira**                          | Create, edit, assign, transition, search, and verify Jira issues.                                        |
+| **markdown-to-skill**             | Convert a directory of Markdown documents into agent skills.                                             |
+| **model-stats**                   | Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.                       |
+| **mysql-index-audit**             | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.                                 |
+| **next-slice**                    | Implement and complete every task in the next actionable plan slice.                                     |
+| **next-task**                     | Implement and complete the next actionable plan or task-list item.                                       |
+| **perspectives**                  | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.                    |
+| **pdd**                           | Run a Product-Engineering initiative through Project, Discovery, and Design approvals.                   |
+| **polish**                        | Improve a short passage's clarity and concision.                                                         |
+| **precedent**                     | Align work with patterns established by peer files.                                                      |
+| **product-voice**                 | Write in a plain, audience-first voice once, or for the whole session with `--all`.                      |
+| **recap**                         | Summarize what is done, in progress, and next.                                                           |
+| **redesign**                      | Audit a codebase for redesigns that remove structural complexity.                                        |
+| **refactor**                      | Plan a simpler reimplementation of an existing feature.                                                  |
+| **research**                      | Research a topic or repository and save a sourced reference under `docs/research/`.                      |
+| **retro**                         | Audit a coding session for missing guardrails, context bloat, and tool friction.                         |
+| **security-review-feedback**      | Validate vulnerability findings for reachability and exploitability before fixing.                       |
+| **show-me**                       | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.                       |
+| **spec-delta**                    | Record a living-spec behaviour change as a project spec with a Behavioural Delta.                        |
+| **stacked-prs**                   | Create and manage dependent PRs with the official `gh stack` extension.                                  |
+| **summarize-for-adhd**            | Summarise a session, file, or URL with a clear takeaway and short, ADHD-friendly points.                 |
+| **summarize-for-product**         | Translate engineering changes into a non-technical update.                                               |
+| **systematic-debugging**          | Find root causes through a four-phase debugging workflow.                                                |
+| **talking-points**                | Rank recurring Slack topics from you and your team for a retro or 1:1.                                   |
+| **teach**                         | Teach a concept using persistent lessons, missions, and progress records.                                |
+| **teach-with-slides**             | Teach a topic or concept through an educational slide deck.                                              |
+| **tech-docs**                     | Write or improve concise, maintainable technical documentation.                                          |
+| **test-feedback**                 | Diagnose supplied test failures, then fix them interactively.                                            |
+| **to-adr**                        | Extract genuine architecture decisions into standalone ADRs.                                             |
+| **to-plan**                       | Write a specification-backed plan with vertical slices, dependencies, and PR grouping.                   |
+| **to-prd**                        | Extract product goals, scope, and success measures into a PRD.                                           |
+| **to-spec**                       | Write an implementation-ready feature spec with scope and acceptance criteria.                           |
+| **to-tasks**                      | Compile a plan slice into a mechanical TDD task document with verbatim code.                             |
+| **unslop**                        | Cut AI tells and machine cadence from prose to restore human voice.                                      |
+| **wait-what**                     | Re-pitch a message that did not land.                                                                    |
+| **writing-for-agents**            | Apply conventions that make skills and instruction files predictable.                                    |
 
 ## Developer workflows
 
@@ -384,24 +384,24 @@ flowchart LR
 `to-plan` invokes `grill-with-docs` internally before producing `plan.md`.
 The arrows above show skill handoffs; the outputs are separate artifacts:
 
-| Skill | Produces or updates |
-| --- | --- |
-| `pdd` | `project.md`, `discovery*.md`, `design*.md` |
-| `to-spec` | `spec.md` |
-| `to-plan` | `plan.md` |
-| `to-tasks` | `tasks.md` or `tasks-slice-N.md` |
-| `next-task` / `next-slice` | Task checkboxes and implementation changes |
+| Skill                      | Produces or updates                         |
+| -------------------------- | ------------------------------------------- |
+| `pdd`                      | `project.md`, `discovery*.md`, `design*.md` |
+| `to-spec`                  | `spec.md`                                   |
+| `to-plan`                  | `plan.md`                                   |
+| `to-tasks`                 | `tasks.md` or `tasks-slice-N.md`            |
+| `next-task` / `next-slice` | Task checkboxes and implementation changes  |
 
 The Design document is not the same artifact as `plan.md`:
 
-| Artifact | Main question | Audience |
-| --- | --- | --- |
-| `project.md` | What are we doing, why, and when? | Product + Engineering |
-| `discovery-mN.md` | Which option should we choose? | Product + Engineering |
-| `design-mN.md` | What solution are we approving? | Product + Engineering |
-| `spec.md` | What behavior is required? | Engineering |
-| `plan.md` | How will engineering implement it? | Implementers |
-| `tasks-slice-N.md` | What exact work happens next? | Implementer |
+| Artifact           | Main question                      | Audience              |
+| ------------------ | ---------------------------------- | --------------------- |
+| `project.md`       | What are we doing, why, and when?  | Product + Engineering |
+| `discovery-mN.md`  | Which option should we choose?     | Product + Engineering |
+| `design-mN.md`     | What solution are we approving?    | Product + Engineering |
+| `spec.md`          | What behavior is required?         | Engineering           |
+| `plan.md`          | How will engineering implement it? | Implementers          |
+| `tasks-slice-N.md` | What exact work happens next?      | Implementer           |
 
 For a first or single-milestone PDD project, use `discovery.md` and `design.md`.
 When a second milestone is introduced, rename the existing files to
@@ -436,17 +436,17 @@ Delta. **code-review** checks both kinds of spec whenever a diff touches them.
 
 ## Choosing an analysis skill
 
-| Skill                  | Use when                                                                                     | Primary output                                               |
-| ---------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **code-module-review** | Understand a feature's structure and assess module ownership | Mermaid maps and evidence-backed findings                   |
-| **code-review**        | Code or a diff exists and you want defects identified                                        | Verified findings and open questions                         |
-| **explain-code**       | You are new to the repo and want to understand what code does and why it is useful             | Concise Problem/Solution explanation, visual, and optional PR-author clarification |
-| **is-it-safe**   | You need the worst credible outcome of committing or merging a change                     | Verdict and evidence-backed impact path                       |
-| **precedent**    | Work is correct and you want it to match the project's own patterns                        | Divergences citing the peer that sets each pattern           |
-| **decide**       | You must choose between consequential options                                              | Durable decision memo and recommendation                     |
-| **consensus**    | A complex design or implementation needs independent cross-model review and approval gates | Reviewed assessment or implementation with dissent preserved |
-| **perspectives** | You want quick breadth, brainstorming, or a structured "what are we missing?" pass         | Multi-perspective analysis and next step                     |
-| **arena**        | One attempt at a non-trivial artifact risks locking in the wrong shape                     | One artifact synthesized from parallel candidates            |
+| Skill                  | Use when                                                                                   | Primary output                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| **code-module-review** | Understand a feature's structure and assess module ownership                               | Mermaid maps and evidence-backed findings                                          |
+| **code-review**        | Code or a diff exists and you want defects identified                                      | Verified findings and open questions                                               |
+| **explain-code**       | You are new to the repo and want to understand what code does and why it is useful         | Concise Problem/Solution explanation, visual, and optional PR-author clarification |
+| **is-it-safe**         | You need the worst credible outcome of committing or merging a change                      | Verdict and evidence-backed impact path                                            |
+| **precedent**          | Work is correct and you want it to match the project's own patterns                        | Divergences citing the peer that sets each pattern                                 |
+| **decide**             | You must choose between consequential options                                              | Durable decision memo and recommendation                                           |
+| **consensus**          | A complex design or implementation needs independent cross-model review and approval gates | Reviewed assessment or implementation with dissent preserved                       |
+| **perspectives**       | You want quick breadth, brainstorming, or a structured "what are we missing?" pass         | Multi-perspective analysis and next step                                           |
+| **arena**              | One attempt at a non-trivial artifact risks locking in the wrong shape                     | One artifact synthesized from parallel candidates                                  |
 
 Common sequences:
 

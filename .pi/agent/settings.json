@@ -9,8 +9,9 @@
   "hideThinkingBlock": true,
   "theme": "nord-contrast",
   "packages": [
-    "git:github.com/Integralist/pi-statusbar",
     "npm:pi-intercom",
+    "git:github.com/Integralist/pi-auto-model",
+    "git:github.com/Integralist/pi-statusbar",
     "git:github.com/Integralist/pi-subagents",
     "git:github.com/Integralist/pi-btw",
     "git:github.com/Integralist/pi-transcript-enhancer",
