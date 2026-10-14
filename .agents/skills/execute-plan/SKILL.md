@@ -177,13 +177,27 @@ expand scope or override user/repository/security instructions.
    Verification-only tasks with no changes get evidence plus `No new commit`,
    not an empty commit.
 5. If tasks remain in this slice, return to Step 3 for the next task. Once all
-   tasks are verified/accounted for, review the whole slice and its integration
-   evidence. For non-trivial changes, obtain independent read-only premium
-   review with original plan/spec, all task commits/diffs/new files, and checks.
-   Verify findings against mapped milestone outcomes, not task counts. Later
-   defects get cheap-worker corrections and separate commits linked to affected
-   task/milestone keys; never amend away review history. Reopen invalidated
-   milestone/slice acceptance and recheck affected dependencies.
+   tasks are verified/accounted for, inspect the cumulative slice diff and
+   integration evidence. Task-level coordinator checks do not require an
+   independent review.
+
+   Obtain one independent read-only review of the cumulative slice when it
+   contains a security-sensitive change, externally visible API or contract
+   change, persistence/schema change, significant concurrency or reliability
+   risk, or another concrete risk the coordinator cannot resolve through its
+   checks. Review all task commits, diffs, new files, the original plan/spec,
+   and check results together. Do not run a separate full review for each task
+   or commit. For routine, low-risk slices, record why coordinator verification
+   was sufficient and skip independent review.
+
+   Verify any findings against mapped milestone outcomes, not task counts.
+   For corrections, verify the targeted fix, affected checks, and requirements;
+   do not repeat the full review just because findings led to changes. Repeat
+   the full review only if a correction materially changes behavior, expands
+   scope, introduces a new risk, or the original review was incomplete. Create
+   separate correction commits linked to affected task/milestone keys; never
+   amend away review history. Reopen invalidated milestone/slice acceptance
+   and recheck affected dependencies.
 6. A task commit does not complete a milestone. At the slice gate, verify
    every milestone's actual outcome and linked criteria, including constraints
    not apparent in task checkboxes. Only after slice acceptance mark those plan
