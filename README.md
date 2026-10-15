@@ -277,6 +277,7 @@ authenticate via SSO on first use.
 | **grill-with-docs**               | Grill an idea while updating its glossary and ADRs.                                                      |
 | **grilling**                      | Stress-test assumptions through a structured, relentless interview.                                      |
 | **handoff**                       | Summarize the current session for another agent.                                                         |
+| **hunk**                          | Drive a live Hunk TUI session for interactive local and remote PR code reviews.                          |
 | **improve-codebase-architecture** | Scan a codebase for deepening opportunities, present a visual HTML report, and grill through candidates. |
 | **incident-report**               | Write an incident report from the session's debugging evidence.                                          |
 | **integralist-voice**             | Write in Integralist's voice once, or for the whole session with `--all`.                                |
