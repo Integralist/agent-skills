@@ -194,6 +194,8 @@ Consult these sibling documents when working in specialized areas:
   `testing.F` and benchmarking with `b.Loop()`.
 - [`COVERAGE-PRUNING.md`](COVERAGE-PRUNING.md) — Mapping statement coverage
   overlap and pruning redundant tests with Tobari.
+- [`mutation-testing`](../mutation-testing/SKILL.md) — Load when checking
+  whether Go tests detect behavior changes or investigating surviving mutants.
 
 ## Running Tests
 
