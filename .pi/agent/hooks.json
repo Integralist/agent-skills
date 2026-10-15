@@ -2,7 +2,7 @@
   "hooks": {
     "agent_settled": [
       {
-        "command": "osascript -e 'display notification \"Pi agent finished turn\" with title \"Pi\"'"
+        "command": "osascript -e 'display notification \"Pi agent finished turn\" with title \"Pi\" subtitle (system attribute \"PI_PROJECT_DIR\") sound name \"Tink\"'"
       }
     ]
   }
