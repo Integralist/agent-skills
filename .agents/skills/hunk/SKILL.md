@@ -241,6 +241,25 @@ as replying to a Hunk comment.
    CLI reference if needed. If the target is still ambiguous, ask rather than
    guessing. Preserve the loaded target, source, filters, and threads.
 
+   For a PR opened with `hunk gh` where `inputKind` is `patch`, preserve the
+   existing `sourceLabel` from `hunk session get`. Hunk may reject a new patch
+   path under `$SESSION_REPO/.git` as outside its initial root, even when the
+   session's `cwd` is the Git root. To refresh after the PR changes, replace
+   that original source in place, then reload the same patch path:
+
+   ```bash
+   SOURCE="<sourceLabel from hunk session get>"
+   TMP="${SOURCE}.refresh.$$"
+   trap 'rm -f "$TMP"' EXIT
+   gh pr diff <number> --repo "<owner>/<repo>" > "$TMP" &&
+     test -s "$TMP" && mv "$TMP" "$SOURCE" &&
+     hunk session reload "$SESSION_ID" --json -- patch "$SOURCE" --watch
+   ```
+
+   If fetching or reloading fails, retain the comments and report the exact
+   error. Do not assume a different path is allowed just because it is inside
+   the Git working tree.
+
 2. **Act on each pending note and always reply under it.**
 
    - **Question or discussion:** Answer the actual question inline.
