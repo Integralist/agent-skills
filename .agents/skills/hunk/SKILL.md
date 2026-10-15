@@ -70,12 +70,19 @@ loop.
    user comments are checked, and the correct workflow is selected.
 
 2. **Resolve the requested review target and reload the window.** Clear any
-   stale agent notes and highlights from an earlier review before switching
-   targets:
+   stale agent notes, highlights, and orphaned patch files from earlier or
+   closed sessions before switching targets:
 
    ```bash
    hunk session comment clear "$SESSION_ID" --yes --json
    hunk session highlight clear "$SESSION_ID" --json
+   rm -f "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"
+   LIVE_IDS="$(hunk session list --json | jq -r '.sessions[]?.sessionId // .[]?.sessionId // empty')"
+   for f in "$SESSION_REPO"/.git/hunk-review-*.patch; do
+     [ -e "$f" ] || continue
+     id="${f##*hunk-review-}"; id="${id%.patch}"
+     printf '%s\n' "$LIVE_IDS" | grep -Fxq "$id" || rm -f "$f"
+   done
    ```
 
    Route by the user's argument:
@@ -122,10 +129,10 @@ loop.
    Record each file's `path` and `hunks[].newRange` / `hunks[].oldRange`.
    - For **local reviews** (or same-repo PRs), read changed files and callers
      from disk to verify behavior, edge cases, and contracts.
-   - For **cross-repo PRs** loaded via `.git/hunk-review.patch`, read the patch
-     from `"$SESSION_REPO/.git/hunk-review.patch"` (or run
-     `hunk session review "$SESSION_ID" --include-patch --json`) and fetch any
-     needed surrounding file context with `gh api`.
+   - For **cross-repo PRs** loaded via `.git/hunk-review-$SESSION_ID.patch`,
+     read the patch from `"$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"`
+     (or run `hunk session review "$SESSION_ID" --include-patch --json`) and
+     fetch any needed surrounding file context with `gh api`.
 
    Completion criterion: Every changed file's hunk line ranges are known and
    the changeset has been analyzed.
@@ -187,11 +194,18 @@ loop.
    - **User invokes `/hunk done` or finishes the review (`"stop"`, `"done"`,
      `"clear"`):**
      Clean up agent notes, highlights, and any temporary PR patch file, and
-     restore the working-tree diff when a patch was loaded:
+     prune orphaned patch files from closed sessions before restoring the
+     working-tree diff:
      ```bash
      hunk session comment clear "$SESSION_ID" --yes --json
      hunk session highlight clear "$SESSION_ID" --json
-     rm -f "$SESSION_REPO/.git/hunk-review.patch"
+     rm -f "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"
+     LIVE_IDS="$(hunk session list --json | jq -r '.sessions[]?.sessionId // .[]?.sessionId // empty')"
+     for f in "$SESSION_REPO"/.git/hunk-review-*.patch; do
+       [ -e "$f" ] || continue
+       id="${f##*hunk-review-}"; id="${id%.patch}"
+       printf '%s\n' "$LIVE_IDS" | grep -Fxq "$id" || rm -f "$f"
+     done
      hunk session reload "$SESSION_ID" -- diff --watch --json
      ```
 
@@ -301,20 +315,21 @@ started).
   gh pr view <number> --repo "<owner>/<repo>" --json title,body,baseRefName,headRefOid,url
   git -C "$SESSION_REPO" fetch origin \
     "refs/heads/<baseRefName>:refs/remotes/origin/<baseRefName>" \
-    "pull/<number>/head"
-  hunk session reload "$SESSION_ID" -- diff "origin/<baseRefName>...FETCH_HEAD" --watch
+    "+pull/<number>/head:refs/hunk/pr-<number>"
+  hunk session reload "$SESSION_ID" -- diff "origin/<baseRefName>...refs/hunk/pr-<number>" --watch
   ```
 
 - **Different repository from `SESSION_REPO` (e.g. `integralist/dotfiles` while
   `hunk diff` is running in `fastly/ai-assistant-api`):**
-  Write the PR's unified diff into `"$SESSION_REPO/.git/hunk-review.patch"`
-  (inside `.git/` so it stays inside `SESSION_REPO` bounds and never appears as
-  an untracked file in `git status`), then reload the live Hunk window onto
-  that patch file:
+  Write the PR's unified diff into
+  `"$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"` (inside `.git/` so it
+  stays inside `SESSION_REPO` bounds, isolates concurrent sessions, and never
+  appears as an untracked file in `git status`), then reload the live Hunk
+  window onto that patch file:
   ```bash
   gh pr view <number> --repo "<owner>/<repo>" --json title,body,baseRefName,headRefOid,url
-  gh pr diff <number> --repo "<owner>/<repo>" > "$SESSION_REPO/.git/hunk-review.patch"
-  hunk session reload "$SESSION_ID" -- patch "$SESSION_REPO/.git/hunk-review.patch" --watch
+  gh pr diff <number> --repo "<owner>/<repo>" > "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"
+  hunk session reload "$SESSION_ID" -- patch "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch" --watch
   ```
 
 ## Command reference
