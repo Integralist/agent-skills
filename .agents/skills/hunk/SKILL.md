@@ -1,10 +1,11 @@
 ---
 name: hunk
 description: >-
-  Interactive local and remote PR code review in a live Hunk TUI session.
+  Interactive local and remote PR review with threaded replies to Hunk comments.
 disable-model-invocation: true
 argument-hint: >-
-  [review | branch | staged | <commit-sha> | PR #<num> | <owner/repo>#<num> | <pr-url>]
+  [review | comments | done | branch | staged | <commit-sha> | PR #<num> |
+  <owner/repo>#<num> | <pr-url>]
 metadata:
   model-tier: complex
 ---
@@ -29,10 +30,15 @@ loop.
    hunk session list --json
    ```
 
-   Record `SESSION_ID` (`sessions[0].sessionId`) and `SESSION_REPO`
-   (`sessions[0].repoRoot` or `sessions[0].cwd`). Always pass `<SESSION_ID>` to
-   subsequent `hunk session` commands so targeting still works after reloading
-   onto a patch file.
+   For `/hunk done`, consider only sessions whose `repoRoot` or `cwd` matches
+   the current working directory, even when only one session is live. If none
+   match, report that there is no active review to finish and stop; do not
+   launch Hunk or touch sessions in other repositories.
+
+   Select the session using the rules below. Record its `sessionId` as
+   `SESSION_ID` and its `repoRoot` (or `cwd`) as `SESSION_REPO`. Always pass
+   `<SESSION_ID>` to subsequent `hunk session` commands so targeting still
+   works after reloading onto a patch file.
 
    - **No active session:** Ask the user to run `hunk diff` in their terminal
      and wait for confirmation before continuing.
@@ -43,8 +49,25 @@ loop.
      `cli`) and how many windows are attached, then ask for confirmation before
      running `hunk daemon restart --yes`.
 
-   Completion criterion: `SESSION_ID` and `SESSION_REPO` are resolved from a
-   live Hunk session.
+   For `/hunk done`, jump directly to Step 5's stop/cleanup branch, then stop.
+   Skip comment processing and Steps 2–4; do not start another review.
+
+   Before clearing notes or reloading, check for existing user comments:
+
+   ```bash
+   hunk session comment list "$SESSION_ID" --type user --json
+   ```
+
+   - **`/hunk comments`:** Keep the loaded target and all comment threads.
+     Skip Steps 2–4 and run **Address user comments** below. If there are no
+     user comments, report that and stop without changing the session.
+   - **`/hunk` or `/hunk review` with existing user comments:** Keep the loaded
+     target and all threads, including notes added before the agent started.
+     Skip Step 2; inspect the changeset in Step 3, run **Address user comments**,
+     then continue to Step 4 for any additional review findings.
+
+   Completion criterion: `SESSION_ID` and `SESSION_REPO` are resolved, existing
+   user comments are checked, and the correct workflow is selected.
 
 2. **Resolve the requested review target and reload the window.** Clear any
    stale agent notes and highlights from an earlier review before switching
@@ -107,9 +130,10 @@ loop.
    Completion criterion: Every changed file's hunk line ranges are known and
    the changeset has been analyzed.
 
-4. **Publish inline notes and focus Stop 1.** Apply findings or walkthrough
-   stops in one batch with `--focus` so Hunk turns on agent notes and scrolls
-   to the first note:
+4. **Publish inline notes and focus Stop 1.** Keep existing user notes and
+   replies intact when adding findings. Apply findings or walkthrough stops in
+   one batch with `--focus` so Hunk turns on agent notes and scrolls to the
+   first note:
 
    ```bash
    cat <<'EOF' | hunk session comment apply "$SESSION_ID" --stdin --focus --json
@@ -158,25 +182,10 @@ loop.
      hunk session highlight add "$SESSION_ID" --file <path> --new-line <n> \
        --start <s> --end <e> --tone current --focus --json
      ```
-   - **User says they added notes in Hunk (`"check my notes"`, `"reply to my
-     comments"`, `"address my notes"`):**
-     Read human-authored notes:
-     ```bash
-     hunk session comment list "$SESSION_ID" --type user --json
-     ```
-     For each user note (`id`, `filePath`, `side`, `line`, `body`):
-     - If it is a question or discussion point, reply directly under the user's
-       card:
-       ```bash
-       hunk session comment add "$SESSION_ID" --reply-to "<note-id>" \
-         --summary "<concise answer>" --rationale "<optional detail>" \
-         --focus --json
-       ```
-     - If it requests a code change on a local branch/working tree, follow the
-       session's code-edit approval rules, apply the edit on disk (watch mode
-       refreshes Hunk automatically), and reply to `<note-id>` confirming the
-       fix.
-   - **User stops or finishes the review (`"stop"`, `"done"`, `"clear"`):**
+   - **User invokes `/hunk comments` or asks to check, reply to, or address
+     their Hunk notes:** Run **Address user comments** below.
+   - **User invokes `/hunk done` or finishes the review (`"stop"`, `"done"`,
+     `"clear"`):**
      Clean up agent notes, highlights, and any temporary PR patch file, and
      restore the working-tree diff when a patch was loaded:
      ```bash
@@ -186,8 +195,75 @@ loop.
      hunk session reload "$SESSION_ID" -- diff --watch --json
      ```
 
-   Completion criterion: All user notes and navigation requests are resolved, or
-   the session is cleaned up on stop.
+     Leave the Hunk TUI and shared daemon running. Report that the review is
+     finished, then stop processing.
+
+   Completion criterion: Every handled user note has a verified threaded
+   reply, the view is refreshed, and navigation requests are handled; pending
+   approvals or failures are reported, or the session is cleaned up on stop.
+
+## Address user comments
+
+Use this workflow both for pre-existing comments discovered on review entry
+and for comments added during the review. A chat-only response does not count
+as replying to a Hunk comment.
+
+1. **Read the current view and complete threads.**
+
+   ```bash
+   hunk session get "$SESSION_ID" --json
+   hunk session review "$SESSION_ID" --include-notes --json
+   hunk session comment list "$SESSION_ID" --type all --json
+   ```
+
+   Record each user note's ID, anchor, body, and existing replies. Read the
+   relevant code or patch before acting. Skip completed edits and fully
+   answered questions unless the user asks to revisit them. Approval requests,
+   blockers, and clarification questions remain pending until resolved.
+
+   Record the current reload arguments in a Bash array `RELOAD_ARGS`: source
+   options, `--`, review command, refs, flags, and pathspecs. Recover these
+   from session details and known session history; consult the version-matched
+   CLI reference if needed. If the target is still ambiguous, ask rather than
+   guessing. Preserve the loaded target, source, filters, and threads.
+
+2. **Act on each pending note and always reply under it.**
+
+   - **Question or discussion:** Answer the actual question inline.
+   - **Requested local edit:** Follow code-edit approval rules, make the
+     approved change in the matching checkout, and run relevant checks. Reply
+     with what changed and the verification result; distinguish untested work.
+   - **Blocked, declined, unclear, or awaiting approval:** Reply with the
+     reason or clarification needed. Do not silently skip the note or claim
+     completion. For remote PRs, do not edit an unrelated local checkout.
+
+   Post the outcome under the original note, including when no code changed:
+
+   ```bash
+   hunk session comment add "$SESSION_ID" --reply-to "<note-id>" \
+     --summary "<answer, completed change, or blocker>" \
+     --rationale "<supporting detail or checks, if needed>" --focus --json
+   ```
+
+3. **Explicitly refresh the same view and verify replies.** After the batch,
+   including question-only replies or before pausing for approval, replay the
+   recorded arguments without clearing comments:
+
+   ```bash
+   hunk session reload "$SESSION_ID" --json "${RELOAD_ARGS[@]}"
+   hunk session review "$SESSION_ID" --include-notes --json
+   hunk session comment list "$SESSION_ID" --type all --json
+   ```
+
+   Watch mode alone is not completion. Confirm the target is unchanged and
+   every handled note still has its reply, then focus the relevant reply with
+   `hunk session navigate "$SESSION_ID" --comment "<reply-id>" --json`.
+   If a reply, refresh, or anchor fails, report the failure in chat and retain
+   the note IDs and reply text for retry; do not report the batch as complete.
+
+   Completion criterion: Every pending note has an inline answer, verified
+   change confirmation, or explicit blocker; the same view has refreshed and
+   replies remain visible, or the exact failure is reported.
 
 ## Remote PR loading
 
@@ -246,6 +322,8 @@ started).
 | Action | Command |
 | :--- | :--- |
 | List live sessions | `hunk session list --json` |
+| Inspect current source | `hunk session get <id> --json` |
+| Read complete comment threads | `hunk session comment list <id> --type all --json` |
 | Inspect session structure | `hunk session review <id> [--include-patch] [--include-notes] --json` |
 | Check current focus | `hunk session context <id> --json` |
 | Reload working tree | `hunk session reload <id> -- diff --watch` |
