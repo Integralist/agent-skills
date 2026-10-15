@@ -1,0 +1,9 @@
+{
+  "hooks": {
+    "agent_settled": [
+      {
+        "command": "osascript -e 'display notification \"Pi agent finished turn\" with title \"Pi\"'"
+      }
+    ]
+  }
+}

@@ -17,6 +17,7 @@
     "git:github.com/Integralist/pi-transcript-enhancer",
     "git:github.com/Integralist/pi-context-shake",
     "git:github.com/Integralist/pi-skill-argument-hints",
+    "git:github.com/Integralist/pi-event-hooks",
     {
       "source": "git:github.com/fastly/agent-skills-internal",
       "skills": [
