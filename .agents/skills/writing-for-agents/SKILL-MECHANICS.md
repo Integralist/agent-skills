@@ -1,40 +1,43 @@
 # Skill mechanics
 
-The skill-specific branch of [`writing-for-agents`](SKILL.md): what changes when the document is a skill — frontmatter, the invocation choice, and router skills. Everything else about writing it is the universal reference in `SKILL.md`.
+Frontmatter choices that only apply when the document is a skill.
 
 ## Invocation
 
-Two choices, trading the two loads:
+Default to user-invoked: set `disable-model-invocation: true` and write a
+one-line, human-facing `description`. It costs no context, but only the user
+can start it.
 
-- A **model-invoked** skill keeps a `description`, so the agent can fire it autonomously — and other skills can reach it. You can still type its name: model-invocation always _includes_ user reach; a description only ever adds agent discovery, never removes the human's. The description is the skill's top-level context pointer, forced to stay loaded at all times — permanent context load in exchange for discoverability. A model-invoked skill whose content is all reference is also one home for shared reference: another skill can invoke it, so reference needed by several skills lives in one place. Mechanics: omit `disable-model-invocation`, and write a model-facing description carrying the trigger branches (the pointer-writing rules in `SKILL.md` apply in full).
-- A **user-invoked** skill strips the description from the agent's reach: only the human typing its name can invoke it, and no other skill can. Zero context load, but it spends cognitive load — you are the index that must remember it exists. Mechanics: set `disable-model-invocation: true`; the `description` becomes human-facing — a one-line summary, trigger lists stripped.
-
-Pick model-invocation only when the agent must reach the skill on its own, or another skill must. If it only ever fires by hand, make it user-invoked and pay no context load.
-
-Shared reference that two user-invoked skills both need can live in neither — with no descriptions, neither can fire the other. Push it to a plain file outside the skill system: external reference any skill can point at.
+Make a skill model-invoked (omit the flag) only when the agent must start it on
+its own or another skill must reach it. Its description then stays loaded every
+turn, so write it as a trigger (see "Be concrete" in [SKILL.md](SKILL.md)).
+Split part of a skill into its own model-invoked skill only when that part needs
+its own trigger.
 
 ## Model tier
 
-Every skill declares `metadata.model-tier`, so a model-picking harness (the Claude Code `auto-model` mod, Pi's `pi-auto-model`) switches to the right model when the skill runs instead of guessing from the description:
+Every skill declares `metadata.model-tier`, so a model-picking harness switches
+to the right model and effort when the skill runs:
 
 ```yaml
 metadata:
   model-tier: complex
 ```
 
-Pick the tier from the hardest work the skill does, not from its length:
+Pick the tier from the hardest work the skill does, not its length:
 
 - `trivial` — mechanical jobs: commit, branch, recap, reformat.
-- `moderate` — short writing or one contained task: a PR body, a ticket, a rewrite.
-- `complex` — building or changing software, debugging, research, planning, multi-file work. Also any skill driven by short replies (an interview): those replies keep the skill's model.
-- `frontier` — only work `complex` would fall short on: codebase-wide redesigns, very large migrations.
+- `moderate` — short writing or one contained task: a PR body, a ticket.
+- `complex` — building or changing software, debugging, research, planning,
+  multi-file work, or interviews driven by short replies.
+- `frontier` — work `complex` would fall short on: codebase-wide redesigns,
+  very large migrations.
 
-Write one lowercase value. When unsure, choose `complex`.
+When unsure, choose `complex`.
 
-## Splitting by invocation
+## Allowed tools
 
-The invocation cut of splitting (the sequence cut lives in `SKILL.md`): split off a model-invoked skill when you have a distinct leading word that should trigger it on its own — a trigger word you actually use in your prompts — or another skill must reach it. You pay context load for the new always-loaded description, so that independent reach has to be worth it.
-
-## Router skills
-
-When user-invoked skills multiply past what you can remember, that piled-up cognitive load is cured by a **router skill**: one user-invoked skill that names the others and when to reach for each, so the human has one skill to remember instead of many. It can only hint, never fire them: user-invoked skills have no description, so nothing but the human can reach them.
+`allowed-tools` pre-approves commands the skill runs routinely, so the user
+isn't prompted for each one. Claude Code honours it; other harnesses may not,
+so the skill must work without it. List narrow, low-risk commands such as
+`Bash(git status:*)`, and leave anything risky to the normal permission prompt.
