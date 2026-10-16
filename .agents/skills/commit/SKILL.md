@@ -3,218 +3,51 @@ name: commit
 description: >-
   Create git commits with intelligent file grouping. Use when
   committing changes or drafting a commit message.
-argument-hint: '[force | --force]'
-allowed-tools: Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
+argument-hint: '[force]'
+allowed-tools: Bash(git status:*), Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 metadata:
   model-tier: trivial
 ---
 
-# Commit
+Commit the working tree as one or more Conventional Commits, each subject
+saying why the change matters. The commits are the user's own: add no
+co-author or "generated with" trailer. Start with `git status --short --branch`
+and `git diff HEAD`.
 
-## Context
+**Branch.** On `main` or `master`, unless the user passed `force`, warn them
+and ask for approval to commit there. If they decline, use the branch skill to
+create a branch, then carry on.
 
-If the fields below show commands rather than output, run each one first.
+**Safety.** Secrets (keys, tokens, passwords, `.env` files) never get
+committed. Read the diff and any untracked files before staging; if you find
+one, stop and tell the user. Hooks always run.
 
-- Status: !`git status 2>/dev/null || echo "(not a git repo)"`
-- Staged: !`git diff --cached 2>/dev/null || echo "(not a git repo)"`
-- Unstaged: !`git diff 2>/dev/null || echo "(not a git repo)"`
-- Recent commits: !`git log -5 --oneline 2>/dev/null || echo "(not a git repo)"`
-- Branch: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
-- File stats: !`git diff --stat HEAD 2>/dev/null || git diff --stat --cached 2>/dev/null || echo "(not a git repo)"`
+**Staging.** If the tree is clean, say so and stop. If the user has already
+staged files, ask whether to commit only those or everything — their stage is
+deliberate. Stage files by name, never `git add -A` or `.`.
 
-## Process
+**Grouping.** Group files by purpose — a change with its tests, docs, config —
+and commit groups in dependency order. Commit an obvious grouping straight
+away. When it's ambiguous, offer 2–3 numbered groupings with your
+recommendation and wait.
 
-1. **Review context above:**
+**Message.** Use this shape, with type `feat`, `fix`, `docs`, `chore`, or `ci`:
 
-   - Check for merge conflicts, large files, sensitive file names
-     (`.env`, `.env.*`, `*.env`, `*secret*`, `*credential*`, `*.key`).
-   - Scan diff content for hardcoded secrets: API keys, tokens,
-     passwords, connection strings.
-   - For untracked files (from `git status --porcelain`), use
-     `git add -N <file>` then `git diff` to scan their contents for the
-     same secrets.
-   - **On `main` or `master`:** If the user passed `force` or `--force`
-     as a skill argument, proceed without branch confirmation. Otherwise,
-     STOP, warn the user, and wait for explicit confirmation.
-     Either argument bypasses only branch confirmation; all other safety
-     checks and hooks still apply.
+```txt
+<type>(<scope>): <why it matters, imperative mood>
 
-1. **Assess staging state:**
+<what changed and how it was verified>
+```
 
-   - If nothing is staged, nothing is modified, and nothing is
-     untracked, report the clean working tree and stop. A commit needs a
-     change; `--allow-empty` is not a substitute for one.
-   - If files are already staged, list them and ask whether to commit
-     only those or include unstaged changes.
-   - If nothing is staged, analyze all unstaged changes.
-   - Never silently add files on top of an existing partial stage.
+The subject answers "so what?"; the diff already shows the mechanics. Describe
+the diff, not the request — if they disagree, tell the user.
 
-1. **Analyze files for grouping:**
+```txt
+BAD:  fix(ratelimit): set burst to 200
+GOOD: fix(ratelimit): raise burst so valid retries stop being dropped
+```
 
-   - Purpose: config, docs, source, tests, scripts, assets.
-   - Relationships: files that reference each other; same module/feature.
-   - Change types: new files, modifications, renames.
-
-1. **Decide on commits:**
-
-   ```txt
-   All files single purpose → one commit, no prompt
-   Files split into obvious groups → sequential commits, no prompt
-   Grouping ambiguous → prompt with 2-3 options
-   ```
-
-1. **If grouping is ambiguous, present numbered options and wait for the
-   user's response:**
-
-   - Option 1: All in one commit (describe contents).
-   - Option 2: Suggested split (describe each group).
-   - Option 3: One per file (only if ≤5 files).
-
-1. **If splitting into multiple commits, order them so dependencies come
-   first.** Type definitions before consumers. Shared utilities before
-   features that import them. If ordering is unclear, ask.
-
-1. **For each commit group:**
-
-   - If splitting into multiple commits, unstage everything first:
-     `git reset --quiet` (skip this if committing only what the user
-     already staged).
-
-   - Stage specific files: `git add <file1> <file2>` (never `-A` or `.`).
-
-   - Verify staged: `git diff --cached --name-only`.
-
-   - **Draft the commit message:**
-     - **Subject = consequence/why (outcome/benefit/prevention), NOT diff
-       mechanics (what was typed).**
-     - **Apply the "So What?" test before finalizing:** If you ask "So what? /
-       Why does this matter?", the subject must already contain the answer. If
-       the subject merely describes what code/docs changed (`add X`,
-       `require Y`, `update Z`), rewrite it to state the consequence (`prevent X
-       so Y`, `enable X for faster Y`, `space out X so Y is readable`).
-     - **Precedence over `~/.gitcommit`:** Use `~/.gitcommit` only for
-       `type(scope):` syntax; ignore any legacy `WHAT` placeholder in it—the
-       subject is strictly the **WHY / consequence**.
-     - **Body = what changed + verification.**
-     - Keep the type prefix and imperative mood from `~/.gitcommit` (or
-       `chore`, `feat`, `fix`, etc.).
-     - Check repo configs (`commitlint.config.*`, `.commitlintrc*`, or
-       `.github/workflows/`) for allowed types and scopes. Repo rules take
-       precedence over `~/.gitcommit`; use Conventional Commits plural
-       `docs` (never `doc`), `feat`, `fix`, `chore`, etc.
-
-   - Write the commit message to a uniquely-named temp file with your
-     file-writing tool (NOT a shell heredoc), then commit from that file.
-     Use a random suffix so concurrent runs never collide, e.g.
-     `/tmp/commit-msg-<random>.txt` where `<random>` is a short random
-     string:
-
-     ```bash
-     git commit -F /tmp/commit-msg-a1b2c3.txt
-     ```
-
-     Do NOT pipe the message via a heredoc (`git commit -F - <<'EOF'`).
-     `git commit -F -` reads stdin until the closing delimiter appears
-     alone at column 0; if the shell receives it indented, with trailing
-     whitespace, or without a final newline, git never sees the terminator
-     and blocks on stdin forever — the call then hangs until it times out
-     with no error. Writing a real file sidesteps stdin, heredocs, and
-     shell escaping entirely.
-
-   - If any `git commit` call hasn't returned within a few seconds, assume
-     it is blocked reading stdin. Do not wait for the timeout — the message
-     never reached git. Re-run using the temp-file form above.
-
-1. **If pre-commit hook modifies files:** review the changes. Only amend
-   if they're mechanical (formatting, linting). If substantive or unclear,
-   ask before amending.
-
-1. **Update project plan:** If you have been working against a project
-   plan (a plan file, task list, or checklist in the conversation or
-   filesystem), mark the corresponding task done. Match the plan's
-   existing format: `[x]` for Markdown checklists, ✅ for emoji markers, or
-   whatever convention the document uses.
-
-## Agent Context Files
-
-Do not auto-commit user-specific agent state, secrets, or generated files.
-Tracked, repo-owned configuration—including files under `.pi/`, `.claude/`,
-`.gemini/`, and similar directories—is eligible for commit when it belongs to
-the requested change. Inspect each path and ask if its ownership or purpose is
-unclear.
-
-## Plan and Task Documents
-
-Project planning documents and task lists (under `projects/<slug>/`) need
-special handling:
-
-- **Not started** (no `[x]` checkboxes): commit freely — it's a new project plan
-  or task list being checked in.
-- **In progress** (some tasks done, implementation incomplete): commit
-  freely — a half-implemented plan or task list is a valid checkpoint.
-- **Completed** (implementation tasks done — remaining unchecked items are
-  post-deploy/operational only): update the document's `Status` field (e.g.
-  `Draft`, `Planning`, or `Ready` → `Complete`), then move the project directory
-  to `projects/completed/<slug>/` (or legacy `docs/plans/completed/` /
-  `docs/tasks/completed/`) and commit. Create the directory if it doesn't exist.
-  If unsure whether the document qualifies as complete, ask.
-
-## Grouping Examples
-
-**Clear single purpose (no prompt):**
-
-- 3 test files → one commit
-- README + docs/ files → one commit
-- Single feature's source files → one commit
-
-**Obvious split (no prompt, sequential commits):**
-
-- Source files + their tests → 2 commits
-- Config + docs + implementation → 3 commits
-- Core feature + supporting utilities → 2 commits
-
-**Ambiguous (prompt):**
-
-- Mixed docs, config, and source with unclear boundaries
-- Files that could logically go in multiple groups
-- Large change set with no obvious structure
-
-## Commit Message Style
-
-- **The subject states why the change matters, not the mechanics.** A
-  reader who never opens the diff should learn what improves. The diff
-  already shows what changed; the subject supplies the consequence.
-  Keep the type prefix and imperative mood from `~/.gitcommit` (for
-  syntax/scoping only, not subject content).
-
-  ```txt
-  BAD (WHAT):  feat(draft-pr): require loose bullet lists in pr descriptions
-  GOOD (WHY):  feat(draft-pr): space out bullet lists so pr descriptions are easier to read
-
-  BAD (WHAT):  fix(ratelimit): set burst to 200
-  GOOD (WHY):  fix(ratelimit): raise burst so valid retries stop being dropped
-
-  BAD (WHAT):  fix(auth): check if user is nil in Check()
-  GOOD (WHY):  fix(auth): prevent panic when Check() receives a nil user
-  ```
-
-- Use the body for what changed and how it was verified.
-- Describe the diff, not the request. When the user's description and the
-  actual change disagree — "fixed the nil pointer" against a diff holding
-  no pointer — the message follows the diff, and you say plainly that the
-  two differ. The commit outlives the conversation, so a claim that was
-  only ever true in chat becomes a false permanent record.
-- Use counts: "3 files" not "several files".
-- Active voice, specific language.
-- Omit needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
-- If `~/.gitcommit` exists, read it for the user's preferred
-  commit-message conventions (type prefixes, scopes, subject style,
-  examples) and follow them.
-
-## Safety
-
-- NEVER commit secrets (.env, credentials, keys, tokens, passwords,
-  connection strings).
-- NEVER skip hooks without user request.
-- NEVER force operations without user consent.
+**Commit.** Write the message to a uniquely named temp file with your
+file-writing tool, then `git commit -F <file>`. A heredoc into `git commit -F -`
+can hang forever on a malformed terminator. If a hook rewrites files, amend
+only for formatting or lint fixes; ask otherwise.
