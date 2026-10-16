@@ -29,7 +29,9 @@ hoped it would notice. For skill frontmatter, read
 
 **Be concrete.** Name specific artifacts and verbs, especially in descriptions,
 which stay loaded every turn. Lead with what the document is, then "Use when…"
-with one trigger per distinct case.
+with one trigger per distinct case. A description decides when the skill
+loads, not how it runs. The body carries the method once the skill loads, so in
+the description it only costs tokens and can mismatch the body after an edit.
 
 ```txt
 BAD:  Helps with documents.
@@ -53,4 +55,5 @@ file for them.
 
 **Stay portable.** Name other skills in plain words ("use the branch skill"),
 not as slash commands. Tell the agent which commands to run rather than using
-syntax only some harnesses execute.
+syntax only some harnesses execute, such as Claude Code's `` !`cmd` `` context
+injection.
