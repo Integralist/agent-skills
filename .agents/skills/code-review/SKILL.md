@@ -1,287 +1,263 @@
 ---
 name: code-review
 description: >-
-  Code review using specialized subagents. Analyzes behavior and tests,
-  security, reliability and performance, and maintainability. Use when
-  reviewing a remote PR or local code, including unpushed/uncommitted changes.
-  Automatically checks relevant specs, plans, and task lists. Pass
-  --plan=<path> to select a specific plan or task list.
+  Review a PR or local changes with parallel read-only reviewer subagents,
+  verify each finding, and check the change against its project's spec and
+  plan. Use when reviewing a remote PR or local code, including unpushed or
+  uncommitted changes. Pass --plan=<path> to name the plan or task list.
 argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan=<path>]'
 metadata:
   model-tier: complex
 ---
 
-# Code Review Skill
+# Code Review
 
-Review code with four specialized subagents in parallel, plus a fifth for spec
-and plan adherence when it applies. Works against GitHub PRs or local changes,
-including committed-but-unpushed and uncommitted work.
+Review a change with four read-only reviewer subagents in parallel, one per
+profile, plus a fifth for spec and plan adherence when the change has intent
+documents. A verifier subagent then tries to refute each finding, and the main
+conversation reports only what survives. Review only: never edit code, change
+state, or comment on a PR.
 
-> [!NOTE]
-> Some platforms cap concurrent subagents; the four dimensions fit a common
-> limit of 4. Run the Spec and Plan Adherence subagent as a fifth —
-> sequentially after the first four if the cap prevents a parallel spawn.
+1. **Gather the source.** Pick the source from the argument:
 
-## Input
+   | Argument                      | Source                          |
+   | ----------------------------- | ------------------------------- |
+   | PR URL or `owner/repo#number` | Remote PR                       |
+   | `--diff` or none              | Local branch vs. default branch |
+   | `--uncommitted`               | Working-tree changes            |
+   | `--all-local`                 | Local branch plus working tree  |
+   | File path or glob             | Explicit paths                  |
 
-Follow the loading instructions in [`MODES.md`](MODES.md) for the selected
-source and for Spec and Plan Adherence. Complete source gathering before
-spawning reviewers.
+   Run that source's commands from [MODES.md](MODES.md), writing the whole
+   diff once to a temp file, `DIFF_PATH`; reviewers read it from there rather
+   than re-fetching it. Never mix remote and local revisions silently. If the
+   diff is empty and no files match, report "No changes to review" and stop
+   before starting any reviewer. Done when `DIFF_PATH` and the changed-file
+   list exist.
 
-## Gather the diff once
+2. **Find the intent.** Collect every intent document, in this order:
 
-Gather the full diff **once** and write it to a single temp file (e.g.
-`${TMPDIR:-/tmp}/code-review.diff`). Subagents read the diff from that path — do
-not embed it in prompts, and do not have any subagent re-fetch or re-compute it.
-This avoids re-tokenizing the diff per subagent.
+   1. the `--plan=<path>` file;
+   2. project files in the diff, including under `projects/completed/`: a
+      project the diff adds or moves is this change's contract, not history;
+   3. the plan named by an `Execution-Plan:` trailer in the reviewed commits;
+   4. a `projects/` link in the PR body.
 
-Create a second temp file, `CONTEXT_PATH`, containing:
+   For each plan or task list found, also load its project's `spec.md`, and
+   the plan a task list came from. Then add each living spec a found project
+   spec names under Living Specifications, every `docs/specs/` file the diff
+   changes, and any `docs/specs/` file whose contract covers the changed
+   behaviour; when it's unclear whether one applies, record an unknown. A
+   completed project outside the diff is history, and its living spec
+   supersedes it. Read every document at the reviewed revision.
 
-- The stated purpose of the change
-- PR title and body, when available
-- Relevant repository instructions
-- Intent documents — project specs, plans, task lists, and living specs —
-  resolved by "Spec and Plan Adherence" in `MODES.md`, each labelled with its
-  path
-- Available test results
+   Write a second temp file, `CONTEXT_PATH`, with the change's stated purpose,
+   PR title and body, the repository's instructions, each intent document
+   labelled with its path, and any test results. Done when `CONTEXT_PATH` is
+   written.
 
-Record for the subagent prompts:
+3. **Review in parallel.** Start one read-only subagent per profile below, on
+   the most capable model available: a missed defect costs more than the
+   tokens. [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md)
+   covers turn budgets and retries. If the platform caps concurrency, run the
+   adherence reviewer after the four. Give each one:
 
-- `DIFF_PATH` — absolute path to the diff file just written
-- `CONTEXT_PATH` — absolute path to the review-context file
-- `FILE_LIST` — changed files, one per line
-- `CONVENTIONS` — every conventions skill matching a changed file (table below)
-- `LARGE_DIFF` — true if the diff exceeds ~3000 lines (see "Large diffs")
+   - its profile's question, what it owns, and what it hands off;
+   - `DIFF_PATH`, `CONTEXT_PATH`, and the changed-file list, and for a diff
+     over about 3000 lines, an instruction to read it file by file;
+   - the conventions skills matching the changed files: `conventions-go` for
+     `*.go`, `conventions-python` for `*.py`, `conventions-sql` for `*.sql`,
+     `conventions-markdown` for `*.md`, and `conventions-mermaid` for Mermaid
+     files or fences;
+   - the rule to judge the change against `CONTEXT_PATH`, and to report an
+     unknown, not a defect, when intent is unclear;
+   - the findings schema below, and the rule that every changed file is either
+     reviewed or skipped with a reason.
 
-| Changed file                                         | Conventions skill      |
-| ---------------------------------------------------- | ---------------------- |
-| `*.go`                                               | `conventions-go`       |
-| `*.py`                                               | `conventions-python`   |
-| `*.sql`                                              | `conventions-sql`      |
-| `*.md`                                               | `conventions-markdown` |
-| `*.mmd`, `*.mermaid`, or a `mermaid` fence in a diff | `conventions-mermaid`  |
+   Done when every reviewer is `COMPLETE` and every changed file was reviewed
+   by at least one profile that applies; re-run or redirect reviewers to close
+   a gap.
 
-Reviewers must judge changes against `CONTEXT_PATH`. When intent remains
-unclear, they report an unknown rather than infer a defect.
+4. **Verify.** Give each finding (or a batch, under a concurrency cap) to a
+   verifier subagent on the same model, told to refute it:
 
-**Intent sources can disagree.** The PR body, project spec, living spec,
-operational docs, and code each state intended behavior. When two disagree,
-report the contradiction and cite both locations — settling it by trusting one
-source hides the question the author must answer. A demonstrated contradiction
-is a finding whose correction names both resolutions (change the code, or
-amend the spec); wording too ambiguous to demonstrate one is an unknown.
+   - Read the cited lines and their context at the reviewed revision.
+   - Refute it when the code is neither changed nor bound by a contract the
+     diff changes, a guard or caller already prevents it, the line doesn't
+     match, or it misreads the language or library.
+   - "Intended" refutes it only when a `CONTEXT_PATH` source states that
+     intent and no other source contradicts it.
+   - For a consistency finding, open each cited peer and refute it unless at
+     least two show the pattern.
+   - Leave the working tree untouched: run Python as `python3 -B`, keep scratch
+     files in a temp directory, and check `git status` is unchanged after.
+   - Default to refuted unless the finding is demonstrably real. A High
+     security finding it can neither confirm nor refute is unresolved: move it
+     to the open questions with the evidence that would settle it.
 
-## Spawn Subagents
+   Each verifier returns:
 
-Spawn one subagent per dimension (roles below are descriptions, not agent names
-— use your platform's primitives). Run each on the cheapest model tier adequate
-to its dimension (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md),
-including its completion and retry protocol). Set `max_turns: 40` (or platform
-equivalent) so deep reading and cross-file checks
-do not hit turn limits prematurely. When your platform distinguishes named agent
-files from inline characters, prefer saved agent files if configured, or launch
-the subagent inline. Each prompt must include:
+   ```json
+   {
+     "status": "COMPLETE | INCOMPLETE",
+     "isReal": true,
+     "unresolved": false,
+     "confidence": "high | medium | low",
+     "reason": "what confirms or refutes it",
+     "correctedSeverity": "High | Medium | Low (omit if unchanged)"
+   }
+   ```
 
-- The review dimension and focus area
-- `DIFF_PATH`, `CONTEXT_PATH`, and `FILE_LIST`, with instructions to read both
-  files
-- For `LARGE_DIFF`: inspect per-file shards or changed files incrementally
-- **Stay within the assigned dimension. Mention another dimension only when
-  needed to explain impact; do not independently review it.**
-- **Review-only; do not modify code or run tools that change state. Do NOT add
-  comments to any PR. Return findings as structured JSON (schema below) when
-  complete.**
+   Done when every finding has a verdict.
 
-### Findings schema
+5. **Report** with the template below. Keep findings with `isReal: true`,
+   applying any corrected severity; merge duplicates across profiles; sort
+   High, Medium, then Low; list each dropped finding with the verifier's
+   reason. When actionable findings exist, offer to address them. Done when
+   every changed file is accounted for, every kept finding is verified, and
+   every unknown is kept apart from the defects.
+
+**Findings schema.** Every reviewer returns:
 
 ```json
 {
   "status": "COMPLETE | INCOMPLETE",
   "files_reviewed": ["path/to/file"],
-  "files_skipped": [
-    {
-      "file": "path/to/file",
-      "reason": "why this dimension does not apply"
-    }
-  ],
+  "files_skipped": [{ "file": "path/to/file", "reason": "why this profile doesn't apply" }],
   "findings": [
     {
       "severity": "High | Medium | Low",
       "file": "path/to/file",
-      "line": "approx line or range",
-      "snippet": "short relevant code excerpt",
+      "line": "approximate line or range",
+      "snippet": "short relevant excerpt",
       "why": "why it matters",
-      "suggestion": "concrete improvement"
+      "suggestion": "smallest viable correction"
     }
   ],
-  "unknowns": [
-    {
-      "question": "fact or intended behavior that could not be established",
-      "why": "why resolving it matters to this review dimension"
-    }
-  ]
+  "unknowns": [{ "question": "what couldn't be established", "why": "why it matters here" }]
 }
 ```
 
-Every reviewer must place every `FILE_LIST` entry in either `files_reviewed` or
-`files_skipped`. Return empty finding and unknown arrays when nothing is worth
-raising. Unknowns are not findings: do not present an unanswered question as a
-defect unless the code demonstrates one.
+**Severity** reflects impact and likelihood, not the reviewer's confidence.
+High means a likely security compromise, data loss, outage, or broken core
+contract. Medium means a demonstrated defect under plausible conditions. Low
+means a contained cost with no user-visible impact: a minor defect, or a real
+maintainability or testability cost, never a style preference. Each
+suggestion is the smallest viable correction; add an alternative only when it
+exposes a real trade-off.
 
-### Severity
+**When sources disagree.** The PR body, project spec, living spec, docs, and
+code each state intent. When two disagree, report the contradiction citing
+both; trusting one hides the question the author must answer. A demonstrated
+contradiction is a finding whose correction names both fixes (change the code,
+or amend the spec); wording too vague to demonstrate one is an unknown.
 
-- **High** — likely security compromise, data loss, outage, or violation of a
-  core contract
-- **Medium** — demonstrated defect under plausible conditions
-- **Low** — contained cost with no user-visible impact: a minor defect, or a
-  concrete maintainability or testability cost. Not a style preference.
+## Profiles
 
-Severity reflects impact and likelihood, not reviewer confidence.
+Each profile owns one question, and a defect belongs to the profile whose
+question it answers. A reviewer stays in its profile, mentioning another only
+to explain impact.
 
-### Review Dimensions
+1. **Behaviour and tests:** *does the change do what `CONTEXT_PATH` says, and
+   do the tests prove it?* Owns intended behaviour, logic errors, edge cases,
+   regressions, and the contracts callers rely on. For every changed exported
+   symbol, signature, or behaviour, find its callers and confirm each still
+   holds: a caller the change breaks is a finding, even in an unchanged file.
+   The same goes for an unchanged file bound by a spec, doc, or policy the
+   diff changes. Flags new public functions or error branches without unit
+   tests, new endpoints or slices without integration tests, and assertions
+   that can't catch a contract violation; include
+   [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) in its prompt. Hands off
+   failure, concurrency, load, and rollout (reliability) and attacker-driven
+   misuse (security).
+2. **Security:** *can an attacker or untrusted input make this code do
+   something it shouldn't?* Owns trust boundaries, authentication and
+   authorization, injection, information leaks, unsafe dependencies,
+   fail-open behaviour, and resource use an attacker can inflate. Hands off
+   cost under ordinary load (reliability).
+3. **Reliability, performance, and rollout:** *does it keep working under
+   failure, concurrency, load, and deployment?* Owns state transitions,
+   concurrency, context propagation, retries, partial failure, atomicity,
+   resource lifecycle, and unhandled error paths; a query or remote call per
+   loop item (N+1), work growing faster than its input, hot-path allocation,
+   missing pagination or indexes, and blocking calls on latency-sensitive
+   paths; and migrations that lock, rewrite, or can't be undone, changes that
+   break while old and new versions run side by side, and changes with no
+   rollback path. Load `conventions-sql` first when SQL changed. Hands off
+   error-handling style (maintainability).
+4. **Maintainability and conventions:** *what does this cost the next person
+   who changes it?* Owns consistency with project precedent, readability, API
+   ergonomics, naming, error-handling style, observability conventions, idioms,
+   and docs or comments the change left stale. Load the matching conventions
+   skills first and judge against project rules over generic ones. For a
+   consistency finding, use the precedent skill and cite at least two peer
+   `file:line` locations; one peer is a coincidence. Hands off whether errors
+   are handled at all (reliability).
+5. **Spec and plan adherence** (only when step 2 found intent documents):
+   *does the change deliver what its spec and plan promise, and do they
+   agree?* Include the intent documents in its prompt. It checks:
+   - **Milestones:** each milestone the change claims or ticks is met.
+   - **Interfaces:** the code matches the plan's `Consumes` and `Produces`
+     signatures.
+   - **Unplanned files:** changed files absent from the plan's File Changes
+     table or the task list.
+   - **Task drift:** for a task list, the code departs from its verbatim tests
+     or implementation.
+   - **Scope excess:** work beyond the stated goal, reported without judging
+     it.
+   - **Spec conflict:** the project spec, living spec, docs, PR body, and code
+     disagree, including unchanged code bound by a contract the diff changes.
+   - **Delta sync:** every Behavioural Delta scenario appears in the living
+     spec it names, and every behavioural edit to `docs/specs/` appears in a
+     delta, as [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) describes.
 
-Each dimension owns one question. A defect belongs to the dimension whose
-question it answers; the others hand it off. Include the owning question and
-hand-offs in each subagent prompt.
+   If `--plan` was passed but nothing was found, skip it and say so once.
 
-1. **Behavior and Tests Review** — *Does the change do what `CONTEXT_PATH`
-   says, and do the tests prove it?*
-   - Owns: intended behavior, logic and computation errors, edge cases,
-     regressions, and the contract callers rely on.
-   - Blast radius: for every changed exported symbol, signature, or observable
-     behavior, search for its callers and confirm each still holds. A caller
-     the change breaks is a finding against the change, even when the caller's
-     file is unchanged. The same holds for contracts: when the diff changes a
-     spec, doc, or policy statement, check the unchanged code that must now
-     satisfy it.
-   - Tests: (a) new public functions or error branches lacking unit tests; (b)
-     new API endpoints or workflow slices lacking integration tests; (c)
-     assertions that cannot detect a contract violation. Before dispatch, load
-     [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) and include its contents
-     in this reviewer's prompt.
-   - Hands off: behavior under failure, concurrency, load, or deployment
-     (Reliability); attacker-driven misuse (Security).
+## Report template
 
-2. **Security and Abuse Resistance Review** — *Can an attacker or untrusted
-   input make this code do something it should not?*
-   - Owns: trust boundaries, authentication and authorization, injection,
-     information leakage, unsafe dependencies, fail-open behavior, and work or
-     resource use an attacker can inflate.
-   - Hands off: cost under ordinary load (Reliability).
-   - **Use the most capable model available** — security findings are
-     highest-stakes and least tolerant of misses.
+Spec conflicts and delta-sync gaps rank with the other actionable items. The
+other adherence checks go under Informational unless the user asked for strict
+scope. If a reviewer hit its turn limit, add a `⚠️` line after "Subagent pass"
+giving the original and retry limits and whether the retry completed.
 
-3. **Reliability, Performance, and Rollout Review** — *Does it keep working
-   under failure, concurrency, load, and deployment?*
-   - Failure and state: state transitions, concurrency, context propagation,
-     retries, partial failures, atomicity, resource lifecycle, leaks,
-     double-close, and whether every error path is handled.
-   - Performance: a query or remote call per item in a loop (N+1), work that
-     grows faster than its input, allocation in hot paths, missing pagination
-     or indexes, and blocking calls on latency-sensitive paths.
-   - Rollout: migrations that lock or rewrite large tables or cannot be undone;
-     schema, API, config, or message changes that break while old and new
-     versions run side by side; changes with no rollback path. When
-     `CONVENTIONS` includes `conventions-sql`, load it first.
-   - Hands off: error-handling style and wrapping (Maintainability).
+````markdown
+## {PR #<number> Review Summary: "<title>" | Code Review: <branch, "uncommitted", or path>}
 
-4. **Maintainability and Conventions Review** — *What does this cost the next
-   person who changes it?*
-   - Owns: consistency with project precedent, readability, API ergonomics,
-     naming, error-handling style, observability conventions (log keys,
-     metrics, spans), language idioms, and comments or docs the change left
-     stale.
-   - Load every skill in `CONVENTIONS` first and judge changed files against
-     project rules rather than generic ones. For file types with no
-     conventions skill, use the repository's instructions when available.
-   - For consistency findings, load the `precedent` skill and cite at least
-     two peer `file:line` locations that establish the pattern the change
-     departs from. One peer is a coincidence; a finding with fewer than two
-     citations is an invention.
-   - Hands off: whether errors are handled at all (Reliability).
+- **Date:** {YYYY-MM-DD HH:MM}
+- **Mode:** {remote PR | branch-diff | uncommitted | all-local | paths}
+- **Base:** {merge-base ref, for branch-diff and all-local}
+- **Files reviewed:** {count}
 
-5. **Spec and Plan Adherence Review** *(when relevant intent documents were
-   located)*
-   — *Does the change deliver what its specs and plan promise, and do those
-   documents agree?* See "Spec and Plan Adherence" in `MODES.md`. The prompt
-   must additionally include the intent document contents.
+**Overall assessment:** {one or two sentences}
 
-Collect all results before verification. Do not advance until every reviewer
-has accounted for every file and every changed file was reviewed by at least
-one applicable dimension. Re-run or redirect reviewers to close any gap.
+**Subagent pass:** {complete, or incomplete with what remains}
 
-Every suggestion must give the smallest viable correction. Include an
-alternative only when it exposes a meaningful trade-off. Do not propose
-unrelated redesigns.
+### Actionable Items
 
-## Verify Findings
+{Confirmed findings, High to Medium to Low: file and line, snippet, impact,
+and the smallest viable correction.}
 
-Before compiling, run an adversarial verification pass to drop false positives.
-For each finding, spawn a verifier subagent (or batch findings per verifier if
-your platform caps concurrency — this stage runs *after* the dimension
-reviewers, so it does not compete for the cap). Set `max_turns: 40` (or
-`max_turns: 50` when batching findings) so caller and invariant searches across
-the codebase do not hit turn limits prematurely. Instruct each verifier to **try
-to refute** the finding, not confirm it:
+### Spec and Plan Adherence
 
-- Read the cited `file`/`line` and enough surrounding context from `DIFF_PATH`
-  and the selected source described in `MODES.md`.
-- Look for reasons it is wrong or moot: code neither changed by the diff nor
-  bound by a contract the diff changes; a guard/caller/invariant already
-  prevents it; the behavior is intended; the claim misreads language/library
-  semantics; the line reference doesn't match real code.
-- "Intended" refutes a finding only when you cite the `CONTEXT_PATH` source
-  that states the intent and no other source contradicts it. When sources
-  disagree, the contradiction is real: confirm it as one.
-- For a consistency finding, open each cited peer and confirm at least two
-  show the claimed pattern; refute the finding otherwise.
-- When running code settles a finding, leave the working tree untouched: run
-  Python as `python3 -B` (or with `PYTHONDONTWRITEBYTECODE=1`), keep scratch
-  state in memory or a temp directory, and confirm `git status` is unchanged
-  afterwards.
-- **Default to refuted** when the finding cannot be positively confirmed from
-  the code. The bar is "demonstrably real," not "plausible."
-- Exception: a High security finding you can neither confirm nor refute
-  returns `isReal: false` with `unresolved: true`. An unproven attack path is
-  an open question, not a dismissal.
+{Only when that reviewer ran.}
 
-Each verifier returns the shared completion status along with its verdict:
+- **Intent documents:** {paths}
+- **Milestones:** …
+- **Interfaces:** …
+- **Unplanned files:** …
+- **Task drift:** …
+- **Scope excess:** …
 
-```json
-{
-  "status": "COMPLETE | INCOMPLETE",
-  "isReal": true,
-  "unresolved": false,
-  "confidence": "high | medium | low",
-  "reason": "what confirms or refutes it",
-  "correctedSeverity": "High | Medium | Low (omit if unchanged)"
-}
-```
+### Informational / No Action Needed
 
-Keep only findings with `isReal: true`; apply any `correctedSeverity`. Move
-each finding marked `unresolved` to unknowns, stating the evidence that would
-settle it. Record each dropped finding with the verifier's reason; the summary
-lists them so a reader can catch a wrong refutation. Keep unknowns separate and
-deduplicate them; do not send them through defect verification unless they
-assert a defect.
+{Brief observations needing no change.}
 
-## Compile Summary
+### Open Questions
 
-Deduplicate confirmed findings — if multiple subagents flag the same file/line,
-combine them into one item citing all relevant dimensions. Sort by severity
-(High → Medium → Low). List dropped findings under "Dropped by Verification".
-List unresolved unknowns after findings and identify what evidence would answer
-each one. Load "Remote PR" or "Local" from [`OUTPUT.md`](OUTPUT.md), plus "Spec
-and Plan Adherence" when that reviewer ran, and render the consolidated review. Completion
-requires every changed file accounted for, every retained finding verified, and
-every unknown separated from defects.
+{Unknowns that limited the review, and the evidence that would answer each.}
 
-## Agent teams (if your harness supports it)
+### Dropped by Verification
 
-Run the review subagents as parallel teammates: spawn one per review dimension,
-have each report findings to the team lead, then synthesize. Faster than
-sequential subagent calls when the harness can run them concurrently.
-
-See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for enablement
-instructions.
+{One line per dropped finding: `file:line` — claim — why it was refuted, or
+"None".}
+````

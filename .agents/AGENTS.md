@@ -53,7 +53,7 @@
 
 # Cost & Subagents
 
-- **Model Selection:** Default subagents to the cheapest adequate model (see `.agents/skills/shared/SUBAGENT-STEERABILITY.md`).
+- **Model Selection:** Choose each subagent's model by what a miss would cost. Mechanical work (search, bulk reads, formatting, drafting prose) goes on the cheapest tier; judgment work (code or security review, diagnosis, design) stays on the session model or better. See `.agents/skills/shared/SUBAGENT-STEERABILITY.md`.
 - **Completion:** Whenever spawning subagents, follow
   `.agents/skills/shared/SUBAGENT-STEERABILITY.md#completion-and-retry`:
   verify completion and retry incomplete work with a higher turn limit. Report

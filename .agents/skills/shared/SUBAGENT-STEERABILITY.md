@@ -79,20 +79,21 @@ why those skills need no steering gate.
 ## Model tier for the subagent
 
 A subagent inherits the main model by default — often needlessly expensive.
-When your harness lets you set a subagent's model, pick the cheapest tier
-adequate to the task. Never hardcode a model name; the main agent chooses
-within its own ecosystem.
+When your harness lets you set a subagent's model, pick the tier by what a
+miss would cost. Never hardcode a model name; the main agent chooses within
+its own ecosystem.
 
 - **Cheapest tier** — mechanical, high-recall, low-judgment: bulk file
   reads, grep/trace, drafting commit/PR/changelog prose, formatting, and
   the apply agents of a verified-pattern fan-out.
-- **Mid tier** — analytical read-only reasoning: code review, security
-  analysis, root-cause diagnosis.
-- **Main (session) model** — engineering judgment: design, ambiguous
-  debugging, and the interactive apply phase of a two-phase split.
+- **Mid tier** — read-only analysis whose output is checked before anyone
+  acts on it: research summaries, first-pass triage of failures.
+- **Main (session) model or better** — engineering judgment: code review,
+  security analysis, root-cause diagnosis, design, ambiguous debugging, and
+  the interactive apply phase of a two-phase split.
 
-The read-only audit phase is the natural place to spend a cheap tier; the
-interactive apply stays on the main model.
+A mechanical read-only scan is the natural place for a cheap tier; review and
+the interactive apply stay on the main model.
 
 Never silently downgrade work touching product-code correctness or
 design/debug judgment. Disclose the downgrade at the gate that approves the
