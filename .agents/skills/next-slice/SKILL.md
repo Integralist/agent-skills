@@ -3,7 +3,7 @@ name: next-slice
 description: Work through every task in one slice of a plan or task list.
 disable-model-invocation: true
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Next Slice

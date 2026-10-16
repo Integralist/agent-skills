@@ -3,7 +3,7 @@ name: next-task
 description: Work on the next task in a plan or task list.
 disable-model-invocation: true
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Next Task
