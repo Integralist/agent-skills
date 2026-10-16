@@ -87,6 +87,11 @@ belong in a follow-on project rather than rewriting a completed project.
 - **Complete** — all tasks in the project are verified and the project can move
   to `projects/completed/`.
 
+To complete a project, set its `Status` to `Complete` and move its directory to
+`projects/completed/<yyyy-mm-dd>-<slug>/` in the same commit. A project counts
+as complete once its implementation tasks are done; unchecked post-deploy items
+don't block it. Ask if unsure.
+
 Keep planning documents scoped to the project they describe. Put durable
 repository usage instructions in the relevant README or `docs/` document instead
 of leaving them only in a project plan.

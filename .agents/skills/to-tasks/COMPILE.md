@@ -189,9 +189,8 @@ individual task descriptions and checkboxes only in the task list.
   file.
 
 Date from `date +%F`, author from `git config user.name`. A new task list's
-`Status` is always `Ready`; the transition to `Complete` and the move to
-`projects/completed/<yyyy-mm-dd>-<slug>/` happen at commit time — see
-[`commit`](../commit/SKILL.md).
+`Status` is always `Ready`; the transition to `Complete` follows
+[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md#status).
 
 Load [`product-voice`](../product-voice/SKILL.md) and write `Summary` immediately
 above `Pull Request Delivery`. In 2–3 sentences, explain this slice's problem,

@@ -43,8 +43,6 @@ stash, reset, or commit unrelated work to clear the problem.
 3. Follow the repository's commit-message conventions and the
    [commit skill's message/security guidance](../../commit/SKILL.md). Use the
    consequence-focused title and a unique message file with `git commit -F`.
-   Do not invoke its project archival/lifecycle steps after every task: a task
-   checkpoint is not slice acceptance or whole-plan completion.
 4. Include these trailers in each implementation/correction commit. Replace
    placeholders with the stable task key, relative plan path, and kind. For a
    correction affecting multiple tasks, repeat `Execution-Task:` for each.

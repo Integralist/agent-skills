@@ -41,5 +41,5 @@ project record, so an auditor can see each delta after the living spec moves on.
 Done when every scenario changed in the living spec appears under a delta
 heading: `MODIFIED` with baseline and updated blocks, `REMOVED` with reason
 and migration. The fix itself is the implementation, so the project needs no
-`plan.md` or tasks; [`commit`](../commit/SKILL.md) handles the Complete status
-and the move to `projects/completed/`.
+`plan.md` or tasks; [`PROJECTS-README.md`](../shared/PROJECTS-README.md#status)
+covers the Complete status and the move to `projects/completed/`.

@@ -132,8 +132,8 @@ the plan in its artifact table.
 
 Write to `projects/<yyyy-mm-dd>-<slug>/plan.md`. Date from `date +%F`, author
 from `git config user.name`. A new plan's `Status` is always `Planning`; the
-transition to `Complete` and the move to `projects/completed/<yyyy-mm-dd>-<slug>/`
-happen at commit time — see [`commit`](../commit/SKILL.md).
+transition to `Complete` follows
+[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md#status).
 
 ````markdown
 # {Plan Name}
