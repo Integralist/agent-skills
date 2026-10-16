@@ -18,7 +18,7 @@ const policyPath = ".agents/skills/shared/EXECUTION-MODELS.md";
 const piPath = ".agents/skills/execute-plan/references/pi-subagents.md";
 const claudePath = ".agents/skills/execute-plan/references/claude-code.md";
 const compilerPath = ".agents/skills/to-tasks/COMPILE.md";
-const executorPath = ".agents/skills/next-slice/EXECUTE.md";
+const executorPath = ".agents/skills/execute-plan/references/worker.md";
 const agentPath = ".claude/agents/plan-executor.md";
 const commitsPath = ".agents/skills/execute-plan/references/task-commits.md";
 const autoPath = ".agents/skills/execute-plan/references/auto.md";
@@ -124,19 +124,20 @@ test("compiler, executor, adapters and commits carry auto authority without chan
 test("manual commands and coordinator share one compiler and executor", () => {
   const content = read(skillPath);
   assert.match(content, /to-tasks\/COMPILE\.md/);
-  assert.match(content, /next-slice\/EXECUTE\.md/);
+  assert.match(content, /references\/worker\.md/);
   for (const name of ["to-tasks", "next-slice"]) {
     assert.match(read(`.agents/skills/${name}/SKILL.md`), /^disable-model-invocation: true$/m);
   }
   assert.match(read(".agents/skills/to-tasks/SKILL.md"), /\(COMPILE\.md\)/);
-  assert.match(read(".agents/skills/next-slice/SKILL.md"), /\(EXECUTE\.md\)/);
   assert.match(read(compilerPath), /Integration \/ Boundary Verification Task/);
   assert.match(read(executorPath), /coordinated/);
   assert.match(read(executorPath), /parent plan/);
 });
 
-test("manual plan execution can still author tests and implementation inline", () => {
-  assert.match(read(executorPath), /### Manual plan input\s+Author tests and implementation in this main conversation/);
+test("manual commands build plan milestones inline through one item procedure", () => {
+  for (const name of ["next-task", "next-slice"])
+    assert.match(read(`.agents/skills/${name}/SKILL.md`), /\.\.\/shared\/BUILD-ITEM\.md/);
+  assert.match(read(".agents/skills/shared/BUILD-ITEM.md"), /milestone outcomes, which you break into\s+test-first steps yourself/);
 });
 
 function assertClaudeReadiness(adapter, agent) {
@@ -327,8 +328,7 @@ test("milestone acceptance requires outcome evidence and preserves legacy resume
   assert.match(coordinator, /A task commit does not complete a milestone/);
   assert.match(coordinator, /legacy `Task N\.N` plan checkboxes/);
   assert.match(coordinator, /never renumber/);
-  assert.match(read(".agents/skills/next-slice/SKILL.md"), /milestone outcomes/);
-  assert.match(read(".agents/skills/next-task/SKILL.md"), /milestone outcomes/);
+  assert.match(read(".agents/skills/next-slice/SKILL.md"), /milestone outcome/);
 });
 
 function stripFences(content) {

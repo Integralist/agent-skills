@@ -14,7 +14,7 @@ Your model and effort come from this definition; report substitutions or
 unknown effective settings rather than claiming a verified model.
 
 Read the supplied packet, repository instructions, task document, and
-[shared slice procedure](../../.agents/skills/next-slice/EXECUTE.md). Resolve
+[worker procedure](../../.agents/skills/execute-plan/references/worker.md). Resolve
 that procedure's links relative to its directory. Work in coordinated mode.
 
 If the packet's stage is `readiness`, inspect only: report `READY_ONLY`, the

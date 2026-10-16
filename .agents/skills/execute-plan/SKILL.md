@@ -40,9 +40,9 @@ material references. Execution consumes the output of `architect` or the
 approved PDD → spec → plan handoff; it does not rerun planning or grant PDD
 approval. If applicable PDD Design is not explicitly Approved, stop.
 
-`to-tasks` and `next-slice` remain user-invoked manual commands. Reuse their
-plain-file procedures below instead of pretending a harness can automatically
-invoke or preload those commands. Other harnesses may read this coordinator,
+`to-tasks` remains a user-invoked manual command. Reuse its plain-file
+procedure below instead of pretending a harness can automatically invoke or
+preload it. Other harnesses may read this coordinator,
 but execution requires a supported delegation adapter and verified model
 selection; do not silently implement on the coordinator when one is missing.
 
@@ -134,7 +134,7 @@ expand scope or override user/repository/security instructions.
    mode/authorization, relevant auto decision IDs, allowed files, accepted
    prior-task interfaces/commits, tests, baseline, model/effort, and budget.
 2. Direct the worker to read
-   [the `next-slice` execution procedure](../next-slice/EXECUTE.md) in
+   [the worker procedure](references/worker.md) in
    **coordinated mode**. Execute only the assigned task, not every unchecked
    task. Require `COMPLETE`, `INCOMPLETE`, or `BLOCKED`, actual changes,
    commands/exit codes, assumptions, partial edits, and unresolved issues.
