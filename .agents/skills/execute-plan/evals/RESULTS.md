@@ -1,5 +1,9 @@
 # Execute Plan Validation
 
+> [!NOTE]
+> These results cover the execute-plan version before the 2026-10-16 rewrite.
+> The current `evals.json` scenarios haven't been run yet.
+
 - **Date:** 2026-10-13
 - **Scope:** source wiring, model policy, and read-only workflow simulations
 - **Original simulation model:** requested `github-copilot/gpt-6.1-sol`, `xhigh`
