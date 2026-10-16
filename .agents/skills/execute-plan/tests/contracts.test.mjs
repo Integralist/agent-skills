@@ -17,7 +17,7 @@ const skillPath = ".agents/skills/execute-plan/SKILL.md";
 const policyPath = ".agents/skills/shared/EXECUTION-MODELS.md";
 const piPath = ".agents/skills/execute-plan/references/pi-subagents.md";
 const claudePath = ".agents/skills/execute-plan/references/claude-code.md";
-const compilerPath = ".agents/skills/to-tasks/COMPILE.md";
+const compilerPath = ".agents/skills/to-tasks/SKILL.md";
 const executorPath = ".agents/skills/execute-plan/references/worker.md";
 const agentPath = ".claude/agents/plan-executor.md";
 const commitsPath = ".agents/skills/execute-plan/references/task-commits.md";
@@ -113,9 +113,8 @@ test("auto continues through final residual work but cannot invent acceptance or
 });
 
 test("compiler, executor, adapters and commits carry auto authority without changing manual workflows", () => {
-  for (const relative of [compilerPath, executorPath, commitsPath, piPath, claudePath])
+  for (const relative of [executorPath, commitsPath, piPath, claudePath])
     assert.match(read(relative), /auto/, `${relative}: missing auto handoff`);
-  assert.match(read(compilerPath), /coordinator.*auto/s);
   assert.match(read(executorPath), /decision IDs/);
   assert.match(read(commitsPath), /retry.*once/s);
   assert.match(read("README.md"), /--auto/);
@@ -123,12 +122,11 @@ test("compiler, executor, adapters and commits carry auto authority without chan
 
 test("manual commands and coordinator share one compiler and executor", () => {
   const content = read(skillPath);
-  assert.match(content, /to-tasks\/COMPILE\.md/);
+  assert.match(content, /to-tasks\/SKILL\.md/);
   assert.match(content, /references\/worker\.md/);
   for (const name of ["to-tasks", "next-slice"]) {
     assert.match(read(`.agents/skills/${name}/SKILL.md`), /^disable-model-invocation: true$/m);
   }
-  assert.match(read(".agents/skills/to-tasks/SKILL.md"), /\(COMPILE\.md\)/);
   assert.match(read(compilerPath), /Integration \/ Boundary Verification Task/);
   assert.match(read(executorPath), /coordinated/);
   assert.match(read(executorPath), /parent plan/);
@@ -198,7 +196,6 @@ test("the coordinator contains review, correction, resume and whole-plan gates",
 test("unsliced requirements have a bounded execution route after slices end", () => {
   assert.match(read(skillPath), /tasks-final-verification\.md/);
   assert.match(read(skillPath), /return directly to Step 5/);
-  assert.match(read(compilerPath), /tasks-final-verification\.md/);
 });
 
 function assertTaskCommitPolicy(coordinator, executor, policy) {
@@ -312,7 +309,6 @@ function assertMilestoneMapping(compiler, template) {
   assert.match(compiler, /Keep milestone IDs and task IDs separate/);
   assert.match(compiler, /every unchecked milestone/);
   assert.match(template, /\*\*Supports:\*\*/);
-  assert.match(template, /## Milestone coverage/);
 }
 
 test("compiled tasks map to milestones without copying the plan checklist", () => {

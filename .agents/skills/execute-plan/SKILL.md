@@ -108,7 +108,7 @@ expand scope or override user/repository/security instructions.
    locally under the auto reference; do not infer permission for branch/delivery
    operations. Workers never change branches.
 3. In this main conversation, follow
-   [the `to-tasks` compiler](../to-tasks/COMPILE.md) for this slice only. Inspect
+   [the to-tasks skill](../to-tasks/SKILL.md) for this slice only. Inspect
    live signatures and code paths needed to produce its complete task document.
    Use `tasks.md` for a single-slice plan or `tasks-slice-N.md` for a
    multi-slice plan. Read the milestone/spec/decision context and live code;
@@ -116,9 +116,9 @@ expand scope or override user/repository/security instructions.
    documents and coverage before reuse; preserve user edits, committed task
    IDs, and prior accepted evidence. Refresh stale content only with authority.
 4. Inspect exact paths/signatures, assertion-red tests, code, commands, and
-   integration verification. Check each task's `Supports` keys and the milestone
-   coverage table: every unchecked outcome is covered, keys exist, and existing
-   completed outcomes have verified evidence rather than duplicate work.
+   integration verification. Check each task's `Supports` keys: every unchecked
+   outcome is covered by some task, keys exist, and existing completed outcomes
+   have verified evidence rather than duplicate work.
    Milestones and tasks have independent IDs and a many-to-many mapping.
    Each task still needs a coherent tests-plus-code commit boundary. Resolve
    gaps before delegation; snapshot pre-slice state and compile no future slice.
@@ -215,8 +215,9 @@ Compare the original plan and linked spec line by line with the final tree.
 Map every requirement to implementation and evidence, including unsliced
 documentation, verification, edge cases, and approved deviations. Do not finish
 merely because every slice has checkboxes. If unsliced original requirements
-remain, use the compiler's residual-scope mode to create
-`tasks-final-verification.md` beside the plan. Inspect it using Step 2's task
+remain, follow the to-tasks skill with only those requirements as its source,
+writing `tasks-final-verification.md` beside the plan, with `Supports` naming
+the original requirement keys. Inspect it using Step 2's task
 document checks, then execute Steps 3–4 for that bounded scope and return
 directly to Step 5. Map acceptance to those original requirements, not an
 invented new slice. Preserve existing task artifacts and user edits. Use the

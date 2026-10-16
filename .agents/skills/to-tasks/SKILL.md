@@ -1,28 +1,66 @@
 ---
 name: to-tasks
 description: >-
-  Turn the plan already worked out this session into a mechanical,
-  TDD-shaped task list a cheaper agent can execute without exploring —
-  verbatim tests, verbatim code, and a runnable check per task. Writes
-  to projects/<slug>/tasks-slice-<n>.md or projects/<slug>/tasks.md.
+  Write a step-by-step task list from a plan file or this session's
+  discussion.
 disable-model-invocation: true
-argument-hint: "[slice scope or plan path]"
+argument-hint: "[plan path] [slice-N]"
 metadata:
   model-tier: complex
 ---
 
 # To Tasks
 
-Read and follow [the slice compiler](COMPILE.md) in this conversation. Preserve
-its precondition, input selection, language conventions, delivery approval,
-self-contained task contract, and project README maintenance.
+Turn a plan, or what this session has worked out, into a task list a less
+capable agent can retrace step by step: verbatim tests, verbatim code, and a
+runnable check per task. You walk the code once so the executor doesn't have
+to. Write the list; don't run it.
 
-## Hand-off
+**Stop and ask.** Follow the source as given, but when something is missing,
+contradictory, or looks like the wrong design, tell the user and wait. Don't
+fill the gap with a guess.
 
-Stop at the task document. To run one task or slice manually, point a fresh
-agent at its path using [`next-task`](../next-task/SKILL.md) or
-[`next-slice`](../next-slice/SKILL.md). For premium coordination with cheap
-implementation across the plan, offer
-[`execute-plan`](../execute-plan/SKILL.md) with the parent plan path.
+1. **Pick the source.** Use the file the user names, and the slice they give
+   (`slice-N`) if it has slices. With no file, use this session's discussion.
+   If neither says enough to build tasks, ask.
 
-Generating tasks never authorizes implementation by itself.
+2. **Read the code it touches.** Ground every task in live code, not the
+   plan's wording. Load the convention and testing skills for each language
+   the tasks will contain. Done when you know every signature, path, and test
+   pattern the tasks rely on.
+
+3. **Write the tasks** in order, so each works once the ones above it are done.
+   Each task must clear the bar: given only this document and a shell, a less
+   capable agent can complete it without writing code of its own, making a
+   design choice, or opening a file not named here. If a task needs a judgment
+   call, supply what's missing or split it.
+
+   - Give each task the parts shown in [TEMPLATE.md](TEMPLATE.md): what it
+     delivers, its location, a stub if the test needs one to compile, the
+     failing test (red) with its command and the assertion failure to expect,
+     the implementation (green), and a runnable Verify. A task with no code,
+     such as adding a dependency, still gets a runnable Verify.
+   - Write tests as [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) describes.
+   - When the source has milestones, give each task a `Supports:` line naming
+     the milestones it serves. The mapping is many-to-many:
+     Keep milestone IDs and task IDs separate.
+     Cover every unchecked milestone in the slice.
+   - Cite existing code as `path:line`. Before finishing, check every cited
+     symbol still resolves and every new name is spelled the same in every
+     task.
+   - End with an **Integration / Boundary Verification Task** that exercises
+     the whole slice without mocks.
+
+4. **Write the file** in the plan's project folder, or a new
+   `projects/<yyyy-mm-dd>-<slug>/` when there's no plan:
+
+   - `tasks.md` for a single-slice plan or a session's discussion.
+   - `tasks-slice-<n>.md` for a multi-slice plan. If `tasks.md` already exists
+     there, rename it to `tasks-slice-1.md` first.
+
+   Fill the header from `date +%F` and `git config user.name`, with Status
+   `Ready`. Write the Summary with the product-voice skill: two or three
+   sentences on the problem, what changes for whom, and why it matters. Add
+   the task list to the project README as
+   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
+   file is written and you've shared its path.

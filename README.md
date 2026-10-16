@@ -582,8 +582,9 @@ the named branch; the workflow never pushes or deploys. Manual `next-slice`
 keeps one commit per slice.
 See [task-commit safety and review indexing](./.agents/skills/execute-plan/references/task-commits.md).
 
-`to-tasks` and `next-slice` keep their manual invocation behavior and share
-plain-file compilation/execution procedures with the coordinator. Validate
+`to-tasks` keeps its manual invocation behavior; the coordinator follows its
+`SKILL.md` as a plain file, and workers follow
+[the worker procedure](./.agents/skills/execute-plan/references/worker.md). Validate
 wiring and model-definition consistency with `make check-execute-plan`. The
 bundled simulations exercise workflow decisions, not live provider execution;
 see [validation results](./.agents/skills/execute-plan/evals/RESULTS.md) for
