@@ -45,8 +45,7 @@ completion, then present:
 
 Delegate to [`to-spec`](../to-spec/SKILL.md), passing the build goal, the
 project slug, and the Phase 1 research context. It writes the problem, solution,
-user stories, acceptance criteria (via
-[`behaviour-spec`](../behaviour-spec/SKILL.md)), testing seams, and scope to
+user stories, Gherkin acceptance criteria, testing seams, and scope to
 `projects/<yyyy-mm-dd>-<slug>/spec.md`. Run it to completion, then proceed to
 Phase 3: Grill. If the user explicitly asks to refine the spec or research more
 first, loop back to Phase 1 or 2.

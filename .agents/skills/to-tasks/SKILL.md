@@ -49,7 +49,9 @@ fill the gap with a guess.
      symbol still resolves and every new name is spelled the same in every
      task.
    - End with an **Integration / Boundary Verification Task** that exercises
-     the whole slice without mocks.
+     the whole slice without mocks. When the spec has Gherkin acceptance
+     criteria, this task runs the slice's scenarios under the language's
+     runner (godog for Go, as the go-testing skill describes).
 
 4. **Write the file** in the plan's project folder, or a new
    `projects/<yyyy-mm-dd>-<slug>/` when there's no plan:

@@ -190,6 +190,8 @@ Consult these sibling documents when working in specialized areas:
 
 - [`INTEGRATION.md`](INTEGRATION.md) — E2E test structure, `//go:build e2e`
   tags, and running full-stack tests.
+- [`ACCEPTANCE.md`](ACCEPTANCE.md) — Running a spec's Gherkin acceptance
+  criteria as godog tests, and when a behaviour gets a `.feature` file.
 - [`FUZZ-AND-BENCHMARKS.md`](FUZZ-AND-BENCHMARKS.md) — Fuzz testing with
   `testing.F` and benchmarking with `b.Loop()`.
 - [`COVERAGE-PRUNING.md`](COVERAGE-PRUNING.md) — Mapping statement coverage

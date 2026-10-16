@@ -240,7 +240,6 @@ authenticate via SSO on first use.
 | **architect**                     | Turn an idea into research, a specification, and an implementation plan.                                 |
 | **arena**                         | Spawn N parallel candidates, pick the strongest, and graft in the best of the rest.                      |
 | **bcp**                           | Create a branch, commit changes, and open a PR or submit its stack.                                      |
-| **behaviour-spec**                | Write Gherkin acceptance criteria and Go test scaffolding.                                               |
 | **branch**                        | Create a feature branch named from the current task.                                                     |
 | **caveman**                       | Use technically accurate, token-saving caveman speech.                                                   |
 | **changelog**                     | Add a changelog entry for uncommitted or branch changes.                                                 |

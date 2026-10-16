@@ -75,11 +75,21 @@ Confirm the seams with the user before writing them into the spec.
 
 ## Write the acceptance criteria
 
-Delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md), passing the feature
-description and language (`N/A` for non-code or operational work). Take its
-**acceptance-criteria block** (rendered in a fenced ```` ```gherkin ```` code
-block) for the spec's `## Acceptance Criteria` section. Leave its **scaffold
-tasks** for the plan — they are implementation, not spec.
+Write the definition of done as feature-level Gherkin in a fenced code block
+marked `gherkin`, never as Markdown prose, lists, or headings. Each
+scenario becomes an acceptance test that runs end to end, so keep it at the
+system boundary (API, CLI, handler); unit behaviour belongs in the tests, not
+here. For non-code work, each scenario names the checkable assertion (grep,
+command output, file state) that proves it.
+
+- **Declarative, not imperative.** Say what behaviour holds, not the clicks or
+  calls that reach it.
+- **One behaviour per scenario.** If it needs "and then also", split it.
+- **Concrete and observable.** Name values and outcomes, never "works
+  correctly".
+- **The domain's words.** Use the terms the glossary and code use.
+- Use `Background` for preconditions every scenario shares, and
+  `Scenario Outline` with `Examples` for one behaviour across inputs.
 
 ## Write the spec
 
@@ -135,8 +145,8 @@ for the new behaviour.
 
 ## Acceptance Criteria
 
-The definition of done — feature-level Given/When/Then from
-`behaviour-spec`, rendered in a fenced `gherkin` code block. Verification
+The definition of done — feature-level Given/When/Then, rendered in a
+fenced `gherkin` code block. Verification
 is by test runner for code, or checkable assertions (grep, command output,
 file state) for non-code and operational work.
 
