@@ -37,8 +37,9 @@ sense, tell the user and wait. Don't fill the gap with a guess.
    `spec.md` to match. Done when grilling ends and the spec reflects it.
 
 5. **Plan.** Use the to-plan skill with the spec. Then use the to-adr skill on
-   the plan; when it writes no ADR, note why in the plan's Notes. Offer the
-   to-prd skill for stakeholder framing, and run it only if the user wants it.
+   the plan; when it writes no ADR, note why in the plan's Notes. Unless the
+   project started from a PDD Design, offer the to-prd skill for stakeholder
+   framing, and run it only if the user wants it.
    Done when the plan is written and the ADRs and PRD are settled.
 
 6. **Hand off.** Ask the user to choose one next step, and start only that one:
