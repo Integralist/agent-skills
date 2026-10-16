@@ -25,5 +25,5 @@ finds nothing to do, such as no changes to commit, stop there.
 
 2. **Commit.** Use the commit skill. Done when the changes are committed.
 
-3. **PR.** Use the open-pr skill. Done when the PR is open, or open-pr has
-   handed a stack to stacked-prs.
+3. **PR.** If `gh stack view` finds an active stack, use the stacked-prs
+   skill; otherwise use the open-pr skill. Done when the PR or stack is up.

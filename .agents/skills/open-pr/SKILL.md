@@ -1,187 +1,77 @@
 ---
 name: open-pr
-description: Open a pull request with a concise, direct description built around a clear Problem and Solution. Use when the user asks to create, open, or write a PR.
-allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh repo view:*), Bash(gh stack:*), Bash(mmdc:*)
+description: >-
+  Open a GitHub pull request for the current branch. Use when the user asks to
+  create, open, or write a PR.
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr edit:*), Bash(mmdc:*)
 metadata:
   model-tier: moderate
 ---
 
 # Open PR
 
-Open a pull request whose description is direct and concise, structured around a
-clear **Problem** and **Solution**.
+Open a ready-for-review pull request for the current branch, with a title that
+says what the change is worth and a short Problem / Solution description. Write
+the title and body with the product-voice skill.
 
-## Context
+1. **Check the branch.** On the default branch, ask whether to create a branch
+   with the branch skill or stop. If this branch already has an open PR, ask
+   whether to update its description instead. Done when you're on a feature
+   branch with no open PR, or the user has chosen.
 
-If the fields below show commands rather than output, run each one first.
+2. **Read the change.** Read every commit and the full diff since the branch
+   left the default branch (`git merge-base`), not just the list of changed
+   files. Done when you can say what the change fixes and how.
 
-- Branch: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
-- Default branch: !`git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo "(unknown — detect in step 3)"`
-- Status: !`git status --short 2>/dev/null`
-- Recent commits: !`git log --oneline -15 2>/dev/null`
-- Existing PR: !`gh pr view --json url,state,isDraft 2>/dev/null || echo "(none)"`
+3. **Write the title** as the commit skill writes a subject:
+   `type(scope): <why it matters>`. If the repo lints PR titles (a workflow in
+   `.github/workflows/` or a commitlint config), its rules win.
 
-## Process
+4. **Write the body** from this template, even when the repo ships its own:
 
-1. **Check for a stack.** Read the active plan or task document, then run
-   `gh stack view --json`. If the document declares `Stack` or the command
-   finds an active stack, invoke [`stacked-prs`](../stacked-prs/SKILL.md) and
-   stop. `gh stack submit` creates or updates the complete PR chain and its
-   base branches.
+   ````md
+   ## Problem
 
-2. **Check preconditions.**
+   <What's wrong or missing, and why it matters. Reference the issue or ticket
+   if there is one.>
 
-   - Not a git repo, or branch is the base branch itself → stop and say so. A PR
-     needs a feature branch distinct from base.
-   - If an open PR already exists for this branch, stop and ask whether to
-     update its description instead of opening a new one.
+   ## Solution
 
-3. **Determine the base branch.** Use the default branch from Context. If
-   unknown, run `git symbolic-ref --short refs/remotes/origin/HEAD`, falling
-   back to `main`, then `master`. Confirm with the user if still ambiguous (e.g.
-   the branch was cut from something else).
+   <What the change does to fix it, verifiable against the diff. Lead with the
+   key change; note trade-offs.>
 
-4. **Read the full branch diff** against the base:
+   <Optional: one high-level Mermaid diagram.>
 
-   ```bash
-   base=$(git merge-base HEAD origin/<base>)
-   git log --oneline "$base"..HEAD   # commits + intent
-   git diff "$base"...HEAD           # actual hunks
-   ```
+   ## Notes
 
-   Don't rely on diffstat alone; Problem/Solution must reflect the actual hunks.
-   Read commit messages for intent the diff doesn't reveal.
+   <Optional: testing done, migration steps, risks. Omit if empty.>
+   ````
 
-5. **Write the description** using the Template.
+   - Describe behaviour and intent. The reviewer gets file-by-file detail from
+     the diff.
+   - Notes holds only what a reviewer can check before merging. Leave
+     post-merge work, such as deploys, to the ticket. List only testing that
+     you or the user actually did.
+   - Write each paragraph as one line. GitHub soft-wraps, so breaks at 80
+     columns render ragged.
+   - Separate bullet items with a blank line so GitHub spaces them out.
+   - Use an emoji only where it signals status faster than words (✅ verified,
+     ⚠️ caution, ❌ breaking), at most one per line, and never in the title,
+     headings, or code.
+   - Wrap a Markdown code block in 4 backticks so inner 3-backtick blocks
+     don't break it.
 
-   Read [`product-voice`](../product-voice/SKILL.md) before drafting. Apply it to
-   Problem, Solution, and relevant Notes; explain impact plainly while keeping
-   facts and technical details needed to review the diff.
+5. **Add a diagram when it helps.** When the change alters how parts call each
+   other, branch, or move through states, add one Mermaid diagram of the type
+   that fits: `sequenceDiagram` for calls between parts, `flowchart` for
+   branching, `stateDiagram-v2` for lifecycles. Keep it high-level: only the
+   slice that changed, a dozen nodes or fewer, with ` (new)` or ` (changed)` on
+   the steps the diff touches. Check it with the conventions-mermaid skill.
 
-   - **Problem:** what was wrong or missing and why it matters — the observable
-     symptom or gap, not the implementation. Reference the linked issue/ticket
-     if any.
-   - **Solution:** what the change does to fix the Problem, verifiable against
-     the diff. Lead with the key change; note notable trade-offs or rejected
-     alternatives.
-   - Keep both concise — one short paragraph or a few bullets each. Cut filler
-     ("this PR", "simply", "just"). Active voice.
-   - **Separate list items with blank lines.** When using bullet lists, insert a
-     blank line between each item (loose list) so GitHub renders them with
-     breathing space instead of a dense block.
-   - Add `## Notes` only for testing done, a migration step, a risk, or a
-     follow-up worth flagging. Omit otherwise.
+6. **Get approval.** Show the title and body, then wait for the user to
+   approve. Done when they approve.
 
-6. **Decide whether Solution needs a diagram.** Go through the table below
-   against the hunks from step 4, top to bottom. The first row that matches
-   decides.
-
-   | # | The diff…                                                                                                              | Result            |
-   | - | ---------------------------------------------------------------------------------------------------------------------- | ----------------- |
-   | 1 | changes only docs, comments, tests, CI/lint config, dependency/lock files, or renames/formatting                       | Skip              |
-   | 2 | adds, removes, or reorders calls or messages between 3+ participants (functions, services, processes, queues, stores) | `sequenceDiagram` |
-   | 3 | adds or changes a control-flow branch with 2+ outcomes (retry, fallback, error path, guard, feature flag)              | `flowchart`       |
-   | 4 | adds or changes states or transitions in a lifecycle (status field, state machine, job phases)                         | `stateDiagram-v2` |
-   | 5 | matches none of the above                                                                                              | Skip              |
-
-   When the result is a diagram:
-
-   - Read [`show-me`](../show-me/SKILL.md) and follow its Mermaid guidance.
-     Read the file directly: `show-me` can only be started by the user.
-   - Draw the flow as it works after the change. Add ` (new)` or ` (changed)`
-     to the labels on steps the diff touches.
-   - Draw one diagram with at most 12 nodes or messages. If the flow needs
-     more, draw only the segment that changed.
-   - Validate it per [`conventions-mermaid`](../conventions-mermaid/SKILL.md)
-     before showing it.
-   - Put it in Solution, in a `mermaid` block right after the lead paragraph.
-
-   Write down which row decided (e.g. `Diagram: skipped, row 1`) for step 8.
-
-7. **Draft the title:**
-   - **Title = consequence/why (outcome/benefit/prevention), NOT diff mechanics
-     (what was typed).** A reviewer reading only the title should learn what
-     improves without opening the PR.
-   - **Apply the "So What?" test before finalizing:** If you ask "So what? /
-     Why does this matter?", the title must already contain the answer. If the
-     title merely describes what changed in the diff (`add X`, `require Y`,
-     `update Z`), rewrite it with the consequence (`retry transient 502s so
-     import completes`, `space out lists so pr is readable`).
-     - *Reject mechanical summaries (WHAT):* `update X to Y`, `add helper Z`,
-       `require loose lists`, `refactor auth module`.
-     - *Require consequence (WHY):* `retry transient 502s so nightly import
-       completes`, `space out bullet lists so pr descriptions are easier to
-       read`, `prevent auth panic on nil user`.
-   - Keep imperative mood, concise, no trailing period.
-   - Follow `~/.gitcommit` conventions for `type(scope):` syntax if that file
-     exists (ignoring any legacy `WHAT` placeholder); a squash merge turns this
-     title into the commit subject.
-   - Check `.github/workflows/` for PR title linters (such as
-     `action-semantic-pull-request`) or root commitlint configs. Repo rules
-     take precedence over `~/.gitcommit`; adhere to allowed types (e.g.
-     Conventional Commits standard plural `docs`, never `doc`).
-
-   ```txt
-   BAD (WHAT):  feat(open-pr): require loose bullet lists in pr descriptions
-   GOOD (WHY):  feat(open-pr): space out bullet lists so pr descriptions are easier to read
-
-   BAD (WHAT):  fix(fetch): add retry wrapper to the fetch helper
-   GOOD (WHY):  fix(fetch): retry transient 502s so the nightly import completes
-   ```
-
-8. **Show the title, description, and diagram decision from step 6 to the
-   user, then wait for approval.** Do not open the PR before then.
-
-9. **Push if needed,** then open the PR:
-
-   - `git push -u origin <branch>` if the branch has no upstream.
-   - `gh pr create --base <base> --title <title> --body-file -` piping the
-     approved body via heredoc. Write paragraphs as single unwrapped lines — do
-     not hard-wrap at 80 columns (see Style).
-   - Open ready-for-review by default. Add `--draft` only if the user asked.
-
-10. **Report the PR URL** from `gh`'s output.
-
-## Template
-
-````md
-## Problem
-
-<What's wrong or missing, and why it matters. Reference the issue/ticket
-if there is one.>
-
-## Solution
-
-<What the change does to fix it, verifiable against the diff. Lead with
-the key change; note trade-offs.>
-
-<Optional: one Mermaid diagram when step 6 calls for one.>
-
-## Notes
-
-<Optional: testing, migration steps, risks, follow-ups. Omit if empty.>
-````
-
-## Style
-
-- Omit needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). No marketing tone,
-  no restating the diff line by line, no boilerplate checklists.
-- When producing a code block for markdown, use 4 backticks instead of 3 —
-  see [`../shared/MARKDOWN-CODE-BLOCKS.md`](../shared/MARKDOWN-CODE-BLOCKS.md).
-- **Don't hard-wrap the PR body.** GitHub soft-wraps prose, so manual breaks at
-  80 columns render as ragged text. Write each paragraph as one continuous line.
-  (The 80-column markdown convention applies to source files, not text submitted
-  to GitHub.)
-- **Space out bullet lists.** Always separate bullet list items with a blank
-  line. Tight lists render densely on GitHub and hurt readability; blank lines
-  between items produce loose lists with comfortable breathing space.
-- **Use load-bearing emojis where helpful.** Signal status or structure faster
-  than words would (e.g. ✅ verified, ⚠️ caution, ❌ breaking change). Cap at
-  one per line; keep them out of PR titles, headings, and code.
-- Use backticks for identifiers, paths, flags, env vars.
-- Describe behaviour and intent, not a file-by-file walkthrough.
-- Don't invent testing or context absent from the diff or supplied by the user —
-  ask instead.
-- Match any PR template the repo ships (`.github/PULL_REQUEST_TEMPLATE*`),
-  mapping Problem/Solution onto its sections.
+7. **Open it.** If the branch has no upstream, run `git push -u origin
+   <branch>`. Write the body to a temp file, then run
+   `gh pr create --base <default-branch> --title "<title>" --body-file <file>`.
+   Done when `gh` prints the PR URL and you've shared it.
