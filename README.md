@@ -236,7 +236,6 @@ authenticate via SSO on first use.
 
 | Skill                             | Description                                                                                              |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **voice-adhd**                    | Reply in an ADHD-friendly shape once, or for the whole session with `--all`.                             |
 | **agents-md**                     | Make `AGENTS.md` canonical and point `CLAUDE.md` and `GEMINI.md` to it.                                  |
 | **architect**                     | Turn an idea into research, a specification, and an implementation plan.                                 |
 | **arena**                         | Spawn N parallel candidates, pick the strongest, and graft in the best of the rest.                      |
@@ -267,8 +266,8 @@ authenticate via SSO on first use.
 | **eval**                          | Create and run skill evaluations, then compare with the previous run.                                    |
 | **execute-plan**                  | Compile, delegate, verify, and correct one plan slice at a time without model switching.                 |
 | **explain-code**                  | Explain what code does and why it matters to a newcomer, with a small visual.                            |
-| **git-metadata**                  | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.                    |
 | **ghostty**                       | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.                           |
+| **git-metadata**                  | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.                    |
 | **go-api**                        | Scaffold a production-ready Go API with local tooling and observability.                                 |
 | **go-testing**                    | Write Go unit, integration, fuzz, and benchmark tests.                                                   |
 | **grepai**                        | Search code semantically when exact names are unknown.                                                   |
@@ -279,21 +278,19 @@ authenticate via SSO on first use.
 | **hunk**                          | Drive a live Hunk TUI session for interactive local and remote PR code reviews.                          |
 | **improve-codebase-architecture** | Scan a codebase for deepening opportunities, present a visual HTML report, and grill through candidates. |
 | **incident-report**               | Write an incident report from the session's debugging evidence.                                          |
-| **voice-integralist**             | Write in Integralist's voice once, or for the whole session with `--all`.                                |
 | **is-it-safe**                    | Assess the worst credible consequence of committing or merging a change.                                 |
 | **jira**                          | Create, edit, assign, transition, search, and verify Jira issues.                                        |
 | **markdown-to-skill**             | Convert a directory of Markdown documents into agent skills.                                             |
 | **model-stats**                   | Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.                       |
-| **mysql-index-audit**             | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.                                 |
 | **mutation-testing**              | Check whether tests detect behavior changes with deliberate mutations.                                   |
+| **mysql-index-audit**             | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.                                 |
 | **next-slice**                    | Implement and complete every task in the next actionable plan slice.                                     |
 | **next-task**                     | Implement and complete the next actionable plan or task-list item.                                       |
 | **open-pr**                       | Write and open a concise PR with clear Problem and Solution sections.                                    |
-| **perspectives**                  | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.                    |
 | **pdd**                           | Run a Product-Engineering initiative through Project, Discovery, and Design approvals.                   |
+| **perspectives**                  | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.                    |
 | **polish**                        | Improve a short passage's clarity and concision.                                                         |
 | **precedent**                     | Align work with patterns established by peer files.                                                      |
-| **voice-product**                 | Write in a plain, audience-first voice once, or for the whole session with `--all`.                      |
 | **recap**                         | Summarize what is done, in progress, and next.                                                           |
 | **redesign**                      | Audit a codebase for redesigns that remove structural complexity.                                        |
 | **refactor**                      | Plan a simpler reimplementation of an existing feature.                                                  |
@@ -318,6 +315,9 @@ authenticate via SSO on first use.
 | **to-spec**                       | Write an implementation-ready feature spec with scope and acceptance criteria.                           |
 | **to-tasks**                      | Compile a plan slice into a mechanical TDD task document with verbatim code.                             |
 | **unslop**                        | Cut AI tells and machine cadence from prose to restore human voice.                                      |
+| **voice-adhd**                    | Reply in an ADHD-friendly shape once, or for the whole session with `--all`.                             |
+| **voice-integralist**             | Write in Integralist's voice once, or for the whole session with `--all`.                                |
+| **voice-product**                 | Write in a plain, audience-first voice once, or for the whole session with `--all`.                      |
 | **wait-what**                     | Re-pitch a message that did not land.                                                                    |
 | **writing-for-agents**            | Apply conventions that make skills and instruction files predictable.                                    |
 
