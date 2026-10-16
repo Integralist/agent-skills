@@ -1,0 +1,7 @@
+{
+  "name": "clean-view",
+  "version": "0.1.0",
+  "description": "Hides tool calls and output while Claude works, and shows a plain-English checklist of the plan above the prompt.",
+  "author": { "name": "Integralist" },
+  "types": "./types/index.d.ts"
+}

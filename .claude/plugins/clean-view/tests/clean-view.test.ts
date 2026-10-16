@@ -1,0 +1,183 @@
+import { describe, expect, mock, test } from 'claude-code/testing'
+import type { Engine, MockClock } from 'claude-code/testing'
+import type { On } from 'claude-code'
+
+import { cleanName } from '../hooks/logic'
+
+const PLUGIN = 'clean-view'
+const PLAN = 'mcp__clean-view__plan_steps'
+const PROGRESS = 'mcp__clean-view__report_progress'
+const PRESENTATION = { isFullscreen: false, columns: 120 }
+const SURFACES = ['terminal', 'desktop'] as const
+const BAND = (columns = 80) => ({
+  plugin: PLUGIN,
+  component: 'AbovePrompt' as const,
+  props: {
+    hasSurvey: false,
+    isWorking: true,
+    maxRows: 20,
+    bodyColumns: columns,
+    scroll: { offset: 0, bodyRows: 19, totalRows: 0 },
+    view: {},
+  },
+  viewport: { columns: columns + 5, rows: 30 },
+})
+
+type World = { toasts: string[]; ran: string[]; clock: MockClock }
+
+/** The engine beneath the mod: store, clock, a Haiku that names jobs, tools that succeed. */
+function world(on: On): World {
+  const w: World = { toasts: [], ran: [], clock: mock.clock(on) }
+  mock.store(on)
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('command.register', ($, e) => ({ value: { command: e.name } }))
+  on('tool.register', ($, e) => ({ value: { tool: `mcp__${PLUGIN}__${e.name}` } }))
+  on('ui.toast', ($, e) => {
+    w.toasts.push(e.text)
+    return { value: undefined }
+  })
+  on('model.complete', () => ({
+    value: {
+      isAnswered: true as const,
+      text: 'Build my landing page',
+      usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
+    },
+  }))
+  on('prompt.submit', ($, e) => ({ text: e.text }))
+  on('turn.start', ($, e) => ({ turnId: e.turnId }))
+  on('turn.complete', ($, e) => ({ text: e.answer }))
+  on('classic.Notification', () => ({}))
+  on('tool.call', ($, e) => {
+    w.ran.push(String(e.tool))
+    return { result: 'ok' }
+  })
+  return w
+}
+
+async function start($: Engine) {
+  await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
+}
+
+async function prompt($: Engine, text: string) {
+  await $.turn.start({ text, turnId: 'turn-1' })
+}
+
+async function simple($: Engine, args: string) {
+  return $.command.run({ command: 'simple', args, origin: { kind: 'composer' }, presentation: PRESENTATION })
+}
+
+async function rows($: Engine, surface: (typeof SURFACES)[number], columns = 80) {
+  const ui = await $.ui.mount({ ...BAND(columns), surface })
+  const texts = (await ui.findAll({ type: 'Text' })).map(one => one.text)
+  await ui.unmount()
+  return texts
+}
+
+describe('plain names', () => {
+  test('strips code, paths and file names, and trims long names', () => {
+    expect(cleanName('Build the pricing section in `src/Pricing.tsx`')).toBe('Build the pricing section in')
+    expect(cleanName('update src/app/main.go handler')).toBe('Update handler')
+    expect(cleanName('fix the header in index.html quickly')).toBe('Fix the header in quickly')
+    const long = cleanName('Write a very long description of everything that the landing page should contain')
+    expect(long.length).toBeLessThanOrEqual(40)
+    expect(long.endsWith('…')).toBe(true)
+    expect(cleanName('`npm test`')).toBe('Working on it')
+  })
+})
+
+describe('checklist', () => {
+  test('a to-do list and a 60% report draw done, active, next and up-next rows', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({
+      tool: 'TodoWrite',
+      todos: [
+        { content: 'Read your brand notes', status: 'completed', activeForm: 'Reading' },
+        { content: 'Build the pricing section', status: 'in_progress', activeForm: 'Building' },
+        { content: 'Add the contact form', status: 'pending', activeForm: 'Adding' },
+        { content: 'Polish the footer', status: 'pending', activeForm: 'Polishing' },
+      ],
+    })
+    await $.tool.call({ tool: PROGRESS, task: 'Build the pricing section', percent: 60 })
+    for (const surface of SURFACES) {
+      const texts = (await rows($, surface)).join('\n')
+      expect(texts).toContain('✓')
+      expect(texts).toMatch(/Read your brand notes\s+██████████\s+Done/)
+      expect(texts).toMatch(/▶ Build the pricing section\s+██████░░░░\s+60%/)
+      expect(texts).toMatch(/○ Add the contact form\s+░{10}\s+Next/)
+      expect(texts).toMatch(/○ Polish the footer\s+░{10}\s+Up next/)
+    }
+  })
+
+  test('plan_steps then a report at 100 checks off step one and starts step two', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    const planned = await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section'] })
+    expect(planned.result).toBe('Planned 2 steps. The first one has started.')
+    const noted = await $.tool.call({ tool: PROGRESS, task: 'Read your brand notes', percent: 140 })
+    expect(noted.result).toBe('Progress noted: 100%.')
+    const texts = (await rows($, 'terminal')).join('\n')
+    expect(texts).toMatch(/✓ Read your brand notes\s+█{10}\s+Done/)
+    expect(texts).toMatch(/▶ Build the pricing section\s+[█░]{10}\s+Working/)
+  })
+
+  test('a permission prompt shows Needs you', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.classic.Notification({ message: 'Claude needs your permission', notification_type: 'permission_prompt' })
+    const texts = (await rows($, 'terminal')).join('\n')
+    expect(texts).toContain('Needs you')
+    expect(texts).toContain('Claude needs your OK to continue')
+  })
+
+  test('finishing shows All done, then one line after 5 seconds', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Build the page'] })
+    await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
+    await $.turn.complete({ answer: 'Done.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+    const before = (await rows($, 'terminal')).join('\n')
+    expect(before).toMatch(/✓ All done · Build my landing page · took/)
+    expect(before).toContain('Build the page')
+    await w.clock.advance(5000)
+    const after = (await rows($, 'terminal')).join('\n')
+    expect(after).toMatch(/✓ All done/)
+    expect(after).not.toContain('Build the page')
+  })
+})
+
+describe('plan first', () => {
+  test('denies other tools before a plan and allows them after', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    const before = await $.tool.call({ tool: 'Bash', command: 'ls', description: 'list' })
+    expect(before.deny).toContain('plan_steps')
+    expect(w.ran).not.toContain('Bash')
+    await $.tool.call({ tool: PLAN, steps: ['Look around', 'Build it'] })
+    const after = await $.tool.call({ tool: 'Bash', command: 'ls', description: 'list' })
+    expect(after.deny).toBeUndefined()
+    expect(w.ran).toContain('Bash')
+  })
+})
+
+describe('turning it off', () => {
+  test('/simple off leaves only the button, and is remembered', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await simple($, 'off')
+    const texts = await rows($, 'terminal')
+    expect(texts.join('\n')).not.toContain('Understand your request')
+    await start($)
+    const ui = await $.ui.mount({ ...BAND(), surface: 'terminal' })
+    expect((await ui.find({ key: 'clean-view-toggle' }))?.text).toContain('Clean View: OFF')
+    await ui.press({ key: 'clean-view-toggle' })
+    expect((await ui.find({ key: 'clean-view-toggle' }))?.text).toContain('Clean View: ON')
+    await ui.unmount()
+  })
+})
