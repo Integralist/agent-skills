@@ -14,7 +14,8 @@ Take a feature from an idea to a spec and plan by running other skills in
 order: bootstrap, research, spec, grill, plan. Coordinate only: each skill does
 its own job, and you decide what runs next and carry context between them.
 Keep every artifact in one `projects/<yyyy-mm-dd>-<slug>/` folder, and pass it
-to each skill once it exists.
+to each skill once it exists. When the project has an approved PDD Design,
+that Design is the idea: start at step 3.
 
 **Stop and ask.** When a skill reports a gap, or the design doesn't make
 sense, tell the user and wait. Don't fill the gap with a guess.

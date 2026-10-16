@@ -374,8 +374,9 @@ artifacts translate the approved Design into executable work:
 flowchart LR
     PDD["pdd<br/>(Project, Discovery, Design)"]
 
-    subgraph Delivery[Engineering skill handoff]
-        ToSpec["to-spec"] --> ToPlan["to-plan"]
+    subgraph Delivery[architect, from its Spec step]
+        ToSpec["to-spec"] --> Grill["grill-with-docs"]
+        Grill --> ToPlan["to-plan"]
         ToPlan --> ToTasks["to-tasks"]
         ToTasks --> Execute["next-task / next-slice"]
     end
@@ -383,7 +384,7 @@ flowchart LR
     PDD --> ToSpec
 ```
 
-Run `grill-with-docs` before `to-plan` to stress-test the design. The arrows above show skill handoffs; the outputs are separate artifacts:
+The arrows above show skill handoffs; the outputs are separate artifacts:
 
 | Skill                      | Produces or updates                         |
 | -------------------------- | ------------------------------------------- |
@@ -410,10 +411,8 @@ When a second milestone is introduced, rename the existing files to
 all links in the project README. If multiple milestones are known up front, use
 qualified names from the beginning.
 
-After Design is explicitly approved, use `to-spec`, then `to-plan`,
-`to-tasks`, and `next-task` or `next-slice`. Do not run `architect` again by
-default; that duplicates engineering discovery unless substantial technical
-research is still unresolved.
+After Design is approved, pdd hands off to `architect` from its Spec step, so
+research and bootstrap are skipped.
 
 ### Project workspaces
 
@@ -494,7 +493,7 @@ Use one of these flows:
 
 ```txt
 Product: pdd (Project, Discovery, Design)
-       → to-spec → to-plan → to-tasks → next-task / next-slice
+       → architect (spec, grill, plan) → to-tasks → next-task / next-slice
 
 Engineering: architect (research, spec, grill, plan)
        → to-tasks → next-task / next-slice → commit → code-review
