@@ -1,106 +1,49 @@
 ---
 name: architect
 description: >-
-  Design and plan a feature from idea to actionable artifacts. Use when
-  architecting a feature, exploring a design before planning, or coordinating
-  research, spec, grill, and plan phases.
+  Take a feature from an idea to a spec and plan by running the research,
+  spec, grill, and plan skills in order. Use when architecting a feature from
+  an idea or this session's discussion, or exploring a design before planning.
 metadata:
   model-tier: complex
 ---
 
 # Architect
 
-Design-and-plan coordinator: turn an idea into the artifacts that support
-building it. Five phases — **bootstrap → research → spec → grill → plan** — each
-delegated to its own skill. This file only sequences them; the depth lives in
-the delegates.
+Take a feature from an idea to a spec and plan by running other skills in
+order: bootstrap, research, spec, grill, plan. Coordinate only: each skill does
+its own job, and you decide what runs next and carry context between them.
+Keep every artifact in one `projects/<yyyy-mm-dd>-<slug>/` folder, and pass it
+to each skill once it exists.
 
-## Phase 0: Bootstrap project instructions
+**Stop and ask.** When a skill reports a gap, or the design doesn't make
+sense, tell the user and wait. Don't fill the gap with a guess.
 
-Delegate to [`agents-md`](../agents-md/SKILL.md), which reconciles `AGENTS.md`,
-`CLAUDE.md`, and `GEMINI.md` so `AGENTS.md` is canonical and the others are thin
-`@AGENTS.md` pointers, bootstrapping any that are missing. Run it to completion,
-then prompt:
+1. **Bootstrap.** Use the agents-md skill so the project's instructions are in
+   place. Take the idea from the user's message or this session's discussion;
+   with neither, ask what to build. If the idea is vague, use the clarify
+   skill. Done when you know what to build and why.
 
-```txt
-What do you want to build? I'll research it first.
-```
+2. **Research.** Use the research skill on the idea, scoped to the project
+   folder. Then ask whether to research another topic or move on. Done when
+   the user is ready for a spec.
 
-If the answer is vague, delegate to [`clarify`](../clarify/SKILL.md) to elicit intent
-(audience, goal, context, constraints, format) before researching.
+3. **Spec.** Use the to-spec skill with the idea and the research. Done when
+   `spec.md` is written.
 
-## Phase 1: Research
+4. **Grill.** Use the grill-with-docs skill to stress-test the spec. If
+   grilling changes a decision, testing seam, or acceptance criterion, update
+   `spec.md` to match. Done when grilling ends and the spec reflects it.
 
-Delegate to [`research`](../research/SKILL.md). It detects whether the input is
-a repo or a topic, gathers project metadata for repos, and writes findings to
-`docs/research/<yyyy-mm-dd>-<slug>.md` (or `projects/<yyyy-mm-dd>-<slug>/research.md`
-when scoped to an active project). Pass the project scope when one exists;
-project-scoped research bootstraps and updates that project's README. Run it to
-completion, then present:
+5. **Plan.** Use the to-plan skill with the spec. Then use the to-adr skill on
+   the plan; when it writes no ADR, note why in the plan's Notes. Offer the
+   to-prd skill for stakeholder framing, and run it only if the user wants it.
+   Done when the plan is written and the ADRs and PRD are settled.
 
-1. **Research another topic** — ask what next and loop back to Phase 1.
-1. **Write a spec** — proceed to Phase 2.
+6. **Hand off.** Ask the user to choose one next step, and start only that one:
 
-## Phase 2: Spec
-
-Delegate to [`to-spec`](../to-spec/SKILL.md), passing the build goal, the
-project slug, and the Phase 1 research context. It writes the problem, solution,
-user stories, Gherkin acceptance criteria, testing seams, and scope to
-`projects/<yyyy-mm-dd>-<slug>/spec.md`. Run it to completion, then proceed to
-Phase 3: Grill. If the user explicitly asks to refine the spec or research more
-first, loop back to Phase 1 or 2.
-
-## Phase 3: Grill
-
-Delegate to [`grill-with-docs`](../grill-with-docs/SKILL.md). Grilling is a
-mandatory phase before planning. Conduct a relentless interview to stress-test
-the design tree against the spec, resolve unstated assumptions and open
-questions, pin down domain vocabulary in `GLOSSARY.md`, and record ADRs
-under `docs/adr/`. If only legacy `CONTEXT.md` exists, use it in place and
-show the user a `⚠️` warning to rename it to `GLOSSARY.md`.
-
-If the interview reshapes any decisions, testing seams, or acceptance criteria,
-update `projects/<yyyy-mm-dd>-<slug>/spec.md` with the settled changes.
-
-Run the grilling session to completion (the question frontier is empty and the
-user explicitly confirms shared understanding), then proceed to Phase 4: Plan.
-
-## Phase 4: Plan
-
-Delegate to [`to-plan`](../to-plan/SKILL.md), passing the build goal,
-the project directory, the spec, and the research context. It writes the plan to
-`projects/<yyyy-mm-dd>-<slug>/plan.md`, decomposes the work into vertical slices
-with interface contracts (`Consumes` / `Produces`) and Blocked-by edges, points
-to `./spec.md` for acceptance criteria. Run it to completion.
-
-Then delegate to [`to-adr`](../to-adr/SKILL.md), passing the plan path. Its
-value gate writes each genuine decision as `ADR-<NNNN>.md` and updates the
-repo-wide ADR index; when it produces nothing, note why in the plan's Notes.
-
-## Offer a PRD
-
-After the plan, offer [`to-prd`](../to-prd/SKILL.md) as an opt-in step — a
-focused product framing (goals, success metrics, audience) sourced from the
-spec, written to `projects/<yyyy-mm-dd>-<slug>/prd.md`. Produce it only if the
-user wants stakeholder-facing framing; otherwise skip it.
-
-Ask the user to choose one next action:
-
-1. **Execute the plan — choose one route:**
-   - **Automated:** offer [`execute-plan`](../execute-plan/SKILL.md) with the
-     plan path. Keep this session's model as coordinator.
-   - **Manual:** run `/to-tasks <plan-path> slice-1`, or
-     `/to-tasks <plan-path>` for a single-slice plan.
-   Start only the selected route, after explicit user authorization.
-2. **Research another topic** — loop back to Phase 1.
-3. **Create another plan** — delegate to `to-plan` again.
-
-## Guidelines
-
-- This skill is a thin coordinator. Research depth lives in
-  [`research`](../research/SKILL.md); the spec's structure and acceptance
-  criteria in [`to-spec`](../to-spec/SKILL.md); interview mechanics, domain
-  vocabulary, and ADRs in [`grill-with-docs`](../grill-with-docs/SKILL.md);
-  slice, Blocked-by, and milestone guidance in
-  [`to-plan`](../to-plan/SKILL.md).
-- Wrap all Markdown output at 80 columns.
+   1. Execute the plan with the execute-plan skill, or by hand: tell the user
+      to run `/to-tasks <plan-path> slice-1` (`/to-tasks <plan-path>` for a
+      single-slice plan).
+   2. Research another topic: return to step 2.
+   3. Write another plan: return to step 5.
