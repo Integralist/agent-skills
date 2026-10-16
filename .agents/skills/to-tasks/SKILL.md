@@ -59,7 +59,7 @@ fill the gap with a guess.
      there, rename it to `tasks-slice-1.md` first.
 
    Fill the header from `date +%F` and `git config user.name`, with Status
-   `Ready`. Write the Summary with the product-voice skill: two or three
+   `Ready`. Write the Summary with the voice-product skill: two or three
    sentences on the problem, what changes for whom, and why it matters. Add
    the task list to the project README as
    [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the

@@ -136,7 +136,7 @@ Reason: {Why this section warrants its own document.}
   writing or revising Markdown; follow its repository-link rules for
   cross-references.
 - For reader-facing explanations, read
-  [`product-voice`](../product-voice/SKILL.md). Apply it to the overview,
+  [`voice-product`](../voice-product/SKILL.md). Apply it to the overview,
   rationale, and user impact; preserve exact technical contracts and
   implementation details where readers need them.
 - The rewritten document is the deliverable, not a list of suggestions. Produce

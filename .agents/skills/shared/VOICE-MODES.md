@@ -1,25 +1,25 @@
 # Voice Modes
 
-Shared mode contract for voice skills (`product-voice`, `integralist-voice`,
-`adhd-voice`). Read the invocation, pick exactly one mode, then apply the
+Shared mode contract for voice skills (`voice-product`, `voice-integralist`,
+`voice-adhd`). Read the invocation, pick exactly one mode, then apply the
 calling skill's voice rules.
 
 ## Pick the mode
 
 1. **One-off (default).** No flag. Apply the voice once, then return to your
    normal reply style.
-   - Text follows the slash command (`/product-voice <text>`): rewrite that
+   - Text follows the slash command (`/voice-product <text>`): rewrite that
      text in the voice. Keep every fact, identifier, and caveat.
-   - Nothing follows the slash command (`/product-voice`): rewrite your
+   - Nothing follows the slash command (`/voice-product`): rewrite your
      previous reply in the voice. If there is no previous reply, ask for the
      text.
    - The voice is named inside a request ("write the PR description and use
-     product-voice"): do the request, writing its output in the voice.
+     voice-product"): do the request, writing its output in the voice.
 2. **Persistent.** `--all`, or the user asks for the voice across the session
-   ("use product-voice for all communication", "reply in adhd-voice from now
+   ("use voice-product for all communication", "reply in voice-adhd from now
    on"). Confirm in one line written in the voice, then write every later
    reply in it. If text also follows `--all`, rewrite that text too.
-3. **Off.** `--off`, or the user asks to stop ("stop using product-voice",
+3. **Off.** `--off`, or the user asks to stop ("stop using voice-product",
    "back to normal"). Confirm in one plain line and return to your normal
    reply style.
 

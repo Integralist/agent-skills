@@ -1,12 +1,12 @@
 ---
-name: product-voice
+name: voice-product
 description: >-
   Use when drafting or revising reader-facing prose in product or engineering
   documents. Trigger for PR descriptions, ADR context and consequences, spec
   problem/solution/user stories, plan summaries/deliverables, and technical
   documentation—even if the user does not request a particular voice. Also use
   when the user asks to rewrite a message in product voice or to use
-  product-voice for all replies. Keep technical contracts and acceptance
+  voice-product for all replies. Keep technical contracts and acceptance
   criteria precise.
 argument-hint: "[--all | --off | text to rewrite]"
 metadata:

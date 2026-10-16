@@ -47,7 +47,7 @@ framing the spec lacks.
 
 ## Write the PRD
 
-Read [`product-voice`](../product-voice/SKILL.md) before drafting. Use it for
+Read [`voice-product`](../voice-product/SKILL.md) before drafting. Use it for
 problem, goals, audience, and success measures; keep every claim grounded in
 the source spec or plan.
 

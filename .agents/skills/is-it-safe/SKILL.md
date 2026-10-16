@@ -157,7 +157,7 @@ portable text colors, so do not rely on styling the verdict word itself.
 ## Report
 
 Keep the report concise and lead with the verdict. Apply
-[`product-voice`](../product-voice/SKILL.md) to explanatory prose: write for a
+[`voice-product`](../voice-product/SKILL.md) to explanatory prose: write for a
 human who may act on it, use plain language, and name who does what, under which
 condition, and with what observable impact. Explain unfamiliar terms. Preserve
 the causal path, preconditions, file-and-line evidence, uncertainty, and

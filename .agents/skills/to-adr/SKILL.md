@@ -47,7 +47,7 @@ decision**, not one giant ADR.
 
 ## Write the ADR(s)
 
-Read [`product-voice`](../product-voice/SKILL.md) before drafting. Apply it to
+Read [`voice-product`](../voice-product/SKILL.md) before drafting. Apply it to
 Context and Consequences so readers can follow the problem and trade-offs.
 Keep the chosen decision, alternatives, and technical constraints precise.
 

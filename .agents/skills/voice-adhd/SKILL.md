@@ -1,9 +1,9 @@
 ---
-name: adhd-voice
+name: voice-adhd
 description: >-
   Write or rewrite replies in an ADHD-friendly shape: answer first, short
-  bullets, one next action. Use when the user asks for adhd-voice, an
-  ADHD-friendly reply or rewrite, or to use adhd-voice for all replies. For
+  bullets, one next action. Use when the user asks for voice-adhd, an
+  ADHD-friendly reply or rewrite, or to use voice-adhd for all replies. For
   summarising a session, file, or URL, use summarize-for-adhd instead.
 argument-hint: "[--all | --off | text to rewrite]"
 metadata:

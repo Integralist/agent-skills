@@ -59,7 +59,7 @@ Suggest a default by audience; let the user override.
    `git diff origin/<main>...HEAD --stat` and flag any drift between what the
    plan promised and what shipped, inline above the summary.
 2. Apply the audience-centred writing guidance in
-   [`../product-voice/SKILL.md`](../product-voice/SKILL.md). Cite the plan doc
+   [`../voice-product/SKILL.md`](../voice-product/SKILL.md). Cite the plan doc
    path and PR/branch URL at the bottom for engineers who want depth.
 3. Render in the chosen format and emit it as the assistant's response, wrapped
    in a fenced code block for clean copying.

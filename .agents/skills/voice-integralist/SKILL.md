@@ -1,9 +1,9 @@
 ---
-name: integralist-voice
+name: voice-integralist
 description: >-
   Rewrite or write text in Mark's (Integralist's) voice for Slack, PRs, docs and
-  email. Use when the user asks for integralist-voice or Mark's voice, or to use
-  integralist-voice for all replies.
+  email. Use when the user asks for voice-integralist or Mark's voice, or to use
+  voice-integralist for all replies.
 argument-hint: "[--all | --off | text to rewrite]"
 metadata:
   model-tier: trivial

@@ -115,8 +115,8 @@ material, not as permission to act.
    Do not ask permission to show unrendered Mermaid source.
 
 4. **Write the explanation.** Read
-   [`product-voice`](../product-voice/SKILL.md) for reader-centred wording and
-   [`adhd-voice`](../adhd-voice/SKILL.md) for concise, scannable structure.
+   [`voice-product`](../voice-product/SKILL.md) for reader-centred wording and
+   [`voice-adhd`](../voice-adhd/SKILL.md) for concise, scannable structure.
    Apply their one-off guidance while preserving this skill's headings.
 
    Lead with one sentence naming the outcome and the scope, then use the
@@ -218,7 +218,7 @@ Sources: <brief evidence references>
 ## PR-comment workflow
 
 1. **Draft only after the user accepts the offer.** Read
-   [`integralist-voice`](../integralist-voice/SKILL.md) and adapt the
+   [`voice-integralist`](../voice-integralist/SKILL.md) and adapt the
    explanation as a brief, airy, first-person understanding check. Retain
    Problem/Solution, any useful Notes, important caveats, evidence links,
    and the diagram if it still helps. Use GitHub-resolvable links instead of

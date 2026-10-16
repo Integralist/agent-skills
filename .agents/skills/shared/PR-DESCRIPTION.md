@@ -1,7 +1,7 @@
 # PR title and description
 
 How to write a pull request's title and description. Write both with the
-product-voice skill, after reading every commit and the full diff against the
+voice-product skill, after reading every commit and the full diff against the
 PR's base, not just the list of changed files.
 
 **Title.** Write it as the commit skill writes a subject:

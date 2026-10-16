@@ -59,7 +59,7 @@ fill the gap with a guess.
    `projects/<yyyy-mm-dd>-<slug>/` when there's no spec, filling the template
    below. Fill the header from `date +%F` and `git config user.name`, with
    Status `Planning`. Write the Summary and each slice's Delivers with the
-   product-voice skill, so a reader sees what is built, for whom, and why. Add
+   voice-product skill, so a reader sees what is built, for whom, and why. Add
    the plan to the project README as
    [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
    file is written and you've shared its path.

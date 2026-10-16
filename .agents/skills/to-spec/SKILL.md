@@ -83,7 +83,7 @@ tasks** for the plan — they are implementation, not spec.
 
 ## Write the spec
 
-Read [`product-voice`](../product-voice/SKILL.md) before drafting the Problem
+Read [`voice-product`](../voice-product/SKILL.md) before drafting the Problem
 Statement, Solution, and User Stories. Keep acceptance criteria, interfaces,
 permissions, and other testable contracts precise.
 
