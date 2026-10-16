@@ -537,9 +537,10 @@ Pi:          /skill:execute-plan projects/<date>-<slug>/plan.md
 Claude Code: /execute-plan projects/<date>-<slug>/plan.md
 ```
 
-[`execute-plan`](./.agents/skills/execute-plan/SKILL.md) compiles only the next
-unblocked slice into a task document and delegates one task at a time to a
-cheap subagent. The premium coordinator inspects each task's actual changes,
+[`execute-plan`](./.agents/skills/execute-plan/SKILL.md) has a premium subagent
+write the task list for only the next unblocked slice and delegates one task at
+a time to a cheap subagent, both on the session's provider. The premium
+coordinator inspects each task's actual changes,
 runs checks, and commits its tests, implementation, and required documentation
 together before assigning another task. It reviews the whole slice before
 compiling the next one. Later review fixes receive separate correction commits.
@@ -550,11 +551,10 @@ grouped by slice and task, when reporting completion or a blocker.
 The [model policy](./.agents/skills/shared/EXECUTION-MODELS.md) configures Luna
 for Pi/Copilot and Haiku for Claude Code, both at `xhigh`, never `max`.
 
-Add `--auto` (or `auto`) before or after the plan path to keep going without
-routine confirmations:
+Add `auto` after the plan path to keep going without routine confirmations:
 
 ```text
-/skill:execute-plan projects/<date>-<slug>/plan.md --auto
+/skill:execute-plan projects/<date>-<slug>/plan.md auto
 ```
 
 Auto mode authorizes in-scope local edits, configured workers, and task/status
@@ -564,7 +564,7 @@ rationale, impact, and validation in `execution.md`, with a complete decision
 index in the final or blocked report. Default mode remains interactive. Auto
 still stops for real blockers, required fresh-per-diff approvals, unavailable
 checks/models, unsafe staging, or exhausted retries. It never pushes, deploys,
-publishes, or submits PRs. Re-supply the flag when starting a new invocation;
+publishes, or submits PRs. Re-supply `auto` when starting a new invocation;
 a prior log does not silently opt you back in. See
 [auto authority and decision logging](./.agents/skills/execute-plan/references/auto.md).
 
@@ -573,7 +573,7 @@ Install the shared skill with `make install-agents`. Pi also needs the updated
 [adapter setup](./.agents/skills/execute-plan/references/pi-subagents.md).
 Claude Code needs the [plan-executor](./.claude/agents/plan-executor.md) definition
 installed through `make install-claude`; see its
-[readiness/verification gate](./.agents/skills/execute-plan/references/claude-code.md).
+[model checks](./.agents/skills/execute-plan/references/claude-code.md).
 Native model/effort substitutions or unavailable telemetry can block execution.
 PDD approvals, permissions, and separately authorized delivery operations
 remain explicit gates. Interactive startup confirmation or explicit auto

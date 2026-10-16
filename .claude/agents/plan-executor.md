@@ -17,12 +17,7 @@ Read the supplied packet, repository instructions, task document, and
 [worker procedure](../../.agents/skills/execute-plan/references/worker.md). Resolve
 that procedure's links relative to its directory. Work in coordinated mode.
 
-If the packet's stage is `readiness`, inspect only: report `READY_ONLY`, the
-input paths, available checks, conflicts/blockers, and received model/effort
-metadata or its absence. Make no edits. Await a resumed `execute` packet with
-recorded user authorization and coordinator-verified model/effort evidence.
-
-An `execute` packet must name the repository root, exact task document,
+The packet must name the repository root, exact task document,
 assigned task key/scope, source milestone/requirement keys, allowed files,
 prior-task interfaces, protected user work, checks, and recorded authorization.
 Missing inputs or authority mean `BLOCKED` before edits.

@@ -1,56 +1,70 @@
 # Plan Execution Models
 
-Use this policy for [`execute-plan`](../execute-plan/SKILL.md) implementation
-and correction subagents, not as a global override for other delegation.
+Which models [`execute-plan`](../execute-plan/SKILL.md) uses for its subagents.
+This is not a global override for other delegation.
 
 ## Roles
 
-Keep the user-selected session model as coordinator. The usual choices are
-GPT-6.1 Sol through Pi/Copilot and Opus 5.5 through Claude Code, both at `xhigh`.
-Do not switch that model or its effort. It owns slice task compilation,
-engineering decisions, defect diagnosis, acceptance, and final review.
+Keep the user-selected session model as coordinator, at its own effort. The
+usual choices are GPT-6.1 Sol through Pi/Copilot and Opus 5.5 through Claude
+Code, both at `xhigh`. Don't switch that model or its effort. It owns
+decisions, defect diagnosis, acceptance, commits, and the final review.
 
-| Harness | Implementation model | Effort setting |
-| --- | --- | --- |
-| Pi + GitHub Copilot | `github-copilot/gpt-6-luna` | `thinking: xhigh` |
-| Claude Code | `claude-haiku-5-5` | `effort: xhigh` |
+Two kinds of subagent do the heavy work, so the coordinator's context lasts the
+whole plan:
 
-These are the user's chosen lower-cost tiers, not a claim about realized cost.
-The identifiers are pinned preferences, not an instruction to guess the latest
-release. Verify availability and effort support at runtime; update this table
-and the [Claude agent definition](../../../.claude/agents/plan-executor.md)
-together when the user chooses a newer worker. Check with
-`make check-execute-plan` to catch definition drift.
+- **Task-list writer:** a premium subagent that follows the to-tasks skill for
+  one slice.
+- **Implementer:** a cheap subagent that does one task from a finished task
+  list. Corrections use the same model.
+
+**Same provider, different model.** The coordinator's provider decides every
+subagent's provider. Change the model and effort, never the provider:
+
+- **Pi:** the provider is the one in brackets in the model list, such as
+  `github-copilot`. Pick another model from that provider.
+- **Claude Code:** the provider is the session's Anthropic connection. Pick
+  another Claude model, such as Haiku for the implementer.
+
+| Harness | Task-list writer (premium) | Implementer (cheap) | Effort |
+| --- | --- | --- | --- |
+| Pi + GitHub Copilot | the session's model | `github-copilot/gpt-6-luna` | `thinking: xhigh` |
+| Pi + Amazon Bedrock | the session's model | `amazon-bedrock/global.anthropic.claude-haiku-5-5` | `thinking: xhigh` |
+| Claude Code | the session's model | `claude-haiku-5-5` | `effort: xhigh` |
+
+These are the user's chosen tiers, not a claim about realized cost, and the IDs
+are pinned preferences, not a guess at the latest release. Verify availability
+and effort support at runtime. When you choose a newer implementer, update this
+table and the [Claude agent definition](../../../.claude/agents/plan-executor.md)
+together, then run `make check-execute-plan` to catch drift.
+
+**Provider unavailable.** If the provider is out of credits or can't be
+reached, stop. In Pi, ask which of the other providers in the model list to
+use, and propose their cheap implementer and higher-end writer models for the
+user to confirm. In Claude Code there's no other provider, so report and stop.
+
+```txt
+`github-copilot` is out of credits. Continue on:
+1. `amazon-bedrock`
+2. `google-vertex`
+3. Stop here.
+```
+
+A harness and provider pair with no row above is unmapped: stop and ask.
 
 ## Enforcement
 
-1. Detect the harness and provider independently. Pi using Anthropic through
-   AWS Bedrock is not Claude Code. Pi/Copilot uses the existing Copilot login;
-   Claude Code uses the company Anthropic connection. Do not copy credentials
-   between harnesses or route through a different provider as a fallback.
-2. Explicitly configure the implementation model and `xhigh`. Never request
-   `max`, rely on inherited worker settings, or silently choose another model
-   or effort. If support, effective settings, or permissions cannot be
-   established, report `BLOCKED` and ask the coordinator for a decision.
-3. Enforce Pi's no-fallback flag as described in
-   [its adapter](../execute-plan/references/pi-subagents.md). Claude Code has
-   no equivalent strict-fallback flag: follow
+1. Detect the harness and provider separately: Pi using Anthropic through AWS
+   Bedrock is not Claude Code. Don't copy credentials between harnesses.
+2. Configure the model and `xhigh` explicitly. Never request `max`, rely on
+   inherited settings, or silently pick another model or effort. If support,
+   effective settings, or permissions can't be established, return `BLOCKED`.
+3. Pi enforces no fallback with a flag, as [its adapter](../execute-plan/references/pi-subagents.md)
+   describes. Claude Code has no such flag; follow
    [its preflight and telemetry limits](../execute-plan/references/claude-code.md)
-   rather than claiming the definition alone guarantees the effective model.
-4. Corrections use the same implementation model. Keep ambiguous debugging and
-   design judgment with the coordinator. Explicit user approval is required
-   before premium implementation or any unmapped harness/provider pairing.
-5. Report requested settings separately from observable effective settings.
-   Config files and UI labels are not proof of every runtime request. Use
-   authoritative transcript/provider metadata where available; disclose gaps.
-
-## Verified configuration sources
-
-- [Pi defaults and per-model thinking](../../../.pi/agent/settings.json)
-  already include the Copilot worker at `xhigh`. Its installed Pi catalog
-  exposes `xhigh` for GPT-6 Luna; recheck after catalog/provider changes.
-- [Claude Code model and effort documentation](https://code.claude.com/docs/en/model-config#adjust-effort-level)
-  lists Haiku 5.5 and `xhigh` support.
-- [Claude Code subagent configuration](https://code.claude.com/docs/en/sub-agents#supported-frontmatter-fields)
-  defines `model`, `effort`, and `maxTurns`. Environment variables, organization
-  restrictions, and effort caps can override effective settings.
+   and don't claim the definition alone fixes the model.
+4. Keep ambiguous debugging and design judgment with the coordinator. Premium
+   implementation, or an unmapped pair, needs the user's explicit approval.
+5. Report requested settings apart from observed ones. Config files and UI
+   labels don't prove every request; use transcript or provider metadata and
+   say what you couldn't see.
