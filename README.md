@@ -301,6 +301,7 @@ authenticate via SSO on first use.
 | **retro**                         | Audit a coding session for missing guardrails, context bloat, and tool friction.                         |
 | **security-review-feedback**      | Validate vulnerability findings for reachability and exploitability before fixing.                       |
 | **show-me**                       | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.                       |
+| **skill-rewrite**                 | Rewrite a skill to be short and readable without losing its core behaviour.                              |
 | **spec-delta**                    | Record a living-spec behaviour change as a project spec with a Behavioural Delta.                        |
 | **stacked-prs**                   | Create and manage dependent PRs with the official `gh stack` extension.                                  |
 | **summarize-for-adhd**            | Summarise a session, file, or URL with a clear takeaway and short, ADHD-friendly points.                 |
