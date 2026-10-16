@@ -80,13 +80,6 @@ spec, scratch pad, or decision log.
 
 ### Offer ADRs sparingly
 
-Only offer an ADR when all three hold:
-
-1. **Hard to reverse** — changing your mind later costs meaningfully.
-1. **Surprising without context** — a future reader will wonder "why this
-   way?"
-1. **The result of a real trade-off** — genuine alternatives existed and
-   you picked one for specific reasons.
-
-If any is missing, skip it. Follow the naming, migration, and content rules in
-[ADR-FORMAT.md](./ADR-FORMAT.md).
+Offer an ADR only when a decision passes the three tests in
+[ADR-FORMAT.md](../shared/ADR-FORMAT.md), and write it with that file's
+template, numbering, and registry rules.
