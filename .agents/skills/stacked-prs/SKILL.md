@@ -88,9 +88,9 @@ several tasks or vertical slices.
    ```
 
    For each PR layer in the stack, draft its title and description using the
-   [`draft-pr`](../draft-pr/SKILL.md) skill against that layer's base branch
+   [`open-pr`](../open-pr/SKILL.md) skill against that layer's base branch
    (trunk for the bottom layer; the parent layer's branch for higher layers).
-   Follow `draft-pr` to obtain explicit user approval for each layer's PR.
+   Follow `open-pr` to obtain explicit user approval for each layer's PR.
 
    Submit the stack to push branches and create or update the PR chain on
    GitHub:
@@ -151,7 +151,7 @@ several tasks or vertical slices.
 
 Finish when the stack matches the confirmed delivery mapping, every submitted
 PR has the correct base with a user-approved title and description matching the
-[`draft-pr`](../draft-pr/SKILL.md) skill, `gh pr checks <PR>` passes for all
+[`open-pr`](../open-pr/SKILL.md) skill, `gh pr checks <PR>` passes for all
 layers, and `gh stack view --short` reports no layer needing a rebase.
 
 ## Reference

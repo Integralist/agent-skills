@@ -1,12 +1,12 @@
 ---
-name: draft-pr
-description: Draft a concise, direct pull request with a clear Problem and Solution. Use when the user asks to create, draft, or open a PR.
+name: open-pr
+description: Open a pull request with a concise, direct description built around a clear Problem and Solution. Use when the user asks to create, open, or write a PR.
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git symbolic-ref:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh repo view:*), Bash(gh stack:*), Bash(mmdc:*)
 metadata:
   model-tier: moderate
 ---
 
-# Draft PR
+# Open PR
 
 Open a pull request whose description is direct and concise, structured around a
 clear **Problem** and **Solution**.
@@ -122,8 +122,8 @@ If the fields below show commands rather than output, run each one first.
      Conventional Commits standard plural `docs`, never `doc`).
 
    ```txt
-   BAD (WHAT):  feat(draft-pr): require loose bullet lists in pr descriptions
-   GOOD (WHY):  feat(draft-pr): space out bullet lists so pr descriptions are easier to read
+   BAD (WHAT):  feat(open-pr): require loose bullet lists in pr descriptions
+   GOOD (WHY):  feat(open-pr): space out bullet lists so pr descriptions are easier to read
 
    BAD (WHAT):  fix(fetch): add retry wrapper to the fetch helper
    GOOD (WHY):  fix(fetch): retry transient 502s so the nightly import completes

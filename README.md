@@ -263,7 +263,6 @@ authenticate via SSO on first use.
 | **delegate**                      | Choose and dispatch the right subagent for a task.                                                       |
 | **distill**                       | Shorten long prose without losing essential information.                                                 |
 | **domain-modeling**               | Define shared domain language and record architecture decisions.                                         |
-| **draft-pr**                      | Write and open a concise PR with clear Problem and Solution sections.                                    |
 | **durable-rules**                 | Turn recurring findings into conventions, anti-patterns, or skill improvements.                          |
 | **eval**                          | Create and run skill evaluations, then compare with the previous run.                                    |
 | **execute-plan**                  | Compile, delegate, verify, and correct one plan slice at a time without model switching.                 |
@@ -289,6 +288,7 @@ authenticate via SSO on first use.
 | **mutation-testing**              | Check whether tests detect behavior changes with deliberate mutations.                                   |
 | **next-slice**                    | Implement and complete every task in the next actionable plan slice.                                     |
 | **next-task**                     | Implement and complete the next actionable plan or task-list item.                                       |
+| **open-pr**                       | Write and open a concise PR with clear Problem and Solution sections.                                    |
 | **perspectives**                  | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.                    |
 | **pdd**                           | Run a Product-Engineering initiative through Project, Discovery, and Design approvals.                   |
 | **polish**                        | Improve a short passage's clarity and concision.                                                         |
@@ -355,7 +355,7 @@ flowchart TD
     end
 
     PDD --> Spec
-    Small --> Delivery[commit → draft-pr or stacked-prs]
+    Small --> Delivery[commit → open-pr or stacked-prs]
     Execute --> Delivery
     Docs --> Delivery
 ```
