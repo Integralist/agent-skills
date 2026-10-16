@@ -35,7 +35,7 @@ fill the gap with a guess.
    design choice, or opening a file not named here. If a task needs a judgment
    call, supply what's missing or split it.
 
-   - Give each task the parts shown in [TEMPLATE.md](TEMPLATE.md): what it
+   - Give each task the parts shown in the template below: what it
      delivers, its location, a stub if the test needs one to compile, the
      failing test (red) with its command and the assertion failure to expect,
      the implementation (green), and a runnable Verify. A task with no code,
@@ -64,3 +64,62 @@ fill the gap with a guess.
    the task list to the project README as
    [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
    file is written and you've shared its path.
+
+`{...}` are placeholders; repeat the task block for each task.
+
+`````markdown
+# {Feature} — Task List
+
+- **Status:** Ready
+- **Author:** {git config user.name}
+- **Created:** {date +%F}
+- **Language:** {detected language}
+- **Source:** {plan path and slice, or "in-session discussion"}
+
+## Summary
+
+{Two or three reader-facing sentences.}
+
+## Context for the executor
+
+Existing code the tasks build on (verified — do not re-explore):
+
+- `{path/to/file:NN}` — {signature or fact the tasks depend on}
+
+Conventions and gotchas:
+
+- {convention or gotcha the tasks depend on}
+
+## Tasks
+
+### Task {n}: {what it delivers}
+
+{One or two sentences on the behaviour this task delivers.}
+
+- **Supports:** {milestone keys; omit when the source has none}
+- **Location:** `{path}`, `{path}`
+
+**Stub** — add to `{path}` (only if the test needs it to compile):
+
+```{language}
+{verbatim stub}
+```
+
+**Test (red)** — add to `{path}`:
+
+```{language}
+{verbatim test}
+```
+
+Run `{command}`; expect `{assertion failure}`.
+
+**Implementation (green)** — add to `{path}`:
+
+```{language}
+{verbatim implementation}
+```
+
+**Verify:** `{command}` → `{expected output}`.
+
+- [ ] Task {n} complete
+`````

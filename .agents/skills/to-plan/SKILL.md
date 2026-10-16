@@ -1,446 +1,131 @@
 ---
 name: to-plan
 description: >-
-  Write an implementation plan. Use when creating a feature implementation
-  plan, persisting a plan discussed in chat, or when another skill needs to plan
-  a change.
+  Write an implementation plan of slices and milestones from a spec or a
+  session's discussion. Use when creating a feature plan, saving a plan
+  discussed in chat, or when another skill needs a plan.
+argument-hint: "[source path]"
 metadata:
   model-tier: complex
 ---
 
 # To Plan
 
-Produce a precise delivery plan: ordered, demoable slices, outcome milestones,
-dependencies, and approved interface contracts. The stable behavior and full
-acceptance criteria live in the [`spec`](../to-spec/SKILL.md). Keep signatures,
-types, import paths, design decisions, and scope constraints precise;
-implementation details belong in the task document compiled just-in-time via
-[`to-tasks`](../to-tasks/SKILL.md), not a duplicate executable checklist here.
+Turn a source (a file or this session's discussion), and its spec if one
+exists, into `plan.md`: ordered vertical slices, each with the outcomes it
+must reach, the slices it waits on, and the exact interfaces it shares with
+its neighbours. Plan outcomes, not steps; the to-tasks skill later turns one
+slice at a time into tasks against live code. Write the plan; don't build it.
 
-Normally invoked by [`architect`](../architect/SKILL.md) after the spec, but it
-is the single way to produce a plan document and is often run standalone.
+**Stop and ask.** Follow the source as given, but when something is missing,
+contradictory, or looks like the wrong design, tell the user and wait. Don't
+fill the gap with a guess.
 
-## When to use this skill
+1. **Pick the source.** Use the file the user names. With none, use this
+   session's discussion: capture the plan worked out there rather than
+   starting over. Use the spec the user or calling skill names, or `spec.md`
+   in the source's project folder; plan without one when neither exists. If
+   the source names a spec you can't find, ask for its path. Done when you
+   know the source and whether there's a spec.
 
-Two points are easy to get wrong:
+2. **Read what it touches.** Read the spec if there is one, any research the
+   source links, and the code the plan will change. Load the convention skills
+   for each language the signatures use. Done when you know the existing
+   interfaces the slices build on.
 
-- **A plan just discussed in chat is the source, not a prompt to start over.**
-  When the user says "save this" or "turn this into a plan doc", capture *that*
-  plan — do not invent a new one or skip the skill.
-- Research is an optional input, not a precondition. A spec is required; if
-  absent, you must run `to-spec` first to create one.
+3. **Slice the work.** Cut vertical slices: each a tracer bullet through every
+   layer it touches, demoable on its own, and small enough for one session.
+   For single-layer or non-code work, use one flat `#### Milestones` list. For
+   a wide rename, use expand–contract: add the new form, migrate call sites in
+   slices, then remove the old form.
 
-Never hand-roll a plan by copying the shape of files already in `projects/`.
+   - Give each slice `Blocked by`, and `Consumes`/`Produces` with exact
+     signatures. A slice's implementer sees only its own section, so this is
+     how it learns its neighbours' names and types.
+   - Give each slice milestones: verifiable outcomes keyed `M<slice>.<n>`. A
+     milestone says what is true when done ("empty input returns
+     `ErrEmpty`"), not which files change. With a spec, link the criteria
+     each milestone meets; without one, the milestone's own wording is the
+     criterion, so make it checkable. Never renumber a key once assigned; task
+     lists and execution logs refer to it.
+   - Choose the delivery shape as
+     [PULL-REQUEST-DELIVERY.md](../shared/PULL-REQUEST-DELIVERY.md) describes,
+     naming slices or milestones, not task numbers.
 
-## Input
+   Done when every requirement in the spec, or in the source without one, maps
+   to a milestone, and every name is spelled the same in every slice.
 
-Determine what to plan, in priority order:
-
-1. Invoked from `architect` with a build goal, spec, and research → use those.
-1. **A plan already worked out in the current conversation** → structure and
-   persist *that*; do not start over.
-1. Otherwise → ask the user what to build; if the request is vague, elicit
-   intent first via [`clarify`](../clarify/SKILL.md).
-
-Locate the spec: a path passed in, or the matching `spec.md` in the project
-directory (`projects/<yyyy-mm-dd>-<slug>/spec.md`). If no spec exists yet,
-you must first run [`to-spec`](../to-spec/SKILL.md) to create one. Read it —
-its acceptance criteria and implementation decisions feed the plan.
-
-### Detect programming language
-
-Auto-detect the primary language(s) from file extensions and build files, then
-proceed with the detected language unless the user corrects you — fold the
-detection into whatever you ask next rather than blocking on a standalone
-confirmation:
-
-```txt
-Planning in Go (detected). Tell me if the snippets should use a
-different language.
-```
-
-### Load convention and testing skills
-
-Explicitly load convention and testing skills before drafting the plan:
-
-- **Markdown (always):** Load [`conventions-markdown`](../conventions-markdown/SKILL.md).
-- **Go:** If Go, load [`conventions-go`](../conventions-go/SKILL.md) and
-  [`go-testing`](../go-testing/SKILL.md) for signatures, stubs, and test strategy.
-- **Python:** If Python, load [`conventions-python`](../conventions-python/SKILL.md).
-- **SQL:** If schema or migrations are involved, load
-  [`conventions-sql`](../conventions-sql/SKILL.md).
-- **Mermaid:** If diagrams are included, load
-  [`conventions-mermaid`](../conventions-mermaid/SKILL.md).
-
-### Gather context
-
-Read the spec (above), any project research (`./research.md`), and relevant
-`docs/research/*.md`. These are the foundation for the plan.
-
-### Grill and resolve decision frontier (Mandatory)
-
-Before drafting slices, grilling is a mandatory step to focus in on what is
-being planned. Delegate to [`grill-with-docs`](../grill-with-docs/SKILL.md) to
-run a relentless interview, stress-test technical choices, interface contracts,
-and external dependencies, capture domain terms in `GLOSSARY.md`, and record
-ADRs under `docs/adr/`. If only legacy `CONTEXT.md` exists, use it in place
-and show the user a `⚠️` warning to rename it to `GLOSSARY.md`.
-
-Do not skip this step. Even if the feature was discussed in chat or specified
-in a spec document, you must run the grilling interview to stress-test
-assumptions and solidify the design tree. The only exception is if `to-plan` was
-invoked as Phase 4 of [`architect`](../architect/SKILL.md) and Phase 3 (Grill)
-was already completed in the current workflow. Run the grilling session to
-completion (until the question frontier is empty and the user confirms shared
-understanding) before drafting the plan slices.
-
-## Acceptance criteria & scaffolding
-
-The **spec** owns the acceptance criteria — the plan links them from its
-`## Specification` section, it does not restate them.
-
-- **Code plan** → delegate to [`behaviour-spec`](../behaviour-spec/SKILL.md),
-  passing the spec's scenarios and language, to identify the required runner
-  and verification seams. Record the chosen dependency in Prerequisites and
-  an outcome milestone for runnable acceptance verification in the first
-  relevant slice. Compile dependency/file/wiring/stub steps later via
-  `to-tasks`; do not paste a scaffold task list into the plan.
-- **Non-code plan** → criteria are still written in Gherkin syntax
-  (` ```gherkin `), but verified by checkable assertions (grep, command output,
-  file state) rather than executable runner scaffolding.
-- **No spec** (standalone, or a plan discussed in chat) → you must run
-  [`to-spec`](../to-spec/SKILL.md) first to generate `spec.md` in the project
-  directory (`projects/<yyyy-mm-dd>-<slug>/spec.md`). This ensures a stable
-  specification file exists.
-
-Whenever acceptance criteria or Given/When/Then scenarios are authored, render
-them inside a GitHub Flavoured Markdown fenced code block (` ```gherkin `).
-Never format them as loose Markdown prose, lists, or headings.
-
-## Plan document
-
-Read [`product-voice`](../product-voice/SKILL.md) when writing the Summary and
-user-observable part of each slice's **Delivers** field and milestones. Keep
-interfaces, dependencies, approved design decisions, and scope constraints
-exact. Reserve executable tasks for the compiled task document.
-
-Ensure `projects/README.md` exists. If missing, create it from
-[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md). Ensure the
-project's `README.md` exists too; create it from
-[`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) and add or update
-the plan in its artifact table.
-
-Write to `projects/<yyyy-mm-dd>-<slug>/plan.md`. Date from `date +%F`, author
-from `git config user.name`. A new plan's `Status` is always `Planning`; the
-transition to `Complete` follows
-[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md#status).
+4. **Write the plan** to `plan.md` in the spec's project folder, or a new
+   `projects/<yyyy-mm-dd>-<slug>/` when there's no spec, filling the template
+   below. Fill the header from `date +%F` and `git config user.name`, with
+   Status `Planning`. Write the Summary and each slice's Delivers with the
+   product-voice skill, so a reader sees what is built, for whom, and why. Add
+   the plan to the project README as
+   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
+   file is written and you've shared its path.
 
 ````markdown
-# {Plan Name}
+# {Feature} — Plan
 
-- **Status**: Planning
-- **Author**: {git config user.name}
-- **Created**: {date +%F}
-- **Language**: {confirmed language, or "Markdown"/"N/A" for non-code}
+- **Status:** Planning
+- **Author:** {git config user.name}
+- **Created:** {date +%F}
+- **Language:** {detected language, or N/A}
+- **Spec:** {[spec](./spec.md), or "None — criteria live in the milestones"}
 
 ## Summary
 
-{What is being built and why — one paragraph. Full what/why and
-definition of done live in the spec.}
+{Two or three reader-facing sentences: the problem, what changes for whom,
+and why it matters.}
 
-## Specification
+## Prerequisites
 
-Acceptance criteria and scope:
-[{spec name}](./spec.md).
+{Services, libraries, tools, or config needed first, or "None".}
 
-## Research
+## Pull Request Delivery
 
-- [research](./research.md) (or topic in `docs/research/`)
-
-## Prerequisites & Dependencies
-
-{External services, libraries, tools, or config required before
-implementation. For a code plan, list the BDD runner here — e.g.
-`github.com/cucumber/godog` for Go — so the new dependency is a
-conscious choice.}
+{Mode and layer table, per PULL-REQUEST-DELIVERY.md.}
 
 ## Implementation
 
-Vertical slices for multi-layer features; a flat milestone checklist for
-single-layer or non-code work — see "Slicing the work".
+### Slice 1: {what it delivers end to end}
 
-### Slice 1: {what it delivers, end to end}
+- **Blocked by:** None
+- **Delivers:** {observable behaviour}
+- **Consumes:** None
+- **Produces:** {exact signatures later slices rely on}
 
-- **Blocked by**: None — can start immediately
-- **Delivers**: {observable, demoable behaviour across every layer
-  the slice touches}
-- **Consumes**: None
-- **Produces**: {exact signatures later slices rely on — function
-  names, parameter and return types, import paths}
-
-```go
-// Key interface or type signatures produced by this slice
+```{language}
+{key signatures}
 ```
 
 #### Slice 1 Milestones
 
-- [ ] **M1.1**: {verifiable outcome; link relevant spec criteria}
-- [ ] **M1.2**: {verifiable outcome; link relevant spec criteria}
+- [ ] **M1.1**: {checkable outcome}{ — [criterion](./spec.md#anchor), when there's a spec}
 
-### Slice 2: {what it delivers}
+### Slice 2: {what it delivers end to end}
 
-- **Blocked by**: Slice 1 ({why})
-- **Delivers**: {…}
-- **Consumes**: {exact signatures taken from Slice 1}
-- **Produces**: {…}
-
-```go
-// Key interface or type signatures produced by this slice
-```
+- **Blocked by:** Slice 1 ({why})
+- **Delivers:** {observable behaviour}
+- **Consumes:** {signatures from Slice 1}
+- **Produces:** {exact signatures, or None}
 
 #### Slice 2 Milestones
 
-- [ ] **M2.1**: {verifiable outcome; link relevant spec criteria}
+- [ ] **M2.1**: {checkable outcome}{ — [criterion](./spec.md#anchor), when there's a spec}
 
 ### Documentation
 
-- [ ] Seed or update `docs/specs/<capability>.md` with behaviour contracts
-- [ ] Update `**/README.md` for packages whose public API changed
-- [ ] Update `docs/**/*.md` for user-facing behaviour changes
-
-### Verification
-
-- [ ] {How to test end-to-end}
-- [ ] All spec acceptance criteria hold — code: via `make test`
-  (godog for Go); non-code: via the grep/command/file-state
-  assertions named in each scenario
+- [ ] {Living spec `docs/specs/<capability>.md` to seed or update}
+- [ ] {README or `docs/` page whose behaviour or usage changes}
 
 ## File Changes
 
-| File           | Change                         |
-| -------------- | ------------------------------ |
-| `path/to/file` | {Brief description of changes} |
+| File     | Change         |
+| -------- | -------------- |
+| `{path}` | {what and why} |
 
-## Parallel Execution
+## Notes
 
-> [!IMPORTANT]
-> Only delegate a slice to a fire-and-forget subagent if it is
-> independent, well-specified, touches files no other slice touches,
-> and won't need interactive steering. A sealed subagent can't be
-> redirected mid-flight — it ploughs ahead while objections pile up.
-> Work you expect to iterate on belongs in the main thread or a
-> chat-able teammate. For editing work that still benefits from
-> parallel scanning, prefer a two-phase split: a read-only subagent
-> returns a proposed-change list, then the main thread applies edits
-> with the user able to veto each one.
-
-The Blocked-by graph is the parallelism: slices sharing no
-unresolved blocker and touching different files can run concurrently.
-Assign each to a subagent role.
-
-| Subagent Role      | Slices              |
-| ------------------ | ------------------- |
-| {Role description} | {Slice 1, Slice 3}  |
-
-## Notes & Caveats
-
-- {Edge cases, decisions, risks, or open questions.}
+- {Risks, open questions, unverified assumptions.}
 ````
-
-## Slicing the work
-
-Decompose into **vertical slices**, not horizontal layers. A slice is a tracer
-bullet: it cuts a narrow but *complete* path through every layer it touches
-(schema, API, UI, tests), is independently demoable, and fits one work session.
-Layer-by-layer phases leave nothing runnable until the last phase lands; a slice
-gives working behaviour early. Where the spec has acceptance-criteria scenarios,
-each scenario is a natural slice boundary.
-
-Every slice declares **Blocked by** — the slices that must finish first, or
-"None — can start immediately".
-
-A slice also declares its interface: **Consumes** (exact signatures it takes
-from earlier slices) and **Produces** (exact signatures later slices rely on).
-A slice handed to a subagent sees only its own section, so this block is the
-only way its implementer learns the names and types its neighbours use.
-**Delivers** describes behaviour; it does not carry types.
-
-### Slice milestones, not implementation tasks
-
-Use `#### Slice N Milestones` with stable `MN.K` keys, such as `M1.1` and
-`M1.2`, for outcome checkpoints. Preserve keys once assigned. Keep milestones
-coarse and verifiable: "Identity discovery satisfies the specified privacy
-constraints", not a sequence of file edits, API calls, test functions, and
-commands. Link full criteria in the spec rather than restating them here.
-
-Keep exact public interfaces in `Consumes`/`Produces`, approved implementation
-choices in the design/ADRs, file ownership in File Changes, and prerequisites
-or scope constraints in their named sections. Moving those details out of a
-milestone must not delete or weaken a requirement. Keep implementation history
-and acceptance evidence in `execution.md`, not in the milestone's description.
-
-A slice milestone is not a PDD initiative milestone, an executable task, or a
-commit boundary. `to-tasks` maps independently numbered tasks to milestone
-keys after inspecting live code; the relationship need not be one-to-one.
-Check a plan milestone only when its outcome has evidence, not when one task
-has finished. `execute-plan` additionally requires slice-level acceptance.
-
-For flat/single-layer plans, use a `#### Milestones` checklist with `M1.K`
-keys and the same outcome bar. Existing plans with `Task N.N` checkboxes remain
-valid legacy input: preserve their identifiers and completion state unless the
-user approves a migration. Do not reinterpret existing requirements as optional.
-
-### Module seams and encapsulation
-
-A vertical slice cuts across layers, but it must respect **deep module
-boundaries** along that path:
-
-- **Treat adjacent modules as grey boxes.** Interact strictly through their
-  public interfaces (`Consumes`). An executor must not alter private internals
-  or unexported helpers of existing modules unless the slice explicitly plans a
-  refactor of that module.
-- **Avoid shotgun surgery.** If implementing a slice forces edits across many
-  scattered helper files, the underlying modules are shallow and leaking
-  concerns. Stop and consolidate the abstraction into a deep module behind a
-  narrow public interface before proceeding.
-
-Not everything slices vertically:
-
-- **Single-layer or non-code work** (one package, a doc set, config) has no
-  layers to cut — use a flat milestone checklist or group outcomes by concern,
-  keeping Blocked-by edges. Compile executable steps later via `to-tasks`.
-- **Wide mechanical refactors** (a rename or API change across many call sites)
-  use **expand–contract**:
-  1. **Expand** — introduce the new form alongside the old; nothing breaks.
-  1. **Migrate** — rewrite call sites in batches by blast radius, each batch a
-     slice blocked by Expand.
-  1. **Contract** — delete the old form once unused; blocked by all migration
-     slices.
-
-## Pull request delivery
-
-After slicing the work, determine its delivery shape using
-[`PULL-REQUEST-DELIVERY.md`](../shared/PULL-REQUEST-DELIVERY.md). Insert the
-confirmed `Pull Request Delivery` section after `Prerequisites & Dependencies`
-in the generated plan.
-
-The delivery graph and the `Blocked by` graph answer different questions:
-delivery groups review units into PRs, while `Blocked by` controls work order.
-A PR layer may contain several tasks or slices. Before task compilation,
-express the plan's delivery units in slices or milestone keys, not guessed
-future task numbers. The compiler maps actual tasks to those confirmed units.
-
-## Parallel execution
-
-First decide whether parallelism applies at all. A single coherent stream, or an
-inherently sequential chain (each slice blocked by the prior), runs in the main
-thread — say so in one line and omit the Subagent Role table. Do not fabricate
-concurrency to fill the template.
-
-When it does apply:
-
-- **Read the Blocked-by graph.** Slices with no shared unresolved blocker,
-  touching different files, run concurrently.
-- **Define roles by slice, not by task.** Each role owns a coherent slice of the
-  system, not a grab-bag.
-- **Keep the team small** — two to four roles; more means more coordination.
-- **Make instructions concrete** — the plan goes to an AI agent later, so they
-  must be followable mechanically.
-
-The embedded `> [!IMPORTANT]` steerability caveat travels inside the generated
-plan so it reaches repos without
-[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md) — keep
-it intact. That file holds the full rule.
-
-## Self-review
-
-Run these against the finished plan yourself — a checklist, not a subagent
-dispatch. Fix what you find inline and move on; there is no second pass.
-
-1. **Spec coverage** — walk each requirement in the spec and name the slice
-   that implements it. A requirement with no slice is a missing slice, not a
-   line in Notes & Caveats.
-2. **Citations resolve** — grep or read each `path:line` you cited and confirm
-   the symbol still exists. A citation pointing at the wrong line is worse
-   than none.
-3. **Type consistency** — every symbol a slice invents is spelled identically
-   everywhere later slices use it. `clearLayers()` in Slice 1 against
-   `clearFullLayers()` in Slice 4 is a bug shipped into the plan. Diff the
-   Consumes and Produces blocks against each other first; mismatches surface
-   there.
-4. **Encapsulation boundaries** — verify each slice only consumes public module
-   APIs. If a slice lists edits to internal files of established modules it
-   only needs to consume, push those changes back behind that module's public
-   interface.
-5. **Milestone boundary** — check stable outcome keys and spec links. Keep
-   file-edit/test/command sequences in the later task document, preserve all
-   approved decisions and exact interfaces, and avoid numbering plan bullets
-   as executable tasks.
-
-## Extract decisions
-
-After the plan is written, delegate to [`to-adr`](../to-adr/SKILL.md), passing
-the plan path. Its value gate produces an ADR only for a genuine decision (a
-fork with a rejected alternative) and skips mechanical or single-obvious-way
-work. If it produces nothing, note in `## Notes & Caveats` why no ADR was
-warranted. A PRD, when warranted, is offered separately by `architect` via
-[`to-prd`](../to-prd/SKILL.md).
-
-## Surface durable rules
-
-After extracting decisions, if systemic patterns surfaced, tell the user to
-run `/durable-rules` as a separate follow-up to codify them. It is
-user-invoked and requires confirmation before writing. Skip the hand-off when
-nothing durable surfaced.
-
-## Guidelines
-
-- Use specific file paths and line numbers when referencing code.
-- Cite every factual claim inline — `path/to/file.go:42` for code, URL for
-  external docs. Label anything you cannot cite an unverified assumption.
-- Each slice small enough to complete in one session.
-- Keep slice definitions focused on interface contracts (`Consumes` /
-  `Produces`) and behavioral deliverables. Avoid embedding verbatim test code
-  or full function bodies — detailed TDD steps are compiled just-in-time per
-  slice via [`to-tasks`](../to-tasks/SKILL.md).
-- Name the target living spec (`docs/specs/<capability>.md`) in the
-  Documentation section (seed if new, update if existing) so behavioural
-  contracts fold forward when the plan ships.
-- Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
-  needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Cut prose, not
-  load-bearing detail (paths, constraints, acceptance criteria).
-- If including Mermaid diagrams, follow
-  [`conventions-mermaid`](../conventions-mermaid/SKILL.md) and validate with
-  `mmdc`.
-- Render all Given/When/Then examples and acceptance criteria in GitHub
-  Flavoured Markdown fenced `gherkin` code blocks.
-
-## Execution hand-off (Just-in-Time tasks)
-
-Do not generate verbatim TDD code for all slices upfront, as early slices may
-alter implementation details for later ones. Offer
-[`execute-plan`](../execute-plan/SKILL.md) with the plan path to automate the
-premium compile → cheap execution → premium review loop. It compiles each next
-slice only after accepting the previous implementation; execution is opt-in.
-
-For the existing manual workflow, hand off one slice at a time to the user:
-
-1. Tell the user to run `/to-tasks <plan-path>` for a single-slice plan, or
-   `/to-tasks <plan-path> slice-1` for the first slice of a multi-slice plan.
-2. Once the task list is ready, tell the user to run `/next-task` or
-   `/next-slice` to execute Slice 1.
-3. After Slice 1 is verified and merged, tell the user to run
-   `/to-tasks <plan-path> slice-2` to compile Slice 2 against the updated
-   codebase.
-
-## Agent teams (if your harness supports it)
-
-Execute the Parallel Execution section as a real team: create one teammate per
-concurrent slice, give each its slice's tasks, and use the Blocked-by edges to
-decide where a teammate must wait for another's output before proceeding. The
-team lead coordinates hand-offs and shuts the team down when all slices
-complete.
-
-See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for enablement
-instructions.

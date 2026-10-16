@@ -27,7 +27,6 @@ const agentPath = ".claude/agents/plan-executor.md";
 const commitsPath = ".agents/skills/execute-plan/references/task-commits.md";
 const autoPath = ".agents/skills/execute-plan/references/auto.md";
 const planPath = ".agents/skills/to-plan/SKILL.md";
-const templatePath = ".agents/skills/to-tasks/TEMPLATE.md";
 const buildItemPath = ".agents/skills/shared/BUILD-ITEM.md";
 
 test("explicit invocation keeps the session model coordinating", () => {
@@ -345,9 +344,9 @@ test("new plans use outcome milestones while keeping exact interfaces", () => {
   assert.match(scaffold, /\*\*M1\.1\*\*/);
   assert.match(scaffold, /#### Slice 2 Milestones/);
   assert.doesNotMatch(scaffold, /^- \[ \] \*\*Task \d/m);
-  assert.match(scaffold, /\*\*Consumes\*\*/);
-  assert.match(scaffold, /\*\*Produces\*\*/);
-  assert.match(plan, /implementation details belong in the task document/);
+  assert.match(scaffold, /\*\*Consumes:\*\*/);
+  assert.match(scaffold, /\*\*Produces:\*\*/);
+  assert.match(plan, /Plan outcomes, not steps/);
 });
 
 function assertMilestoneMapping(compiler, template) {
@@ -359,7 +358,7 @@ function assertMilestoneMapping(compiler, template) {
 
 test("compiled tasks map to milestones without copying the plan checklist", () => {
   const compiler = flat(compilerPath);
-  const template = read(templatePath);
+  const template = read(compilerPath);
   assertMilestoneMapping(compiler, template);
   assert.throws(() => assertMilestoneMapping(compiler.replace("many-to-many", "one task per milestone"), template));
   assert.throws(() => assertMilestoneMapping(compiler, template.replaceAll("**Supports:**", "**Location:**")));
@@ -394,7 +393,7 @@ test("reference checking ignores nested examples but keeps real instruction link
 });
 
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, templatePath, buildItemPath]) {
+  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, buildItemPath]) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {

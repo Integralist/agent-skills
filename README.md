@@ -313,7 +313,7 @@ authenticate via SSO on first use.
 | **tech-docs**                     | Write or improve concise, maintainable technical documentation.                                          |
 | **test-feedback**                 | Diagnose supplied test failures, then fix them interactively.                                            |
 | **to-adr**                        | Extract genuine architecture decisions into standalone ADRs.                                             |
-| **to-plan**                       | Write a specification-backed plan with vertical slices, dependencies, and PR grouping.                   |
+| **to-plan**                       | Write a plan of vertical slices, outcome milestones, dependencies, and PR grouping.                      |
 | **to-prd**                        | Extract product goals, scope, and success measures into a PRD.                                           |
 | **to-spec**                       | Write an implementation-ready feature spec with scope and acceptance criteria.                           |
 | **to-tasks**                      | Compile a plan slice into a mechanical TDD task document with verbatim code.                             |
@@ -384,8 +384,7 @@ flowchart LR
     PDD --> ToSpec
 ```
 
-`to-plan` invokes `grill-with-docs` internally before producing `plan.md`.
-The arrows above show skill handoffs; the outputs are separate artifacts:
+Run `grill-with-docs` before `to-plan` to stress-test the design. The arrows above show skill handoffs; the outputs are separate artifacts:
 
 | Skill                      | Produces or updates                         |
 | -------------------------- | ------------------------------------------- |

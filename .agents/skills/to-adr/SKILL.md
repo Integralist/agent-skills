@@ -17,7 +17,7 @@ decisions only: the product-facing *what & why* goes to
 [`to-prd`](../to-prd/SKILL.md), the engineering source-of-truth to
 [`to-spec`](../to-spec/SKILL.md).
 
-Normally invoked by [`to-plan`](../to-plan/SKILL.md) after a plan is
+Normally invoked by [`architect`](../architect/SKILL.md) after a plan is
 written; also runs standalone.
 
 ## Input
@@ -43,7 +43,7 @@ decision**, not one giant ADR.
 > [!NOTE]
 > Direct `/to-adr` invocation lowers the bar: skip only if the ADR would be
 > entirely placeholder, but honour a borderline case the user explicitly asked
-> for. The strict gate is for **automatic** invocation from `to-plan`.
+> for. The strict gate is for **automatic** invocation from `architect`.
 
 ## Write the ADR(s)
 

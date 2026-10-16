@@ -72,9 +72,11 @@ Delegate to [`to-plan`](../to-plan/SKILL.md), passing the build goal,
 the project directory, the spec, and the research context. It writes the plan to
 `projects/<yyyy-mm-dd>-<slug>/plan.md`, decomposes the work into vertical slices
 with interface contracts (`Consumes` / `Produces`) and Blocked-by edges, points
-to `./spec.md` for acceptance criteria, and extracts ADRs via
-[`to-adr`](../to-adr/SKILL.md), which writes each decision as
-`ADR-<NNNN>.md` and updates the repo-wide ADR index. Run it to completion.
+to `./spec.md` for acceptance criteria. Run it to completion.
+
+Then delegate to [`to-adr`](../to-adr/SKILL.md), passing the plan path. Its
+value gate writes each genuine decision as `ADR-<NNNN>.md` and updates the
+repo-wide ADR index; when it produces nothing, note why in the plan's Notes.
 
 ## Offer a PRD
 
@@ -100,6 +102,6 @@ Ask the user to choose one next action:
   [`research`](../research/SKILL.md); the spec's structure and acceptance
   criteria in [`to-spec`](../to-spec/SKILL.md); interview mechanics, domain
   vocabulary, and ADRs in [`grill-with-docs`](../grill-with-docs/SKILL.md);
-  slice, Blocked-by, and parallel-execution guidance in
+  slice, Blocked-by, and milestone guidance in
   [`to-plan`](../to-plan/SKILL.md).
 - Wrap all Markdown output at 80 columns.

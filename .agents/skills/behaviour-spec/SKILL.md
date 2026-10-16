@@ -14,9 +14,8 @@ Turn a feature description into behavioural specifications in Gherkin
 (Given/When/Then): a machine-checkable definition of done expressed in
 ubiquitous language shared by humans and AI.
 
-Invoked by [`to-spec`](../to-spec/SKILL.md) for its acceptance-criteria block,
-and by [`to-plan`](../to-plan/SKILL.md) for its scaffold tasks. Can
-also run standalone.
+Invoked by [`to-spec`](../to-spec/SKILL.md) for its acceptance-criteria block.
+Can also run standalone.
 
 ## Two altitudes
 

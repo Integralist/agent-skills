@@ -221,9 +221,10 @@ stable behavior, acceptance criteria, and testing seams. The project-level
 begin. If a living specification changes, `spec.md` must contain a
 `## Behavioural Delta` section with `ADDED`, `MODIFIED`, `REMOVED`, or `RENAMED`.
 
-Then use [`to-plan`](../to-plan/SKILL.md) for vertical implementation slices.
-`to-plan` invokes [`grill-with-docs`](../grill-with-docs/SKILL.md) internally
-before writing `plan.md`. Once the plan is ready, offer
+Then stress-test the design with
+[`grill-with-docs`](../grill-with-docs/SKILL.md) and use
+[`to-plan`](../to-plan/SKILL.md) for vertical implementation slices. Once the
+plan is ready, offer
 [`execute-plan`](../execute-plan/SKILL.md) with that plan path for premium
 coordination and cheap slice implementation. This is opt-in and does not
 bypass PDD approval gates. For manual execution, tell the user to run
