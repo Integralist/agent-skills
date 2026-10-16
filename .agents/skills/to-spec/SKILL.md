@@ -1,9 +1,10 @@
 ---
 name: to-spec
 description: >-
-  Produce a functional specification defining problem, solution, and
-  acceptance criteria. Use when specifying a feature or when another skill
-  needs the spec phase before planning.
+  Write a project spec: the problem, the solution, and Gherkin acceptance
+  criteria, with any delta against the living spec. Use when specifying a
+  feature, saving a spec discussed in chat, or when another skill needs a spec.
+argument-hint: "[source path]"
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
 metadata:
   model-tier: complex
@@ -11,133 +12,58 @@ metadata:
 
 # To Spec
 
-A **spec** is the engineering source-of-truth: *what* to build and the
-definition of done. It is stable — it outlives plan revisions — because it
-carries **no file paths and no code snippets**. Those go stale, so they belong
-to the [`plan`](../to-plan/SKILL.md), where they can be kept current. Spec is
-the stable *what*; the plan is the volatile *how*.
+Turn a source (a file or this session's discussion) into `spec.md`: what to
+build, for whom, and the Gherkin scenarios that define done. A spec is the
+stable *what*. It names interfaces, contracts, schema, and API shape, but no
+file paths or code; those go stale and belong in the plan. Write the spec;
+don't plan or build it.
 
-Normally invoked by [`architect`](../architect/SKILL.md) after research; also
-runs standalone.
+**Stop and ask.** Follow the source as given, but when something is missing,
+contradictory, or looks like the wrong design, tell the user and wait. Don't
+fill the gap with a guess.
 
-## Input
+1. **Pick the source.** Use the file the user names. With none, use this
+   session's discussion: capture the spec worked out there rather than
+   starting over. If neither says enough to specify, ask. Done when you know
+   what is being built, for whom, and why.
 
-Determine what to specify, in priority order:
+2. **Read current truth.** Read any research the source links, the decisions
+   in `docs/adr/`, the code the feature touches, and the capability's living
+   spec in `docs/specs/` if one exists. A living spec is current truth; without
+   one, the code is. Done when you know the behaviour that exists today and the
+   decisions the spec must not contradict.
 
-1. Invoked from `architect` with a build goal and research context → use those.
-1. A spec worked out in the current conversation → capture *that*; do not start
-   over.
-1. Otherwise → ask the user what to build; if the request is vague, elicit
-   intent first via [`clarify`](../clarify/SKILL.md).
+3. **Write the scenarios** as [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md)
+   describes. Choose the testing seams: the fewest points where a test
+   observes the behaviour, as high as they go (a boundary over an internal
+   call), reusing existing ones. If the feature changes behaviour a living spec
+   holds, write the Behavioural Delta against it. Done when every behaviour in
+   the source has a scenario and every scenario has a seam.
 
-Detect the primary language from the repo so acceptance criteria target the
-right test runner; fold the detection into whatever you ask next rather than
-blocking on it. Non-code work → language is `N/A`.
-
-## Gather context
-
-Read any existing project research (`projects/<project-dir>/research.md` or
-`docs/research/*.md`). Explore the codebase to understand current state, using
-the project's domain vocabulary, and read `docs/adr/` so the spec does not
-contradict a decision already made. Inspect `docs/specs/` for an existing living
-spec covering the capability; if present, read it as current truth. If absent,
-the codebase is current truth and this project will seed the living spec.
-
-### Read-only current-state discovery
-
-When existing research leaves material behavior or contract questions across
-modules, use one read-only investigator under
-[the shared policy](../shared/SUBAGENT-STEERABILITY.md).
-Supply the confirmed feature scope, revision, relevant instructions, code,
-tests, living specs, and ADR paths. Reuse settled research; do not rescan it.
-Grant only verified read-only tools; no edits, test execution, or remote writes.
-Require `COMPLETE` / `INCOMPLETE`, observed behavior, existing test boundaries,
-contract conflicts, unknowns, and path:line evidence. Budget 40 turns; apply
-shared completion/retry. Verify material findings yourself; keep scope,
-acceptance criteria, seam selection/user confirmation, and all spec writes in
-the main thread. Keep small lookups inline; if delegation is unavailable,
-report it and investigate inline.
-
-## Identify testing seams
-
-Map where the feature's behaviour will be exercised by tests. A **seam** is a
-point where a test observes behaviour:
-
-- Prefer existing seams over new ones.
-- Position each seam as high in the architecture as it goes — a boundary (API,
-  CLI, HTTP handler) over an internal call.
-- The fewer seams, the better; the ideal is one.
-- Seams establish deep module boundaries: tests observe behavior at the public
-  interface (grey box), leaving internal implementations free to evolve without
-  breaking the test harness.
-
-Confirm the seams with the user before writing them into the spec.
-
-## Write the acceptance criteria
-
-Write the definition of done as feature-level Gherkin in a fenced code block
-marked `gherkin`, never as Markdown prose, lists, or headings. Each
-scenario becomes an acceptance test that runs end to end, so keep it at the
-system boundary (API, CLI, handler); unit behaviour belongs in the tests, not
-here. For non-code work, each scenario names the checkable assertion (grep,
-command output, file state) that proves it.
-
-- **Declarative, not imperative.** Say what behaviour holds, not the clicks or
-  calls that reach it.
-- **One behaviour per scenario.** If it needs "and then also", split it.
-- **Concrete and observable.** Name values and outcomes, never "works
-  correctly".
-- **The domain's words.** Use the terms the glossary and code use.
-- Use `Background` for preconditions every scenario shares, and
-  `Scenario Outline` with `Examples` for one behaviour across inputs.
-
-## Write the spec
-
-Read [`voice-product`](../voice-product/SKILL.md) before drafting the Problem
-Statement, Solution, and User Stories. Keep acceptance criteria, interfaces,
-permissions, and other testable contracts precise.
-
-Ensure `projects/README.md` exists. If missing, create it from
-[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md). Ensure the
-project's `README.md` exists too; create it from
-[`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) and add the new
-spec to its artifact table.
-
-Write the initiative-scoped delta spec to
-`projects/<yyyy-mm-dd>-<slug>/spec.md`. Date from `date +%F`, author from
-`git config user.name`. A new spec's `Status` is `Draft`; the transition to
-`Complete` follows
-[`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md#status). This
-document records the
-delta—problem, proposed solution, and acceptance criteria for this initiative.
-Net behaviour changes fold into the living spec at `docs/specs/<capability>.md`
-when the implementation ships (seed if new, update if existing).
-
-When the project changes an existing living contract, add a
-`## Behavioural Delta` section. Pin the baseline living-spec path and commit,
-then use generic `### ADDED`, `### MODIFIED`, `### REMOVED`, or `### RENAMED`
-headings. Keep every behaviour snapshot in a fenced `gherkin` block. For
-`MODIFIED`, show baseline and updated blocks; for `REMOVED`, record the reason
-and migration. The baseline is the behaviour accepted immediately before this
-project, not whatever the living spec says after later projects. For a project
-with no existing capability, state that the baseline is absent and use `ADDED`
-for the new behaviour.
+4. **Write the spec** to `spec.md` in the source's project folder, or a new
+   `projects/<yyyy-mm-dd>-<slug>/`, filling the template below. Fill the
+   header from `date +%F` and `git config user.name`, with Status `Draft`.
+   Write the Problem Statement, Solution, and User Stories with the
+   voice-product skill. Drop the Behavioural Delta section when no existing
+   behaviour changes. Add the spec to the project README as
+   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
+   file is written and you've shared its path.
 
 ````markdown
-# {Feature Name} — Specification
+# {Feature} — Specification
 
-- **Status**: Draft
-- **Author**: {git config user.name}
-- **Created**: {YYYY-MM-DD}
-- **Language**: {confirmed language, or "N/A" for non-code}
+- **Status:** Draft
+- **Author:** {git config user.name}
+- **Created:** {date +%F}
+- **Language:** {detected language, or N/A}
 
 ## Problem Statement
 
-{User-facing description of what is wrong or missing.}
+{What is wrong or missing, for whom.}
 
 ## Solution
 
-{User-facing description of what will exist when this is done.}
+{What will exist when this is done.}
 
 ## User Stories
 
@@ -145,132 +71,41 @@ for the new behaviour.
 
 ## Acceptance Criteria
 
-The definition of done — feature-level Given/When/Then, rendered in a
-fenced `gherkin` code block. Verification
-is by test runner for code, or checkable assertions (grep, command output,
-file state) for non-code and operational work.
-
 ```gherkin
 Feature: {capability}
-
-  As a {actor}
-  I want {capability}
-  So that {benefit}
 
   Scenario: {one concrete behaviour}
     Given {a starting state}
     When {an action occurs}
     Then {an observable outcome holds}
-    And {another observable outcome}
 ```
 
 ## Behavioural Delta
 
-<!-- Include this section when the project changes an existing durable contract.
-Pin the baseline path and commit. Use ADDED, MODIFIED, REMOVED, or RENAMED
-headings and fenced Gherkin snapshots. Omit it for a new capability with no
-baseline. -->
-
-**Baseline:** `{path}` at `{commit}`
-
-### MODIFIED
-
-**Baseline:**
-
-```gherkin
-Feature: {capability before this project}
-
-  Scenario: {existing behaviour}
-    Given {starting state}
-    When {action}
-    Then {observable outcome}
-```
-
-**Updated:**
-
-```gherkin
-Feature: {capability after this project}
-
-  Scenario: {updated behaviour}
-    Given {starting state}
-    When {action}
-    Then {observable outcome}
-```
+{Baseline and grouped scenarios, per SPEC-FORMAT.md.}
 
 ## Testing Seams
-
-Where this feature's behaviour is exercised. Prefer existing seams,
-positioned high; ideal count is one.
 
 - {Seam} — {what it covers, why chosen}
 
 ## Implementation Decisions
 
-Interfaces, contracts, schema changes, and API shape — **no file
-paths, no code snippets** (those live in the plan).
-
-- {Module / interface / contract, and the decision about it}
+- {Interface, contract, schema, or API shape, and the decision about it}
 
 ## Out of Scope
 
-- {Explicitly excluded, to bound the work.}
+- {What is excluded, to bound the work}
 
 ## Living Specifications
 
-This project spec records the historical change. Current behaviour belongs in
-one or more living specifications under `docs/specs/`:
-
-- `docs/specs/<capability>.md` — {the current behaviour this project changes}
-
-If the project changes no durable application or operational behaviour, say so
-here and point to the relevant operational documentation instead. Do not copy
-the living specification into the project document.
+- {[`docs/specs/<capability>.md`](...) — the behaviour it owns, or
+  "None — no durable behaviour changes"}
 
 ## Research
 
-- [research](./research.md) (or `docs/research/<yyyy-mm-dd>-topic.md`)
+- {[research](./research.md), or "None"}
 
 ## Open Questions
 
-- {Unresolved decisions or risks.}
+- {Unresolved decisions or risks}
 ````
-
-## Guidelines
-
-- The spec stays stable: name interfaces, contracts, schema, and API shape —
-  never their file location or an implementation snippet.
-- Extract from research and code; do not invent. Cite claims — `path:line` for
-  code, URL for docs — and label anything you cannot cite an unverified
-  assumption.
-- Follow [`conventions-markdown`](../conventions-markdown/SKILL.md) and omit
-  needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
-- If including Mermaid diagrams, follow
-  [`conventions-mermaid`](../conventions-mermaid/SKILL.md) and validate with
-  `mmdc`.
-- Render all Given/When/Then acceptance criteria in GitHub Flavoured Markdown
-  fenced `gherkin` code blocks. Never render scenarios as plain prose or
-  Markdown headings.
-
-## Next step
-
-Once the spec is complete, proceed to grilling via
-[`grill-with-docs`](../grill-with-docs/SKILL.md) to stress-test the design
-before planning.
-
-## Standing capability specs in `docs/specs/`
-
-Standing specs live in `docs/specs/<capability>.md` and define current truth:
-
-- **Title:** `# {Capability Name}` (e.g. `# Deployment`). Never append "Living
-  Specification" or "Spec" — the directory already declares what it is.
-- **Content:** Lasting contracts, invariants, and Given/When/Then scenarios.
-  Omit transient project metadata (Problem Statement, Out of Scope, author,
-  dates).
-- **Reference in project spec:** Under `## Living Specifications`, explain that
-  the project records historical change and link each existing
-  `docs/specs/<capability>.md` file with the behaviour it owns. If no living spec
-  exists yet, say so and mention any planned future path as inline code, not as a
-  Markdown link. If no durable behaviour changes, point to the relevant
-  operational documentation. Do not copy instructional text into the project
-  document.

@@ -33,9 +33,9 @@ project record, so an auditor can see each delta after the living spec moves on.
    [`to-spec`](../to-spec/SKILL.md) (Write the spec). Scale it to the fix:
    keep the header bullets, Problem Statement, Solution, Acceptance Criteria,
    Behavioural Delta, and Living Specifications; drop sections with nothing to
-   say. Under Behavioural Delta, pin the baseline path and commit from Step 3,
-   then use `### ADDED`, `### MODIFIED`, `### REMOVED`, or `### RENAMED`, with
-   every snapshot in a fenced `gherkin` block.
+   say. Write the Behavioural Delta as
+   [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) describes, pinning the baseline
+   path and commit from Step 3.
 6. Edit the living spec to match the delta's updated snapshots.
 
 Done when every scenario changed in the living spec appears under a delta
