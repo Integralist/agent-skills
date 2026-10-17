@@ -1,13 +1,11 @@
 ---
 name: voice-product
 description: >-
-  Use when drafting or revising reader-facing prose in product or engineering
-  documents. Trigger for PR descriptions, ADR context and consequences, spec
-  problem/solution/user stories, plan summaries/deliverables, and technical
-  documentation—even if the user does not request a particular voice. Also use
-  when the user asks to rewrite a message in product voice or to use
-  voice-product for all replies. Keep technical contracts and acceptance
-  criteria precise.
+  Write reader-facing prose in a plain, audience-first voice. Use when
+  drafting or revising PR descriptions, ADR context and consequences, spec
+  problems, solutions, and user stories, plan summaries, or technical docs,
+  even if no voice was requested; or when the user asks for product voice,
+  once or for all replies.
 argument-hint: "[--all | --off | text to rewrite]"
 metadata:
   model-tier: moderate
@@ -15,41 +13,30 @@ metadata:
 
 # Product Voice
 
-Write for the person using or learning the thing, not just the team that built
-it. Make clear why it matters while keeping the underlying facts and mechanisms
-accurate.
+Write for the person using or learning the thing, not just the team that
+built it: make clear why it matters, and keep the facts and mechanisms
+accurate. Pick the mode from [VOICE-MODES.md](../shared/VOICE-MODES.md):
+one-off (the default), persistent (`--all`), which applies these rules to
+every reply, or off (`--off`).
 
-## Modes
+**Where it applies.** Use it for the explanatory prose in technical
+documents: a PR's Problem, Solution, and Notes; an ADR's Context and
+Consequences; a spec's Problem Statement, Solution, and User Stories; a
+plan's Summary and slice outcomes; and a doc's introductions, explanations,
+and user-visible behaviour. Leave exact wording where precision is the point:
+ADR decisions and alternatives, acceptance criteria and Gherkin, interfaces,
+tasks, dependencies, schemas, signatures, and implementation steps. Never
+simplify away API behaviour, permissions, assumptions, or uncertainty.
 
-Pick the mode from [`../shared/VOICE-MODES.md`](../shared/VOICE-MODES.md):
-one-off (default), persistent (`--all`), or off (`--off`). In persistent mode,
-apply the voice rules below to every reply.
+**Voice.**
 
-## Apply selectively
-
-Use this skill for the explanatory prose in mixed technical documents:
-
-- PR descriptions: Problem, Solution, and relevant Notes.
-- ADRs: Context and Consequences; keep the decision and alternatives exact.
-- Specs: Problem Statement, Solution, and User Stories; keep acceptance criteria
-  testable and precise.
-- Plans: Summary and observable slice outcomes; keep interfaces, tasks, and
-  dependencies exact.
-- Technical docs: introductions, explanations, and user-visible behaviour.
-
-Do not simplify away API behaviour, permissions, assumptions, or uncertainty.
-Gherkin, schemas, signatures, and implementation steps need exact wording.
-
-## Voice rules
-
-- Start with the reader's problem, question, or desired outcome.
-- Explain technical choices through their effects: what changes, for whom, and
-  why it matters.
+- Start with the reader's problem, question, or goal.
+- Explain technical choices by their effects: what changes, for whom, and why
+  it matters.
 - Use plain language. Include paths, internal names, and technical terms only
-  when they help the reader, and explain them on first use.
-- Prefer concrete examples and observable outcomes over abstractions or
+  when they help the reader, and explain each on first use.
+- Prefer concrete examples and observable outcomes to abstractions or
   promotional claims.
-- Keep the writing focused, direct, and warm. Do not oversimplify to achieve
-  accessibility.
+- Keep it focused, direct, and warm, without oversimplifying.
 - Separate verified facts from assumptions; never invent benefits or impact.
-- For teaching, connect how a concept works to why the learner might care.
+- When teaching, connect how a concept works to why the learner should care.
