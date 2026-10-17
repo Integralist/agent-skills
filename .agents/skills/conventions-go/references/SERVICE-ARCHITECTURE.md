@@ -59,6 +59,8 @@ A `Handlers` struct holds the logger, metrics, service, and tracer, built by
 cfg)`. Write errors as RFC 7807 Problem Details:
 
 ```go
+// RegisterRoutes mounts every handler behind the shared middleware pipeline,
+// so no route skips auth, logging, or metrics.
 func (h *Handlers) RegisterRoutes(mux *http.ServeMux, p *middleware.Pipeline, cfg *config.Config) {
 	mux.Handle("POST /v1/things", p.Decorate(http.HandlerFunc(h.createThing)))
 }
@@ -76,6 +78,8 @@ inside the span; handlers may also call it to fail fast. Wrap the operation in
 a span and record metrics outside it:
 
 ```go
+// Validate rejects input missing required fields, so every transport gets
+// the same checks before any work starts.
 func (in CreateConfigIn) Validate() error {
 	if in.CustomerID == "" {
 		return errorsx.Invalid("customer_id is required")
@@ -83,6 +87,8 @@ func (in CreateConfigIn) Validate() error {
 	return nil
 }
 
+// CreateConfig validates and stores a new config, recording its outcome in
+// traces and metrics so failures show up on dashboards.
 func (s *Service) CreateConfig(ctx context.Context, in CreateConfigIn) (*Config, error) {
 	start := time.Now()
 	var cfg *Config
@@ -116,6 +122,8 @@ Transactions defer a rollback that logs and counts any rollback error other
 than `sql.ErrTxDone`:
 
 ```go
+// withDBMetrics wraps a repository operation with tracing and DB metrics, so
+// every query is measured the same way without repeating the code.
 func (r *MySQLRepository) withDBMetrics(ctx context.Context, span, operation, table string, fn func(ctx context.Context) error) error {
 	start := time.Now()
 	err := traces.WithSpan(ctx, r.Tracer, span, fn)
@@ -130,6 +138,8 @@ func (r *MySQLRepository) withDBMetrics(ctx context.Context, span, operation, ta
 	return err //nolint:wrapcheck // fn's errors are already wrapped
 }
 
+// CreateConfig inserts a config and its ownership row in one transaction, so
+// a config never exists without an owner.
 func (r *MySQLRepository) CreateConfig(ctx context.Context, config *Config) error {
 	return r.withDBMetrics(ctx, "repository.CreateConfig", "insert", "routing_configs",
 		func(ctx context.Context) error {
@@ -164,12 +174,19 @@ func (r *MySQLRepository) CreateConfig(ctx context.Context, config *Config) erro
 A `Decorator` wraps an `http.Handler`, and a `Pipeline` composes them:
 
 ```go
+// Decorator adds one cross-cutting behaviour to a handler, so concerns like
+// auth and logging stay out of handler code.
 type Decorator func(http.Handler) http.Handler
 
+// Pipeline holds the middleware every route shares, so the chain is defined
+// once.
 type Pipeline struct {
+	// middleware runs in slice order, first entry outermost.
 	middleware []Decorator
 }
 
+// Decorate wraps next in the pipeline's middleware, applied in reverse so
+// the first entry runs first.
 func (p *Pipeline) Decorate(next http.Handler) http.Handler {
 	for _, mw := range slices.Backward(p.middleware) {
 		next = mw(next)

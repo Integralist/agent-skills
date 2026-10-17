@@ -93,9 +93,12 @@ type Service struct {
 
 // Good — each name says what it's for.
 type Service struct {
-	purgeAPI   *http.Client
+	// auditRepo records who changed what, for compliance reviews.
+	auditRepo *PostgresRepository
+	// configRepo stores customer configs, the service's source of truth.
 	configRepo *MySQLRepository
-	auditRepo  *PostgresRepository
+	// purgeAPI clears cached content after a config change.
+	purgeAPI *http.Client
 }
 ```
 
@@ -104,20 +107,36 @@ type Service struct {
 - **Structs:** sort fields alphabetically, embedded structs first. Put JSON
   tags on exported fields and `json:"-"` on internal-only ones. Use a pointer
   field when nil means "not provided", as in partial updates.
-- **Variables:** group consecutive `var` declarations into one `var ( … )`
-  block.
+- **Constants and variables:** declare two or more together in one
+  `const ( … )` or `var ( … )` block, with a comment above each entry:
+
+  ```go
+  const (
+  	// defaultRefreshWindow is how long before expiry a token is renewed,
+  	// leaving headroom for slow upstream calls.
+  	defaultRefreshWindow = 5 * time.Minute
+  	// maxTokenAge caps a token's lifetime to limit damage if one leaks.
+  	maxTokenAge = 24 * time.Hour
+  )
+  ```
 - **Imports:** three groups separated by blank lines: standard library, third
   party, then internal.
 - **Enums:** use a string type with an `All*` slice for validation:
 
   ```go
+  // ConditionType names what a routing rule matches on, so rules can be
+  // stored and validated as data.
   type ConditionType string
 
   const (
+  	// HeaderCondition matches on a request header.
   	HeaderCondition ConditionType = "header"
-  	GeoCondition    ConditionType = "geo"
+  	// GeoCondition matches on the client's location.
+  	GeoCondition ConditionType = "geo"
   )
 
+  // AllConditionTypes lists every valid ConditionType so input can be
+  // validated against one source of truth.
   var AllConditionTypes = []ConditionType{HeaderCondition, GeoCondition}
   ```
 
@@ -128,10 +147,14 @@ defaults, `NewX` takes only the required ones and `WithXxx` methods set the
 rest and return the receiver:
 
 ```go
+// NewClient returns a Client for baseURL with safe defaults, so callers set
+// only what differs.
 func NewClient(baseURL string) *Client {
 	return &Client{baseURL: baseURL, httpClient: http.DefaultClient, timeout: 30 * time.Second}
 }
 
+// WithTimeout overrides the request timeout, for callers whose upstream is
+// slower or faster than the default allows.
 func (c *Client) WithTimeout(d time.Duration) *Client {
 	c.timeout = d
 	return c
@@ -150,15 +173,32 @@ compile-time check: `var _ redis.Client = (*MockRedisClient)(nil)`.
 
 ## Comments
 
-**Writing.** Document every exported function and method, and every
-non-trivial unexported one. Start with what it does and its result or
-observable effect, not the steps it takes. Add why it exists or behaves this
-way only when that's non-obvious, such as a constraint, invariant, policy, or
-surprising side effect; don't invent a rationale for a simple pure function.
-Say more than the identifier does, and start an exported identifier's comment
-with its name.
+**Writing.** Comment every declaration: functions, methods, types, struct
+fields, interface methods, constants, and variables, exported or not. Say
+what it is or does and why it exists: the constraint, policy, invariant, or
+caller need behind it. Describe the result or observable effect, not the
+steps taken. Make the why specific; restating the name adds nothing. Start an
+exported identifier's comment with its name.
 
 ```go
+// Session tracks one authenticated client so requests can skip
+// re-checking credentials.
+type Session struct {
+	// expiresAt is when the token stops being valid; RefreshToken renews
+	// it early so long requests don't fail mid-flight.
+	expiresAt time.Time
+	// token is the bearer token sent upstream; unexported so callers
+	// can't log or leak it.
+	token string
+}
+
+// TokenStore persists session tokens so sessions survive a restart.
+type TokenStore interface {
+	// Save stores the token for the session, replacing any earlier one,
+	// so a refresh never leaves two valid tokens.
+	Save(ctx context.Context, sessionID, token string) error
+}
+
 // RefreshToken renews the session token before it expires. This avoids
 // forcing active clients to reauthenticate during long requests.
 func (s *Session) RefreshToken(ctx context.Context) error {
@@ -244,17 +284,23 @@ type behind an exported variable, and read and write through generic helpers
 defined once in a `contextx`-style package rather than per-type wrappers:
 
 ```go
+// WithValue stores val under key, typed so readers don't repeat assertions.
 func WithValue[T any](ctx context.Context, key any, val T) context.Context {
 	return context.WithValue(ctx, key, val)
 }
 
+// FromContext returns the value under key as a T, and false when it's
+// missing or another type, so callers never panic on a bad assertion.
 func FromContext[T any](ctx context.Context, key any) (T, bool) {
 	v, ok := ctx.Value(key).(T)
 	return v, ok
 }
 
+// customerIDCtxKey is unexported so no other package can collide with it.
 type customerIDCtxKey struct{}
 
+// CustomerIDContextKey keys the request's customer ID, for code that needs
+// the tenant without threading it through every signature.
 var CustomerIDContextKey = customerIDCtxKey{}
 
 ctx = contextx.WithValue(ctx, CustomerIDContextKey, "cust-123")
@@ -302,6 +348,8 @@ returns errors rather than exiting, so it can be tested, and `main` is the
 only place that calls `os.Exit`.
 
 ```go
+// main wires flags, logging, and context, then hands off to run so the
+// program logic stays testable.
 func main() {
 	flag.IntVar(&days, "days", defaultDays, "days before expiry to warn")
 	flag.Parse()
