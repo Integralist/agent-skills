@@ -9,89 +9,47 @@ paths:
 > stop — there is nothing to do yet. They're now ready to apply when I
 > ask you to design, write, or edit Python code.
 
-Target modern Python (3.10+) unless the repository specifies an older runtime in
-`pyproject.toml` or `.python-version`. Match existing patterns when editing an
-established project.
+# Python Conventions
+
+Write Python that follows these conventions, and run the tools below after
+every edit. When editing an established project, match its existing patterns.
+
+**Python version.** Target Python 3.12+, unless `pyproject.toml` or
+`.python-version` pins an older runtime; then use only what that version
+supports.
 
 ## Tooling
 
-### Project & Package Management (`uv`)
-
-Use `uv` for package management, virtual environments, and running project
-scripts:
+Use `uv` for environments and dependencies (`uv sync`, `uv add <pkg>`,
+`uv add --dev <pkg>`) and run everything through `uv run`. After editing, run:
 
 ```bash
-uv venv                       # create virtual environment
-uv sync                       # sync dependencies from lockfile
-uv add <package>              # add dependency
-uv add --dev <package>        # add development dependency
-uv run <command>              # execute command within environment
+ruff format .              # format
+ruff check --fix .         # lint and sort imports
+uv run mypy .              # or `uv run pyright .` where the repo uses it
+uv run pytest              # add a path or -k "name" to narrow
 ```
 
-### Formatting & Linting (`ruff`)
+Fix the cause rather than suppress a warning. When a suppression is
+warranted, name the exact code: `# noqa: F401` for ruff, or
+`# type: ignore[assignment]` for mypy.
 
-Use `ruff` as the single tool for formatting, linting, and import sorting:
-
-```bash
-# Format code (replaces black)
-ruff format .
-
-# Lint and auto-fix safe rules (replaces flake8, isort, pyupgrade)
-ruff check --fix .
-
-# Preview lint violations without fixing
-ruff check .
-```
-
-### Type Checking (`mypy` / `pyright`)
-
-Run static type checking across the codebase:
-
-```bash
-# Using mypy
-uv run mypy .
-
-# Using pyright (if configured in repo)
-uv run pyright .
-```
-
-### Testing (`pytest`)
-
-Run tests with `pytest`:
-
-```bash
-uv run pytest
-uv run pytest path/to/test_file.py -k "test_filter"
-```
-
-## Configuration (`pyproject.toml`)
-
-Consolidate tool configuration in `pyproject.toml`:
+**Configuration.** Keep tool settings in `pyproject.toml`. For a new project,
+start from:
 
 ```toml
 [project]
-name = "my-project"
-version = "0.1.0"
-requires-python = ">=3.11"
-dependencies = []
+requires-python = ">=3.12"
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
-    "RUF", # ruff-specific rules
-]
+select = ["E", "W", "F", "I", "B", "UP", "RUF"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
@@ -100,219 +58,194 @@ warn_unused_configs = true
 testpaths = ["tests"]
 ```
 
-## Type Annotations
+## Comments and docstrings
 
-Always annotate function arguments and return types for public functions and
-methods.
-
-- **Union syntax (PEP 604):** Use `X | Y` and `X | None`. Do not use
-  `typing.Union` or `typing.Optional`.
-- **Built-in collections (PEP 585):** Use `list[str]`, `dict[str, int]`,
-  `set[bytes]`, `tuple[int, ...]`. Do not use `typing.List`, `typing.Dict`,
-  `typing.Set`, `typing.Tuple`.
-- **Abstract collections:** Import from `collections.abc` (`Iterable`,
-  `Sequence`, `Mapping`, `Callable`, `Awaitable`), not `typing`.
-- **Self types (Python 3.11+ / PEP 673):** Use `typing.Self` for method chaining
-  or factory methods returning the instance type.
-- **Protocols (PEP 544):** Prefer `typing.Protocol` for structural typing and
-  interfaces over rigid inheritance hierarchies.
-- **Avoid `Any`:** Prefer precise types, `object` (when type is genuinely
-  arbitrary), or generic type parameters (`TypeVar`).
+Give every module, class, function, and method a docstring, public or
+private, and put a comment above every module-level constant and every
+dataclass or Pydantic field. Say what it is or does and why it exists: the
+constraint, policy, invariant, or caller need behind it. Describe the result
+or observable effect, not the steps taken. Make the why specific; restating
+the name adds nothing.
 
 ```python
-from collections.abc import Iterable, Sequence
-from typing import Protocol, Self
+"""Load and cache feature flags so requests don't hit the flag service."""
 
-
-class Repository(Protocol):
-    def fetch_by_id(self, item_id: str) -> dict[str, str] | None: ...
-
-
-class ConfigBuilder:
-    def __init__(self) -> None:
-        self._options: dict[str, str] = {}
-
-    def with_option(self, key: str, value: str) -> Self:
-        self._options[key] = value
-        return self
-
-
-def process_items(items: Sequence[str]) -> list[str]:
-    return [item.strip().lower() for item in items if item]
-```
-
-### Suppressing Linter & Type Warnings
-
-Fix root causes instead of suppressing warnings. When suppression is required,
-use targeted comments with explicit codes:
-
-- **Ruff:** `# noqa: <RULE_CODE>` (e.g. `# noqa: F401`, `# noqa: E501`)
-- **Mypy:** `# type: ignore[<error-code>]` (e.g. `# type: ignore[assignment]`)
-
-## Data Modeling
-
-- **Value objects / Internal state:** Use standard library dataclasses with
-  `frozen=True` and `slots=True` for lightweight, immutable data structures.
-- **Boundary models / Settings:** Use Pydantic (`pydantic.BaseModel`) for API
-  request/response schemas, JSON deserialization, and environment settings.
-- **Enumerations:** Use `enum.StrEnum` (Python 3.11+) or `enum.Enum` for fixed
-  sets of values.
-
-```python
-from dataclasses import dataclass
-from enum import StrEnum, auto
-
-
-class TaskStatus(StrEnum):
-    PENDING = auto()
-    IN_PROGRESS = auto()
-    COMPLETED = auto()
+# DEFAULT_TTL is how long a flag stays cached; short enough that a flipped
+# flag takes effect within a minute.
+DEFAULT_TTL = 60.0
 
 
 @dataclass(frozen=True, slots=True)
-class UserProfile:
-    user_id: str
-    email: str
-    status: TaskStatus = TaskStatus.PENDING
+class Flag:
+    """One feature flag, immutable so a cached copy can't drift."""
+
+    # name is the flag's key in the flag service.
+    name: str
+    # enabled is the value at fetch time; refetch after DEFAULT_TTL.
+    enabled: bool
+
+
+def is_enabled(flags: Mapping[str, Flag], name: str) -> bool:
+    """Return whether a flag is on, treating unknown flags as off so a typo
+    never enables a feature."""
+    flag = flags.get(name)
+    return flag is not None and flag.enabled
 ```
 
-## Code Conventions & Idioms
+## Types
 
-- **Package exports (`__all__`):** In multi-module packages or `__init__.py`,
-  define `__all__` to make the public API surface explicit. Keep internal
-  helpers unexported so callers and agents encounter a small, clear interface.
-- **Imports:** Group in order: standard library, third-party, local modules. Let
-  `ruff check --fix` sort and format them. Never use star imports (`from x
-  import *`).
-- **Paths:** Always use `pathlib.Path` instead of `os.path` and string
-  manipulations:
-  ```python
-  from pathlib import Path
+Annotate every function's arguments and return type.
 
-  config_path = Path("/etc/app") / "config.json"
-  content = config_path.read_text(encoding="utf-8")
-  ```
-- **String interpolation:** Use f-strings (`f"value: {val}"`) exclusively. Avoid
-  `%` formatting and `.format()`.
-- **Resource management:** Always wrap I/O, database sessions, locks, and
-  network handles in `with` or `async with` context managers. Use
-  `contextlib.contextmanager` / `asynccontextmanager` when building custom
-  managers.
-- **Early returns:** Use guard clauses and return early to keep nesting levels
-  shallow.
+- Write unions as `X | Y` and `X | None`, not `Union` or `Optional`.
+- Use built-in generics (`list[str]`, `dict[str, int]`, `tuple[int, ...]`),
+  not `typing.List` and friends, and abstract types (`Iterable`, `Sequence`,
+  `Mapping`, `Callable`, `Awaitable`) from `collections.abc`, not `typing`.
+- Declare generics with type parameters (`def first[T](items: Sequence[T]) ->
+  T`, `class Box[T]:`) and aliases with `type`
+  (`type UserID = str`), not `TypeVar` or `TypeAlias`.
+- Return `Self` from chaining and factory methods.
+- Prefer `Protocol` for interfaces over inheritance hierarchies.
+- Avoid `Any`; use a precise type, a type parameter, or `object` when the
+  type really is arbitrary.
 
-## Error Handling
+```python
+class Repository(Protocol):
+    """Anything that can fetch a record by ID, so services can swap stores."""
 
-- **Custom exception hierarchies:** Inherit from `Exception` (never
-  `BaseException`). Define a domain base exception for the module or service.
-- **Exception chaining:** Always use `raise CustomError(...) from err` to
-  preserve the underlying traceback and cause.
-- **No bare excepts:** Never write `except:` or `except Exception:` without
-  re-raising or logging with full traceback. Catch specific exceptions.
+    def fetch_by_id(self, item_id: str) -> dict[str, str] | None:
+        """Return the record, or None when it doesn't exist."""
+        ...
+
+
+class ConfigBuilder:
+    """Collect options step by step, so callers set only what they need."""
+
+    def __init__(self) -> None:
+        """Start with no options; defaults apply at build time."""
+        self._options: dict[str, str] = {}
+
+    def with_option(self, key: str, value: str) -> Self:
+        """Set one option and return the builder, so calls can chain."""
+        self._options[key] = value
+        return self
+```
+
+## Data
+
+- **Internal values:** `@dataclass(frozen=True, slots=True)`, for light,
+  immutable structures.
+- **Boundaries and settings:** Pydantic `BaseModel` for API schemas, JSON
+  parsing, and environment settings.
+- **Fixed sets of values:** `StrEnum` (or `Enum` for non-string values).
+
+```python
+class TaskStatus(StrEnum):
+    """Where a task is in its lifecycle, stored as readable strings."""
+
+    # PENDING tasks are queued and not yet picked up.
+    PENDING = auto()
+    # IN_PROGRESS tasks are held by a worker.
+    IN_PROGRESS = auto()
+    # COMPLETED tasks are finished and won't run again.
+    COMPLETED = auto()
+```
+
+## Idioms
+
+- Define `__all__` in `__init__.py` and multi-module packages so the public
+  API is explicit and helpers stay internal.
+- Group imports as standard library, third party, then local, and let `ruff
+  check --fix` sort them. Never use `from x import *`.
+- Use `pathlib.Path`, not `os.path` or string joins:
+  `Path("/etc/app") / "config.json"`, and pass `encoding="utf-8"` when reading
+  or writing text.
+- Use f-strings, not `%` or `.format()`, except in log calls (see Logging).
+- Wrap files, sessions, locks, and network handles in `with` or `async with`;
+  build custom managers with `contextlib.contextmanager` or
+  `asynccontextmanager`.
+- Return early with guard clauses to keep nesting shallow.
+
+## Errors
+
+Give each module or service a base exception that inherits from `Exception`,
+never `BaseException`, and derive specific errors from it. Chain with
+`raise NewError(...) from err` to keep the cause. Catch specific exceptions;
+never write a bare `except:`, and don't catch `Exception` unless you re-raise
+or log the full traceback.
 
 ```python
 class StorageError(Exception):
-    """Base error for storage operations."""
+    """Base for storage failures, so callers can catch them all at once."""
 
 
 class ItemNotFoundError(StorageError):
-    """Raised when an item is missing from storage."""
+    """A requested item doesn't exist, which callers usually treat as a 404."""
 
 
 def load_record(path: Path) -> str:
+    """Return a record's text, raising ItemNotFoundError rather than the OS
+    error so callers don't depend on the storage backend."""
     try:
         return path.read_text(encoding="utf-8")
     except FileNotFoundError as err:
-        raise ItemNotFoundError(f"Record at {path} not found") from err
+        raise ItemNotFoundError(f"record at {path} not found") from err
 ```
 
-## Async & Concurrency
+## Async
 
-- **Structured concurrency (Python 3.11+):** Use `asyncio.TaskGroup` instead of
-  `asyncio.gather` for managing multiple concurrent background tasks safely.
-- **Timeouts:** Use `asyncio.timeout(seconds)` context manager (3.11+) rather
-  than wrapping tasks in `wait_for`.
-- **Blocking I/O:** Never run synchronous I/O or CPU-heavy loops directly inside
-  async functions; offload with `asyncio.to_thread`.
+Run concurrent tasks in an `asyncio.TaskGroup`, not `asyncio.gather`, so one
+failure cancels the rest. Bound waits with `async with asyncio.timeout(...)`,
+not `wait_for`. Move blocking I/O and CPU-heavy work off the event loop with
+`asyncio.to_thread`.
 
 ```python
-import asyncio
-
-
-async def fetch_item(item_id: str) -> str:
-    async with asyncio.timeout(5.0):
-        await asyncio.sleep(0.1)
-        return f"item-{item_id}"
-
-
 async def fetch_all(item_ids: list[str]) -> list[str]:
-    results: list[str] = []
+    """Fetch every item concurrently, failing fast if any fetch fails."""
     async with asyncio.TaskGroup() as tg:
         tasks = [tg.create_task(fetch_item(i)) for i in item_ids]
     return [task.result() for task in tasks]
 ```
 
-## Logging & Observability
+## Logging
 
-- Use standard `logging.getLogger(__name__)` or structured logging libraries
-  (e.g. `structlog`).
-- Never use `print()` for runtime diagnostics, debug statements, or errors.
-- Supply arguments to log methods for deferred formatting:
-  ```python
-  import logging
-
-  logger = logging.getLogger(__name__)
-
-  # Good: deferred evaluation
-  logger.info("Processed item %s for user %s", item_id, user_id)
-
-  # Bad: eager interpolation
-  logger.info(f"Processed item {item_id} for user {user_id}")
-  ```
-
-## Testing (`pytest`)
-
-- Name test files `test_*.py` and test functions `test_*`.
-- Use `@pytest.fixture` for test setup and teardown.
-- Parameterize test cases with `@pytest.mark.parametrize` instead of writing
-  loops inside test functions.
-- Verify exceptions using `with pytest.raises(ExpectedException):`.
-- Mock external systems using `unittest.mock` or `pytest-mock` (`mocker`
-  fixture).
-- **Integration testing:** Place integration / boundary tests in `tests/integration/` or `tests/e2e/`. Use `httpx.AsyncClient` (with `ASGITransport`) or framework test clients against real application instances with dependencies overridden only at the wire/storage boundaries.
-- **Test public interfaces, not private (`_`) functions:** Exercise module and
-  class behavior through public methods. Do not import `_`-prefixed functions or
-  assert on private attributes in tests. If an internal branch cannot be reached
-  through public entry points, delete it as dead code.
-- **Extract submodules for complex internals:** If an internal algorithm,
-  parser, or transformation has complex edge cases that cause combinatorial
-  explosion when tested through the outer API, do not reach into private
-  functions. Extract the logic into a focused internal submodule with a clean
-  public function, and unit-test that sub-interface directly.
+Log with `logging.getLogger(__name__)` or a structured logger such as
+`structlog`, never `print()`. Pass values as arguments so formatting is
+deferred until the record is emitted:
 
 ```python
-import pytest
+logger.info("processed item %s for user %s", item_id, user_id)  # not an f-string
+```
 
+## Testing
 
-def divide(a: float, b: float) -> float:
-    if b == 0:
-        raise ValueError("Cannot divide by zero")
-    return a / b
+- Name files `test_*.py` and functions `test_*`, and give each test a
+  docstring saying what it proves.
+- Set up with `@pytest.fixture`, and use `@pytest.mark.parametrize` rather
+  than loops inside a test.
+- Check exceptions with `pytest.raises(..., match=...)`.
+- Mock external systems with `unittest.mock` or the `pytest-mock` `mocker`
+  fixture.
+- Put integration tests in `tests/integration/` or `tests/e2e/`, against a
+  real app instance (for example `httpx.AsyncClient` with `ASGITransport`),
+  overriding dependencies only at the wire or storage boundary.
+- Test through public functions and methods. Don't import `_`-prefixed names
+  or assert on private attributes. Delete a branch no public entry point can
+  reach. When internal logic has too many edge cases to test through the outer
+  API, extract it into a focused submodule with a public function and test
+  that.
 
-
+```python
 @pytest.mark.parametrize(
     ("a", "b", "expected"),
-    [
-        (10.0, 2.0, 5.0),
-        (9.0, 3.0, 3.0),
-        (0.0, 5.0, 0.0),
-    ],
+    [(10.0, 2.0, 5.0), (9.0, 3.0, 3.0), (0.0, 5.0, 0.0)],
 )
 def test_divide_valid(a: float, b: float, expected: float) -> None:
+    """divide returns the quotient for any non-zero divisor."""
     assert divide(a, b) == expected
 
 
 def test_divide_by_zero() -> None:
+    """divide refuses a zero divisor instead of returning inf."""
     with pytest.raises(ValueError, match="Cannot divide by zero"):
         divide(10.0, 0.0)
 ```
