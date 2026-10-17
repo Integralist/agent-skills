@@ -10,201 +10,151 @@ metadata:
 
 # Go Testing
 
-Guidelines for writing unit tests and following TDD in Go services.
+Write Go tests test-first, where each case proves one behaviour through the
+package's public API. Load the conventions-go skill too: it sets the style and
+linter rules for test code (`testCases`/`tc`, `rr`, `noctx`, `scopeguard`,
+comments, `testify/mock`), and wins where the two overlap. Before writing or
+changing tests, read [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) for what
+an assertion must protect.
 
-> [!NOTE]
-> [`conventions-go`](../conventions-go/SKILL.md) is the authority for Go style
-> and linter rules (`noctx`, `scopeguard`, doc comments). Load it alongside
-> this skill; where they overlap, it wins.
+**Style.** When asked for unit tests, ask whether the user wants table-driven
+tests (the default) or f-tests, a local helper `f` called from named subtests.
 
-## Instructions
+**Test-first in Go.** A test written before its types exist fails to compile,
+which doesn't count as red. So:
 
-When asked to write unit tests, ask the user if they prefer:
+1. Stub the types and signatures, returning zero values or a sentinel such as
+   `errors.New("unimplemented")`.
+2. Write the test against the stub and run `go test`; it must compile and
+   fail on its assertion.
+3. Write the least code that passes, then tidy up and delete dead code.
 
-- **Table-driven tests** — test cases defined in a struct slice (default).
-- **F-tests** — helper function `f` with explicit named subtests.
+## What each test proves
 
-## TDD Cycle in Go
+- **One behaviour per case.** The case name states it; a case proving two
+  things becomes two cases.
+- **Every error path.** Each `if err != nil` branch in production code gets a
+  case that checks the failure, matching errors with `errors.Is` or
+  `errors.AsType`. Match on a substring only for an unexported third-party
+  error.
+- **Real assertions.** Assert state changes, header values, or payloads, never
+  only `assert.NoError` when the call returns values. Assert the fields that
+  matter rather than whole structs with `reflect.DeepEqual` or `cmp.Diff`,
+  which fail on timestamps and generated IDs.
+- **Nothing unused.** Deleting any field or setup step must break the test.
+  Split cases with different setup into separate tables.
+- **Distinct paths only.** Each case covers its own branch or dimension, not
+  a trivial variation of another. Add to an existing table before writing a
+  new `Test*` function.
+- **Cancellation.** A long-running, I/O-bound, or goroutine-spawning function
+  gets a test proving it stops promptly when `ctx` is cancelled.
+- **Public API.** Test through exported names, preferably from
+  `package foo_test`, and delete branches no public path reaches. When
+  internal logic has intricate branching or state, extract it to a child
+  package under `internal/` with an exported API and test it there.
+- **No coverage loss.** Refactoring tests must never lower package statement
+  coverage (`go test -cover`).
 
-In compiled Go, tests written before types exist fail compilation, not
-assertion. Follow the 3-step cycle:
+## Patterns
 
-1. **Stub signatures:** Define types and empty signatures returning zero values
-   or sentinel errors (e.g. `return nil, errors.New("unimplemented")`).
-2. **Red test:** Write the test against the stub. Run `go test` to confirm it
-   compiles and fails on assertion.
-3. **Green implementation:** Write the minimum logic to pass, refactor, and
-   clean dead code.
-
-## What Each Test Proves
-
-Load [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) before writing or changing
-tests. Apply it alongside these Go-specific rules for every test style.
-
-- **One behavior per case:** The case `name` states the exact behavior proven.
-  If a case proves two things, split it into two cases.
-- **Error path parity:** Every `if err != nil` branch in production code must
-  have a corresponding test case verifying failure behavior and sentinel
-  matching via `errors.Is` or `errors.AsType`.
-- **No vacuous assertions:** Assert actual state mutations, header values, or
-  payload contents — never assert only `assert.NoError` when return values are
-  expected.
-- **Context cancellation:** Functions that are long-running, I/O-bound, or
-  spawn goroutines must have a test proving prompt termination when `ctx` is
-  canceled.
-- **Use `t.Context()`:** Pass `t.Context()` (Go 1.24+) rather than
-  `context.Background()` to operations under test.
-- **No unused fields or setup:** Deleting any field or setup step must break the
-  test. Separate tests with distinct setup requirements into separate tables.
-- **Assert targeted fields:** Avoid deep struct comparisons
-  (`reflect.DeepEqual`, `cmp.Diff`) that fail on irrelevant fields (e.g.,
-  timestamps, generated IDs).
-- **Distinct code paths only:** Do not duplicate tests with trivial input
-  variations. Each case covers a unique branch or dimension.
-- **Extend existing tables first:** Add cases to existing tables before
-  creating standalone `Test*` functions.
-- **Zero coverage regression:** Refactoring tests must never decrease package
-  statement coverage (`go test -cover`).
-- **Match errors by identity:** Use `errors.Is` or `errors.As`. Substring
-  matches (`strings.Contains`) are permitted only for unexported third-party
-  errors.
-- **Test through the public interface:** Prefer `package foo_test`. Test
-  unexported helpers through public contracts; delete unreached branches as
-  dead code.
-- **Extract child packages for complex internals:** When internal logic has
-  intricate branching or state machines, extract it to a child package under
-  `internal/` with an exported API and unit-test it there. Do not bypass
-  encapsulation by testing private functions.
-
-## Test Styles & Patterns
-
-### Table-Driven Tests
+**Table-driven:**
 
 ```go
-func TestFunctionName(t *testing.T) {
-    tests := []struct {
-        name     string
-        input    string
-        expected string
-        wantErr  error // sentinel to match with errors.Is
-    }{
-        {name: "valid input", input: "hello", expected: "HELLO"},
-        {name: "empty input", input: "", wantErr: ErrEmptyInput},
-    }
+// TestNormalize proves Normalize upper-cases input and rejects empty
+// strings with ErrEmptyInput.
+func TestNormalize(t *testing.T) {
+	testCases := []struct {
+		// name states the behaviour this case proves.
+		name string
+		// input is passed to Normalize.
+		input string
+		// expected is the result on success.
+		expected string
+		// wantErr is the sentinel to match with errors.Is, or nil.
+		wantErr error
+	}{
+		{name: "upper-cases valid input", input: "hello", expected: "HELLO"},
+		{name: "rejects empty input", input: "", wantErr: ErrEmptyInput},
+	}
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            result, err := FunctionName(tt.input)
-
-            if tt.wantErr != nil {
-                if !errors.Is(err, tt.wantErr) {
-                    t.Fatalf("expected %v, got %v", tt.wantErr, err)
-                }
-                return
-            }
-            if err != nil {
-                t.Fatalf("unexpected error: %v", err)
-            }
-            if result != tt.expected {
-                t.Errorf("expected %q, got %q", tt.expected, result)
-            }
-        })
-    }
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := Normalize(tc.input)
+			if tc.wantErr != nil {
+				if !errors.Is(err, tc.wantErr) {
+					t.Fatalf("expected %v, got %v", tc.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if result != tc.expected {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
 }
 ```
 
-### Operation Closures for Varied Signatures
+When cases prove one invariant across operations with different signatures,
+give each case an `invoke func(*Repository) error` closure rather than
+reaching for generics.
 
-When tests prove the same invariant across different operations, normalize
-signatures with an operation closure rather than generics:
+**F-test:**
 
 ```go
-tests := []struct {
-    name   string
-    invoke func(*Repository) error
-}{
-    {
-        name: "published outbox row",
-        invoke: func(r *Repository) error {
-            return r.MarkPublished(ctx, eventID, token, now)
-        },
-    },
-    {
-        name: "delivered notification",
-        invoke: func(r *Repository) error {
-            return r.MarkNotificationDelivered(ctx, notificationID, token, now)
-        },
-    },
+// TestShout proves Shout upper-cases its input.
+func TestShout(t *testing.T) {
+	// f checks one input against its expected output.
+	f := func(t *testing.T, input, expected string) {
+		t.Helper()
+		if got := Shout(input); got != expected {
+			t.Fatalf("Shout(%q) = %q; want %q", input, got, expected)
+		}
+	}
+
+	t.Run("converts to uppercase", func(t *testing.T) { f(t, "hello", "HELLO") })
+	t.Run("handles empty string", func(t *testing.T) { f(t, "", "") })
 }
 ```
 
-### F-Tests (Alternative Style)
-
-Hoist assertion logic into a local helper function `f`:
+**Helpers and context.** Call `t.Helper()` in every helper. Pass
+`t.Context()` (Go 1.24+), not `context.Background()`, to code under test; it
+cancels when the test ends. Don't block on a bare `<-t.Context().Done()` for
+an async wait, or a stuck test hangs until the suite times out; bound it:
 
 ```go
-func TestSomeFunc(t *testing.T) {
-    f := func(t *testing.T, input, expected string) {
-        t.Helper()
-        if got := SomeFunc(input); got != expected {
-            t.Fatalf("SomeFunc(%q) = %q; want %q", input, got, expected)
-        }
-    }
+ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+defer cancel()
 
-    t.Run("converts to uppercase", func(t *testing.T) { f(t, "hello", "HELLO") })
-    t.Run("handles empty string", func(t *testing.T) { f(t, "", "") })
+select {
+case <-renewed:
+case <-ctx.Done():
+	t.Fatalf("claim was not renewed: %v", ctx.Err())
 }
 ```
 
-## Unit Test Conventions
+**Assertions.** Prefer `t.Errorf` and `t.Fatalf`; use `testify/assert` for
+complex checks.
 
-- **Helpers:** Mark helper functions with `t.Helper()` for accurate line
-  reporting.
-- **Test Context (`t.Context()`):** Cancels automatically when test or subtest
-  finishes or fails. For bounded async waits, do not block bare on
-  `<-t.Context().Done()`. Derive a timeout to prevent hanging until suite
-  timeout:
-
-  ```go
-  ctx, cancel := context.WithTimeout(t.Context(), time.Second)
-  defer cancel()
-
-  select {
-  case <-renewed:
-  case <-ctx.Done():
-      t.Fatalf("claim was not renewed: %v", ctx.Err())
-  }
-  ```
-
-- **HTTP Handlers:** Use
-  `httptest.NewRequestWithContext(t.Context(), method, path, body)` and
-  `httptest.NewRecorder()`.
-- **Mocks:** Use `testify/mock`. Include compile-time interface assertion:
-  `var _ Client = (*MockClient)(nil)`.
-- **Assertions:** Prefer standard library (`t.Errorf`, `t.Fatalf`). Use
-  `testify/assert` for complex assertions.
-
-## Disclosed Reference
-
-Consult these sibling documents when working in specialized areas:
-
-- [`INTEGRATION.md`](INTEGRATION.md) — E2E test structure, `//go:build e2e`
-  tags, and running full-stack tests.
-- [`ACCEPTANCE.md`](ACCEPTANCE.md) — Running a spec's Gherkin acceptance
-  criteria as godog tests, and when a behaviour gets a `.feature` file.
-- [`FUZZ-AND-BENCHMARKS.md`](FUZZ-AND-BENCHMARKS.md) — Fuzz testing with
-  `testing.F` and benchmarking with `b.Loop()`.
-- [`COVERAGE-PRUNING.md`](COVERAGE-PRUNING.md) — Mapping statement coverage
-  overlap and pruning redundant tests with Tobari.
-- [`mutation-testing`](../mutation-testing/SKILL.md) — Load when checking
-  whether Go tests detect behavior changes or investigating surviving mutants.
-
-## Running Tests
+## Running and references
 
 ```bash
-make test                                      # Unit tests
-make test-integration                          # Integration tests
-go test -v -run TestFunctionName ./pkg/...     # Specific test
-go test -race ./...                            # Race detection
-go test -cover ./...                           # Coverage summary
+make test                                    # unit tests
+make test-integration                        # integration tests
+go test -v -run TestName ./pkg/...           # one test
+go test -race ./...                          # race detector
+go test -cover ./...                         # coverage
 ```
+
+For specialised work, read:
+
+- [INTEGRATION.md](INTEGRATION.md): e2e tests under the `e2e` build tag.
+- [ACCEPTANCE.md](ACCEPTANCE.md): running a spec's Gherkin criteria with
+  godog, and when a behaviour gets a `.feature` file.
+- [FUZZ-AND-BENCHMARKS.md](FUZZ-AND-BENCHMARKS.md): `testing.F` fuzzing and
+  `b.Loop()` benchmarks.
+- [COVERAGE-PRUNING.md](COVERAGE-PRUNING.md): finding and pruning overlapping
+  tests with Tobari.
+- The mutation-testing skill: checking whether tests catch behaviour changes.

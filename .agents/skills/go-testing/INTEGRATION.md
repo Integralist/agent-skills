@@ -29,12 +29,18 @@ import (
 )
 
 const (
+    // baseURL is the locally running stack that make test-integration starts.
     baseURL = "http://localhost:8080"
-    apiKey  = "test-api-key"
+    // apiKey is the fixed key the test stack accepts, never a real credential.
+    apiKey = "test-api-key"
 )
 
+// client bounds every request so a hung service fails the test instead of
+// stalling the suite.
 var client = &http.Client{Timeout: 10 * time.Second}
 
+// TestE2EWorkflow runs each end-to-end scenario as a named subtest, so a
+// failure points at the scenario that broke.
 func TestE2EWorkflow(t *testing.T) {
     t.Run("Scenario: Complete CRUD workflow", testCRUDWorkflow)
     t.Run("Scenario: Error handling", testErrorHandling)
