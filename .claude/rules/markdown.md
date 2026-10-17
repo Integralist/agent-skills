@@ -3,115 +3,60 @@ paths:
   - '**/*.md'
 ---
 
-We are peers writing Markdown. Prioritize readability, consistency, and
+# Markdown Conventions
+
+Write Markdown that reads well, renders correctly on GitHub, and uses
 inclusive language.
 
-## Repository links
+**Formatting.** Wrap prose at 80 columns by hand. Format with
+`mdformat --number`, which keeps ordered lists numbered 1, 2, 3, never with
+`--wrap`, which breaks GitHub alert blocks. Never run `mdformat` on files an
+agent reads: skills (`**/skills/**`), prompts (`**/prompts/**`), and
+`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`. It collapses the 4-backtick fences
+that protect nested code blocks and strips deliberate layout, so format those
+by hand and keep their lists numbered 1, 2, 3. Install it with
+`pipx install mdformat` and
+`pipx inject mdformat mdformat-gfm mdformat-frontmatter`.
 
-Base links on the repository that will contain the document, not the agent's
-working directory.
+**Label lines.** GitHub joins consecutive lines into one paragraph, so a stack
+of `**Label:** value` lines renders as one run-on line. Make them a bullet
+list instead of forcing breaks with a trailing `\` or spaces:
 
-- Use repository-relative paths for files in that repository.
-- Link to files, directories, or roots in another GitHub repository with an
-  absolute permalink pinned to the exact full commit SHA inspected:
-  `https://github.com/<owner>/<repo>/blob/<sha>/<path>#L42` for files and
-  `https://github.com/<owner>/<repo>/tree/<sha>/<path>` for directories
-  (omit `/<path>` for the repository root).
-- Get the SHA with `git -C <checkout> rev-parse HEAD`; form the URL from the
-  canonical repository remote as `https://github.com/<owner>/<repo>`. Treat
-  `path:line` guidance in other skills as applying only to the document's own
-  repository.
-- Never publish a sibling-checkout path (`../Northstar/...`) or use a branch,
-  tag, or abbreviated SHA. If the source file is modified or untracked, or its
-  remote/SHA cannot be verified, say it cannot be pinned or ask for a stable
-  revision; do not present HEAD as a permalink to uncommitted content.
-
-## Formatting
-
-- Use `mdformat --number` to automatically format Markdown files while
-  preserving consecutive numbering on ordered lists.
-- Wrap text at 80 columns manually, do not use `mdformat --wrap 80` as it breaks
-  GitHub flavoured quote blocks (e.g. `> [!NOTE]`).
-- **AI-facing files exception:** NEVER run `mdformat` on Skill files (`SKILL.md`,
-  `**/skills/**`), prompt files (e.g. `**/prompts/**`), agent instructions
-  (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`), or any Markdown consumed by an AI.
-  Automated formatters collapse 4-backtick Markdown blocks (which protect
-  nested 3-backtick blocks) into 3 backticks, alter prompt formatting, and
-  strip intentional layout. In AI-facing files, format manually and maintain
-  explicit sequential numbering (`1., 2., 3.`).
-
-To install and configure the formatter with the necessary plugins (GitHub
-Flavored Markdown and Frontmatter support):
-
-```bash
-pipx install mdformat
-pipx inject mdformat mdformat-gfm
-pipx inject mdformat mdformat-frontmatter
-```
-
-## Metadata / label lines
-
-Consecutive lines that aren't separated by a blank line collapse onto a single
-line when rendered (GitHub treats them as one paragraph). So a block of
-`**Label:** value` lines renders as one run-on line.
-
-Use a bullet list instead:
-
-````md
+```md
 - **Date:** 2026-06-16
 - **Reporter:** Jane Doe
-- **Config under test:** `foo`
-````
+```
 
-Not this (renders on one line):
+**Code blocks.** Give every code block a language, using `txt` when there's no
+obvious one. Fence a Markdown code block with 4 backticks, so 3-backtick
+blocks inside it don't end it early:
 
+`````md
 ````md
-**Date:** 2026-06-16
-**Reporter:** Jane Doe
-**Config under test:** `foo`
-````
+Run this:
 
-A bullet list is preferred over forcing breaks with a trailing `\` or two
-trailing spaces — it's clearer and survives reformatting.
-
-## Code Blocks
-
-- Always apply a language identifier to code blocks.
-- If there is no obvious language, use `txt` as the language (`txt` or `text` is
-  generally more widely recognized and supported by syntax highlighters like
-  GitHub Linguist, highlight.js, and Prism compared to `plain`).
-- When producing a code block for markdown (`markdown` or `md`), use 4
-  backticks instead of 3 so any inner code blocks do not break rendering (see
-  [`../shared/MARKDOWN-CODE-BLOCKS.md`](../skills/shared/MARKDOWN-CODE-BLOCKS.md)).
-
-````md
-```txt
-This is a plain text block.
+```bash
+make test
 ```
 ````
+`````
 
-## Callouts
+**Callouts.** Use GitHub alerts (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
+`> [!WARNING]`, `> [!CAUTION]`), not prose prefixes like `Note:`.
 
-Use GitHub-flavored alert blockquotes for callouts. Do not use plain prose
-prefixes like `Note:`, `Warning:`, or `Tip:`.
+**Links.** Base links on the repository that will hold the document, not your
+working directory. Link files in the same repository with relative paths.
+Link another GitHub repository with a permalink pinned to the full commit SHA
+you inspected: `https://github.com/<owner>/<repo>/blob/<sha>/<path>#L42` for a
+file, or `/tree/<sha>/<path>` for a directory (omit the path for the root).
+Get the SHA with `git -C <checkout> rev-parse HEAD` and the URL from the
+canonical remote. Never publish a sibling-checkout path (`../other-repo/…`), a
+branch, a tag, or a short SHA. If the file is modified or untracked, or you
+can't verify its remote and SHA, say it can't be pinned or ask for a stable
+revision rather than presenting HEAD as a permalink. `path:line` guidance in
+other skills applies only within the document's own repository.
 
-Supported types: `NOTE`, `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`.
-
-````md
-> [!NOTE]
-> Useful information that users should know, even when skimming.
-
-> [!WARNING]
-> Urgent info that needs immediate user attention to avoid problems.
-````
-
-## Linting
-
-Use the following linters to ensure quality, style consistency, and inclusivity:
-
-- **[markdownlint](https://github.com/DavidAnson/markdownlint)**: For general
-  Markdown style checking and consistency.
-- **[alex](https://alexjs.com/)**: For catching insensitive, inconsiderate, or
-  offensive writing.
-- **[woke](https://docs.getwoke.tech/)**: For detecting and replacing
-  non-inclusive language.
+**Linting.** Check style with
+[markdownlint](https://github.com/DavidAnson/markdownlint) and inclusive
+language with [alex](https://alexjs.com/) and
+[woke](https://docs.getwoke.tech/).
