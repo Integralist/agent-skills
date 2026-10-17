@@ -8,146 +8,102 @@ metadata:
   model-tier: complex
 ---
 
-# Security Review Reception
+# Security Review Feedback
 
-A security finding is a **claim to verify**, not an order to implement.
+Give every security finding a verdict — `TRUE POSITIVE`, `FALSE POSITIVE`, or
+`NEEDS-INFO` — backed by evidence, then fix only the true positives. Security
+reviews, whether from AI, a scanner, or a person, fail the same way: they flag
+code that looks dangerous without tracing whether an attacker can reach or
+control it, and they inflate severity. Fixing every flagged item churns code
+for impossible bugs. For how to respond and fix, follow the
+code-review-feedback skill; this skill adds the verdict before that.
 
-**Core principle:** every finding earns a **verdict** before any fix is written
-— `TRUE POSITIVE`, `FALSE POSITIVE`, or `NEEDS-INFO`. Prove reachability and
-impact with evidence; never assume them from how the code looks.
+Work through each finding:
 
-Security reviews — AI, command-driven, or human — fail the same way: **false
-positives and severity inflation**. AI reviewers especially over-flag ("this
-pattern looks dangerous") and overrate severity ("definitely critical") without
-tracing whether an attacker can reach or control the code. Implementing every
-flagged item churns code for issues that are unreachable or impossible.
+1. **Restate the claim.** State the vulnerability, root cause, trigger, and
+   claimed impact in your own words. Many false positives collapse here,
+   because the claim doesn't hold together once stated precisely. If you can't
+   restate it, the verdict is `NEEDS-INFO`: ask the reviewer to point at the
+   code path. Done when the claim is restated or marked `NEEDS-INFO`.
 
-## Relationship to `code-review-feedback`
+2. **Set the threat model.** What privilege does the code run at, and is it
+   sandboxed? What can the attacker already do before triggering the bug? Is
+   the input attacker-controlled, or trusted (config, constants, values set by
+   a trusted component at setup)? A bug reachable only by local root or fed
+   only trusted data rarely survives. Done when attacker and input trust are
+   named.
 
-The reception *posture* is shared, not restated here. Load
-`code-review-feedback` for it: no performative agreement ("you're absolutely
-right"), no gratitude, push back with technical reasoning, clarify unclear items
-first, implement one at a time and test each.
+3. **Trace source to sink.** Prove each hop from attacker data to the
+   dangerous operation; don't assume data arrives unmodified. Then trace
+   backwards for every validation, bounds check, and assertion before the
+   sink, since vulnerable-looking code is often guarded upstream. Check
+   claimed guards (auth middleware, a "behind requireAdmin" comment) against
+   the actual route registration. Done when the path and its guards are cited
+   by file and line.
 
-This skill adds the **security verdict** layer on top: before the implement
-stage, every finding passes the verdict workflow.
+4. **Run the gates.** A finding is a `TRUE POSITIVE` only if it passes every
+   applicable gate. The first gate it fails makes it a `FALSE POSITIVE`.
 
-## The Verdict Workflow
+   | Gate             | Passes when                                                 | Fails when                                                     |
+   | ---------------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+   | Reachability     | A concrete path reaches the code with attacker input        | The path is unreachable, dead, or test/debug-only              |
+   | Attacker control | The attacker controls the data that drives the bug          | The input is internal, trusted, or fixed                       |
+   | Real impact      | It leads to code execution, privilege escalation, or a leak | It's only a robustness issue, such as a restartable crash      |
+   | Math / bounds    | The condition is arithmetically possible after validation   | Validation makes it impossible, e.g. underflow can't occur     |
+   | Environment      | Platform protections don't fully block exploitation         | A sandbox, framework, or language guarantee blocks it entirely |
 
-```txt
-FOR each finding in the review:
-  1. RESTATE   the claim in your own words
-  2. THREAT    establish the threat model
-  3. TRACE     source → sink, and backwards for validation
-  4. GATE      run the gate reviews
-  5. VERDICT   assign verdict + calibrate severity
-THEN:
-  6. CHAIN     check whether rejected findings combine
-  7. IMPLEMENT TRUE POSITIVEs only, highest severity first
-```
+   Done when each finding has passed every gate or failed a named one.
 
-### 1. Restate the claim
+5. **Set the verdict and severity.** Re-derive severity from impact times
+   reachability rather than adopting the reviewer's. An unauthenticated,
+   trivially reachable RCE is critical; the same bug behind three privilege
+   checks is not, and one that needs improbable preconditions is `low`. Done
+   when each finding has one line in this format:
 
-State the vulnerability, alleged root cause, trigger, and claimed impact in your
-own words. Half of false positives collapse here — the claim doesn't cohere when
-stated precisely. If you can't restate it coherently, verdict is `NEEDS-INFO`:
-ask the reviewer rather than guessing.
+   ```txt
+   FINDING #1 TRUE POSITIVE  — SQL injection in search handler; user query reaches raw concat (sink: db.go:88)
+   FINDING #2 FALSE POSITIVE — Integer underflow in parser: Math/bounds gate fails — length validated >= 16 at line 40, so (length - 8) cannot underflow
+   FINDING #3 NEEDS-INFO     — "auth bypass in middleware": cannot identify which middleware or route; ask reviewer to point at the code path
+   ```
 
-### 2. Establish the threat model
+Then:
 
-- What privilege level does this code run at? Is it sandboxed?
-- What can the attacker already do *before* triggering the bug?
-- Is the input attacker-controlled, or internal/trusted (config, compile-time
-  constant, value set by a trusted component)?
+6. **Check chains.** See whether findings that each failed a gate combine into
+   a viable attack, such as an info leak that gives a rejected overflow the
+   address it needs. A chain can be a `TRUE POSITIVE` when its links are not.
+   Done when every combination of rejected findings has been considered.
 
-A "vulnerability" reachable only by an already-root local user, or fed only by
-trusted internal data, rarely survives this step.
+7. **Fix the true positives.** Highest severity first, one at a time, as the
+   code-review-feedback skill describes. Done when every `TRUE POSITIVE` is
+   fixed and tested.
 
-### 3. Trace source → sink
+**Before a FALSE POSITIVE.** A rejection is a claim too, so evidence it. Check
+the ways a finding can look real but be impossible:
 
-Confirm attacker-controlled data actually reaches the dangerous operation. Trace
-the full path step by step — don't assume network/user data arrives unmodified.
-Then trace **backwards**: find every validation, bounds check, and assertion
-preceding the sink. Vulnerable-looking code is often guarded upstream. Verify
-claimed guards (auth middleware, a "behind requireAdmin" comment) against the
-actual registration — don't trust the claim.
+- Conditional flow: `buf[length-4]` is safe if the path only runs when
+  `length > 12`.
+- Defensive code: a check followed by a guarded operation is defence; confirm
+  the check actually prevents the condition.
+- Bounds arithmetic: if `size >= MIN` and `MIN >= header`, then
+  `size - header` can't underflow.
+- TOCTOU: the checked value must be able to change before use.
+- Concurrency: no race exists in single-threaded setup or under a held lock.
+- API contract: some APIs bound their own writes or manage their own memory.
+- Defence in depth: a failed secondary layer isn't critical while a primary
+  control holds, e.g. token cleanup failing when tokens are single-use.
 
-### Read-only trace checks
+**Tempting shortcuts.** Verify each instance, even when similar code was
+vulnerable elsewhere, since callers and protections differ. Run the full
+workflow even when the fix looks cheap; a fix for an impossible bug still
+churns code. Reach a verdict before any fix, whoever the reviewer is.
 
-For a clarified multi-module finding, or several independent finding clusters,
-use read-only investigators under
-[the shared subagent policy](../shared/SUBAGENT-STEERABILITY.md).
-Supply each worker the claim, threat model, revision, scoped paths, and relevant
-instructions. Assign separate clusters; keep straightforward checks inline.
-Grant only verified read-only tools: no edits, test execution, or remote writes.
-Require `COMPLETE` / `INCOMPLETE`, checked paths, source-to-sink and guard
-citations, counterevidence, and unknowns. Budget 40 turns; apply the shared
-completion/retry protocol. Verify critical evidence yourself; keep final
-verdicts, severity, exploit-chain synthesis, user discussion, and fixes in the
-main thread. If suitable delegation is unavailable, report it and trace inline.
-
-### 4. Run the gate reviews
-
-A finding is a `TRUE POSITIVE` only if it passes **every applicable** gate. The
-first gate it fails makes it a `FALSE POSITIVE`, recorded with the evidence.
-
-| Gate                 | Passes when                                                                 | Fails when                                                                       |
-| -------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Reachability**     | A concrete execution path reaches the code under attacker-influenced inputs | The path is unreachable, dead, or test/debug-only                                |
-| **Attacker control** | The attacker controls the data that drives the bug                          | The input is internal, trusted, or fixed                                         |
-| **Real impact**      | Leads to RCE, privilege escalation, or information disclosure               | Only an operational-robustness issue (a crash of non-critical, restartable work) |
-| **Math / bounds**    | The vulnerable condition is arithmetically possible given the validation    | Validation makes the condition impossible (e.g. underflow can't occur)           |
-| **Environment**      | Platform/runtime protections do not fully prevent exploitation              | A sandbox, framework, or language guarantee blocks it entirely                   |
-
-### 5. Assign a verdict + calibrate severity
-
-Don't adopt the reviewer's severity uncritically — re-derive it from **impact ×
-reachability**. An unauthenticated, trivially reachable RCE is critical; the
-same bug behind three privilege checks is not. AI reviewers systematically
-over-rate; a finding that survives the gates but needs improbable preconditions
-is `low`, not `critical`.
-
-## Rationalizations to Reject
-
-If you catch yourself thinking any of these, STOP.
-
-| Rationalization                                | Why it's wrong                                          | Required action                                     |
-| ---------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
-| "This pattern looks dangerous, so it's a vuln" | Pattern recognition is not analysis                     | Trace the data flow before concluding               |
-| "This is clearly critical"                     | AI reviewers are biased toward bugs and over-rate them  | Prove impact and reachability with evidence         |
-| "Similar code was vulnerable elsewhere"        | Each context has different callers and protections      | Verify *this* instance independently                |
-| "Skip the trace, the fix is cheap anyway"      | Cheap fixes still churn code and can mask the real path | Run the full workflow; a no-op fix is still a no-op |
-| "The reviewer is an expert, just implement"    | Source authority does not establish a finding's truth   | Verdict before fix, regardless of source            |
-
-## Verdict Output Format
-
-One line per finding, then act only on the confirmed set:
-
-```txt
-FINDING #1 TRUE POSITIVE  — SQL injection in search handler; user query reaches raw concat (sink: db.go:88)
-FINDING #2 FALSE POSITIVE — Integer underflow in parser: Math/bounds gate fails — length validated >= 16 at line 40, so (length - 8) cannot underflow
-FINDING #3 NEEDS-INFO     — "auth bypass in middleware": cannot identify which middleware or which route; ask reviewer to point at the code path
-```
-
-Then implement `TRUE POSITIVE`s only, highest severity first, one at a time —
-the *how* of responding and fixing lives in `code-review-feedback`.
-
-## Exploit Chains
-
-After per-finding verdicts, check whether findings that individually failed a
-gate combine into a viable attack — e.g. an info-disclosure that leaks the
-address a separately-rejected overflow needs. A chain can be a `TRUE POSITIVE`
-even when its links are not.
-
-## Before Issuing a FALSE POSITIVE
-
-Apply the full checklist in
-[`false-positive-patterns.md`](false-positive-patterns.md) before finalizing any
-`FALSE POSITIVE` verdict. A rejection is a claim too, and must be evidenced.
-
-## The Bottom Line
-
-**A security review = claims to verify, not fixes to apply.**
-
-Verdict before fix. Evidence over pattern-matching. Re-derive severity. No
-reflexive agreement, whatever the source.
+**Read-only trace checks.** For a multi-module finding or several independent
+clusters of findings, you may hand traces to read-only investigators under
+[the shared subagent policy](../shared/SUBAGENT-STEERABILITY.md). Give each one
+the claim, threat model, revision, scoped paths, and relevant instructions,
+and only verified read-only tools: no edits, test runs, or remote writes.
+Require `COMPLETE` or `INCOMPLETE`, the paths checked, source-to-sink and guard
+citations, counterevidence, and unknowns. Budget 40 turns and follow the
+policy's completion and retry rules. Check critical evidence yourself, and
+keep verdicts, severity, chains, user discussion, and fixes in the main
+thread. If delegation isn't available, say so and trace inline.
