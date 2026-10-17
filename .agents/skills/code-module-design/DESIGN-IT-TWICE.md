@@ -1,50 +1,37 @@
 # Design It Twice
 
-When the user wants to explore alternative interfaces for a chosen deepening candidate, use this parallel subagent pattern. Based on "Design It Twice" (Ousterhout): your first idea is unlikely to be the best.
+Explore alternative interfaces for a chosen deepening candidate by having
+parallel subagents design it in radically different ways, then compare them;
+your first idea is rarely the best (Ousterhout). Uses the vocabulary in
+[SKILL.md](SKILL.md) and the dependency categories in
+[DEEPENING.md](DEEPENING.md).
 
-Uses the vocabulary in [SKILL.md](SKILL.md): **module**, **interface**, **seam**, **adapter**, **leverage**.
+1. **Frame the problem** for the user: the constraints any new interface must
+   meet, the dependencies it relies on and their categories, and a rough code
+   sketch that makes the constraints concrete (an illustration, not a
+   proposal). Show it and go straight on to step 2; the user reads while the
+   subagents work. Done when the framing is shown.
+2. **Spawn three or more subagents in parallel,** following
+   [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md). Give each a
+   technical brief, separate from the user's framing: file paths, coupling,
+   dependency category, what sits behind the seam, and the vocabulary from
+   [SKILL.md](SKILL.md) plus the project's `GLOSSARY.md`. If only a legacy
+   `CONTEXT.md` exists, use it and warn the user with `⚠️` to rename it to
+   `GLOSSARY.md`. Give each subagent a different constraint:
 
-## Process
+   - Minimise the interface: one to three entry points, maximum leverage
+     each.
+   - Maximise flexibility: many use cases and extension points.
+   - Optimise for the most common caller: make the default case trivial.
+   - Where dependencies cross a seam: design around ports and adapters.
 
-### 1. Frame the problem space
-
-Before spawning subagents, write a user-facing explanation of the problem space for the chosen candidate:
-
-- The constraints any new interface would need to satisfy
-- The dependencies it would rely on, and which category they fall into (see [DEEPENING.md](DEEPENING.md))
-- A rough illustrative code sketch to ground the constraints, not a proposal, just a way to make the constraints concrete
-
-Show this to the user, then immediately proceed to Step 2. The user reads and thinks while the subagents work in parallel.
-
-### 2. Spawn subagents
-
-Follow the [shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md)
-before spawning. Spawn 3+ subagents in parallel. Each must produce a
-**radically different** interface for the deepened module.
-
-Prompt each subagent with a separate technical brief (file paths, coupling details, dependency category from [DEEPENING.md](DEEPENING.md), what sits behind the seam). The brief is independent of the user-facing problem-space explanation in Step 1. Give each agent a different design constraint:
-
-- Agent 1: "Minimize the interface: aim for 1–3 entry points max. Maximise leverage per entry point."
-- Agent 2: "Maximise flexibility: support many use cases and extension."
-- Agent 3: "Optimise for the most common caller: make the default case trivial."
-- Agent 4 (if applicable): "Design around ports & adapters for cross-seam dependencies."
-
-Include both [SKILL.md](SKILL.md) vocabulary and the project's
-`GLOSSARY.md` vocabulary in the brief so each subagent names things
-consistently with the architecture language and the project's domain
-language. If only legacy `CONTEXT.md` exists, use it and show the user a
-`⚠️` warning to rename it to `GLOSSARY.md`.
-
-Each subagent outputs:
-
-1. Interface (types, methods, params, plus invariants, ordering, error modes)
-2. Usage example showing how callers use it
-3. What the implementation hides behind the seam
-4. Dependency strategy and adapters (see [DEEPENING.md](DEEPENING.md))
-5. Trade-offs: where leverage is high, where it's thin
-
-### 3. Present and compare
-
-Present designs sequentially so the user can absorb each one, then compare them in prose. Contrast by **depth** (leverage at the interface), **locality** (where change concentrates), and **seam placement**.
-
-After comparing, give your own recommendation: which design you think is strongest and why. If elements from different designs would combine well, propose a hybrid. Be opinionated: the user wants a strong read, not a menu.
+   Ask each for the interface (types, methods, parameters, invariants,
+   ordering, error modes), a caller's usage example, what the implementation
+   hides, the dependency strategy and adapters, and the trade-offs: where
+   leverage is high and where it's thin. Done when every subagent has
+   returned all five, with incomplete ones retried per the steerability
+   guide.
+3. **Present and compare.** Show the designs one at a time, then compare them
+   in prose by depth, locality, and seam placement. Recommend the strongest
+   and say why, proposing a hybrid if parts combine well; the user wants a
+   strong read, not a menu. Done when you've given a recommendation.
