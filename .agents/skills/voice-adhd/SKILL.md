@@ -2,9 +2,9 @@
 name: voice-adhd
 description: >-
   Write or rewrite replies in an ADHD-friendly shape: answer first, short
-  bullets, one next action. Use when the user asks for voice-adhd, an
-  ADHD-friendly reply or rewrite, or to use voice-adhd for all replies. For
-  summarising a session, file, or URL, use summarize-for-adhd instead.
+  bullets, one next action. Use when the user asks for voice-adhd or an
+  ADHD-friendly reply or rewrite, once or for all replies. For summarising a
+  session, file, or URL, use summarize-for-adhd instead.
 argument-hint: "[--all | --off | text to rewrite]"
 metadata:
   model-tier: trivial
@@ -12,48 +12,39 @@ metadata:
 
 # ADHD Voice
 
-Write so the reader can act after reading line 1. Cut reading effort, never
-facts. Treat this shape as a starting point and honour the reader's stated
-preferences for length, structure, and detail.
+Write so the reader can act after reading line 1: cut reading effort, never
+facts. This shape is a starting point; the reader's stated preferences for
+length, structure, and detail win. Pick the mode from
+[VOICE-MODES.md](../shared/VOICE-MODES.md): one-off (the default), persistent
+(`--all`), or off (`--off`). Apply
+[EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md) for state
+anchors, the debug-spiral breaker, error reporting, the pre-send check, and
+the escape hatches that allow longer replies.
 
-## Modes
+**Shape.**
 
-Pick the mode from [`../shared/VOICE-MODES.md`](../shared/VOICE-MODES.md):
-one-off (default), persistent (`--all`), or off (`--off`). In persistent mode,
-write every reply in this shape.
-
-## Shape
-
-1. **Line 1: the answer or the action.** The direct answer, runnable command,
-   file path, or diff. Rationale goes below it.
-2. **Body: up to five short bullets,** most important first, one idea each.
-   Use fewer when there is less to say.
+1. **Line 1: the answer or the action:** the direct answer, runnable command,
+   file path, or diff, with rationale below it.
+2. **Body: up to five short bullets,** most important first, one idea each,
+   fewer when there's less to say.
 3. **Last line: one next action,** small and concrete, naming its owner when
-   it is not you. Omit it when nothing needs doing.
+   it isn't you. Leave it out when nothing needs doing.
 
-Apply [`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md)
-for state anchors on multi-turn work, the debug-spiral circuit breaker, error
-reporting, and the escape hatches that allow longer replies.
+Done when every caveat, identifier, and done-versus-proposed label from the
+source or work has survived.
 
-## Wording
+**Wording.**
 
-- Short, complete sentences in plain words. Define jargon on first use; keep
-  technical meaning exact.
+- Short, complete sentences in plain words. Define jargon on first use and
+  keep technical meaning exact.
 - Name the task, file, or decision every time ("the auth middleware fix"), so
   each reply stands alone without the reader's working memory.
-- Keep each caveat beside the claim it qualifies. Keep exact dates, numbers,
-  and identifiers. Label proposed work as proposed and done work as done.
+- Keep each caveat beside the claim it qualifies, and keep exact dates,
+  numbers, and identifiers. Label proposed work as proposed and done work as
+  done.
 - Bold only short labels or crucial facts. Prefer flat bullets to nested
-  lists, dense tables, or long paragraphs; number steps only when order
+  lists, dense tables, or long paragraphs, and number steps only when order
   matters.
-- Write to an adult peer: neutral, plain, and respectful. Use emoji only when
-  they signal status (✅ ❌ ⚠️).
-- Keep unprompted explanation under ~150 words; go longer when the user asks
-  to explain or walk through something.
-
-## Check before sending
-
-- Line 1 answers the question or gives the action.
-- Line 1 plus the last line tell the reader what happened and what comes next.
-- Every caveat, identifier, and done-versus-proposed label from the source or
-  work survived.
+- Write to an adult peer: neutral, plain, and respectful, with emoji only to
+  signal status (✅ ❌ ⚠️).
+- Keep unprompted explanation under ~150 words.
