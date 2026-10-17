@@ -12,74 +12,66 @@ metadata:
 
 # Domain Modeling
 
-The *active* discipline of building the domain model as you design:
-challenging terms, inventing edge-case scenarios, and writing the
-glossary and decisions down the moment they crystallise. (Merely
-*reading* `GLOSSARY.md` (or a legacy `CONTEXT.md`) for vocabulary is a
-one-line habit any skill can do — not this skill. This skill is for
-changing the model, not consuming it.)
+Build the domain model while you design: challenge terms, test them against
+edge cases, and write the glossary and decisions down the moment they settle.
+This skill is for changing the model; any skill can read `GLOSSARY.md` for
+vocabulary without it.
 
-## File structure
-
-Keep one root `GLOSSARY.md` for the project. Group terms for different
-domain areas under subheadings instead of splitting the glossary across
-files.
-
-```txt
-/
-├── GLOSSARY.md
-└── docs/
-    └── adr/
-        ├── README.md        # repo-wide ADR index
-        ├── ADR-0001.md
-        └── ADR-0002.md
-```
-
-Use the root `GLOSSARY.md` when it exists. If it does not exist but a root
-`CONTEXT.md` does, use that file in place rather than creating a duplicate.
-On the first fallback in a task, warn the user:
+**Files.** Keep one `GLOSSARY.md` at the repository root, grouping domain
+areas under subheadings rather than splitting it into files, and ADRs in
+`docs/adr/` with a repo-wide `docs/adr/README.md` index. If there's no
+`GLOSSARY.md` but a root `CONTEXT.md` exists, use it in place rather than
+create a duplicate, and on the first such use in a task, warn:
 
 > ⚠️ This project uses legacy `CONTEXT.md`; rename it to `GLOSSARY.md`.
-> I’ll continue using the existing file for now.
+> I'll continue using the existing file for now.
 
-If neither file exists, create a root `GLOSSARY.md` lazily when the first
-term is resolved. Create root `docs/adr/README.md` with the first ADR
-anywhere in the repository.
+If neither exists, create `GLOSSARY.md` when the first term is resolved, and
+`docs/adr/README.md` with the first ADR.
 
-## During the session
+**During the session:**
 
-### Challenge against the glossary
+1. **Challenge** a term that conflicts with the glossary as soon as it comes
+   up: "Your glossary defines 'cancellation' as X, but you seem to mean Y;
+   which is it?"
+2. **Sharpen** vague or overloaded terms into one precise word: "You're
+   saying 'account'; do you mean the Customer or the User?"
+3. **Test with scenarios** that probe edge cases and the boundaries between
+   concepts.
+4. **Check the code** when the user says how something works, and surface
+   contradictions: "Your code cancels whole Orders, but you said partial
+   cancellation is possible; which is right?"
+5. **Update the glossary** the moment a term is resolved, not in a batch.
+   Keep implementation detail out: it's a glossary, not a spec, scratch pad,
+   or decision log.
+6. **Offer an ADR** only when a decision passes the three tests in
+   [ADR-FORMAT.md](../shared/ADR-FORMAT.md), and write it with that file's
+   template, numbering, and registry rules.
 
-When a term conflicts with the active glossary, call it out immediately.
-"Your glossary defines 'cancellation' as X, but you seem to mean Y — which
-is it?"
+## Glossary format
 
-### Sharpen fuzzy language
+````md
+# {Project Name} Glossary
 
-When a term is vague or overloaded, propose a precise canonical one.
-"You're saying 'account' — do you mean the Customer or the User? Those are
-different things."
+{One or two sentences on the project and the glossary's scope.}
 
-### Discuss concrete scenarios
+## Language
 
-Stress-test domain relationships with specific scenarios that probe edge
-cases and force precision about the boundaries between concepts.
+**Order**:
+A request from a customer to purchase one or more items.
+_Avoid_: Purchase, transaction
 
-### Cross-reference with code
+**Customer**:
+A person or organization that places orders.
+_Avoid_: Client, buyer, account
+````
 
-When the user states how something works, check whether the code agrees.
-Surface contradictions: "Your code cancels entire Orders, but you just
-said partial cancellation is possible — which is right?"
-
-### Update the glossary inline
-
-When a term is resolved, update the active glossary right there — don't
-batch. Use the format in [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md). Keep
-the glossary devoid of implementation details: it is a glossary, not a
-spec, scratch pad, or decision log.
-
-### Offer ADRs sparingly
-
-Offer an ADR only when a decision passes the three tests in
-[ADR-FORMAT.md](../shared/ADR-FORMAT.md), and write it with that file's
-template, numbering, and registry rules.
+- **Be opinionated.** When several words name one concept, pick the best and
+  list the rest under `_Avoid_`.
+- **Keep definitions tight:** one or two sentences on what the term is, not
+  what it does.
+- **Include only project-specific domain terms,** not general programming
+  concepts such as timeouts or error types, however often the project uses
+  them.
+- **Group related terms under subheadings** when clusters emerge, all in the
+  one `GLOSSARY.md`.
