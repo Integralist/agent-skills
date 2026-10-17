@@ -1,81 +1,55 @@
 ---
 name: test-feedback
 description: >-
-  Parse test failure output and diagnose root causes in a
-  read-only background subagent, then fix the failures
-  interactively in the main thread. Use when the user shares
-  test output or says "tests fail". Default output path is
-  /tmp/output.
+  Diagnose and fix test failures from saved test output. Use when the user
+  shares test output or says "tests fail".
 metadata:
   model-tier: complex
 ---
 
 # Test Feedback
 
-A read-only background subagent diagnoses test failures; the main
-thread applies the fixes interactively so the user can redirect any
-fix before work piles up. Follow the completion and retry protocol in
-[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md).
+Find the failures in a test-output file, have a read-only subagent diagnose
+their root causes, then apply the fixes in the main thread, where the user can
+redirect or stop any fix before work piles up.
 
-## Process
+1. **Find the output.** Use the path the user gave, else `/tmp/output`. Read
+   it; if it's missing or empty, ask the user where the output is. Done when
+   you have a non-empty file.
 
-1. **Determine the output path** — what the user provided, else
-   `/tmp/output`.
-
-1. **Verify the file exists and is non-empty** by reading it. If missing
-   or empty, ask the user where the output is. Do NOT spawn a subagent
-   without valid test output.
-
-1. **Scan for failures mechanically — never eyeball.** A read of a long
-   file that interleaves passing lines and `make run` infra logs is how
-   real failures slip past. Search for markers instead:
+2. **Search for failures.** Search for markers rather than reading, because
+   failures slip past in long output mixed with passing lines and infra logs:
 
    ```bash
    rg -n 'FAIL|--- FAIL|^panic:|DATA RACE|^not ok|Error Trace|build failed' <path>
    ```
 
-   - Matches → these are the failures; pass them to the subagent.
-   - No matches → report "no failures found" *and the command you ran* so
-     the user can confirm. Never declare "all tests pass" from skimming.
+   If nothing matches, report "no failures found" with the command you ran,
+   and stop. Done when you have the list of failures, or have reported none.
 
-1. **Spawn a read-only diagnosis subagent.** Its prompt must include:
+3. **Diagnose in a read-only subagent.** Follow the completion and retry
+   rules in [the shared subagent policy](../shared/SUBAGENT-STEERABILITY.md).
+   Tell the subagent to:
+   - read the output file and the failures you found, then the relevant
+     source, before reasoning about causes;
+   - find the root cause from evidence, saying so when evidence is missing
+     instead of guessing;
+   - stay read-only: no edits, no `make test`, no workspace changes;
+   - prefer fixing the implementation over weakening an assertion;
+   - note any `docs/**/*.md` or `**/README.md` a fix would touch if it
+     changes behaviour, public APIs, or usage;
+   - note that `e2e` or integration failures need a running stack for
+     `make test-integration`;
+   - follow the project's AGENTS.md;
+   - return, per failure, the test, the root cause, and the proposed fix.
 
-   - The test-output file path; read it first, then parse and
-     summarize the failures.
-   - Read relevant source files before reasoning about causes.
-   - Identify root causes — no guessing.
-   - **Read-only**: do not edit files, run `make test`, or change the
-     workspace. Diagnose and propose only.
-   - Prefer fixing implementation over weakening test assertions, and
-     say so in each proposed fix.
-   - Note which `docs/**/*.md` or `**/README.md` the fix would touch
-     if it changes behavior, public APIs, or usage patterns.
-   - If the output has `e2e` or integration failures, note that
-     `make test-integration` requires a running stack.
-   - The project's AGENTS.md path for conventions.
-   - Return per failure: the failing test, the root cause, the
-     proposed fix.
+   Done when every failure has a root cause and a proposed fix.
 
-1. **Apply the fixes interactively (main thread).**
-
-   - Present the per-failure root causes and proposed fixes.
-   - Apply them yourself, surfacing any you're unsure about so the
-     user can redirect, skip, or stop mid-stream.
-   - Prefer fixing implementation over weakening test assertions.
-   - Run `make test` after applying (up to 3 iterations). If a fix
-     doesn't hold, re-diagnose rather than guessing.
-   - Update `docs/**/*.md` or `**/README.md` when a fix changes
-     behavior, public APIs, or usage patterns.
-   - Do NOT commit — leave that to the user.
-
-## REQUIRED
-
-- Verify the output file exists before spawning.
-- Detect failures by search (`rg`), not by reading — a clean read of a
-  noisy file is not proof the tests passed.
-- The diagnosis subagent is read-only — it diagnoses, never edits.
-- Apply fixes in the main thread so each stays steerable.
-- Never weaken assertions to make tests pass.
-- Cap iterative fixes at 3, avoid fabricated root causes, and lead with
-  actionable diffs — see
-  [`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).
+4. **Fix in the main thread.** Show the root causes and fixes, then apply
+   them, flagging any you're unsure of so the user can redirect, skip, or
+   stop. Never weaken an assertion to make a test pass. Update the docs a
+   fix affects. Run `make test` after applying; if a fix doesn't hold,
+   re-diagnose rather than guess. After 3 runs that still fail, stop editing,
+   name the assumption you haven't verified, and ask one diagnostic question.
+   Leave committing to the user. Done when `make test` passes or you've
+   stopped after 3 runs.
