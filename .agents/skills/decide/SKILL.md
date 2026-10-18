@@ -1,195 +1,104 @@
 ---
 name: decide
 description: >-
-  Decision Memo + Contrarian Check. Runs an interview,
-  structures the options with explicit assumptions, dispatches
-  a contrarian pass to find holes and second-order effects, and
-  produces a saved decision memo with a clear recommendation and
-  reversibility rating.
+  Decision memo with a contrarian check, saved to docs/decisions/. Use when
+  the user wants help making a consequential, hard-to-reverse, or
+  multi-stakeholder decision.
 disable-model-invocation: true
 argument-hint: '[short description of the decision]'
 metadata:
   model-tier: complex
 ---
 
-# /decide — Decision Memo + Contrarian Check
+# Decide
 
-Help the user make better, faster decisions on consequential,
-hard-to-reverse, or multi-stakeholder choices by structuring their
-thinking, red-teaming their logic, and producing a saved memo they
-can revisit.
+Help the user make a consequential, hard-to-reverse, or multi-stakeholder
+decision faster and better: interview them, structure the options with
+explicit assumptions, red-team the logic, and save a memo with one
+recommendation and a reversibility rating that they can revisit. The
+interview runs in the main session; three subagents do the heavy thinking,
+each one job. Follow the
+[completion and retry protocol](../shared/SUBAGENT-STEERABILITY.md#completion-and-retry)
+for each, and send any omission back to the same subagent to fix before
+moving on.
 
-Three subagent passes, each a distinct cognitive job:
+1. **Interview** one question at a time, waiting for each answer, in this
+   order:
+   1. What's the decision, in one sentence?
+   2. What are the options? With only one, ask for the alternatives,
+      including doing nothing.
+   3. Can any option avoid the central trade-off? Look for a smaller,
+      staged, combined, or lateral option rather than accepting the framing.
+   4. Why now? What changes if you wait?
+   5. What's the decision window: a deadline, an opportunity cost, or a soft
+      "off my plate by Friday"?
+   6. What happens by default if no one acts?
+   7. What does each option cost in money, time, focus, reputation, and
+      optionality?
+   8. What goes well if each option works?
+   9. What's each option's worst plausible outcome you'd have to live with?
+   10. What must be true for each serious option to be the right call?
+   11. Which of those beliefs are you least sure about?
+   12. Who else has a stake, whose buy-in matters, and what enthusiasm,
+       resistance, or anxiety have they actually expressed? Record only
+       sentiment they've communicated.
+   13. What's reversible and what's one-way: a hat or a tattoo?
+   14. What would make you change your mind?
+   15. What's your gut call right now? Record it so the user can later see
+       whether the analysis moved them or rationalised the gut.
 
-| Pass        | Purpose                                                                  |
-| ----------- | ------------------------------------------------------------------------ |
-| Structurer  | Organize the interview into a clean draft memo.                          |
-| Contrarian  | Red-team the logic; surface hidden assumptions and second-order effects. |
-| Synthesizer | Weigh structure vs. contrarian pass; recommend; rate reversibility.      |
+   Push once on a thin answer ("Take a guess: what's the closest thing you
+   do believe?"), then move on and flag the gap in the memo. Capture extra
+   detail the user volunteers, but keep to the order. Done when all fifteen
+   have an answer or a flagged gap.
+2. **Structurer.** Summarise the answers and give the Structurer the full
+   transcript and a kebab-case decision slug (`hire-vp-eng`). It drafts the
+   memo in the template below without recommending or editorialising,
+   writes `_(unanswered)_` for a missing or thin answer rather than inventing
+   content, and classifies each decision-relevant claim as `Verified fact`,
+   `User belief`, `Assumption`, or `Unknown`, never upgrading a belief to a
+   fact. Done when the draft accounts for every answer and serious option and
+   classifies every claim.
+3. **Contrarian.** Give it the draft and frame it as a contrarian advisor
+   whose job is to find what's wrong, defaulting to scepticism. It returns
+   Markdown under these headings: hidden assumptions treated as fact;
+   second-order effects 6–18 months out; selection bias in options dropped
+   too fast or framed to prejudge the answer; sunk cost or momentum bias;
+   reversibility mislabels; and the strongest case for every serious
+   option, including the one the user leans away from. It's specific: not
+   "you haven't thought about competitors" but "if competitor X mirrors this
+   in 3 months, your moat is gone". Done when every heading is covered and
+   every serious option steel-manned.
+4. **Synthesizer.** Give it the draft and the critique to produce the final
+   memo in the template. It recommends exactly one option; "it depends"
+   isn't one, and if it truly can't recommend, the recommendation is to
+   gather more information, naming the smallest step and the unknowns it
+   resolves. It keeps the evidence classifications, marks every contrarian
+   claim `_(contrarian)_`, and compares the recommendation with the gut
+   call, saying loudly why if they differ. Done when the memo has every
+   section and reads clearly six months later without the transcript.
+5. **Save and close.** Write the memo to
+   `docs/decisions/YYYY-MM-DD-<decision-slug>.md`, creating the directory if
+   needed, present it, and ask:
 
-The interview happens in the main session. Subagents only enter
-for the heavy thinking.
+   ```txt
+   What now?
 
-## Step 1 — Run the interview
+   1. Lock it in — I'll mark this decided and note the kill criteria.
+   2. Revisit later — I'll mark it for revisit on a date you choose.
+   3. Push back — identify the disputed input or reasoning and rerun from there.
+   4. Something else.
+   ```
 
-Ask **one** question at a time. Do not batch. Wait for the answer
-before moving on. Ask in this order:
+   To lock it in, set `Status` to `Decided` and append `## Decided` with the
+   option and date, leaving the kill criteria as they are. To revisit, ask
+   for the date, set `Status` to `Revisit`, and add `Revisit date` to the
+   metadata; you don't schedule or start the revisit. To push back, amend
+   the disputed input and rerun from the earliest affected pass: Structurer
+   for inputs, Contrarian for critique, Synthesizer for weighting. Done when
+   the user's choice is applied.
 
-1. **What's the decision?** — In one sentence.
-1. **What are the options?** — List them. If only one, ask "What
-   are the alternatives, including doing nothing?"
-1. **Can any option avoid the central trade-off?** — Look for a smaller,
-   staged, combined, or otherwise lateral option rather than accepting the
-   initial framing.
-1. **Why now?** — Why decide today/this week/this month? What
-   changes if you wait?
-1. **What's the decision window?** — Deadline, opportunity cost, or
-   a soft "off my plate by Friday."
-1. **What's the decision unmade?** — Default outcome if no action
-   is taken.
-1. **What does each option cost?** — Money, time, focus,
-   reputation, optionality. Per-option, briefly.
-1. **What's the upside of each option?** — What goes well if it
-   works.
-1. **What's the downside?** — Per option, the worst plausible
-   outcome you'd have to live with.
-1. **What must be true for option X to be the right call?** —
-   Repeat for each serious option. Surfaces the assumptions.
-1. **Which of those beliefs are you least sure about?** — The
-   weakest link.
-1. **Who else has a stake?** — Co-founder, team, investors,
-   customers, family. Whose buy-in matters, and what enthusiasm, resistance,
-   or anxiety have they actually expressed? Do not infer sentiment they have
-   not communicated.
-1. **What's reversible vs. one-way?** — Is this a hat or a tattoo?
-1. **What would make you change your mind?** — Kill criteria.
-1. **Gut call right now?** — Force a tentative answer before the
-   analysis. Recorded so the user can later check whether the
-   analysis moved them or just rationalized the gut call.
-
-If the user gives a thin answer ("I dunno"), push once: "Take a
-guess — what's the closest thing you do believe?" Move on if they
-still won't bite, but flag the gap in the memo.
-
-If the user volunteers extra detail mid-question, capture it but
-stay on the ordered list. Don't let the interview wander.
-
-## Step 2 — Spawn the Structurer subagent
-
-After the interview, summarise the captured answers and spawn the
-Structurer. Follow the [shared completion and retry
-protocol](../shared/SUBAGENT-STEERABILITY.md#completion-and-retry) for each
-subagent phase. Its instructions must include:
-
-- The full interview transcript (questions and answers).
-- The decision slug (e.g., `hire-vp-eng`, `kill-feature-x`).
-- Produce a draft memo using the Output template below — Context,
-  Evidence ledger, Options, Assumptions per option, Costs, Upside, Downside,
-  Reversibility, Stakeholders, Gut call, Kill criteria.
-- Classify each decision-relevant claim as `Verified fact`, `User belief`,
-  `Assumption`, or `Unknown`. Do not upgrade a belief or assumption to fact.
-- "Do not recommend. Do not editorialize. Just structure."
-- "If an answer is missing or thin, write `_(unanswered)_` rather
-  than inventing content."
-- "Return the draft memo as Markdown."
-
-Before advancing, verify the draft accounts for every interview answer, marks
-missing answers `_(unanswered)_`, classifies every decision-relevant claim, and
-covers every serious option. Return omissions to the Structurer for correction.
-
-## Step 3 — Spawn the Contrarian subagent
-
-Pass the Structurer's draft to the Contrarian, instructed to
-red-team it. Its instructions must include:
-
-- The full draft memo.
-- Role framing: "You are a contrarian advisor. Your job is to find
-  what's wrong, not to validate. Default to skepticism."
-- Required output sections:
-  - **Hidden assumptions** — beliefs the user treats as fact.
-  - **Second-order effects** — what happens 6–18 months out that
-    the user hasn't priced in.
-  - **Selection bias** — options excluded too quickly, or framed in
-    a way that prejudged the answer.
-  - **Sunk cost / momentum bias** — choices driven by past
-    investment rather than future expected value.
-  - **Reversibility check** — decisions labelled reversible that
-    aren't, or vice versa.
-  - **Steel-manned options** — the strongest success case for every serious
-    option, including the option the user is leaning away from.
-- "Be specific. 'You haven't thought about competitors' is useless.
-  'If competitor X mirrors this in 3 months, your moat is gone' is
-  useful."
-- "Return findings as Markdown, organized under the sections above."
-
-Before advancing, verify the critique covers every required section and
-steel-mans every serious option. Return omissions to the Contrarian for
-correction.
-
-## Step 4 — Spawn the Synthesizer subagent
-
-Pass both the Structurer draft and the Contrarian critique to the
-Synthesizer to produce the final memo. Its instructions must
-include:
-
-- The Structurer's draft memo.
-- The Contrarian's findings.
-- "Produce the final memo in the Output format below. You must
-  recommend a single option. 'It depends' is not a recommendation.
-  If you genuinely cannot recommend, the recommendation is 'gather
-  more information' and you must specify the smallest evidence-gathering step
-  and the critical unknowns it resolves."
-- "Preserve the evidence classification from the draft. Mark every claim from
-  the Contrarian as `_(contrarian)_`. Don't blend sources silently."
-- "Compare the recommendation to the user's gut call. If they
-  agree, say so. If they disagree, say so loudly and explain why
-  the analysis diverged from the gut."
-- "Return the final memo as Markdown using the Output template."
-
-Before saving, verify the memo contains every required section, preserves claim
-classifications, makes one recommendation, accounts for every serious option,
-and states the smallest evidence-gathering step when information is
-insufficient. It must be understandable six months later without the interview
-transcript. Return omissions to the Synthesizer for correction.
-
-## Step 5 — Save the memo
-
-Write the Synthesizer's output to:
-
-```txt
-docs/decisions/YYYY-MM-DD-<decision-slug>.md
-```
-
-Create `docs/decisions/` if it doesn't exist. The slug is a
-kebab-case version of the decision (e.g., `hire-vp-eng`,
-`kill-pricing-tier-b`).
-
-Then present the memo and ask:
-
-```txt
-What now?
-
-1. Lock it in — I'll mark this decided and note the kill criteria.
-2. Revisit later — I'll mark it for revisit on a date you choose.
-3. Push back — identify the disputed input or reasoning and rerun from there.
-4. Something else.
-```
-
-Apply the selected mutation:
-
-- **Lock it in** — set `Status` to `Decided` and append `## Decided` with the
-  option and date. Keep the existing kill-criteria checklist authoritative.
-- **Revisit later** — ask for the revisit date, set `Status` to `Revisit`, and
-  add `Revisit date` to the metadata list. Do not promise to schedule or
-  initiate the revisit.
-- **Push back** — amend the disputed input or instructions, then rerun from the
-  earliest affected pass: Structurer for source inputs, Contrarian for critique,
-  or Synthesizer for weighting and recommendation.
-
-## Output template
-
-The final memo (produced by the Synthesizer) must follow this
-structure:
+## Memo template
 
 ````markdown
 # Decision: {one-line decision}
@@ -218,7 +127,6 @@ structure:
 - **Upside:** ...
 - **Downside:** ...
 - **Must be true for this to work:**
-  - ...
   - ...
 - **Weakest assumption:** ...
 
@@ -253,17 +161,16 @@ structure:
 
 **{Option name}.**
 
-{2–4 sentences explaining why this option, what trade-off the user is accepting,
-and whether the analysis matches or contradicts the gut call.}
+{2–4 sentences: why this option, what trade-off the user accepts, and whether
+the analysis matches or contradicts the gut call.}
 
 ## Kill criteria
 
 If any of these become true, abandon or revisit:
 
 - [ ] ...
-- [ ] ...
 
 ## Open questions
 
-{Anything still unanswered. Use `_(unanswered)_` markers from the draft.}
+{Anything still unanswered, with `_(unanswered)_` markers from the draft.}
 ````
