@@ -1,8 +1,9 @@
 ---
 name: eval
 description: >-
-  Draft or refresh a skill's eval cases, then run them in a sandbox and grade
-  the result against the previous run.
+  Run a skill's eval cases in a sandbox and grade them against the previous
+  run, drafting or refreshing the cases first. Use when the user wants to test
+  a skill in this repo, add eval cases, or check a skill edit for regressions.
 disable-model-invocation: true
 argument-hint: "[skill-name]"
 metadata:
@@ -11,199 +12,112 @@ metadata:
 
 # Eval
 
-Skills have no compiler — the only evidence one works is running it against
+Skills have no compiler: the only evidence one works is running it on
 realistic prompts and reading what happened. This makes that a regression
-suite: fixed cases, plain-English checks, graded from the transcript.
+suite of fixed cases and plain-English checks, graded from transcripts, with
+cases and results versioned beside the skills in this repo.
 
-Scoped to this repo. Cases and results are versioned alongside the skills they
-test.
+**Paths.** All are repo-relative. Read the skill from the working tree, not
+`~/.agents/skills/`, which lags until the next `make install-agents` and would
+score the previous edit.
 
-## Scope
+| Path                                         | Role                                                    |
+| -------------------------------------------- | ------------------------------------------------------- |
+| `.agents/skills/<skill>/SKILL.md`            | The text under test                                     |
+| `.agents/skills/<skill>/evals/cases.json`    | The cases: [CASES-FORMAT.md](CASES-FORMAT.md)           |
+| `docs/evals/<yyyy-mm-dd>-<hhmm>-<skill>.md`  | One run's result: [RESULTS-FORMAT.md](RESULTS-FORMAT.md) |
 
-Confirm `.agents/skills/` exists in the current directory before anything else;
-when it does not, report that and stop. Every path here is repo-relative.
+1. **Pick the skill.** Confirm `.agents/skills/` exists in the current
+   directory, and stop with a note if it doesn't. With no argument, list the
+   skills, flag those without cases, and ask which. Done when the target is
+   named.
+2. **Sync the cases** with the skill as it stands. With no
+   `evals/cases.json`, draft a starter suite: one case per branch the skill
+   describes and one per hard rule. Otherwise compare
+   `git log -1 --format=%h -- <skill path>` with the Skill revision in the
+   newest results file; if they differ, read that diff and propose cases for
+   new behaviour and retirement for checks on dropped behaviour. Derive every
+   case from the skill's text, and never edit a check because it went red:
+   that rewrites the test to match the bug. Show the `cases.json` diff and
+   write it only once the user approves. Done when the file is settled; cases
+   don't change mid-run.
+3. **Run each case cold** in its own subagent, all concurrently. Cold means
+   the executor never sees that case's checks, since an agent that knows the
+   criteria performs to them. Give it only: the sandbox path as its working
+   directory, the case's `setup`, its `prompt`, the target `SKILL.md`
+   verbatim, an instruction to execute what the skill describes with real
+   commands and files, the transcript path, and these steps verbatim:
 
-| Path                                      | Role                                                         |
-| ----------------------------------------- | ------------------------------------------------------------ |
-| `.agents/skills/<skill>/SKILL.md`         | The text under test                                          |
-| `.agents/skills/<skill>/evals/cases.json` | The cases — [`CASES-FORMAT.md`](CASES-FORMAT.md)             |
-| `docs/evals/<yyyy-mm-dd>-<skill>.md`      | This run's result — [`RESULTS-FORMAT.md`](RESULTS-FORMAT.md) |
+   ```txt
+   1. Run `rm -rf .evals-sandbox/<id> && mkdir -p .evals-sandbox/<id>`, then
+      work only inside it.
+   2. Run the case's setup commands there, in order, with
+      GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null exported.
+   3. If setup fails, report it and stop.
+   4. Append every command with its output, then the final state, to
+      .evals-sandbox/<id>-transcript.md as you work.
+   ```
 
-Read the target from the working tree. The installed copy under
-`~/.agents/skills/` lags the repo until the next `make install-agents`, so
-grading it scores the previous edit rather than the one you just made.
-
-## Input
-
-| Argument    | Scope                                                 |
-| ----------- | ----------------------------------------------------- |
-| Skill name  | Eval that skill                                       |
-| No argument | List the skills and ask which, flagging those with no cases yet |
-
-## Sync the cases
-
-Cases must cover the skill as it stands now. Two states to settle before
-running:
-
-- **No `evals/cases.json`** — draft a starter suite from the target
-  `SKILL.md`: one case per branch the skill describes, one per hard rule it
-  states.
-- **Drift** — compare `git log -1 --format=%h -- <skill path>` against the
-  **Skill revision** recorded in the previous results file. When they differ,
-  read that diff: propose a case or check for behaviour the skill now describes
-  and nothing covers, and retirement for a check asserting behaviour the skill
-  dropped.
-
-Derive every case from the skill's text. A failing check is evidence about the
-skill, not about the check — editing one in response to a red result rewrites
-the test to match the bug, and the suite stops being able to tell you anything.
-
-Show the proposed `cases.json` diff and get approval before writing it. Run
-only once the file is settled; cases must not move mid-run.
+   Done when every case has a transcript file on disk. The sandbox rules are
+   below.
+4. **Grade** each case only after its transcript is recorded: `pass` or
+   `fail` per check, with a one-line reason citing the transcript. Missing
+   evidence is a fail, and a check too vague to decide is itself the finding.
+   For several cases or long transcripts, use fresh read-only graders under
+   [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md): give each
+   a batch of finished case IDs, their fixed checks, and transcript paths (no
+   executor self-grades), only verified read-only tools, and a 30-turn
+   budget, and require `COMPLETE` or `INCOMPLETE` with every check's verdict,
+   transcript location, and evidence. An incomplete grader isn't a finished
+   pass. Verify cited claims and settle gaps or disagreements yourself; keep a
+   short single case inline, and if delegation isn't available, say so and
+   grade inline. Done when every check has a verdict and a reason.
+5. **Report.** Run `mkdir -p docs/evals` and write a new file stamped with
+   `date +%F-%H%M`, compared against the newest older
+   `docs/evals/*-<skill>.md` (names sort by time). Never overwrite an earlier
+   run: it's the baseline. Record the skill and `cases.json` revisions from
+   `git log -1 --format=%h -- <path>`, and mark a case whose `setup` or
+   `prompt` changed as `revised` rather than scoring it against history. List
+   every check that passed last run and fails now before proposing any skill
+   change; what to do about a regression is the user's call. Done when the
+   results file is written and the regressions are stated.
 
 ## Sandbox
 
-Each case with a `setup` runs in its own disposable directory under
-`.evals-sandbox/<case-id>/` — inside the repo, and gitignored.
+**Where.** A case with `setup` runs in `.evals-sandbox/<case-id>/`, inside the
+repo and gitignored. The executor builds it itself, because the orchestrating
+thread may lack permission to write outside the project, and a blocked write
+there can stall silently. The transcript sits beside the sandbox, never in it,
+so a skill under test can't stage the record of its own run. A case without
+`setup` runs in the current directory; reserve that for skills that only read.
 
-The executor subagent builds its own sandbox and runs `setup` itself, as its
-first act, before touching the case prompt. The orchestrating thread only
-dispatches and grades — it may lack permission to create or write a repository
-outside the project, and a blocked write there can stall with no error rather
-than fail.
+**Transcripts are files.** Executors often finish and go idle without
+replying, so grade from the transcript file, whatever the executor said, and
+ask for a reply only to fill a gap. Copy each transcript somewhere durable
+before cleanup, since it's the run's only evidence.
 
-Give the executor these three steps verbatim:
+**Failures.** Bound every setup command; one that exceeds its bound records
+the case as `hung`, naming the command, which says nothing about the skill. A
+failed setup marks every check of that case `fail` with
+`setup failed: <error>`. After grading, remove the sandbox, unless the case
+sets `keep_sandbox_on_fail` and a check failed: then leave it, print its path,
+and let the user remove it.
 
-1. `rm -rf .evals-sandbox/<id> && mkdir -p .evals-sandbox/<id>`, then work only
-   inside it.
-1. Run the case's `setup` commands there, in order, exporting
-   `GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null` — global config
-   otherwise bleeds ANSI colour into the transcript the grader reads, and makes
-   a result depend on the machine that produced it.
-1. Report a setup failure and stop, rather than running the prompt against a
-   half-built sandbox.
-
-The orchestrator removes the directory after grading; an in-project path keeps
-that cleanup working even where writes elsewhere are refused.
-
-Bound every setup command. A command that exceeds its bound records the case as
-`hung`, naming the command that blocked — a distinct outcome from `fail`,
-because it says nothing about the skill.
-
-When a `setup` command fails, mark every check of that case `fail` with reason
-`setup failed: <error>`, clean up, and move on — a half-built sandbox grades
-the setup, not the skill.
-
-When a case sets `keep_sandbox_on_fail` and a check fails, leave the directory
-and print its path so the state can be inspected. Remove it by hand once done.
-
-A case with no `setup` runs in the current directory. Reserve that for skills
-that only read.
+**Model and delegation.** The executor inherits the session model, so evals
+measure the model you actually use. Executors may edit files because every
+edit lands in a disposable sandbox, the sandboxed exception to
+[SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md); follow its
+completion and retry protocol, retrying in a clean sandbox.
 
 > [!WARNING]
-> The sandbox isolates the repository under test — not `$HOME`, and not the
-> filesystem. A skill reading a dotfile (`commit` reads `~/.gitcommit`) still
-> reads your real one, so a check on that behaviour grades your home
-> directory; plant the convention inside the sandbox instead. A skill writing
-> a temp file outside the sandbox (`commit` writes its message there by
-> design) is behaving correctly, not escaping.
-
-## Run each case cold
-
-**Cold** — the agent executing a case never sees that case's `checks`. An
-executor that knows the criteria performs to them, and the run stops measuring
-what the skill elicits on its own.
-
-Dispatch one subagent per case, giving it only:
-
-- the sandbox path, as its working directory
-- the case `setup` commands, to run first
-- the case `prompt`
-- the target `SKILL.md`, read verbatim from the working tree
-- an instruction to execute what the skill describes — real commands, real
-  files, no simulation
-- the transcript path, and the rule below
-
-Cases run concurrently. Each owns a separate sandbox, so there is no shared
-state to serialise on.
-
-**The transcript is a file, not a reply.** The executor appends to
-`.evals-sandbox/<id>-transcript.md` as it works — every command with its
-output, then the final state — and the orchestrator grades from that file.
-Executors routinely finish their work and go idle without answering, and no
-wording in the dispatch prevents it; a run that depends on the reply loses its
-evidence and has to score verified behaviour as unverified. Disk survives an
-idle agent.
-
-The transcript is a **sibling** of the sandbox, never inside it. A file within
-the case repository shows up in `git status`, and a skill under test may then
-stage the record of its own execution.
-
-Read the transcript after each executor finishes, whatever it did or did not
-say. Ask for a reply only to fill a gap the file leaves.
-
-The executor inherits the session model. Evals run on the model you actually
-use; a cheaper tier grades a skill you are not running.
-
-Delegating this is safe despite the executor editing files: every edit lands in
-a disposable sandbox, so there is no diff to unwind and nothing to steer
-mid-flight. That is the sandboxed exception to
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md), not
-a loosening of it. Follow its completion and retry protocol; use a clean
-sandbox when retrying an executor that may have changed its case state.
-
-Done when every case in `cases.json` has a transcript file on disk.
-
-Copy each transcript somewhere durable before cleanup — the sandbox goes away
-after grading, and the transcript is the run's only evidence.
-
-## Grade
-
-Read a case's `checks` only after its transcript is recorded.
-
-Give each check `pass` or `fail` plus a one-line reason citing what in the
-transcript decided it. Mark `fail` whenever the evidence for a pass is
-absent — ambiguous is fail, and a check too vague to decide is itself the
-finding.
-
-For multiple cases or a substantial transcript, use fresh read-only graders
-under [the shared policy](../shared/SUBAGENT-STEERABILITY.md).
-Assign independent case batches only after their transcripts are complete;
-provide case IDs, fixed checks, and transcript paths, not executor self-grades.
-Grant only verified read-only tools; no case execution, edits, check changes,
-or cleanup. Require `COMPLETE` / `INCOMPLETE` and every assigned check's
-pass/fail with a transcript location and supporting evidence. Budget 30 turns
-per batch; apply shared completion/retry. Missing or ambiguous evidence stays
-`fail`; an incomplete grader is not a completed grading pass. Verify cited
-claims and resolve gaps/disagreements in the main thread, which owns regression
-comparison, reporting, and cleanup. Preserve transcripts until grading is
-complete. Keep short single-case grading inline; if delegation is unavailable,
-report it and grade inline.
-
-Done when every check of every case carries a verdict and a reason.
-
-## Report
-
-`mkdir -p docs/evals`, then write `docs/evals/<yyyy-mm-dd>-<hhmm>-<skill>.md`,
-stamped from `date +%F-%H%M`. Compare against the newest older file matching
-`docs/evals/*-<skill>.md`; the names sort chronologically, so the newest is the
-last. Every run keeps its own file — a re-run that overwrites its predecessor
-destroys the baseline it exists to be compared against.
-
-Record the revision of both the skill and `cases.json`, from `git log -1
---format=%h -- <path>`. A case whose `setup` or `prompt` changed since the
-previous run is reported as `revised` rather than scored against history —
-the id survives a rewrite, so without this a rebuilt case reads as a
-regression.
-
-State every check that passed in the previous run and fails in this one before
-proposing any change to the skill. The regression is the result; what to do
-about it is the user's call.
+> The sandbox isolates the repository, not `$HOME` or the filesystem. A skill
+> that reads a dotfile reads your real one, so plant the convention inside the
+> sandbox instead. A skill that writes a temp file outside the sandbox by
+> design is behaving correctly, not escaping.
 
 ## Growing the suite
 
-- A failure you caught by hand becomes a case. That is the growth path worth
-  having.
-- Change a `check` when the skill's intended behaviour deliberately changed.
-- A known, accepted trade-off stays a documented `fail`. Chasing a green board
-  deletes the checks that were telling you something.
+A failure caught by hand becomes a case; that's the growth worth having.
+Change a check only when the skill's intended behaviour deliberately changed.
+A known, accepted trade-off stays a documented `fail`, since chasing a green
+board deletes the checks that were telling you something.
