@@ -1,33 +1,26 @@
 ---
 name: clarify
 description: >-
-  Elicit and pin down the user's intent before starting work. Use when a
-  request is too vague to act on, when another skill hits a vague request and
-  needs to clarify it, or when the user says "help me with this", "I need
-  something", "let's work on...", or /clarify.
+  Pin down the user's intent before starting work. Use when a request is too
+  vague to act on ("help me with this", "I need something", "let's work
+  on…"), or when another skill hits a vague request.
 metadata:
   model-tier: trivial
 ---
 
 # Clarify
 
-Clarify the user's intent before acting.
+Pin down what the user wants before acting, in one structured interaction,
+keeping the questions few, per
+[EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md).
 
-## Elicit
+1. **Ask** for whichever of these the conversation hasn't already answered:
+   - **Audience:** who is this for?
+   - **Goal:** what do they need?
+   - **Context:** what should you know?
+   - **Constraints:** what are the boundaries?
+   - **Format:** what should the output look like?
 
-Prompt the user for these five fields in one structured interaction:
-
-- **Audience:** Who is this for?
-- **Goal:** What do they need?
-- **Context:** What should the agent know?
-- **Constraints:** What are the boundaries?
-- **Format:** What should the output look like?
-
-Skip any field already provided in the conversation; use the existing answer
-and ask only for what is missing.
-
-## Confirm and proceed
-
-Restate the completed fields back to the user, then continue with the task.
-Bound clarifying questions to prevent cognitive overload — see
-[`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).
+   Done when all five have an answer.
+2. **Restate** the five back to the user, then carry on with the task. Done
+   when the task is under way.
