@@ -1,7 +1,9 @@
 ---
 name: hunk
 description: >-
-  Interactive local and remote PR review with threaded replies to Hunk comments.
+  Review local changes or GitHub pull requests interactively in a live Hunk
+  window, with inline notes and threaded replies to the user's Hunk comments.
+  Use when the user asks to review with Hunk or to answer their Hunk notes.
 disable-model-invocation: true
 argument-hint: >-
   [review | comments | done | branch | staged | <commit-sha> | PR #<num> |
@@ -12,135 +14,85 @@ metadata:
 
 # Hunk Interactive Code Review
 
-Drive a live Hunk TUI window (`hunk diff`) through `hunk session` CLI commands
-to review local changes or remote GitHub pull requests, leave inline review
-notes, highlight character spans, and answer user notes in a back-and-forth
-loop.
+Drive the user's live Hunk window through `hunk session` commands: load a
+changeset, leave inline notes, highlight the expression under discussion, and
+answer the user's notes in a back-and-forth loop. The user owns the TUI, so
+control it only through `hunk session *`, never by running `hunk diff`,
+`hunk show`, `hunk gh`, `hunk patch`, or `hunk open` in your shell. For a flag,
+STML rule, or daemon error not covered here, read the file at
+`hunk skill path`, run `hunk session <subcommand> --help`, or fetch
+`https://hunk.dev/llms.txt`.
 
-> [!IMPORTANT]
-> Never run interactive TUI commands (`hunk diff`, `hunk show`, `hunk gh`,
-> `hunk patch`, `hunk open`) directly in the agent shell. The user owns the TUI
-> window; control it exclusively with `hunk session *`.
+**Clearing agent state.** Several steps clear your notes, highlights, this
+session's patch file, and patch files orphaned by closed sessions:
 
-## Process
+```bash
+hunk session comment clear "$SESSION_ID" --yes --json
+hunk session highlight clear "$SESSION_ID" --json
+rm -f "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"
+LIVE_IDS="$(hunk session list --json | jq -r '.sessions[]?.sessionId // .[]?.sessionId // empty')"
+for f in "$SESSION_REPO"/.git/hunk-review-*.patch; do
+  [ -e "$f" ] || continue
+  id="${f##*hunk-review-}"; id="${id%.patch}"
+  printf '%s\n' "$LIVE_IDS" | grep -Fxq "$id" || rm -f "$f"
+done
+```
 
-1. **Locate the live Hunk session.** Run:
+## Review
 
-   ```bash
-   hunk session list --json
-   ```
+1. **Find the session** with `hunk session list --json`, matching `repoRoot`
+   or `cwd` to the current directory, and record its `sessionId` as
+   `SESSION_ID` and its `repoRoot` (or `cwd`) as `SESSION_REPO`. Pass
+   `SESSION_ID` to every later command, so targeting survives a reload onto a
+   patch file.
+   - No session: ask the user to run `hunk diff` in their terminal, and wait.
+   - Several and none match: ask which window to drive.
+   - `daemon-build-mismatch`: say whether the daemon or the CLI is older and
+     how many windows are attached, and ask before running
+     `hunk daemon restart --yes`.
 
-   For `/hunk done`, consider only sessions whose `repoRoot` or `cwd` matches
-   the current working directory, even when only one session is live. If none
-   match, report that there is no active review to finish and stop; do not
-   launch Hunk or touch sessions in other repositories.
+   Then pick the workflow:
+   - **`done`:** consider only sessions matching the current directory, even
+     if just one is live; if none match, say there's no review to finish and
+     stop, without launching Hunk or touching other repositories. Otherwise
+     run the finish branch of step 5 and stop.
+   - **`comments`:** keep the loaded target and every thread, and run
+     [Answering user notes](#answering-user-notes); with no user notes, say
+     so and stop without changing the session.
+   - **Review with existing user notes** (check with
+     `hunk session comment list "$SESSION_ID" --type user --json`): keep the
+     target and every thread, skip step 2, inspect in step 3, answer the
+     notes, then add any further findings in step 4.
 
-   Select the session using the rules below. Record its `sessionId` as
-   `SESSION_ID` and its `repoRoot` (or `cwd`) as `SESSION_REPO`. Always pass
-   `<SESSION_ID>` to subsequent `hunk session` commands so targeting still
-   works after reloading onto a patch file.
+   Done when `SESSION_ID` and `SESSION_REPO` are set and the workflow is
+   chosen.
+2. **Load the target.** Clear agent state, then reload:
+   - **Uncommitted** (no argument, `review`, or `uncommitted`):
+     `hunk session reload "$SESSION_ID" -- diff --watch`, adding
+     `--exclude-untracked` if the user wants tracked changes only.
+   - **Staged:** `hunk session reload "$SESSION_ID" -- diff --staged --watch`.
+   - **Branch** (`branch`, or `<base>...<head>`): take the base from the
+     argument or from
+     `git symbolic-ref --quiet --short refs/remotes/origin/HEAD` with
+     `origin/` stripped (falling back to `main`), then
+     `hunk session reload "$SESSION_ID" -- diff "<base>...HEAD" --watch`.
+   - **Commit** (`<commit-sha>` or `show <ref>`):
+     `hunk session reload "$SESSION_ID" -- show "<sha>" --watch`.
+   - **Pull request** (`PR #123`, `#123`, `owner/repo#123`, or a URL):
+     follow [Loading a pull request](#loading-a-pull-request).
 
-   - **No active session:** Ask the user to run `hunk diff` in their terminal
-     and wait for confirmation before continuing.
-   - **Multiple active sessions:** Match the session whose `repoRoot` or `cwd`
-     matches the current working directory; if still ambiguous, ask the user
-     which window to drive.
-   - **`daemon-build-mismatch` error:** Report which build is older (`daemon` vs
-     `cli`) and how many windows are attached, then ask for confirmation before
-     running `hunk daemon restart --yes`.
-
-   For `/hunk done`, jump directly to Step 5's stop/cleanup branch, then stop.
-   Skip comment processing and Steps 2–4; do not start another review.
-
-   Before clearing notes or reloading, check for existing user comments:
-
-   ```bash
-   hunk session comment list "$SESSION_ID" --type user --json
-   ```
-
-   - **`/hunk comments`:** Keep the loaded target and all comment threads.
-     Skip Steps 2–4 and run **Address user comments** below. If there are no
-     user comments, report that and stop without changing the session.
-   - **`/hunk` or `/hunk review` with existing user comments:** Keep the loaded
-     target and all threads, including notes added before the agent started.
-     Skip Step 2; inspect the changeset in Step 3, run **Address user comments**,
-     then continue to Step 4 for any additional review findings.
-
-   Completion criterion: `SESSION_ID` and `SESSION_REPO` are resolved, existing
-   user comments are checked, and the correct workflow is selected.
-
-2. **Resolve the requested review target and reload the window.** Clear any
-   stale agent notes, highlights, and orphaned patch files from earlier or
-   closed sessions before switching targets:
-
-   ```bash
-   hunk session comment clear "$SESSION_ID" --yes --json
-   hunk session highlight clear "$SESSION_ID" --json
-   rm -f "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"
-   LIVE_IDS="$(hunk session list --json | jq -r '.sessions[]?.sessionId // .[]?.sessionId // empty')"
-   for f in "$SESSION_REPO"/.git/hunk-review-*.patch; do
-     [ -e "$f" ] || continue
-     id="${f##*hunk-review-}"; id="${id%.patch}"
-     printf '%s\n' "$LIVE_IDS" | grep -Fxq "$id" || rm -f "$f"
-   done
-   ```
-
-   Route by the user's argument:
-
-   - **Uncommitted changes** (`/hunk`, `/hunk review`, `/hunk uncommitted`):
-     ```bash
-     hunk session reload "$SESSION_ID" -- diff --watch
-     ```
-     Add `--exclude-untracked` when the user asks for tracked changes only.
-
-   - **Staged changes** (`/hunk staged`):
-     ```bash
-     hunk session reload "$SESSION_ID" -- diff --staged --watch
-     ```
-
-   - **Branch comparison** (`/hunk branch`, `/hunk review branch`, or
-     `/hunk <base>...<head>`):
-     Resolve `<base>` from the user's argument, or detect the default branch via
-     `git symbolic-ref --quiet --short refs/remotes/origin/HEAD` (stripping
-     `origin/`, fallback `main`), then reload:
-     ```bash
-     hunk session reload "$SESSION_ID" -- diff "<base>...HEAD" --watch
-     ```
-
-   - **Specific local commit** (`/hunk <commit-sha>` or `/hunk show <ref>`):
-     ```bash
-     hunk session reload "$SESSION_ID" -- show "<commit-sha>" --watch
-     ```
-
-   - **Remote GitHub PR** (`/hunk PR #123`, `/hunk #123`,
-     `/hunk owner/repo#123`, or `/hunk <pr-url>`):
-     Follow **Remote PR loading** below.
-
-   Completion criterion: `hunk session reload` succeeds and the target changeset
-   is active in `SESSION_ID`.
-
-3. **Inspect the loaded changeset.** Fetch the file and hunk structure without
-   inflating context:
-
-   ```bash
-   hunk session review "$SESSION_ID" --json
-   ```
-
-   Record each file's `path` and `hunks[].newRange` / `hunks[].oldRange`.
-   - For **local reviews** (or same-repo PRs), read changed files and callers
-     from disk to verify behavior, edge cases, and contracts.
-   - For **cross-repo PRs** loaded via `.git/hunk-review-$SESSION_ID.patch`,
-     read the patch from `"$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"`
-     (or run `hunk session review "$SESSION_ID" --include-patch --json`) and
-     fetch any needed surrounding file context with `gh api`.
-
-   Completion criterion: Every changed file's hunk line ranges are known and
-   the changeset has been analyzed.
-
-4. **Publish inline notes and focus Stop 1.** Keep existing user notes and
-   replies intact when adding findings. Apply findings or walkthrough stops in
-   one batch with `--focus` so Hunk turns on agent notes and scrolls to the
-   first note:
+   Done when the reload succeeds and the target is active.
+3. **Inspect** with `hunk session review "$SESSION_ID" --json`, recording
+   each file's `path` and `hunks[].newRange` and `oldRange`. For a local or
+   same-repo review, read changed files and callers from disk to check
+   behaviour, edge cases, and contracts. For a cross-repo PR, read the patch
+   at `$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch` (or add
+   `--include-patch`) and fetch surrounding context with `gh api`. Done when
+   every hunk range is known and the change is analysed.
+4. **Publish notes and focus stop 1.** Apply all findings or walkthrough
+   stops in one batch, keeping existing user notes and replies. Every
+   `newLine` or `oldLine` must fall inside a hunk range from step 3, or use a
+   1-based `"hunk": <n>`.
 
    ```bash
    cat <<'EOF' | hunk session comment apply "$SESSION_ID" --stdin --focus --json
@@ -157,12 +109,7 @@ loop.
    EOF
    ```
 
-   Every `newLine` or `oldLine` target **must** fall inside a hunk range
-   returned by `hunk session review "$SESSION_ID" --json` (or target by 1-based
-   `"hunk": <n>`).
-
-   Steer the user's eyes to the key expression on the first stop with an
-   attention mark:
+   Then navigate to the first stop and highlight its key expression:
 
    ```bash
    hunk session navigate "$SESSION_ID" --file <path> --new-line <n> --json
@@ -170,59 +117,27 @@ loop.
      --start <utf16-start> --end <utf16-end> --tone info --focus --json
    ```
 
-   Present a concise overview in chat and state the immediate next step (for
-   example, reply `"next"` for the next stop, or press `c` in Hunk to leave a
-   note and tell the agent to read it).
+   Give a short overview in chat and the next step: reply "next", or press
+   `c` in Hunk to leave a note and tell you to read it. Done when the notes
+   are applied, stop 1 is highlighted, and the overview is in chat.
+5. **Loop** on each user turn:
+   - **"next", "prev", or another file or hunk:** clear highlights, navigate
+     there, and highlight the expression with `--tone current --focus`.
+   - **`comments`, or asks you to read or answer their notes:** run
+     [Answering user notes](#answering-user-notes).
+   - **`done`, "stop", "done", or "clear":** clear agent state, restore the
+     working tree with
+     `hunk session reload "$SESSION_ID" -- diff --watch --json`, leave the
+     TUI and daemon running, say the review is finished, and stop.
 
-   Completion criterion: Batch comments are applied, Stop 1 is focused and
-   highlighted, and the chat summary is presented.
+   Done when each request is handled, or the session is cleaned up.
 
-5. **Run the back-and-forth review loop.** Handle each user turn according to
-   intent:
+## Answering user notes
 
-   - **User says `"next"` / `"prev"` or asks about another file/hunk:**
-     Clear the previous highlight, navigate to the target hunk or comment, and
-     highlight the new expression under discussion:
-     ```bash
-     hunk session highlight clear "$SESSION_ID" --json
-     hunk session navigate "$SESSION_ID" --file <path> --new-line <n> --json
-     hunk session highlight add "$SESSION_ID" --file <path> --new-line <n> \
-       --start <s> --end <e> --tone current --focus --json
-     ```
-   - **User invokes `/hunk comments` or asks to check, reply to, or address
-     their Hunk notes:** Run **Address user comments** below.
-   - **User invokes `/hunk done` or finishes the review (`"stop"`, `"done"`,
-     `"clear"`):**
-     Clean up agent notes, highlights, and any temporary PR patch file, and
-     prune orphaned patch files from closed sessions before restoring the
-     working-tree diff:
-     ```bash
-     hunk session comment clear "$SESSION_ID" --yes --json
-     hunk session highlight clear "$SESSION_ID" --json
-     rm -f "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"
-     LIVE_IDS="$(hunk session list --json | jq -r '.sessions[]?.sessionId // .[]?.sessionId // empty')"
-     for f in "$SESSION_REPO"/.git/hunk-review-*.patch; do
-       [ -e "$f" ] || continue
-       id="${f##*hunk-review-}"; id="${id%.patch}"
-       printf '%s\n' "$LIVE_IDS" | grep -Fxq "$id" || rm -f "$f"
-     done
-     hunk session reload "$SESSION_ID" -- diff --watch --json
-     ```
+Use this for notes found on entry and notes added during the review. A reply
+in chat doesn't count: every handled note gets a reply under it in Hunk.
 
-     Leave the Hunk TUI and shared daemon running. Report that the review is
-     finished, then stop processing.
-
-   Completion criterion: Every handled user note has a verified threaded
-   reply, the view is refreshed, and navigation requests are handled; pending
-   approvals or failures are reported, or the session is cleaned up on stop.
-
-## Address user comments
-
-Use this workflow both for pre-existing comments discovered on review entry
-and for comments added during the review. A chat-only response does not count
-as replying to a Hunk comment.
-
-1. **Read the current view and complete threads.**
+1. **Read the view and threads:**
 
    ```bash
    hunk session get "$SESSION_ID" --json
@@ -230,22 +145,42 @@ as replying to a Hunk comment.
    hunk session comment list "$SESSION_ID" --type all --json
    ```
 
-   Record each user note's ID, anchor, body, and existing replies. Read the
-   relevant code or patch before acting. Skip completed edits and fully
-   answered questions unless the user asks to revisit them. Approval requests,
-   blockers, and clarification questions remain pending until resolved.
+   Record each user note's ID, anchor, body, and replies, and read the code
+   or patch behind it. Skip finished edits and answered questions unless
+   asked to revisit them; approval requests, blockers, and clarifications
+   stay pending until resolved. Record the current reload arguments (source
+   options, `--`, command, refs, flags, pathspecs) in a Bash array
+   `RELOAD_ARGS`, from the session details and history, and ask rather than
+   guess if the target is unclear. Done when every pending note and
+   `RELOAD_ARGS` are known.
+2. **Act on each note and reply under it,** even when no code changed:
+   - **Question:** answer it.
+   - **Requested edit:** get approval under the usual code-edit rules, make
+     the change in the matching checkout, run the relevant checks, and reply
+     with what changed and how it was verified, saying what's untested. For a
+     remote PR, never edit an unrelated local checkout.
+   - **Blocked, declined, unclear, or awaiting approval:** reply with the
+     reason or the question.
 
-   Record the current reload arguments in a Bash array `RELOAD_ARGS`: source
-   options, `--`, review command, refs, flags, and pathspecs. Recover these
-   from session details and known session history; consult the version-matched
-   CLI reference if needed. If the target is still ambiguous, ask rather than
-   guessing. Preserve the loaded target, source, filters, and threads.
+   ```bash
+   hunk session comment add "$SESSION_ID" --reply-to "<note-id>" \
+     --summary "<answer, completed change, or blocker>" \
+     --rationale "<supporting detail or checks, if needed>" --focus --json
+   ```
 
-   For a PR opened with `hunk gh` where `inputKind` is `patch`, preserve the
-   existing `sourceLabel` from `hunk session get`. Hunk may reject a new patch
-   path under `$SESSION_REPO/.git` as outside its initial root, even when the
-   session's `cwd` is the Git root. To refresh after the PR changes, replace
-   that original source in place, then reload the same patch path:
+   Done when every pending note has a reply.
+3. **Refresh the same view and verify,** without clearing comments, after the
+   batch or before pausing for approval; watch mode alone isn't enough:
+
+   ```bash
+   hunk session reload "$SESSION_ID" --json "${RELOAD_ARGS[@]}"
+   hunk session review "$SESSION_ID" --include-notes --json
+   hunk session comment list "$SESSION_ID" --type all --json
+   ```
+
+   For a PR opened with `hunk gh` (`inputKind` is `patch`), Hunk may reject a
+   new patch path as outside its initial root, even under `.git`. Overwrite
+   the original `sourceLabel` from `hunk session get` in place instead:
 
    ```bash
    SOURCE="<sourceLabel from hunk session get>"
@@ -256,130 +191,43 @@ as replying to a Hunk comment.
      hunk session reload "$SESSION_ID" --json -- patch "$SOURCE" --watch
    ```
 
-   If fetching or reloading fails, retain the comments and report the exact
-   error. Do not assume a different path is allowed just because it is inside
-   the Git working tree.
+   Focus the relevant reply with
+   `hunk session navigate "$SESSION_ID" --comment "<reply-id>" --json`. If a
+   reply, refresh, or anchor fails, report the exact error, keep the note IDs
+   and reply text for a retry, and don't call the batch complete. Done when
+   the target is unchanged and every reply is visible, or the failure is
+   reported.
 
-2. **Act on each pending note and always reply under it.**
+## Loading a pull request
 
-   - **Question or discussion:** Answer the actual question inline.
-   - **Requested local edit:** Follow code-edit approval rules, make the
-     approved change in the matching checkout, and run relevant checks. Reply
-     with what changed and the verification result; distinguish untested work.
-   - **Blocked, declined, unclear, or awaiting approval:** Reply with the
-     reason or clarification needed. Do not silently skip the note or claim
-     completion. For remote PRs, do not edit an unrelated local checkout.
+**Confirm the repository** when the user gives only a number. Normalise
+`git remote get-url origin` to `<owner>/<repo>` and ask before fetching
+anything:
 
-   Post the outcome under the original note, including when no code changed:
+```txt
+Which repository is PR #<number> in?
+1. <owner>/<repo> (current directory)
+2. Another repository: reply with owner/repo
+```
 
-   ```bash
-   hunk session comment add "$SESSION_ID" --reply-to "<note-id>" \
-     --summary "<answer, completed change, or blocker>" \
-     --rationale "<supporting detail or checks, if needed>" --focus --json
-   ```
+**Load it** inside `SESSION_REPO`, since Hunk's reload sandbox
+(`reloadBounds`) rejects repos and patch files outside it. Start with
+`gh pr view <number> --repo "<owner>/<repo>" --json title,body,baseRefName,headRefOid,url`.
 
-3. **Explicitly refresh the same view and verify replies.** After the batch,
-   including question-only replies or before pausing for approval, replay the
-   recorded arguments without clearing comments:
+- **Same repository:** fetch the refs without touching the checked-out branch
+  or working tree, and reload onto the range:
 
-   ```bash
-   hunk session reload "$SESSION_ID" --json "${RELOAD_ARGS[@]}"
-   hunk session review "$SESSION_ID" --include-notes --json
-   hunk session comment list "$SESSION_ID" --type all --json
-   ```
-
-   Watch mode alone is not completion. Confirm the target is unchanged and
-   every handled note still has its reply, then focus the relevant reply with
-   `hunk session navigate "$SESSION_ID" --comment "<reply-id>" --json`.
-   If a reply, refresh, or anchor fails, report the failure in chat and retain
-   the note IDs and reply text for retry; do not report the batch as complete.
-
-   Completion criterion: Every pending note has an inline answer, verified
-   change confirmation, or explicit blocker; the same view has refreshed and
-   replies remain visible, or the exact failure is reported.
-
-## Remote PR loading
-
-### 1. Repository confirmation gate
-
-When the user asks to review a PR by number alone (for example,
-`/hunk can you review PR #123` or `/hunk #123`) without specifying
-`<owner>/<repo>` or a full GitHub PR URL:
-
-1. Detect the current directory's GitHub repository from `origin`:
-   ```bash
-   git remote get-url origin
-   ```
-   Normalize it to `<current-owner>/<current-repo>`.
-2. **Stop and prompt the user** before fetching any PR data:
-   ```txt
-   Which repository is PR #<number> in?
-   1. <current-owner>/<current-repo> (current directory)
-   2. Another repository — reply with owner/repo (e.g. integralist/dotfiles)
-   ```
-3. Wait for the user's response. Skip this prompt only when the user already
-   provided `<owner>/<repo>#<number>` or a full GitHub PR URL.
-
-### 2. Loading the PR into the live `hunk diff` window
-
-Hunk's session reload sandbox (`reloadBounds`) requires any reloaded repo or
-patch file to live inside `SESSION_REPO` (the repository root where `hunk diff`
-started).
-
-- **Same repository as `SESSION_REPO`:**
-  Fetch the PR metadata, base branch, and PR head ref without modifying the
-  checked-out branch or working tree, then reload Hunk onto the three-dot ref
-  range:
   ```bash
-  gh pr view <number> --repo "<owner>/<repo>" --json title,body,baseRefName,headRefOid,url
   git -C "$SESSION_REPO" fetch origin \
     "refs/heads/<baseRefName>:refs/remotes/origin/<baseRefName>" \
     "+pull/<number>/head:refs/hunk/pr-<number>"
   hunk session reload "$SESSION_ID" -- diff "origin/<baseRefName>...refs/hunk/pr-<number>" --watch
   ```
 
-- **Different repository from `SESSION_REPO` (e.g. `integralist/dotfiles` while
-  `hunk diff` is running in `fastly/ai-assistant-api`):**
-  Write the PR's unified diff into
-  `"$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"` (inside `.git/` so it
-  stays inside `SESSION_REPO` bounds, isolates concurrent sessions, and never
-  appears as an untracked file in `git status`), then reload the live Hunk
-  window onto that patch file:
+- **Another repository:** write the diff under `.git/`, which keeps it in
+  bounds, separate per session, and out of `git status`, and reload onto it:
+
   ```bash
-  gh pr view <number> --repo "<owner>/<repo>" --json title,body,baseRefName,headRefOid,url
   gh pr diff <number> --repo "<owner>/<repo>" > "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch"
   hunk session reload "$SESSION_ID" -- patch "$SESSION_REPO/.git/hunk-review-$SESSION_ID.patch" --watch
   ```
-
-## Command reference
-
-| Action | Command |
-| :--- | :--- |
-| List live sessions | `hunk session list --json` |
-| Inspect current source | `hunk session get <id> --json` |
-| Read complete comment threads | `hunk session comment list <id> --type all --json` |
-| Inspect session structure | `hunk session review <id> [--include-patch] [--include-notes] --json` |
-| Check current focus | `hunk session context <id> --json` |
-| Reload working tree | `hunk session reload <id> -- diff --watch` |
-| Reload branch diff | `hunk session reload <id> -- diff <base>...HEAD --watch` |
-| Reload commit | `hunk session reload <id> -- show <sha> --watch` |
-| Reload patch file | `hunk session reload <id> -- patch <file-inside-repo> --watch` |
-| Navigate to line/hunk | `hunk session navigate <id> --file <path> (--new-line <n> \| --old-line <n> \| --hunk <n>)` |
-| Step between comments | `hunk session navigate <id> (--next-comment \| --prev-comment \| --comment <comment-id>)` |
-| Add one comment | `hunk session comment add <id> --file <path> (--new-line <n> \| --old-line <n>) --summary <text> [--rationale <text>] [--focus]` |
-| Reply to a note | `hunk session comment add <id> --reply-to <note-id> --summary <text> [--rationale <text>] [--focus]` |
-| Batch-apply comments | `hunk session comment apply <id> --stdin [--focus] --json` |
-| List user notes | `hunk session comment list <id> --type user --json` |
-| Clear comments | `hunk session comment clear <id> [--file <path>] [--all] --yes` |
-| Highlight range | `hunk session highlight add <id> --file <path> (--new-line <n> \| --old-line <n>) --start <s> --end <e> [--tone <match\|current\|info\|warning\|error\|dim>] [--focus]` |
-| Clear highlights | `hunk session highlight clear <id> [--file <path>]` |
-
-## Further reference
-
-When a command flag, STML markup rule, or daemon error is not covered above,
-consult in order:
-
-1. Read the file at `hunk skill path` or run `hunk session <subcommand> --help`
-   for offline, version-matched CLI behavior.
-2. `https://hunk.dev/llms.txt` (page index; append `.md` to any docs URL) or
-   `https://www.hunk.dev/llms-full.txt` for the complete Hunk documentation.
