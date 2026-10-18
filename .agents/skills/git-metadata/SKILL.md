@@ -1,8 +1,9 @@
 ---
 name: git-metadata
 description: >-
-  Git-history diagnostic snapshot — churn hotspots, bus factor,
-  bug clusters, commit velocity, and crisis patterns.
+  Collect a diagnostic snapshot of a repo's git history: churn hotspots, bus
+  factor, bug clusters, commit velocity, and crisis patterns. Use when another
+  skill needs history signals to judge risk or where to look first.
 disable-model-invocation: true
 metadata:
   model-tier: trivial
@@ -10,45 +11,41 @@ metadata:
 
 # Git Metadata
 
-Run these commands in the working directory and capture output.
-The calling skill determines how to use the results.
+Run these commands in the working directory and return their output; the
+calling skill decides what to do with it. Flag every file that appears in
+both churn hotspots and bug clusters as the highest-risk code.
 
-## Churn hotspots — most-changed files in the last year
+**Churn hotspots:** the most-changed files in the last year.
 
 ```bash
 git log --format=format: --name-only --since="1 year ago" \
   | sort | uniq -c | sort -nr | head -20
 ```
 
-## Bus factor — contributors ranked by commit count
+**Bus factor:** contributors by commit count, all time and recent.
 
 ```bash
 git shortlog -sn --no-merges
 git shortlog -sn --no-merges --since="6 months ago"
 ```
 
-## Bug clusters — files most often touched in bug-fix commits
+**Bug clusters:** the files most often touched by bug-fix commits.
 
 ```bash
 git log -i -E --grep="fix|bug|broken" \
   --name-only --format='' | sort | uniq -c | sort -nr | head -20
 ```
 
-## Commit velocity — commits per month
+**Commit velocity:** commits per month.
 
 ```bash
 git log --format='%ad' --date=format:'%Y-%m' \
   | sort | uniq -c
 ```
 
-## Crisis patterns — reverts, hotfixes, and rollbacks
+**Crisis patterns:** reverts, hotfixes, and rollbacks in the last year.
 
 ```bash
 git log --oneline --since="1 year ago" \
   | grep -iE 'revert|hotfix|emergency|rollback'
 ```
-
-## Cross-reference
-
-Files appearing in **both** churn hotspots and bug clusters are
-highest-risk code. Flag these explicitly.
