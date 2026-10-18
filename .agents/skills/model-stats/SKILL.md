@@ -1,6 +1,9 @@
 ---
 name: model-stats
-description: Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.
+description: >-
+  Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML
+  page. Use when the user wants to see which providers, models, harnesses, or
+  projects use their tokens and money over a period.
 disable-model-invocation: true
 argument-hint: "[day|week|month|year|all]"
 metadata:
@@ -9,30 +12,31 @@ metadata:
 
 # Model stats
 
-Chart which providers, models, effort levels, harnesses, and projects consume your tokens and money. The data comes straight from the harnesses' own log files (Claude Code, Codex, pi, OpenCode, Gemini CLI, Copilot CLI); `scripts/report.py` documents each source.
+Chart which providers, models, effort levels, harnesses, and projects use the
+user's tokens and money, read straight from each harness's own logs (Claude
+Code, Codex, pi, OpenCode, Gemini CLI, Copilot CLI). `scripts/report.py`
+documents each source.
 
-## Steps
-
-1. Pick the period from the argument. With no argument, use `all`. For any
-   other argument, stop and list these five periods:
-
-   - `day`: today.
-   - `week`: last 7 days, including today.
-   - `month`: current calendar month to date.
-   - `year`: current calendar month and the previous 11 months.
-   - `all`: full history.
-2. Run the script from this skill's base directory:
+1. **Pick the period** from the argument, `all` when there's none. For any
+   other value, stop and list the five periods: `day` (today), `week` (the
+   last 7 days, including today), `month` (this calendar month to date),
+   `year` (this calendar month and the 11 before it), and `all` (full
+   history). Done when the period is valid.
+2. **Run the script** from the skill's base directory:
 
    ```bash
    python3 <skill-base-dir>/scripts/report.py <period>
    ```
 
-   It writes the page to a random `/tmp/model-stats-XXXXXX.html`, prints that path on stdout, and opens it in the browser. Stderr lines prefixed `model-stats:` are warnings (price-list fetch failed, unreadable log file, no usage in the period).
-3. Reply with the printed path on line 1, then each warning as one bullet. Done when the path is reported.
+   It writes a random `/tmp/model-stats-XXXXXX.html`, prints the path, and
+   opens it. Stderr lines starting `model-stats:` are warnings, such as a
+   failed price-list fetch, an unreadable log, or no usage in the period.
+   Done when it prints the path.
+3. **Reply** with the path on line 1 and each warning as a bullet. Done when
+   the path is reported.
 
-## Maintenance
-
-When a harness changes its log format, update its `load_*` function in
-`scripts/report.py` and its test in `scripts/test_report.py`. For chart changes,
-update `scripts/template.html` and `scripts/test_browser.py`. Run
-`make -C <skill-base-dir> test`; the browser tests require Google Chrome.
+**Maintenance.** When a harness changes its log format, update its `load_*`
+function in `scripts/report.py` and its test in `scripts/test_report.py`. For
+chart changes, update `scripts/template.html` and `scripts/test_browser.py`.
+Then run `make -C <skill-base-dir> test`; the browser tests need Google
+Chrome.
