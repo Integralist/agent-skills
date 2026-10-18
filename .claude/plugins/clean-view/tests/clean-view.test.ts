@@ -150,6 +150,44 @@ describe('checklist', () => {
   })
 })
 
+describe('after the turn', () => {
+  async function stopMidPlan($: Engine) {
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+    await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
+    await $.turn.complete({ answer: 'Which colour?', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+  }
+
+  test('a plain reply with no plan clears the band', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'thanks')
+    await $.turn.complete({ answer: 'You are welcome.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+    const texts = (await rows($, 'terminal')).join('\n')
+    expect(texts).not.toContain('Needs you')
+    expect(texts).not.toContain('Understand your request')
+  })
+
+  test('a plan stopped part way reads Paused, not Working', async ($, on) => {
+    world(on)
+    await start($)
+    await stopMidPlan($)
+    const texts = (await rows($, 'terminal')).join('\n')
+    expect(texts).toContain('Needs you')
+    expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
+  })
+
+  test('a slash command clears a band left waiting', async ($, on) => {
+    world(on)
+    await start($)
+    await stopMidPlan($)
+    await $.prompt.submit({ text: '/context', wait: false, origin: { kind: 'composer' }, command: { name: 'context', args: '' } })
+    const texts = (await rows($, 'terminal')).join('\n')
+    expect(texts).not.toContain('Needs you')
+    expect(texts).not.toContain('Check it')
+  })
+})
+
 describe('plan first', () => {
   test('denies other tools before a plan and allows them after', async ($, on) => {
     const w = world(on)

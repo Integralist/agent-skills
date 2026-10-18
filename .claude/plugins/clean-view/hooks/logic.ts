@@ -196,8 +196,9 @@ export function meter(one: CleanViewTask, frame: number): string {
   return '█'.repeat(filled) + '░'.repeat(METER_CELLS - filled)
 }
 
-export function label(one: CleanViewTask, isFirstUpcoming: boolean): string {
+export function label(one: CleanViewTask, isFirstUpcoming: boolean, isPaused = false): string {
   if (one.status === 'done') return 'Done'
+  if (one.status === 'active' && isPaused) return 'Paused'
   if (one.status === 'active') return one.hasReported ? `${one.percent}%` : 'Working'
   return isFirstUpcoming ? 'Next' : 'Up next'
 }

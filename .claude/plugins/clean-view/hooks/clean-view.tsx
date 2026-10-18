@@ -189,6 +189,8 @@ export function registerCleanView(on: On) {
 
   on('prompt.submit', async ($, e, next) => {
     isNextTurnCommand = e.command !== undefined
+    // A slash command's output would sit under a stale band; clear one left waiting.
+    if (isNextTurnCommand) await edit($, list => (list.phase === 'working' ? list : { ...list, phase: 'idle' }))
     return next(e)
   }).catch(($, e, next) => next(e))
 
@@ -280,6 +282,8 @@ export function registerCleanView(on: On) {
     } else {
       await finish($, list => {
         if (list.phase === 'stuck') return list
+        // No plan means no tools ran (the plan gate): a plain reply, nothing to track.
+        if (!hasPlan(list)) return { ...list, phase: 'idle', needsYouReason: null }
         if (list.tasks.some(one => one.status !== 'done')) return { ...list, phase: 'needsYou', needsYouReason: WAITING }
         return { ...list, phase: 'done', needsYouReason: null }
       })
@@ -391,7 +395,7 @@ function headerOf(list: CleanViewChecklist, took: string, Text: TextElement) {
 function row(one: CleanViewTask, isFirstUpcoming: boolean, isPaused: boolean, frame: number, width: number, Text: TextElement) {
   const name = fit(one.name, width)
   const bar = meter(one, frame)
-  const tag = label(one, isFirstUpcoming)
+  const tag = label(one, isFirstUpcoming, isPaused)
   if (one.status === 'done') {
     return (
       <Text key={one.id}>
