@@ -1,9 +1,9 @@
 ---
 name: retro
 description: >-
-  Conduct a retrospective on a coding session to improve agent ergonomics and
-  reduce friction. Use when a session ran slow, hit repetitive errors, or had
-  tool or context friction.
+  Run a retrospective on a coding session to cut friction in the agent's
+  environment. Use when a session ran slow, hit repeated errors, or had tool
+  or context friction.
 disable-model-invocation: true
 metadata:
   model-tier: moderate
@@ -11,56 +11,44 @@ metadata:
 
 # Retro
 
-Conduct a retrospective on a coding session to suggest improvements to the
-coding agent's **environment** and eliminate recurring friction in future runs.
+Review a coding session and propose changes to the agent's environment
+(checks, instruction files, navigation, tool access) so the same friction
+doesn't recur. Follow [writing-for-agents](../writing-for-agents/SKILL.md) for
+any instruction text you propose.
 
-## Steps
+1. **Read the session's primary sources:** its transcript or logs on this
+   machine, defaulting to the current session. Done when you've read it end
+   to end.
+2. **Audit it** in these categories:
+   - **Automated checks:** errors a check could have caught. Read the repo's
+     build and check commands first (`package.json`, `Makefile`, CI). A check
+     that exists but is unwired or broken is the top finding, and a repo with
+     no pre-commit hook or CI running lint, typecheck, and test is a standing
+     one.
+   - **Coding standards:** give a mechanical violation (syntax, banned API,
+     import shape, file path) a deterministic check, and keep
+     `CODING_STANDARDS.md` or review guidelines for real judgment calls.
+   - **Navigation:** files that took many tool calls to find get a pointer in
+     `AGENTS.md`.
+   - **Context budget:** move operational rules out of `AGENTS.md` and other
+     steering files into checks or review guidelines, and remove instructions
+     that don't change behaviour.
+   - **Tool economy:** expensive calls such as broad greps, repeated reads, or
+     large shell dumps.
+   - **Information access:** missing feeds that forced guessing, such as dev
+     server logs or read-only third-party access.
 
-1. Review [`writing-for-agents`](../writing-for-agents/SKILL.md) for style and
-   instruction design rules.
-2. Read the primary sources for the specified session (inspect transcripts or
-   session logs on this machine). Default to the current session if unspecified.
-3. Audit the session across these candidate categories:
-   - **Automated checks**: identify errors an automated check could catch. Read
-     the repo's existing build and check commands first (e.g. `package.json`,
-     `Makefile`, CI workflows). A check that exists but is unwired or broken is
-     the primary finding. A repo lacking guardrails (no pre-commit hook or CI
-     running lint/typecheck/test) is a standing missed opportunity.
-   - **Coding standards**: classify violations as mechanical or judgment-based.
-     A **mechanical** violation (syntax, banned API, import shape, file path)
-     gets a deterministic check (linter rule, pre-commit hook, or CI job).
-     Reserve `CODING_STANDARDS.md` or review guidelines strictly for genuine
-     **judgment calls** (consistency with surrounding code, design taste).
-   - **Navigation**: identify files that took excessive tool calls or time to
-     locate. Propose explicit **navigation pointers** in `AGENTS.md` for hidden
-     dependencies.
-   - **Context budget**: audit `AGENTS.md` and steering files for bloat. Move
-     operational rules out of `AGENTS.md` and into automated checks or review
-     guidelines.
-   - **No-ops**: remove steering instructions that fail to change agent behavior.
-   - **Tool economy**: flag expensive or token-inefficient tool calls (e.g. broad
-     grep patterns, repeated file reads, large shell dumps).
-   - **Information access**: identify missing data feeds that forced the agent
-     to guess (e.g. streaming dev server logs, read-only third-party access).
-4. Present findings to the user ranked by severity with concrete next steps.
+   Done when each category has findings or is clear.
+3. **Report** the findings ranked by severity, each with a concrete next
+   step. Done when the user has the ranked list.
 
-## Reference
+**Where things go.** Implementation is under high context pressure, so keep
+its steering minimal; review gets a diff and little else, so standards and
+style belong there.
 
-### Implementation vs. Review
-
-Work divides into two distinct stages:
-
-- **Implementation agent**: experiences high context pressure (exploration,
-  code generation, debugging). Keep steering minimal here.
-- **Review agent**: experiences low context pressure (receives a diff, needs
-  no exploration). Assign coding standards and style enforcement to review time,
-  not implementation time.
-
-### Target Files
-
-- `AGENTS.md` / `CLAUDE.md`: always in context. Use sparingly, prioritizing
-  navigation pointers over rules.
-- `CODING_STANDARDS.md`: read during review, not implementation. Add navigation
-  pointers if it exceeds 1,000 lines.
-- `docs/`: reference files loaded on demand via pointers.
-- `skills/`: procedural workflows or reference loaded when invoked.
+- `AGENTS.md` or `CLAUDE.md`: always loaded, so mostly navigation pointers
+  rather than rules.
+- `CODING_STANDARDS.md`: read at review time; add navigation pointers past
+  1,000 lines.
+- `docs/`: reference loaded on demand through pointers.
+- `skills/`: procedures or reference loaded when invoked.
