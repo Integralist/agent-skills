@@ -1,9 +1,8 @@
 ---
 name: perspectives
 description: >-
-  Analyze a problem or proposal across multiple viewpoints for a quick
-  "what are we missing?" pass. Use when evaluating ideas, proposals, or
-  trade-offs.
+  Quick multi-viewpoint "what are we missing?" pass on a problem, proposal,
+  or design. Use when evaluating ideas, proposals, or trade-offs.
 user-invocable: true
 argument-hint: '[topic or proposal] [optional: perspective]'
 metadata:
@@ -12,28 +11,16 @@ metadata:
 
 # Perspectives
 
-Analyze a problem, proposal, or design through six isolated perspectives, then
-synthesize what matters. This is a lightweight exploration tool based on Edward
-de Bono's Six Thinking Hats framework. It broadens the conversation; it does
-not replace `decide`, `consensus`, or `code-review`.
+Look at a problem, proposal, or design through six isolated perspectives,
+based on Edward de Bono's Six Thinking Hats, then pull out what matters.
+It's for breadth: for a consequential choice that needs a durable
+recommendation, use the decide skill; for cross-model review with approval
+gates, use consensus; and to find defects in existing code, use code-review.
 
-## Routing
-
-- Use `perspectives` for quick breadth, brainstorming, or "what are we
-  missing?"
-- Use `decide` when the user must choose between consequential options and
-  needs a durable recommendation.
-- Use `consensus` when a complex assessment or implementation needs independent
-  cross-model review and user approval gates.
-- Use `code-review` when code or a diff exists and the goal is to find defects.
-
-## Input
-
-Accept a topic or proposal and an optional perspective. If the topic is too
-vague to frame as one focused question, ask one clarifying question. Otherwise,
-start immediately.
-
-Perspective aliases:
+**Input.** Take a topic or proposal and an optional perspective. If the topic
+is too vague to frame as one focused question, ask one clarifying question;
+otherwise start. Name each perspective by its practical name, not its colour,
+and accept these aliases:
 
 | Perspective  | Aliases                       |
 | ------------ | ----------------------------- |
@@ -44,69 +31,37 @@ Perspective aliases:
 | Alternatives | green, creative, options      |
 | Process      | blue, meta, next steps        |
 
-## Full Analysis
+**One perspective.** When the user names one, cover only it, in depth: a
+short framing sentence and 5–10 concise points, with no synthesis.
 
-When no perspective is specified:
+## Full analysis
 
-1. Restate the topic as a focused one-sentence question.
-1. Analyze all six perspectives in the order below. Keep each section within
-   its assigned mode; integration happens only in synthesis.
-1. Synthesize the decision-relevant insights and smallest useful next step.
-
-### Evidence
-
-- Separate verified facts, user-supplied claims, assumptions, and unknowns.
-- Cite available evidence. Label unsupported claims; do not invent facts.
-- Identify the unknowns most likely to change the conclusion.
-
-### Sentiment
-
-- Record the user's stated intuition and stakeholder sentiment.
-- When no sentiment was supplied, describe plausible reactions explicitly as
-  hypotheses, not facts or the agent's own feelings.
-- Keep this section short. Feelings matter as signals, not proof.
-
-### Risks
-
-- Identify plausible failure modes, downsides, constraints, and second-order
-  effects.
-- Be genuinely critical, but distinguish demonstrated risks from speculation.
-
-### Benefits
-
-- Identify plausible benefits, leverage, opportunities, and best-case outcomes.
-- State what must be true for each important benefit to materialize.
-
-### Alternatives
-
-- Generate options that avoid or change the central trade-off.
-- Include doing nothing, staged approaches, smaller experiments, and combined
-  options when relevant.
-- Allow unconventional ideas, but label impractical ones.
-
-### Process
-
-- Assess whether the question is framed well and whether more analysis is
-  useful.
-- Identify the owner or decision-maker when known and any evidence needed
-  before action.
-
-## Synthesis
-
-Conclude with:
-
-- The one or two insights most likely to affect the outcome
-- Any sentiment that should be acknowledged
-- The strongest unresolved unknown
-- A concrete next step or recommendation
-
-Do not force a decision when the task is exploratory. If the analysis reveals
-a consequential choice, recommend continuing with `decide`. If it reveals a
-need for independent model review, recommend `consensus`.
-
-## Focused Analysis
-
-When the user specifies one perspective, run only that perspective in depth and
-skip synthesis. Use 5-10 concise points and a brief framing sentence.
-
-Use the practical perspective names as output headings rather than colors.
+1. **Restate** the topic as one focused question. Done when it fits in a
+   sentence.
+2. **Work each perspective in order,** keeping each to its own mode;
+   combining them is the synthesis's job. Done when all six are written.
+   - **Evidence:** separate verified facts, user-supplied claims,
+     assumptions, and unknowns; cite what evidence exists, label
+     unsupported claims, and name the unknowns most likely to change the
+     conclusion.
+   - **Sentiment:** the user's stated intuition and stakeholders' feelings.
+     With none supplied, describe plausible reactions as hypotheses, not
+     facts or your own feelings. Keep it short: feelings are signals, not
+     proof.
+   - **Risks:** failure modes, downsides, constraints, and second-order
+     effects, critically, telling demonstrated risks from speculation.
+   - **Benefits:** benefits, leverage, opportunities, and best cases, each
+     with what must be true for it to happen.
+   - **Alternatives:** options that avoid or change the central trade-off,
+     including doing nothing, staging, smaller experiments, and
+     combinations; unconventional ideas are welcome, labelled if
+     impractical.
+   - **Process:** whether the question is framed well and more analysis
+     would help, the owner or decision-maker if known, and any evidence
+     needed before acting.
+3. **Synthesise:** the one or two insights most likely to change the
+   outcome, any sentiment worth acknowledging, the strongest unresolved
+   unknown, and a concrete next step. Leave an exploratory question open
+   rather than forcing a decision; recommend decide for a consequential
+   choice that emerges, or consensus for a need for independent model
+   review. Done when the next step is named.
