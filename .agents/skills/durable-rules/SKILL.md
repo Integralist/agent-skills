@@ -1,8 +1,10 @@
 ---
 name: durable-rules
 description: >-
-  Surface systemic patterns from an investigation as codified
-  conventions, anti-patterns, or skill improvements.
+  Turn systemic patterns from an investigation or finished work into
+  guardrails, conventions, anti-patterns, or skill changes. Use after a plan
+  or piece of work when the user asks what should be codified so it doesn't
+  recur.
 disable-model-invocation: true
 metadata:
   model-tier: complex
@@ -10,62 +12,41 @@ metadata:
 
 # Surface Durable Rules
 
-After producing a plan or completing work, review findings, recent prompts,
-and interaction behaviours for **systemic patterns** that should be codified
-beyond the specific task.
+After a plan or piece of work, review the findings, recent prompts, and how
+the agent behaved for systemic patterns worth codifying beyond this task:
+guardrails, coding conventions, anti-patterns, and skill changes. Include
+recurring, avoidable context or tool costs, such as repeated reads,
+oversized output, or redundant exploration, when a reusable fix exists; one-off
+waste isn't a rule, and no token metrics are needed. Project operating
+instructions (commands, gotchas) belong to the agents-md skill.
 
-Scope covers automated guardrails, coding conventions, anti-patterns, and skill automation.
-Project operating instructions (build/test/lint commands, gotchas) belong
-to [`agents-md`](../agents-md/SKILL.md).
+1. **Find candidates.** If nothing durable or automatable surfaced, say so
+   and stop. Done when you have a list, or have stopped.
+2. **Route each candidate:**
+   - **Mechanical** (syntax, banned APIs, file structure): propose a linter
+     rule, pre-commit hook, or CI check rather than prose.
+   - **Judgment-call convention or anti-pattern:** a project-specific one
+     goes in the repo's conventions directory or convention skills, or else
+     `.agents/AGENTS.md` through the agents-md skill; a cross-project one
+     goes in the global source repo. Update a file that already covers the
+     topic before proposing a new one.
+   - **Skill behaviour:** extend an existing skill whose scope fits, or
+     propose a new skill for a distinct, repeated workflow, written to
+     [writing-for-agents](../writing-for-agents/SKILL.md), in the project's
+     `.agents/skills/` or the global repo.
 
-Also look for recurring, avoidable context or tool costs surfaced by the work,
-such as repeated reads, oversized command output, or redundant exploration.
-Capture a reusable fix when warranted; don't require token metrics or turn
-one-off waste into a durable rule.
+   Done when every candidate has a destination.
+3. **Confirm, then write.** Show the proposed rules and skills and write only
+   after the user confirms. Edit source repos only, never installed copies
+   (`~/.agents/`, `~/.claude/`) or files with a "generated" banner, then
+   regenerate (`make rules` or `make` in that repo). Done when the approved
+   changes are written and regenerated.
 
-## Workflow
-
-1. If nothing durable or automatable surfaced, skip entirely. Do not force it.
-2. Classify each candidate:
-   - **Automated guardrail**: if mechanical (syntax, banned APIs, file structure),
-     propose a linter rule, pre-commit hook, or CI check before writing text documentation.
-   - **Coding convention or anti-pattern**:
-     - Reserve for judgment calls where deterministic checks cannot substitute.
-     - *Project-specific* → repo's conventions dir or convention skills if
-       present; otherwise `.agents/AGENTS.md` via `agents-md`.
-     - *Cross-project* → global conventions source (see "Locating global
-       source repo").
-     - Update an existing file that covers the topic, or propose a new one.
-   - **Prompt or behaviour for skills**:
-     - *Existing skill* → if the behaviour fits an existing skill's scope,
-       propose updating its `SKILL.md` (e.g. adding steps or edge cases).
-     - *New skill* → if a prompt pattern or workflow is repeated and distinct,
-       propose a new skill (`SKILL.md` with frontmatter, workflow, and bounds
-       following [`writing-for-agents`](../writing-for-agents/SKILL.md)).
-     - *Scope* → target local project (`.agents/skills/`) or global
-       (see "Locating global source repo").
-3. **Never edit installed copies or generated files.** Do not edit
-   `~/.agents/`, `~/.claude/`, or files with a "generated" banner directly.
-   Always edit in the source git repository and regenerate.
-4. **Present proposed rules and skills to the user for confirmation before
-   writing.**
-5. Only write after the user confirms.
-
-## Locating global source repo
-
-Global skills and conventions live in
-`https://github.com/Integralist/agent-skills`. When editing global skills or
-global `AGENTS.md`, locate its local clone on the machine:
-
-1. Check common clone paths: `~/code/agent-skills`, `~/src/agent-skills`,
-   `~/projects/agent-skills`, or `~/dev/agent-skills`.
-2. Inspect symlinks: check `readlink ~/.claude/skills` or
-   `readlink ~/.agents/skills` to resolve the source directory.
-3. Search workspace roots: run
-   `find ~/code ~/src ~/projects -maxdepth 3 -type d -name "agent-skills"`
-   and verify with `git -C <path> remote get-url origin`.
-4. If still not found, ask the user for the local repo path.
-
-Make edits inside the discovered repo (e.g. `.agents/skills/<skill>/SKILL.md`
-or `AGENTS.md`), then run `make rules` or `make` in that repo to regenerate
-derived assets.
+**Global source repo.** Global skills and conventions live in
+`https://github.com/Integralist/agent-skills`. To find its local clone,
+check `~/code/agent-skills`, `~/src/agent-skills`, `~/projects/agent-skills`,
+and `~/dev/agent-skills`; then `readlink ~/.claude/skills` or
+`readlink ~/.agents/skills`; then
+`find ~/code ~/src ~/projects -maxdepth 3 -type d -name agent-skills`,
+confirming with `git -C <path> remote get-url origin`. If it's still missing,
+ask the user for the path.
