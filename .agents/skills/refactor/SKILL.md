@@ -1,9 +1,9 @@
 ---
 name: refactor
 description: >-
-  Analyze an existing feature and produce a reimplementation
-  plan focused on reducing complexity and fragmentation. Asks:
-  "If we started over, what would we do differently?"
+  Investigate an existing feature and write a reimplementation plan that cuts
+  its complexity and fragmentation. Use when asked how a feature would be
+  built differently if started over, or for a refactoring plan for one area.
 disable-model-invocation: true
 argument-hint: <feature or area to refactor>
 metadata:
@@ -12,152 +12,75 @@ metadata:
 
 # Refactor
 
-Strategic refactoring skill. Investigates a feature in the current
-codebase, identifies complexity and fragmentation, and produces a
-reimplementation plan answering: "Knowing what we know now, if we started
-from scratch, how would we do this differently?"
+Investigate one feature and write a plan answering: "Knowing what we know
+now, if we started from scratch, how would we build this differently?" Aim
+for deletions, not just rearrangements.
 
-## Input
+1. **Name the feature.** Take it from the argument, or ask "What feature or
+   area do you want to refactor?" Turn it into a short kebab-case slug, such
+   as `auth-middleware`. Done when you have the feature and slug.
+2. **Gather project metadata** by running the commands in
+   [git-metadata](../git-metadata/SKILL.md). Done when you have its output.
+3. **Spawn one investigation subagent** on the cheapest adequate model,
+   following [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md),
+   including its completion and retry protocol; run it as a background
+   teammate if your harness supports agent teams (see
+   [AGENT-TEAMS.md](../shared/AGENT-TEAMS.md)). Give it the feature, the
+   working directory, the metadata to prioritise and corroborate against,
+   the investigation brief below verbatim, and the code-judo brief verbatim
+   from [CODE-JUDO.md](../shared/CODE-JUDO.md), scoped to this feature. Done
+   when it returns all seven report sections.
+4. **Synthesise a reimplementation strategy** from the report: the root
+   causes of complexity rather than symptoms, the ideal decomposition, the
+   build order with prerequisites first, and what to keep versus rewrite.
+   Done when the strategy covers all four.
+5. **Write the plan** with
+   [REIMPL-PLAN-TEMPLATE.md](../shared/REIMPL-PLAN-TEMPLATE.md), which holds
+   the output path and writing rules. Substitute `Refactor` for
+   `{Plan Type}`, the feature name for `{Scope Name}`, `refactor` for
+   `{plan-type}`, and the slug for `{slug}`; refactor adds no sections, so
+   leave out the insertion-point anchors. Done when the plan is written.
+6. **Surface durable rules** by following
+   [durable-rules](../durable-rules/SKILL.md). Done when it's run.
 
-The argument follows the skill invocation. If empty, prompt:
+**Investigation brief.**
 
-```txt
-What feature or area do you want to refactor?
-```
+````md
+You are a principal engineer doing a strategic code review. Understand this
+feature's implementation deeply and answer: "If we reimplemented this from
+scratch, what would we do differently?" Use file reading, search, and any
+language tools available.
 
-Parse the response into a short kebab-case slug (e.g. `auth-middleware`,
-`config-loading`) for use in file names.
+- **Map the implementation:** every file, function, type, and interface
+  involved; the data and control flow end to end; the public API and
+  internal boundaries; which packages own which responsibilities.
+- **Complexity hotspots:** functions over 50 lines doing several things,
+  nesting over 3 levels, high cyclomatic complexity, complex conditionals or
+  switches, more than 4 parameters.
+- **Fragmentation:** one concern scattered across packages; duplicated
+  patterns to unify; one concept modelled differently in different places,
+  citing the peer `file:line` that sets each pattern you say is departed
+  from; leaky abstractions; helpers that belong nearer their callers.
+- **Shallow module sprawl:** modules with large interfaces over thin logic,
+  such as pass-through wrappers; callers coordinating several low-level
+  helpers instead of one deep entry point; callers importing intermediate
+  types or state the module should keep private; webs of thin files that
+  could collapse into one deep module behind a small API.
+- **Coupling:** circular or upward dependencies; concrete types where an
+  interface would decouple; shared mutable state or globals; tight coupling
+  to external services.
+- **Missing prerequisites:** interfaces, shared types, or abstractions that
+  should have existed first; missing test helpers, fixtures, or fakes;
+  documentation or decisions that should have come first.
 
-## Gather project metadata
+Report, in order:
 
-Load [`git-metadata/SKILL.md`](../git-metadata/SKILL.md) and run its
-commands. Include the output in the subagent prompt as context so it can
-prioritize empirically.
-
-## Investigation Phase
-
-Spawn a single subagent (exploration / investigation role) on the cheapest
-model tier adequate to the investigation (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md),
-including its completion and retry protocol). Its prompt must include:
-
-- The feature or area to investigate.
-- The current working directory.
-- The **project metadata** gathered above — instruct the subagent to use
-  it to prioritize which code to investigate first and to corroborate
-  findings against the empirical data.
-- The investigation checklist below (verbatim).
-- The **code-judo brief** (verbatim) from
-  [`../shared/CODE-JUDO.md`](../shared/CODE-JUDO.md) — push the subagent
-  toward deletions, not just rearrangements, scoped to this single
-  feature.
-- Instructions to use file reading, search, and any relevant language
-  tools available.
-
-### Investigation checklist
-
-Include this verbatim in the subagent prompt:
-
-> You are a principal engineer performing a strategic code review. Your
-> goal is to deeply understand a feature's implementation and answer: "If
-> we were to reimplement this from scratch, what would we do
-> differently?"
->
-> **Map the implementation:**
->
-> - Identify all files, functions, types, and interfaces involved
-> - Trace the data flow and control flow end-to-end
-> - Document the public API surface and internal boundaries
-> - Note which packages/modules own which responsibilities
->
-> **Identify complexity hotspots:**
->
-> - Functions longer than 50 lines that do multiple things
-> - Deep nesting (>3 levels)
-> - High cyclomatic complexity
-> - Complex conditionals or switch statements
-> - Functions with many parameters (>4)
->
-> **Identify fragmentation:**
->
-> - Logic for the same concern scattered across multiple packages
-> - Duplicated patterns that should be unified
-> - Inconsistent abstractions (same concept modeled differently in
->   different places) — cite the peer `file:line` establishing each
->   pattern you claim is departed from
-> - Leaky abstractions where internals bleed across boundaries
-> - Orphaned helpers or utilities that belong closer to their callers
->
-> **Identify shallow module sprawl:**
->
-> - Shallow modules: packages or files with large interface surfaces relative to
->   thin internal logic (e.g. pass-through wrappers, 1:1 forwarders)
-> - Inverted seams: callers coordinating multiple low-level helpers instead of
->   calling one deep entry point that encapsulates the workflow
-> - Leaked internals: callers importing intermediate types or state that the
->   module should manage privately
-> - Consolidation targets: webs of thin, interdependent files that can collapse
->   into a single deep module behind a minimal public API
->
-> **Identify coupling issues:**
->
-> - Circular or upward dependencies between packages
-> - Concrete types used where interfaces would decouple
-> - Shared mutable state or global variables
-> - Tight coupling to external services without abstraction
->
-> **Identify missing prerequisites:**
->
-> - What interfaces, shared types, or abstractions should have existed
->   before this feature was built?
-> - What test infrastructure (helpers, fixtures, fakes) is missing?
-> - What documentation or architectural decisions should have been made
->   first?
->
-> **Structure your report as:**
->
-> 1. **Implementation map** — files, types, and data flow
-> 1. **Complexity hotspots** — ranked by severity
-> 1. **Fragmentation issues** — ranked by impact
-> 1. **Shallow module sprawl** — opportunities for deep module consolidation
-> 1. **Coupling issues** — ranked by risk
-> 1. **Missing prerequisites** — what should have existed first
-> 1. **Key insight** — the single biggest deletion opportunity: the one
->    change that makes the most complexity vanish
-
-## Analysis
-
-Synthesize the findings into a coherent reimplementation strategy. Focus
-on:
-
-- The root causes of complexity, not just symptoms.
-- What the ideal decomposition looks like.
-- What order to build things in (prerequisites first).
-- What to preserve vs. what to rewrite.
-
-## Plan Output
-
-Emit the plan using the shared skeleton in
-[`../shared/REIMPL-PLAN-TEMPLATE.md`](../shared/REIMPL-PLAN-TEMPLATE.md).
-Substitute:
-
-- `{Plan Type}` → `Refactor`
-- `{Scope Name}` → the feature name
-- `{plan-type}` → `refactor`
-- `{slug}` → the feature slug
-
-`refactor` adds no extra sections — leave every insertion-point anchor
-empty. The shared file also carries the output path and the plan-writing
-guidelines.
-
-## Surface durable rules
-
-Load [`durable-rules/SKILL.md`](../durable-rules/SKILL.md) and follow its
-process.
-
-## Agent teams (if your harness supports it)
-
-Run the investigation agent as a teammate in parallel rather than inline,
-then build the plan from its report. See
-[`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for enablement
-instructions.
+1. **Implementation map:** files, types, and data flow.
+2. **Complexity hotspots,** ranked by severity.
+3. **Fragmentation issues,** ranked by impact.
+4. **Shallow module sprawl:** chances to consolidate into deep modules.
+5. **Coupling issues,** ranked by risk.
+6. **Missing prerequisites.**
+7. **Key insight:** the single biggest deletion, the one change that makes
+   the most complexity vanish.
+````
