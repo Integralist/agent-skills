@@ -1,6 +1,9 @@
 ---
 name: jira
-description: Create, edit, assign, transition, search, and verify Jira issues via the Atlassian MCP server.
+description: >-
+  Create, edit, assign, transition, search, and verify Jira issues through the
+  Atlassian MCP server. Use when the user asks to file, update, assign, move,
+  or look up a Jira issue.
 disable-model-invocation: true
 metadata:
   model-tier: moderate
@@ -8,146 +11,85 @@ metadata:
 
 # Jira
 
-Manage Jira issues through the Atlassian MCP server. Keep mutations explicit:
-only create, edit, assign, or transition issues when requested.
+Manage Jira issues through the Atlassian MCP server. Change an issue only in
+the way the user asked, and report a change as done only after reading it
+back.
 
-## Environment variables
+**Configuration.** Check the environment before asking the user:
+`JIRA_BASE_URL` (or `ATLASSIAN_BASE_URL`) for the site, such as
+`example.atlassian.net`; `JIRA_DEFAULT_PROJECT` (or `JIRA_DEFAULT_SPACE`,
+`JIRA_PROJECT`) for the project key; and `JIRA_DEFAULT_ISSUE_TYPE`, which
+defaults to `Task`. Strip trailing slashes. The bare hostname is the
+`cloudId`; browse URLs are `https://<hostname>/browse/<KEY>`.
 
-Inspect the environment before prompting the user for configuration:
+1. **Pick the operation:** create (a new issue, or requirements with no issue
+   key), edit (an existing key such as `PROJ-123`, or a change to one),
+   assign, transition (a status change such as "start" or "close"), or
+   search. If it could be create or edit, ask before changing anything. Done
+   when you know the operation.
+2. **Resolve the site.** Use the hostname from `JIRA_BASE_URL` or a URL the
+   user gave. Otherwise call `atlassian_getAccessibleAtlassianResources`, and
+   ask which site if it returns several and none matches the environment.
+   Done when you have a `cloudId`.
+3. **Resolve the project and type** (for create). Take the project from the
+   prompt or issue key, then the environment, then
+   `atlassian_getVisibleJiraProjects` and the user. Take the type from the
+   prompt (Bug, Story, Epic, Spike), then `JIRA_DEFAULT_ISSUE_TYPE`, then
+   `Task`, and check it exists with
+   `atlassian_getJiraProjectIssueTypesMetadata`; if it doesn't, offer the
+   project's valid types. Done when you have the project key and the type's
+   `id`.
+4. **Find the Acceptance Criteria field.** For a fetched issue, look in the
+   `names` map from `atlassian_getJiraIssue` for a key matching "Acceptance
+   Criteria", case-insensitively. Otherwise call
+   `atlassian_getJiraIssueTypeMetaWithFields` with `cloudId`,
+   `projectIdOrKey`, `issueTypeId`, and `requiredFieldsOnly: false`, since
+   `true` hides optional custom fields. Done when you have its
+   `customfield_*` key, or know there isn't one; if discovery fails, treat it
+   as none.
+5. **Check for duplicates** before creating, with
+   `atlassian_searchJiraIssuesUsingJql` and a query like
+   `project = "<KEY>" AND text ~ "<keywords>"`. Done when none match, or
+   you've shown the matches and the user has said to go ahead.
+6. **Make the change:**
+   - **Create** with `atlassian_createJiraIssue`, passing `cloudId`,
+     `projectKey`, `issueTypeName`, `summary`, `description`,
+     `contentFormat: "markdown"`, and, as needed, `assignee_account_id` and
+     `additional_fields` for custom fields, labels, and components.
+   - **Edit:** fetch the issue with only the fields you need (omit `fields`
+     for the defaults, and never use `["*all"]`, which floods the context
+     with custom fields). Keep existing text and fields unless asked to
+     overwrite them. Call `atlassian_editJiraIssue` with standard and
+     `customfield_*` fields in `fields`, and `null` to clear one.
+   - **Assign:** for "me", get the `account_id` from
+     `atlassian_atlassianUserInfo`; for anyone else, resolve it with
+     `atlassian_lookupJiraAccountId`. Pass `assignee_account_id` on create,
+     or `{"fields": {"assignee": {"accountId": "<id>"}}}` on edit.
+   - **Transition:** never guess a transition ID. Get them from
+     `atlassian_getTransitionsForJiraIssue`, match the target status by
+     name, and call `atlassian_transitionJiraIssue` with
+     `{"transition": {"id": "<id>"}}`. If the status isn't reachable from
+     the current one, show the available transition names.
 
-- `JIRA_BASE_URL` (or `ATLASSIAN_BASE_URL`): Jira site URL or hostname (e.g.
-  `https://example.atlassian.net` or `example.atlassian.net`).
-- `JIRA_DEFAULT_PROJECT` (or `JIRA_DEFAULT_SPACE`, `JIRA_PROJECT`): Default
-  project or space key (e.g. `PROJ`).
-- `JIRA_DEFAULT_ISSUE_TYPE`: Default work type (defaults to `Task`).
+   Done when the call succeeds.
+7. **Verify and report.** For an edit of standard fields only, check the
+   issue `atlassian_editJiraIssue` returned. Otherwise call
+   `atlassian_getJiraIssue` with just the changed fields plus `status` and
+   `assignee`. Done when the read-back matches and you've reported the key,
+   browse URL, assignee, and status.
 
-Strip trailing slashes and normalize URLs. If `JIRA_BASE_URL` lacks a protocol,
-use the raw hostname for `cloudId` and prepend `https://` when constructing
-browse URLs.
+**Summary.** State the consequence or benefit, not the mechanics, which go
+under Approach: someone glancing at the board should see what improves
+without opening the issue.
 
-## Workflow
+```txt
+BAD:  Add caching layer
+GOOD: Eliminate redundant auth lookups to cut p99 latency
+```
 
-### 1. Determine operation from user prompt
+**Description,** in Markdown:
 
-Infer the primary operation from the user's instructions:
-
-- **Create:** User asks to create, file, open, or draft a new issue, or provides
-  requirements without specifying an existing issue key.
-- **Edit / Update:** User references an existing issue key (e.g. `PROJ-123`) or
-  asks to modify, append, update, or change an existing ticket.
-- **Assign:** User asks to assign an issue to themselves or someone else.
-- **Transition:** User asks to move status (e.g. "start", "close", "in review").
-- **Search / Inspect:** User asks to look up, list, or inspect issues.
-
-If the prompt is ambiguous between creating a new issue and editing an existing
-one, ask for clarification before mutating Jira.
-
-### 2. Resolve site and cloudId
-
-1. If `JIRA_BASE_URL` or an issue/project URL is provided, extract the hostname
-   (e.g. `example.atlassian.net`). Pass this hostname as `cloudId`.
-2. If no URL or hostname is known, call
-   `atlassian_getAccessibleAtlassianResources` to retrieve accessible sites and
-   their `cloudId` values.
-3. If multiple resources are returned and no environment variable matches, ask
-   the user which site to use.
-
-### 3. Resolve project and issue type
-
-1. **Project / Space:**
-   - Extract project key from user prompt or issue key if present.
-   - If missing, use `JIRA_DEFAULT_PROJECT` (or `JIRA_DEFAULT_SPACE`).
-   - If still unknown, call `atlassian_getVisibleJiraProjects` and prompt the
-     user.
-2. **Issue Type / Work Type:**
-   - Use explicit type requested in prompt (e.g. Bug, Story, Epic, Spike).
-   - Otherwise, check `JIRA_DEFAULT_ISSUE_TYPE`.
-   - Default to `Task` if unset.
-   - Call `atlassian_getJiraProjectIssueTypesMetadata` with `projectIdOrKey`.
-     Verify the selected type exists for the project. If not, prompt the user
-     with the project's valid types. Note the `id` of the chosen issue type.
-
-### 4. Detect custom Acceptance Criteria field
-
-Jira instances often have a dedicated custom field for Acceptance Criteria.
-Check for this field before formatting the description body:
-
-1. **For existing issues:** If the issue has already been fetched, inspect its
-   `names` map (returned by `atlassian_getJiraIssue` when `names` is expanded)
-   for any key matching "Acceptance Criteria" (case-insensitive) to discover
-   the custom field ID without an extra API call.
-2. **For new issues (or if unset):** Call
-   `atlassian_getJiraIssueTypeMetaWithFields` with:
-   - `cloudId`
-   - `projectIdOrKey`
-   - `issueTypeId`
-   - `requiredFieldsOnly: false` (MANDATORY: setting this to `true` hides
-     optional custom fields).
-   Scan returned fields for any field whose `name` matches "Acceptance Criteria".
-3. **If an Acceptance Criteria custom field is found:**
-   - Record its field key (e.g. `customfield_10023`).
-   - Note that Jira Cloud rich-text custom fields require an Atlassian Document
-     Format (ADF) object rather than a raw Markdown string:
-     ```json
-     {
-       "type": "doc",
-       "version": 1,
-       "content": [
-         {
-           "type": "bulletList",
-           "content": [
-             {
-               "type": "listItem",
-               "content": [
-                 {
-                   "type": "paragraph",
-                   "content": [{ "type": "text", "text": "First criterion" }]
-                 }
-               ]
-             }
-           ]
-         }
-       ]
-     }
-     ```
-   - On create: pass the ADF object inside `additional_fields`
-     (`{ "<customfield_id>": <adf_object> }`).
-   - On edit: pass the ADF object inside `fields`
-     (`{ "<customfield_id>": <adf_object> }`).
-   - **Do not** add an `## Acceptance Criteria` section to the description body.
-4. **If no Acceptance Criteria custom field exists:**
-   - Append an `## Acceptance Criteria` section directly within the Markdown
-     description body.
-
-### 5. Search for duplicates before creating
-
-Before creating a new issue:
-
-1. Search with `atlassian_searchJiraIssuesUsingJql`:
-   - Construct a targeted JQL query, e.g.:
-     `project = "<KEY>" AND text ~ "<keywords>"`
-2. If matching or duplicate issues appear, stop and show them to the user before
-   creating a new ticket.
-
-### 6. Create an issue
-
-Draft the summary and description:
-
-- **Summary (Title):** Focus strictly on the **consequence, user benefit, or
-  why this matters**, NOT the implementation mechanics (what/how belongs in
-  the ticket body under Approach).
-  - **Apply the "So What?" test:** A reader glancing at the summary on a board
-    should immediately understand what improves without opening the ticket. If
-    you ask "So what? / Why does this matter?", the summary must already answer
-    it.
-  - *Reject mechanical summaries (WHAT):* "Add Makefile root targets", "Create
-    Go CLI tool", "Add caching layer".
-  - *Require value/consequence (WHY):* "Reduce setup friction and Makefile
-    drift across AI Assistant", "Eliminate redundant auth lookups to cut p99
-    latency".
-- **Description structure (Markdown):**
-
-````markdown
+````md
 ## Problem
 
 Current pain, risk, or missing capability.
@@ -159,105 +101,38 @@ Target outcome for users or maintainers.
 ## Approach
 
 - Implementation boundaries and constraints.
-- State what will not change.
+- What will not change.
 
 ## Outcome
 
 Practical benefit in one short paragraph.
 ````
 
-*(Only include `## Acceptance Criteria` in the description if step 4 found no
-dedicated custom field).*
-
-Call `atlassian_createJiraIssue` with:
-
-- `cloudId`
-- `projectKey`
-- `issueTypeName`
-- `summary`
-- `description`
-- `contentFormat: "markdown"`
-- `assignee_account_id` (if assigning at creation; see Step 8)
-- `additional_fields` (for custom fields like Acceptance Criteria, labels, or
-  components)
-
-### 7. Edit an existing issue
-
-1. Fetch the issue first using `atlassian_getJiraIssue`. Omit `fields` to
-   retrieve default standard fields (summary, description, status, etc.) or pass
-   only the specific fields needed (e.g. `fields: ["summary", "description"]`).
-   Never pass `fields: ["*all"]` unless doing an exhaustive audit, as it returns
-   hundreds of irrelevant custom fields and drains context tokens.
-2. Preserve existing fields and text unless explicitly asked to overwrite.
-3. Call `atlassian_editJiraIssue`:
-   - Pass updated standard fields in `fields` (e.g. `summary`, `description`).
-     If updating `summary`, ensure it focuses on consequence/value (see Step 6).
-   - Pass custom fields (such as Acceptance Criteria in ADF) in `fields` using
-     their `customfield_*` ID.
-   - To clear a field, pass explicit `null`.
-
-### 8. Assign an issue
-
-If the user says "assign it to me" or asks to assign:
-
-1. Call `atlassian_atlassianUserInfo` to get the current user's `account_id`.
-2. If assigning during creation: pass `assignee_account_id: "<account_id>"`.
-3. If assigning an existing issue: call `atlassian_editJiraIssue` with:
+**Acceptance criteria.** With a custom field, put them there and not in the
+description. Jira Cloud rich-text fields need Atlassian Document Format, not
+Markdown: pass the object in `additional_fields` on create, or in `fields` on
+edit, as `{"<customfield_id>": <adf>}`. Without a custom field, add an
+`## Acceptance Criteria` section to the description.
 
 ```json
 {
-  "fields": {
-    "assignee": {
-      "accountId": "<account_id>"
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [{ "type": "text", "text": "First criterion" }]
+            }
+          ]
+        }
+      ]
     }
-  }
+  ]
 }
 ```
-
-4. If assigning to another person by name or email, resolve their account ID
-   first with `atlassian_lookupJiraAccountId`.
-
-### 9. Transition status
-
-Never hardcode or guess a transition ID:
-
-1. Call `atlassian_getTransitionsForJiraIssue(cloudId, issueIdOrKey)`.
-2. Match the transition whose `name` corresponds to the target status (e.g. "In
-   Progress", "Done").
-3. Call `atlassian_transitionJiraIssue` with:
-
-```json
-{
-  "transition": {
-    "id": "<transitionId>"
-  }
-}
-```
-
-### 10. Verify every mutation
-
-After creating, editing, or transitioning:
-
-1. For edits modifying only standard fields, `atlassian_editJiraIssue` already
-   returns the updated issue payload—verify against that response without
-   making an extra API call.
-2. If verifying custom fields or a transition, call
-   `atlassian_getJiraIssue(cloudId, issueIdOrKey)` passing only the mutated
-   fields in `fields` plus `status` and `assignee`. Never use
-   `fields: ["*all"]`.
-3. Verify updated fields (summary, description, custom fields, assignee, status).
-4. Report the result clearly:
-   - Issue key (e.g. `PROJ-123`).
-   - Browse URL: `https://<site-hostname>/browse/<issueKey>`.
-   - Assignee and status.
-
-## Failure handling
-
-- If project or issue type cannot be resolved, prompt the user with available
-  options.
-- If field discovery fails or `requiredFieldsOnly: false` is not supported, fall
-  back safely to formatting acceptance criteria in the description body.
-- If a duplicate issue is detected, prompt the user before proceeding.
-- If transition fails or the requested status is not available from the current
-  state, display available transition names.
-- Never report an action succeeded without verifying the read-back.
