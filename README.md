@@ -291,8 +291,7 @@ authenticate via SSO on first use.
 | **polish**                        | Improve a short passage's clarity and concision.                                                         |
 | **precedent**                     | Align work with patterns established by peer files.                                                      |
 | **recap**                         | Summarize what is done, in progress, and next.                                                           |
-| **redesign**                      | Audit a codebase for redesigns that remove structural complexity.                                        |
-| **refactor**                      | Plan a simpler reimplementation of an existing feature.                                                  |
+| **redesign**                      | Plan a simpler rebuild of a feature, subsystem, or codebase, with tests pinned first.                    |
 | **research**                      | Research a topic or repository and save a sourced reference under `docs/research/`.                      |
 | **retro**                         | Audit a coding session for missing guardrails, context bloat, and tool friction.                         |
 | **security-review-feedback**      | Validate vulnerability findings for reachability and exploitability before fixing.                       |
@@ -595,8 +594,7 @@ Optional branches:
 
 - **critique** — review a plan or document before implementation
 - **cleanup** — remove AI-generated clutter
-- **refactor** — plan a simpler reimplementation of an existing feature
-- **redesign** — audit the wider codebase for structural simplification
+- **redesign** — plan a simpler rebuild of a feature, subsystem, or codebase
 
 ## Contributing
 

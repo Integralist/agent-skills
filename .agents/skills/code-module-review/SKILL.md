@@ -84,6 +84,6 @@ for every diagram.
 
 **Handing off.** For a broad scan for deepening opportunities, use
 [improve-codebase-architecture](../improve-codebase-architecture/SKILL.md). For
-a scoped reimplementation plan, use [refactor](../refactor/SKILL.md). To explore
+a scoped reimplementation plan, use [redesign](../redesign/SKILL.md). To explore
 alternative interfaces for a chosen module, follow
 [DESIGN-IT-TWICE.md](../code-module-design/DESIGN-IT-TWICE.md).
