@@ -1,14 +1,23 @@
 ---
 name: show-me
-description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
+description: >-
+  Explain the current topic visually with concise diagrams, code-shape
+  sketches, and focused HTML artifacts. Use when the user asks to see or be
+  shown something.
 disable-model-invocation: true
 metadata:
   model-tier: moderate
 ---
 
-Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
+# Show Me
 
-- Show logic or an algorithm as pseudocode:
+Help the user understand the current topic visually. Skip the preamble, keep
+prose brief, and put each visual next to the short text it supports. Pick the
+smallest view, or few views, that make the point; most answers need one or
+two of the forms below, rarely all. Keep only the calls, files, props, states,
+and boundaries the current question or decision needs.
+
+**Pseudocode** for logic or an algorithm:
 
 ```text
 on(save)
@@ -18,7 +27,7 @@ on(save)
   return fresh result
 ```
 
-- Show runtime control flow as a call tree:
+**Call tree** for runtime control flow:
 
 ```text
 submitForm
@@ -28,7 +37,8 @@ submitForm
   navigateToSession
 ```
 
-- Show UI structure as a component tree, including state and module boundaries that matter:
+**Component tree** for UI structure, with the state and module boundaries
+that matter:
 
 ```tsx
 <SessionPage> (apps/example/src/routes/session.tsx)
@@ -37,7 +47,7 @@ submitForm
     <RunSkillButton> (packages/ui)
 ```
 
-- Show file responsibility or a broad refactor as a shallow file tree:
+**Shallow file tree** for file responsibilities or a broad refactor:
 
 ```text
 src/
@@ -46,7 +56,7 @@ src/
 └── transport/      # sends API requests
 ```
 
-- Show component interaction, control flow, or data flow with Mermaid:
+**Mermaid** for component interaction, control flow, or data flow:
 
 ```mermaid
 sequenceDiagram
@@ -58,33 +68,9 @@ sequenceDiagram
     Daemon-->>UI: stream result
 ```
 
-- Use `diff` when the point is what changes and the surrounding shape already exists. Match the diff shape to the topic.
-
-For a component change:
-
-```diff
- <SessionPage>
-   useSessionEvents()
-   <SessionToolbar>
-+    <RunSkillButton />
-   <SessionTimeline>
-+    <SkillResultCard />
-```
-
-For a file-layout change:
-
-```diff
- src/
- ├── commands/
-+│   └── show-me.ts       # expands the slash command
- ├── sessions/
--└── transport.ts
-+└── transport/
-+    ├── client.ts
-+    └── stream.ts
-```
-
-For a call-tree or call-stack change:
+**Diff** when the point is what changes and the surrounding shape already
+exists. Diff whichever of the forms above fits the topic: a component tree,
+file tree, call tree, or control flow.
 
 ```diff
  submitForm
@@ -97,18 +83,8 @@ For a call-tree or call-stack change:
 +    subscribeToEvents
 ```
 
-For a state or control-flow change:
-
-```diff
- on(save)
--  write content
-+  if content is unchanged
-+    return cached result
-+  write new content
-+  invalidate cache
-```
-
-- Show the whole block when most of it is new, when omitted context would hide ownership or order, or when the user needs a copyable target shape:
+**Whole block** when most of it is new, when leaving out context would hide
+ownership or order, or when the user needs a copyable target:
 
 ```ts
 function expandSkill(command: string): string {
@@ -117,14 +93,8 @@ function expandSkill(command: string): string {
 }
 ```
 
-- For a visual UI, layout, state comparison, or concept too dense for Mermaid, write one focused HTML file — a diagram, an infographic, or a short slide deck, whichever fits the point. Match the product's colors, type, spacing, and components; use real labels and data; support desktop and mobile. Then open it for the user:
-
-```
-Bash(open path/to/show-me-{description}.html)
-```
-
-### guidance
-
-Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
-
-You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+**HTML file** for a visual UI, layout, state comparison, or concept too dense
+for Mermaid: one focused diagram, infographic, or short slide deck. Match the
+product's colours, type, spacing, and components, use real labels and data,
+and make it work on desktop and mobile. Save it as
+`show-me-{description}.html` and open it for the user with `open`.
