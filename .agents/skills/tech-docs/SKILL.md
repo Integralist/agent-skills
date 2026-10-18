@@ -1,11 +1,9 @@
 ---
 name: tech-docs
 description: >-
-  Write or improve technical documentation. Applies documentation best
-  practices: brevity, focusing on why and what rather than how, simple
-  visualizations, modularization, and decoupling from volatile code. Use when
-  writing new documentation from scratch, or editing, or reviewing and rewriting
-  existing documents for clarity and quality.
+  Write or improve technical documentation. Use when writing a new document
+  from scratch, or when editing, reviewing, or rewriting an existing one for
+  clarity and quality.
 argument-hint: --new <topic> | --improve <file>
 metadata:
   model-tier: moderate
@@ -13,138 +11,85 @@ metadata:
 
 # Technical Documentation
 
-Write new or improve existing technical documentation. Apply the five pillars
-below to reduce reader friction, prevent documentation rot, and produce a
-concrete document.
+Write new technical documents or rewrite existing ones so they're short,
+explain why and what rather than how, and don't rot when the code changes.
+The deliverable is the document itself, not a list of suggestions. Keep the
+author's intent and technical accuracy, and invent nothing. Follow
+[conventions-markdown](../conventions-markdown/SKILL.md), including its link
+rules, and [voice-product](../voice-product/SKILL.md) for the overview,
+rationale, and user impact.
 
-## Mode selection
+**Mode.** `--new <topic>` writes a document; `--improve <file>` rewrites one.
+With neither flag, infer from context and ask if it's still unclear.
 
-- `--new <topic>` — write a new document from scratch.
-- `--improve <file>` — review and rewrite an existing document.
+## Improving a document
 
-If neither flag is given, infer from context. If still ambiguous, ask.
+1. **Read the whole file,** asking which file if none was given. Done when
+   you've read it end to end.
+2. **Audit it against the five pillars,** noting each passage that breaks
+   one. If it's already well written, say so and make only small fixes. Done
+   when every violation is listed.
+3. **Rewrite it,** applying every fix. Done when the full rewritten document
+   is delivered.
+4. **Summarise the changes** in the output below. Done when the summary and
+   extraction recommendations follow the rewrite.
 
-## Process
+For a set of documents with the same problems, use a
+[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): rewrite one,
+and once the user approves its changes, have subagents apply the same changes
+to the rest, following the shared completion and retry protocol.
 
-**Improving (`--improve`):**
+## Writing a document
 
-1. If no file path was given, ask: `Which file do you want me to improve?`
-1. Read the file in full.
-1. Audit against the five pillars, noting every violation (a specific passage
-   that breaks a pillar rule).
-1. Rewrite the document, applying all fixes. Deliver the rewritten document —
-   don't just list problems.
-1. Present a change summary, organized by pillar.
-
-For a *set* of docs sharing the same problems, this is a
-[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): rewrite **one**
-and present its change summary; once the user approves the pillar-transform, fan
-out subagents to apply the same transform to the siblings. Follow the shared
-completion and retry protocol for every dispatched document. Single-doc
-improvement stays inline.
-
-**Writing (`--new`):**
-
-1. Clarify scope — confirm topic, audience, and purpose with the user.
-1. Draft, applying all five pillars from the start: clear purpose, focus on
-   "why" and "what", simple diagrams for flow, no volatile code references.
-1. Present the draft for review.
+1. **Confirm the topic, audience, and purpose** with the user. Done when all
+   three are agreed.
+2. **Draft it** with the five pillars applied from the start. Done when the
+   draft is presented for review.
 
 ## The five pillars
 
-### 1. Brevity and high signal
+**1. Brevity.** Omit needless words, following
+[CONCISE-PROSE.md](../shared/CONCISE-PROSE.md), and judge each section as well
+as each sentence: cut prose that a table or diagram already says, and cut
+history no current reader needs, which belongs in git or a linked ADR. Keep a
+neutral, expert voice, without frustration, hype, or asides. Emoji appear only
+as status cells in a table (✅ ❌); GitHub callouts render their own icons. To
+condense long prose without losing a load-bearing detail, use the distill
+skill.
 
-- Omit needless words — see
-  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md). Write the point,
-  then cut anything that survives removal without loss of meaning.
-- Maintain a neutral-expert voice. Strip frustration, over-enthusiasm, humor
-  that obscures meaning, and first-person asides that don't serve the reader.
-- Emoji stay load-bearing here too—status cells in a table (✅/❌), nothing
-  decorative in prose or headings. GitHub callouts (`> [!NOTE]`) render their
-  own icons, so don't hand-add emoji to them.
-- Evaluate at the section level, not just the sentence: is this section earning
-  its length? If a diagram or table already says it, cut the prose that
-  restates it.
-- Kill historical/legacy sections that serve no current reader — that context
-  belongs in git history or a linked ADR, not an active reference doc.
-- For aggressive condensing of long prose where every load-bearing detail must
-  survive, use [`distill`](../distill/SKILL.md).
+**2. Why and what, not how.** Document intent, domain models, constraints,
+trade-offs, and boundaries. Leave implementation mechanics to the code and
+tests, the only reliable record of how; explain a flow or lifecycle with a
+diagram or contract rather than a code walkthrough.
 
-### 2. Focus on "why" and "what", not "how"
+**3. Visualise simply.** Use a Mermaid diagram of 15 nodes or fewer for
+architecture, workflows, and lifecycles, following
+[conventions-mermaid](../conventions-mermaid/SKILL.md), and delete the
+paragraphs it replaces. Use a table for many dimensions across many cases,
+such as environment matrices or permission grids, and indented text for a
+chain or hierarchy too simple to diagram.
 
-- Document intent, domain models, constraints, trade-offs, and architectural
-  boundaries.
-- Leave internal implementation mechanics to the code and tests — the codebase
-  is the only reliable source of truth for "how".
-- Avoid step-by-step code walkthroughs in prose. If interaction flow or
-  lifecycle must be explained, use a simple diagram or protocol contract.
+**4. Decouple from volatile code.** Leave out file paths, line numbers,
+private functions and classes, internal variable names, and pasted source,
+which rot on the next refactor. Refer to stable domain terms and public
+boundaries, and when an example is essential, give a generic schema or
+contract.
 
-### 3. Visualize simply
-
-- Where architecture, workflows, or lifecycles are described, use simple
-  Mermaid diagrams (ideally <= 15 nodes). Diagrams replace prose — delete
-  paragraphs a visual already communicates.
-- Follow [`conventions-mermaid`](../conventions-mermaid/SKILL.md) for layout
-  structure and `mmdc` validation.
-- Use tables for "multiple dimensions × multiple cases" information (e.g.
-  environment matrices, permission grids). A table replacing four paragraphs is
-  a net win.
-- Use indented structured text for linear chains or hierarchies too simple for
-  a diagram but too structured for prose.
-- Keep diagrams high-level and clean. Complexity defeats the purpose.
-
-### 4. Decouple from volatile code
-
-- Eliminate references to volatile code artifacts: no file paths, line numbers,
-  private functions/classes, internal variable names, or pasted code blocks.
-- Reference only stable, high-level domain terms and public architectural
-  boundaries.
-- When an example is strictly necessary, provide a generic, illustrative schema
-  or contract rather than live source snippets that rot on refactor.
-
-### 5. Focus and modularize
-
-- If a section is long enough to be its own document, flag it for extraction.
-- Add or improve cross-references between related documents.
-- Avoid the mega-doc trap: one document, one clear purpose.
-- Define terms a reader outside the team might not know, but avoid explaining
-  standard industry concepts in long prose.
+**5. One document, one purpose.** Flag a section long enough to stand alone
+for extraction, add cross-references between related documents, and define
+terms an outsider wouldn't know without explaining standard industry
+concepts at length.
 
 ## Output
 
-**Rewritten document** — the full rewritten document, the primary deliverable.
+The full rewritten document comes first, then the change summary grouped by
+pillar, then extraction recommendations, or a line saying none are needed:
 
-**Change summary** — after the rewrite, list changes grouped by pillar:
+```md
+**{Pillar name}**
 
-```txt
-**{Pillar Name}**
+- {What changed and why, one line per change.}
 
-- {What changed and why — one line per change.}
-```
-
-**Extraction recommendations** — if any sections should move to separate
-files, list them; otherwise state explicitly that none are needed:
-
-```txt
 **{Section title}** → {suggested-filename.md}
-Reason: {Why this section warrants its own document.}
+Reason: {why this section warrants its own document.}
 ```
-
-## Guidelines
-
-- Load [`conventions-markdown`](../conventions-markdown/SKILL.md) before
-  writing or revising Markdown; follow its repository-link rules for
-  cross-references.
-- For reader-facing explanations, read
-  [`voice-product`](../voice-product/SKILL.md). Apply it to the overview,
-  rationale, and user impact; preserve exact technical contracts and
-  implementation details where readers need them.
-- The rewritten document is the deliverable, not a list of suggestions. Produce
-  the improved text.
-- Preserve the author's intent and technical accuracy. Do not invent
-  information.
-- Do not paste code blocks or point to fragile source locations. Rely on
-  domain concepts and simple diagrams.
-- Keep Mermaid diagrams under 15 nodes.
-- If the document is already well-written, say so and make only minor
-  improvements. Do not manufacture issues.
