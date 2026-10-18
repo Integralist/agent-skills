@@ -1,8 +1,10 @@
 ---
 name: llm-stats
 description: >-
-  Build shareable, offline HTML charts from Artificial Analysis model benchmarks,
-  with effort-level lines and searchable model selection.
+  Build a shareable, offline HTML chart of Artificial Analysis model
+  benchmarks, with a line per model family across effort levels and
+  searchable model selection. Use when the user wants to compare LLM
+  benchmark scores against cost, tokens, time, price, or speed.
 disable-model-invocation: true
 argument-hint: "[--demo | --input <CSV/JSON> | --refresh] [--benchmark <key>] [--x cost|tokens|time|price|speed]"
 metadata:
@@ -11,113 +13,87 @@ metadata:
 
 # LLM stats
 
-Compare benchmark scores and effort levels with bright, distinct model lines
-on dark warm-brown surfaces with cream text and terracotta accents. Each report
-is one HTML file with its data, CSS, JavaScript, and SVG embedded. It works
-offline without a server or browser-side credentials.
+Generate one self-contained HTML file, with its data, CSS, JavaScript, and SVG
+embedded, that charts benchmark scores against a chosen metric, one line per
+model family through its effort levels. It works offline, with no server and
+no credentials in the browser. Read [data.md](references/data.md) for API
+limits, units, import formats, URL parameters, and the 1Password setup.
 
-## Steps
+1. **Choose the source.**
+   - `--demo --benchmark intelligence --x cost` gives a synthetic preview.
+   - `--input <path>` imports a CSV or JSON export; read data.md first for
+     unfamiliar columns.
+   - Otherwise use the Artificial Analysis API through the report command.
+     It reuses a 24-hour cache, then an environment key, then the 1Password
+     item named in the `report` target of the [Makefile](Makefile). Keep key
+     values out of chat, command arguments, and files. If authentication
+     fails, keep the existing report and ask the user to sign in; use demo
+     data only when the user asks for a preview.
 
-1. Choose the source from the user's arguments:
-   - Use `--demo --benchmark intelligence --x cost` for a synthetic preview.
-   - Use `--input <path>` for a CSV/JSON export. Read
-     [data formats](references/data.md) before importing unfamiliar columns.
-   - Otherwise use the official Artificial Analysis API via the configured
-     report command below. It reuses the 24-hour cache, then prefers an
-     environment key, then reads the configured 1Password item using an explicit
-     personal account. Keep key values out of chat, command arguments, and files.
-     If authentication fails, preserve the existing report and ask the user to
-     sign in; use demo values only when the user requests a preview.
-   - Default to Intelligence Index score versus its reported weighted benchmark
-     cost per task. Fetch every page of `/api/v2/language/models/free`; the
-     complete catalog is cached for 24 hours. A legacy endpoint cache is
-     refreshed once automatically. For DeepSWE or another benchmark's cost
-     chart, require the matching export; Intelligence Index costs belong only
-     to that index. Keep token prices separate from actual benchmark costs.
-
-2. Run the configured report command from this skill's base directory:
+   The default view is Intelligence Index score against its weighted
+   benchmark cost per task. Those costs belong to that index alone, so a
+   cost chart for DeepSWE or any other benchmark needs that benchmark's own
+   export, and token prices never stand in for task costs. Done when the
+   source is chosen.
+2. **Run the report** from the skill's base directory:
 
    ```bash
    make -C <skill-base-dir> report ARGS="<arguments>"
    ```
 
-   The account and secret reference live in the `report` target in
-   [Makefile](Makefile); no secret value is stored there. For a preview, run
-   `make -C <skill-base-dir> preview` instead.
+   Use `make -C <skill-base-dir> preview` for a preview, and `--no-open` when
+   opening a browser isn't appropriate. It atomically replaces
+   `$HOME/llm-stats.html`, prints the path, and opens it; a failed run
+   leaves the previous file intact. Read stderr for warnings. Done when it
+   exits 0; a nonzero exit means nothing was updated, so report the failure.
+3. **Report** the HTML path first, then any warnings. Say plainly when it's
+   demo data, and for real data, whether it came from the API, the cache, or
+   an import. Done when the path is reported.
 
-   It atomically replaces `$HOME/llm-stats.html`, prints that path on stdout,
-   and opens it in the browser. The previous HTML remains intact if generation
-   fails. Use `--no-open` when opening a browser is inappropriate. Read stderr
-   for warnings; a nonzero exit means generation failed and no successful
-   update should be reported.
+**Defaults.** When the user wants persistent defaults, propose the change to
+[defaults.json](defaults.json) and edit it only once they approve:
 
-3. Report the HTML path first, followed by any warning. Identify demo data
-   explicitly. For real data, state whether it came from the API/cache or an
-   imported export. Done when the file exists and its path is reported.
+- `providers`: the initial provider filter (Anthropic, OpenAI, and Google by
+  default); every imported model stays in the dropdown.
+- `families_per_provider`: how many families per provider to show first,
+  newest then highest-scoring, with every effort variant; `0` means all.
+- `models`: explicit slugs, copied from the data, never invented. A nonempty
+  list overrides the provider filter and family limit.
+- `model_patterns`: `*` and `?` wildcards within the provider filter; a
+  nonempty list bypasses the family limit.
+- `presets`: named selections for the Preset menu, each able to set its own
+  selection, `benchmark`, and `x`.
 
-## Defaults and saved views
+Keep API keys out of this file. URL parameters override a saved view, which
+overrides these defaults.
 
-Edit [defaults.json](defaults.json) when the user requests persistent defaults.
-Propose the change and get approval before editing.
+**Sharing.** **Save HTML view** embeds the current selection and pinned node,
+since URL state doesn't travel with an emailed file. Each run rewrites the
+same `$HOME/llm-stats.html`, so a bookmark with query parameters keeps
+working; keep those parameters when updating one. An old bookmark with
+`x=price` still shows token prices; `x=cost` gives benchmark cost. The page
+can also export all JSON or the chart's CSV.
 
-- `providers`: initial provider filter; bundled values are Anthropic, OpenAI,
-  and Google. Every imported model remains available in the dropdown.
-- `families_per_provider`: number of initial model families per provider,
-  ordered by release date then intelligence score. `0` means all families.
-  Include every effort variant in each selected family.
-- `models`: explicit model slugs; a nonempty list overrides provider filters
-  and family limits. Copy real slugs from the data rather than inventing them.
-- `model_patterns`: wildcard slugs (`*` and `?`) within the provider filter.
-  A nonempty list bypasses the family limit.
-- `presets`: named selections for the Preset menu. Each preset can override
-  selection defaults, `benchmark`, and `x`. Keep API keys out of this file.
+**Page behaviour,** which the tests protect:
 
-URL parameters override a saved HTML view, which overrides these defaults.
-The page updates `models`, `benchmark`, `x`, and `highlight` as controls change;
-`models=` intentionally selects nothing. It also accepts the Artificial
-Analysis `eval-cost`, `eval-token-usage`, and `eval-speed` aliases described in
-[data formats](references/data.md).
+- Hovering or focusing an effort node highlights its family and dims the
+  rest; clicking or Enter/Space pins it, clicking another replaces the pin,
+  and clicking it again, Escape, or **Clear highlight** releases it.
+- The model dropdown has fuzzy search, checkboxes, Clear, Select matches,
+  and Reset defaults, with arrow keys to move and Escape to close.
+- Models missing the chosen score or metric are left out with a visible
+  warning naming each one and what it lacks, updated as selections change.
+  Zero is a value, not a gap.
+- Reports and exports keep the API's index version, and cost tooltips keep
+  four decimal places.
 
-Use **Save HTML view** to share the current selection and pinned node with
-someone else. URL state alone does not travel with an email attachment.
-Bookmark the generated `$HOME/llm-stats.html` page with the desired query
-parameters. Each successful run updates the data at that same persistent path.
-When updating an existing bookmark, keep its query parameters on the new URL.
-Export all JSON or chart CSV to reuse the data in another graphing tool.
+**Data use.** Use the
+[API documentation](https://artificialanalysis.ai/data-api/docs) and exports
+the user is allowed to share, and keep Artificial Analysis's attribution and
+data-use terms in shared files. Credentials stay in the generator's
+environment, never in the HTML.
 
-## Interactions
-
-Hovering or keyboard-focusing an effort node highlights its model-family line
-and dims other lines. Clicking or pressing Enter/Space pins the node. Hovering
-another node leaves a pin unchanged; clicking another replaces it. Clicking the
-same pinned node restores every line immediately. Escape or **Clear highlight**
-also releases it.
-
-The model dropdown supports fuzzy search, checkboxes, Clear, Select matches,
-and Reset defaults. Arrow keys move between results; Escape closes the menu.
-Models missing the chosen score or x metric are omitted with a visible warning
-that lists each model's name and exactly which measurement is missing. Update
-the list when selections or metrics change. Zero is valid, not missing data.
-Preserve the API's index version in reports and exports. Cost tooltips retain
-the reported four-decimal precision.
-An old bookmark with `x=price` still requests token pricing; use `x=cost` for the
-corrected benchmark-cost view.
-
-## Data access and maintenance
-
-Use the [current API documentation](https://artificialanalysis.ai/data-api/docs)
-and user-supplied exports. Retain Artificial Analysis attribution and data-use
-terms in shared files. Keep credentials in the generator's environment, never
-in HTML. Read [data formats](references/data.md) for API limits, units, imports,
-and reproducible examples. Use only data the user is allowed to share.
-
-Run the deterministic tests after changing the script or interactions:
-
-```bash
-make -C <skill-base-dir> check test
-```
-
-The generator requires Python 3.10+. The configured live command also uses the
-1Password CLI when the cache has expired and no environment key is set. Tests
-use `uv`, pytest, Playwright, and a locally installed Google Chrome; browser
-tests disable networking and never read the real 1Password item.
+**Changing the generator.** After editing the script or the page, run
+`make -C <skill-base-dir> check test`. It needs Python 3.10+, `uv`, pytest,
+Playwright, and a local Google Chrome; browser tests run with networking off
+and never read the real 1Password item.

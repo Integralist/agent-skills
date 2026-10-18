@@ -76,7 +76,7 @@ An existing `ARTIFICIAL_ANALYSIS_API_KEY` or `AA_API_KEY` overrides 1Password.
 Each read specifies `--account my.1password.com`. The
 [1Password account-selection rules](https://www.1password.dev/cli/use-multiple-accounts)
 give this flag precedence over `OP_ACCOUNT` and the most recently signed-in
-account, so `~/.zshrc` can continue signing into Fastly unchanged. The generator
+account, so `~/.zshrc` can keep signing into a work account unchanged. The generator
 never runs `op signin` or `op signout` automatically.
 
 If the read fails, sign in to the personal account in your terminal, then retry:
