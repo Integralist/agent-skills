@@ -1,6 +1,7 @@
-# internal/config Template
+# internal/config
 
-Replace `{MODULE_PATH}` with your Go module path.
+Loads the JSON config file and validates it, so a bad value fails at startup
+with every problem listed at once.
 
 ## config.go
 
@@ -16,106 +17,151 @@ import (
 	"math"
 	"os"
 	"slices"
+	"time"
 
 	"{MODULE_PATH}/internal/env"
 )
 
-// MaxPort represents the largest valid port number.
+// MaxPort is the largest valid TCP port, used to bound every port field.
 const MaxPort = math.MaxUint16
 
-// Config contains all values necessary to construct and run the component.
+// Config holds everything the API needs to start, loaded from one JSON file
+// so each environment differs only by that file.
 type Config struct {
-	// Addr is the API server address.
+	// Addr is the address the API server listens on, such as ":8080".
 	Addr string `json:"addr"`
-	// Environment is the cluster environment (e.g. dev, stg, prd).
+	// Environment names where the service runs, so behaviour can differ
+	// between local and deployed environments.
 	Environment env.Environment `json:"environment"`
-	// Metrics is the host/port for the metrics server.
+	// Metrics is where the Prometheus metrics server listens.
 	Metrics Metrics `json:"metrics"`
-	// MySQL is the database configuration.
+	// MySQL is the primary datastore's connection settings.
 	MySQL MySQL `json:"mysql"`
-	// Redis is used to cache data.
+	// Redis is the cache's connection settings.
 	Redis Redis `json:"redis"`
-	// Timeouts are API timeouts.
+	// Timeouts override the API server's default read and write timeouts.
 	Timeouts Timeouts `json:"timeouts"`
 }
 
-// Metrics contains the metric server address and port.
+// Metrics is where the metrics server listens, kept apart from the API port
+// so scraping never competes with client traffic.
 type Metrics struct {
+	// Host is the interface to bind; empty means all interfaces.
 	Host string `json:"host"`
-	Port int    `json:"port"`
+	// Port is the metrics port; 0 leaves the metrics package's default.
+	Port int `json:"port"`
 }
 
-// MySQL contains the MySQL server connection details.
+// MySQL holds the database connection settings. The password comes from the
+// MYSQL_PASSWORD environment variable, so it never sits in a config file.
 type MySQL struct {
-	Host            string `json:"host"`
-	Port            int    `json:"port"`
-	User            string `json:"user"`
-	DBName          string `json:"dbname"`
-	MaxOpenConns    int    `json:"max_open_conns,omitempty"`
-	MaxIdleConns    int    `json:"max_idle_conns,omitempty"`
+	// Host is the database server's hostname or IP.
+	Host string `json:"host"`
+	// Port is the database server's port.
+	Port int `json:"port"`
+	// User is the database user the service connects as.
+	User string `json:"user"`
+	// DBName is the schema the service uses.
+	DBName string `json:"dbname"`
+	// MaxOpenConns caps open connections, so the service can't exhaust the
+	// server's connection limit.
+	MaxOpenConns int `json:"max_open_conns,omitempty"`
+	// MaxIdleConns caps idle connections kept for reuse.
+	MaxIdleConns int `json:"max_idle_conns,omitempty"`
+	// ConnMaxLifetime is how long a connection lives before it's replaced,
+	// as a Go duration such as "5m".
 	ConnMaxLifetime string `json:"conn_max_lifetime,omitempty"`
+	// ConnMaxIdleTime is how long a connection may sit idle before it's
+	// closed, as a Go duration.
 	ConnMaxIdleTime string `json:"conn_max_idle_time,omitempty"`
 }
 
-// Redis contains the Redis server address and port.
+// Redis holds the cache's address.
 type Redis struct {
+	// Host is the Redis server's hostname or IP.
 	Host string `json:"host"`
-	Port int    `json:"port"`
+	// Port is the Redis server's port.
+	Port int `json:"port"`
 }
 
-// Timeouts contains the timeout details.
+// Timeouts override the API server's defaults, as Go durations such as
+// "10s"; empty keeps the default.
 type Timeouts struct {
-	APIReadTimeout  string `json:"api_read_timeout"`
+	// APIReadTimeout bounds how long a client may take to send a request.
+	APIReadTimeout string `json:"api_read_timeout"`
+	// APIWriteTimeout bounds how long a handler may take to respond.
 	APIWriteTimeout string `json:"api_write_timeout"`
 }
 
-// Load reads JSON from cfgPath and returns a populated Config.
+// Load reads and decodes the JSON config at cfgPath. It doesn't validate;
+// call Validate next.
 func Load(cfgPath string) (*Config, error) {
-	var cfg Config
 	file, err := os.ReadFile(cfgPath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to open cfg file '%s': %w", cfgPath, err)
+		return nil, fmt.Errorf("config: failed to read %q: %w", cfgPath, err)
 	}
-	if err = json.Unmarshal(file, &cfg); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal cfg file '%s': %w", cfgPath, err)
+
+	var cfg Config
+	if err := json.Unmarshal(file, &cfg); err != nil {
+		return nil, fmt.Errorf("config: failed to decode %q: %w", cfgPath, err)
 	}
 	return &cfg, nil
 }
 
-// Validate checks specific fields contain valid values.
+// Validate checks every field and returns all problems joined, so one run
+// shows everything to fix.
 func (cfg *Config) Validate() error {
-	var result []error
+	var errs []error
 	if cfg.Addr == "" {
-		result = append(result, errors.New("missing Addr config"))
-	}
-	if cfg.Environment == "" {
-		result = append(result, errors.New("missing Environment config"))
+		errs = append(errs, errors.New("missing addr"))
 	}
 	if !slices.Contains(env.All, cfg.Environment) {
-		result = append(result, fmt.Errorf("invalid Environment config: %q", cfg.Environment))
+		errs = append(errs, fmt.Errorf("invalid environment: %q", cfg.Environment))
 	}
 	if cfg.MySQL.Host == "" {
-		result = append(result, errors.New("missing MySQL.Host config"))
-	}
-	if cfg.MySQL.Port <= 0 || cfg.MySQL.Port > MaxPort {
-		result = append(result, fmt.Errorf("invalid MySQL.Port config: %d (must be 1-%d)", cfg.MySQL.Port, MaxPort))
+		errs = append(errs, errors.New("missing mysql.host"))
 	}
 	if cfg.MySQL.User == "" {
-		result = append(result, errors.New("missing MySQL.User config"))
+		errs = append(errs, errors.New("missing mysql.user"))
 	}
 	if cfg.MySQL.DBName == "" {
-		result = append(result, errors.New("missing MySQL.DBName config"))
+		errs = append(errs, errors.New("missing mysql.dbname"))
 	}
 	if cfg.Redis.Host == "" {
-		result = append(result, errors.New("missing Redis.Host config"))
+		errs = append(errs, errors.New("missing redis.host"))
 	}
-	if cfg.Redis.Port <= 0 || cfg.Redis.Port > MaxPort {
-		result = append(result, fmt.Errorf("invalid Redis.Port config: %d (must be 1-%d)", cfg.Redis.Port, MaxPort))
+	errs = append(errs,
+		validPort("mysql.port", cfg.MySQL.Port, false),
+		validPort("redis.port", cfg.Redis.Port, false),
+		validPort("metrics.port", cfg.Metrics.Port, true),
+		validDuration("timeouts.api_read_timeout", cfg.Timeouts.APIReadTimeout),
+		validDuration("timeouts.api_write_timeout", cfg.Timeouts.APIWriteTimeout),
+	)
+	return errors.Join(errs...)
+}
+
+// validPort reports a port outside 1–MaxPort; allowZero lets 0 mean "use the
+// default".
+func validPort(name string, port int, allowZero bool) error {
+	if allowZero && port == 0 {
+		return nil
 	}
-	if cfg.Metrics.Port != 0 && (cfg.Metrics.Port <= 0 || cfg.Metrics.Port > MaxPort) {
-		result = append(result, fmt.Errorf("invalid Metrics.Port config: %d (must be 1-%d)", cfg.Metrics.Port, MaxPort))
+	if port <= 0 || port > MaxPort {
+		return fmt.Errorf("invalid %s: %d (must be 1-%d)", name, port, MaxPort)
 	}
-	return errors.Join(result...)
+	return nil
+}
+
+// validDuration reports a set value that isn't a Go duration; empty is
+// allowed and means "use the default".
+func validDuration(name, value string) error {
+	if value == "" {
+		return nil
+	}
+	if _, err := time.ParseDuration(value); err != nil {
+		return fmt.Errorf("invalid %s: %w", name, err)
+	}
+	return nil
 }
 ```
 
@@ -124,24 +170,19 @@ func (cfg *Config) Validate() error {
 ````markdown
 # internal/config
 
-This package handles configuration loading and validation.
-
-## Usage
+Loads `local/config/api.json` (or the file passed with `-cfg`) and validates
+it, listing every problem at once.
 
 ```go
-cfg, err := config.Load("./local/config/api.json")
+cfg, err := config.Load(path)
 if err != nil {
-    return fmt.Errorf("failed to load config: %w", err)
+	return err
 }
-
 if err := cfg.Validate(); err != nil {
-    return fmt.Errorf("invalid config: %w", err)
+	return err
 }
 ```
 
-## Adding New Configuration
-
-1. Add the field to the `Config` struct with JSON tags
-2. Add validation in `Validate()` if required
-3. Update the local config file in `local/config/api.json`
+To add a setting, add the field with a JSON tag and a comment, validate it in
+`Validate` if it's required, and add it to `local/config/api.json`.
 ````

@@ -1,8 +1,9 @@
-# Observability Stack Docker Compose Template
+# local/observability
 
-Complete local observability stack with Grafana, Tempo, Loki, Prometheus, and Promtail.
-
-Replace `{SERVICE_NAME}` with your service name.
+A local observability stack: Tempo for traces, Prometheus for metrics, Loki
+and Promtail for logs, and Grafana to explore all three, with links from
+metrics and logs to traces. Promtail reads the API's log file, which
+`make run` writes to `local/observability/logs/`.
 
 ## Docker Compose
 
@@ -12,7 +13,6 @@ Replace `{SERVICE_NAME}` with your service name.
 services:
   tempo:
     image: grafana/tempo:latest
-    platform: linux/arm64
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
       - ./tempo.yaml:/etc/tempo.yaml
@@ -28,7 +28,6 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    platform: linux/arm64
     user: root
     command:
       - --config.file=/etc/prometheus.yaml
@@ -45,7 +44,6 @@ services:
 
   grafana:
     image: grafana/grafana:main
-    platform: linux/arm64
     volumes:
       - ./grafana.ini:/etc/grafana/grafana.ini
       - ./datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
@@ -62,7 +60,6 @@ services:
 
   loki:
     image: grafana/loki:latest
-    platform: linux/arm64
     volumes:
       - ./loki.yaml:/etc/loki/local-config.yaml
       - loki_data:/loki
@@ -75,7 +72,6 @@ services:
 
   promtail:
     image: grafana/promtail:latest
-    platform: linux/arm64
     volumes:
       - ./promtail.yml:/etc/promtail/config.yml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -403,11 +399,8 @@ providers:
     path: '/etc/grafana/dashboards'
 ```
 
-## Usage
+## Endpoints
 
-After starting with `make obs-start`:
-
-- **Grafana**: http://localhost:3000 (auto-login as Admin)
-- **Prometheus**: http://localhost:9090
-- **Tempo**: http://localhost:3200
-- **Loki**: http://localhost:3100
+After `make obs-start`: Grafana at http://localhost:3000 (signed in as Admin
+automatically), Prometheus at http://localhost:9090, Tempo at
+http://localhost:3200, and Loki at http://localhost:3100.

@@ -1,8 +1,9 @@
 ---
 name: go-api
 description: >-
-  Create a new Go API service with complete boilerplate, local
-  development, and observability.
+  Scaffold a new Go HTTP API service with its local development stack and
+  observability. Use when the user asks to create a new Go API service or
+  project.
 disable-model-invocation: true
 metadata:
   model-tier: complex
@@ -10,149 +11,101 @@ metadata:
 
 # Go API Service
 
-Create a production-ready Go API service.
+Scaffold a production-ready Go API service: the handlers → service →
+repository layout, config, structured logging, middleware, metrics, and
+tracing, plus a Makefile that runs it locally with MySQL, Redis, and a
+Grafana observability stack. All generated Go follows
+[conventions-go](../conventions-go/SKILL.md) and its
+[service architecture](../conventions-go/references/SERVICE-ARCHITECTURE.md);
+the templates here are the files to generate, not a second set of rules.
 
-## Instructions
+1. **Ask for the service name and module path:** a kebab-case name such as
+   `user-service`, and a module path such as `github.com/myorg/myservice`.
+   Derive `{SERVICE_NAME}` (kebab-case), `{SERVICE_NAME_SNAKE}`,
+   `{SERVICE_NAME_PASCAL}`, and `{MODULE_PATH}` from them. Done when all four
+   placeholders have values.
+2. **Generate the project** in the layout below, resolving every placeholder.
+   Use the templates where one exists; write the other packages to the
+   contracts below, so they fit the templates that call them. Give every
+   package a `doc.go` and a short `README.md`, as conventions-go requires.
+   Done when every file in the layout exists and no `{…}` placeholder is
+   left.
+3. **Initialise and check it.** Create `go.mod` as
+   [go-mod.md](templates/go-mod.md) describes, then run `make fmt`,
+   `make lint-all`, and `make test`. Done when all three pass.
 
-When asked to create a new Go API service:
+**Parallel scaffold.** The placeholder map is fixed, so instantiating the
+templates is a
+[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): generate one
+representative package (`internal/api`) first and confirm the substitutions
+and layout with the user, then have subagents instantiate the rest in
+parallel, following the shared completion and retry protocol.
 
-1. **Ask for the service name** (kebab-case, e.g.,
-   `user-service`, `config-manager`)
-2. **Ask for the module path** (e.g.,
-   `github.com/myorg/myservice`)
-3. **Generate the complete project structure** using the
-   templates below
-4. **Replace placeholders** (`{SERVICE_NAME}`,
-   `{SERVICE_NAME_SNAKE}`, `{SERVICE_NAME_PASCAL}`,
-   `{MODULE_PATH}`) with appropriate values
-
-### Parallel scaffold (optional)
-
-Scaffolding is a fixed placeholder map applied across independent
-templates — a
-[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md). Scaffold
-**one representative file** first (e.g. `internal/api`) with placeholders
-resolved, and confirm the substitutions and layout with the user. Once
-approved, fan out subagents to instantiate the remaining templates in
-parallel — the placeholder map is fixed, so the work is mechanical. Follow the
-shared completion and retry protocol for each dispatched file.
-
-## Project Structure
-
-Generate the following structure:
+## Layout
 
 ```txt
 {SERVICE_NAME}/
-├── cmd/
-│   └── api/
-│       └── main.go
+├── cmd/api/main.go
 ├── internal/
-│   ├── api/
-│   ├── config/
-│   ├── contextx/
-│   ├── deps/
-│   ├── env/
-│   ├── errorsx/
-│   ├── httpx/
-│   ├── logx/
-│   ├── metrics/
-│   ├── middleware/
-│   ├── mysql/
-│   ├── redis/
-│   └── traces/
+│   ├── api/  config/  contextx/  deps/  env/  errorsx/  httpx/
+│   └── logx/  metrics/  middleware/  mysql/  redis/  traces/
 ├── docs/
-│   ├── projects/
-│   │   ├── completed/
-│   │   └── README.md
+│   ├── projects/completed/
+│   ├── projects/README.md
 │   └── architecture.md
 ├── e2e/
 ├── local/
-│   ├── config/
-│   ├── mysql/
-│   └── observability/
+│   ├── config/  mysql/  observability/
 ├── scripts/
-├── go.mod
-├── go.sum
-├── Makefile
-├── AGENTS.md
-└── README.md
+├── go.mod  go.sum  Makefile  AGENTS.md  README.md
 ```
 
-## Key Patterns
-
-### Clean Architecture
-
-```txt
-handlers (HTTP) → service (business logic) → repository (data)
-  → model (entities)
-```
-
-### Package Naming
-
-Use `x` suffix for packages that shadow stdlib: `logx`, `httpx`,
-`timex`, `errorsx`, `contextx`
-
-### Error Handling
-
-```go
-return nil, fmt.Errorf(
-    "service: failed to create config: %w", err)
-```
-
-### Structured Logging
-
-```go
-logger.LogAttrs(ctx, slog.LevelError, "create_config",
-    slog.String("config_id", configID),
-    slog.Any("err", err),
-)
-```
-
-### Tracing
-
-```go
-spanFunc := func(ctx context.Context) error {
-    traces.AddAttributesToCurrentSpan(ctx,
-        attribute.String("config_id", configID),
-    )
-    return nil
-}
-err := traces.WithSpan(
-    ctx, s.tracer, "service.CreateConfig", spanFunc)
-```
+Packages that shadow a standard-library name take an `x` suffix: `logx`,
+`httpx`, `errorsx`, `contextx`, `timex`.
 
 ## Templates
 
-When generating files, use the templates in the `templates/`
-directory:
+- `cmd/api` and `internal/api`: [internal-api.md](templates/internal-api.md)
+- `internal/config`: [internal-config.md](templates/internal-config.md)
+- `internal/logx`: [internal-logx.md](templates/internal-logx.md)
+- `internal/middleware`:
+  [internal-middleware.md](templates/internal-middleware.md)
+- `go.mod`: [go-mod.md](templates/go-mod.md)
+- `Makefile`: [makefile.md](templates/makefile.md)
+- `local/config`: [config-local.md](templates/config-local.md)
+- `local/mysql`: [docker-compose-mysql.md](templates/docker-compose-mysql.md)
+- `local/observability`:
+  [docker-compose-obs.md](templates/docker-compose-obs.md)
 
-- [Makefile](templates/makefile.md)
-- [MySQL Docker Compose](templates/docker-compose-mysql.md)
-- [Observability Stack](templates/docker-compose-obs.md)
-- [Local Config](templates/config-local.md)
-- [internal/api](templates/internal-api.md)
-- [internal/config](templates/internal-config.md)
-- [internal/logx](templates/internal-logx.md)
-- [internal/middleware](templates/internal-middleware.md)
-- [go.mod](templates/go-mod.md)
+## Contracts for packages without a template
 
-## Running Locally
+The templates call these, so write each package to match:
 
-After generation:
+- **`contextx`:** `WithComponent(ctx, name) context.Context`,
+  `RoutePatternContextKey`, `RoutePatternFromContext(ctx) (string, bool)`.
+- **`deps`:** `Dependencies{MySQLFailed, RedisFailed bool}`.
+- **`env`:** `type Environment string`, and `All []Environment` holding
+  `local`, `dev`, `stg`, and `prd`.
+- **`errorsx`:** domain sentinels such as `ErrNotFound`, and
+  `NewProblem(title, detail)` for RFC 7807 responses.
+- **`httpx`:** `WriteJSON(ctx, logger, w, status, v)`.
+- **`metrics`:** `New(registry, component, logger) *Metrics`,
+  `StoreCreate(*Store)`, `StartServer(ctx, logger, host, port) *http.Server`,
+  `RegisterGauge`, `Count`, `RequestsTotal`, `RequestDuration`,
+  `RequestSize`, `ResponseSize`, and `WithHealthCheckMetrics`.
+- **`mysql`:** `New(ctx, config.MySQL, logger) (*sql.DB, error)`, reading the
+  password from `MYSQL_PASSWORD` so it stays out of the config file.
+- **`redis`:** `NewClient(ctx, logger, *config.Config) (*redis.Client, error)`.
+- **`traces`:** `New(ctx, serviceName) (shutdown func(context.Context) error,
+  tracer, error)`, `WithSpan(ctx, tracer, name, fn)`,
+  `AddAttributesToCurrentSpan`, and `GetTraceID(ctx) string`.
+
+## Running locally
 
 ```bash
-# First-time setup
-make tools-install
-
-# Start full stack (API + MySQL + Redis + Observability)
-make run
-
-# Run tests
-make test
-
-# Run integration tests
-make test-integration
-
-# Run all linters
-make lint-all
+make tools-install     # first-time setup
+make run               # API + MySQL + Redis + observability
+make test              # unit tests
+make test-integration  # end-to-end tests against the running stack
+make lint-all          # every linter
 ```

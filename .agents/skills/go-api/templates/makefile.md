@@ -1,7 +1,8 @@
-# Makefile Template
+# Makefile
 
-Replace `{SERVICE_NAME}` with your service name (kebab-case).
-Replace `{SERVICE_NAME_SNAKE}` with your service name (snake_case).
+Runs the service locally with its dependencies, and holds the format, lint,
+test, and tool targets. The linters and formatters match conventions-go's
+tooling, run through `go tool` so each project pins its own versions.
 
 ```makefile
 .DEFAULT_GOAL := run
@@ -10,6 +11,8 @@ PROJECT_API_COMPONENT_NAME ?= {SERVICE_NAME}-api
 SHELL := /usr/bin/env bash
 TEST_ARGS ?= ./...
 TOOLS = \
+	github.com/go-critic/go-critic/cmd/go-critic \
+	github.com/incu6us/goimports-reviser/v3 \
 	github.com/mgechev/revive \
 	golang.org/x/tools/go/analysis/passes/nilness/cmd/nilness \
 	golang.org/x/vuln/cmd/govulncheck \
@@ -53,15 +56,20 @@ check-container-runtime:  ## Check the container runtime (docker) is running
 	@docker info > /dev/null 2>&1 || (echo "Docker is not running. Please start Docker." && exit 1)
 
 .PHONY: fmt
-fmt: ## Format all Go files using gofumpt
+fmt: ## Format Go files with gofumpt and group imports with goimports-reviser
 	go tool gofumpt -w .
+	go tool goimports-reviser -company-prefixes "$$(go list -m | cut -d/ -f1-2)" -project-name "$$(go list -m)" ./...
 
 .PHONY: lint-all
-lint-all: lint-govet lint-govul lint-nilness lint-revive lint-scopeguard lint-staticcheck ## Lint project using all linters
+lint-all: lint-govet lint-gocritic lint-govul lint-nilness lint-revive lint-scopeguard lint-staticcheck ## Lint project using all linters
 
 .PHONY: lint-govet
 lint-govet: ## Lint project using go vet
 	go vet ./...
+
+.PHONY: lint-gocritic
+lint-gocritic: ## Lint project using go-critic
+	go tool go-critic check ./...
 
 .PHONY: lint-govul
 lint-govul: ## Lint project using govulncheck
@@ -73,7 +81,7 @@ lint-nilness: ## Lint project using nilness
 
 .PHONY: lint-revive
 lint-revive: ## Lint project using revive
-	go tool revive -config revive.toml ./...
+	go tool revive ./...
 
 .PHONY: lint-scopeguard
 lint-scopeguard: ## Lint project using scopeguard
@@ -87,9 +95,9 @@ lint-staticcheck: ## Lint project using staticcheck
 mysql-start: check-container-runtime ## Start MySQL locally
 	@echo "Starting MySQL..."; \
 	mkdir -p local/mysql/initdb.d; \
-	PROJECT_APP_NAME=$(strip $(PROJECT_APP_NAME)) docker-compose --project-directory local/mysql up --detach; \
+	PROJECT_APP_NAME=$(strip $(PROJECT_APP_NAME)) docker compose --project-directory local/mysql up --detach; \
 	echo "Waiting for MySQL to be ready..."; \
-	while ! PROJECT_APP_NAME=$(strip $(PROJECT_APP_NAME)) docker-compose --project-directory local/mysql exec -T mysql mysql -uappuser -papppassword -D {SERVICE_NAME_SNAKE} -e "SELECT 1" >/dev/null 2>&1; do \
+	while ! PROJECT_APP_NAME=$(strip $(PROJECT_APP_NAME)) docker compose --project-directory local/mysql exec -T mysql mysql -uappuser -papppassword -D {SERVICE_NAME_SNAKE} -e "SELECT 1" >/dev/null 2>&1; do \
 		sleep 1; \
 	done; \
 	echo "MySQL is ready."
@@ -97,7 +105,7 @@ mysql-start: check-container-runtime ## Start MySQL locally
 .PHONY: mysql-stop
 mysql-stop: check-container-runtime ## Stop MySQL locally
 	@echo "Stopping MySQL..."; \
-	PROJECT_APP_NAME=$(strip $(PROJECT_APP_NAME)) docker-compose --project-directory local/mysql down --remove-orphans --volumes; \
+	PROJECT_APP_NAME=$(strip $(PROJECT_APP_NAME)) docker compose --project-directory local/mysql down --remove-orphans --volumes; \
 	echo "MySQL stopped"
 
 .PHONY: mysql-connect
@@ -108,14 +116,14 @@ mysql-connect: ## Connect to the dockerized MySQL
 .PHONY: obs-start
 obs-start:  ## Start observability stack locally
 	@echo "Starting observability stack..."; \
-	docker-compose --project-directory local/observability up --detach; \
+	docker compose --project-directory local/observability up --detach; \
 	echo "Observability stack started"; \
 	echo "Visit http://localhost:3000/explore for Grafana"
 
 .PHONY: obs-stop
 obs-stop:  ## Stop observability stack locally
 	@echo "Stopping observability stack..."; \
-	docker-compose --project-directory local/observability down --remove-orphans --volumes; \
+	docker compose --project-directory local/observability down --remove-orphans --volumes; \
 	echo "Observability stack stopped"
 
 .PHONY: redis-start
@@ -151,7 +159,7 @@ export MYSQL_PASSWORD="apppassword"; \
 export REDIS_LOG=true; \
 mkdir -p ./local/observability/logs; \
 go run ./cmd/api/main.go -cfg ./local/config/api.json | tee ./local/observability/logs/$(strip $(PROJECT_API_COMPONENT_NAME)).log $(if $(filter true,$(HL)),| $(hl)) ; \
-pkill main; \
+pkill -f 'exe/main -cfg' || true; \
 $(MAKE) redis-stop; \
 $(MAKE) mysql-stop; \
 $(MAKE) obs-stop;

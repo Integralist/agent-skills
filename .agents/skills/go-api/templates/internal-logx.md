@@ -1,6 +1,8 @@
-# internal/logx Template
+# internal/logx
 
-Structured logging wrapper using `log/slog`.
+Builds the service's `*slog.Logger`: JSON to stdout, UTC timestamps, the app's
+name and version on every line, and the `event` and `err` keys that
+conventions-go's logging rules expect.
 
 ## log.go
 
@@ -19,80 +21,71 @@ import (
 	slogdedup "github.com/veqryn/slog-dedup"
 )
 
-// contextKey is used to store a logger in a context.
+// contextKey is unexported so no other package can collide with the key
+// that stores a logger in a context.
 type contextKey struct{}
 
 var (
-	// ContextKey is used to store a logger in a context.
+	// ContextKey stores a logger in a context, for code that receives only a
+	// context.
 	ContextKey = contextKey{}
-
-	// Level allows dynamically changing the output level.
-	// Defaults to slog.LevelInfo.
+	// Level is the shared minimum level, changeable at runtime without
+	// rebuilding loggers. It defaults to slog.LevelInfo.
 	Level = new(slog.LevelVar)
-
-	// AppName is the application name for logging.
+	// AppName identifies the service in every log line; set it before New.
 	AppName = "unknown"
-	// AppRepo is the repository URL for logging.
+	// AppRepo is the service's repository URL; set it before New.
 	AppRepo = "unknown"
-	// AppVersion is the application version for logging.
+	// AppVersion is the running build's version; set it before New.
 	AppVersion = "unknown"
 )
 
-// New returns a slog.Logger configured for stdout.
+// New returns a logger writing to stdout at the shared Level.
 func New() *slog.Logger {
 	return NewWithOutputLevel(os.Stdout, Level)
 }
 
-// NewWithOutput returns a slog.Logger configured with an output writer.
+// NewWithOutput returns a logger writing to w at the shared Level, so tests
+// can capture output.
 func NewWithOutput(w io.Writer) *slog.Logger {
-	opts := defaultOptions()
-	attrs := defaultAttrs()
-	return slog.New(
-		slogdedup.NewOverwriteHandler(
-			slog.NewJSONHandler(w, opts).WithAttrs(attrs),
-			nil,
-		),
-	)
+	return NewWithOutputLevel(w, Level)
 }
 
-// NewWithOutputLevel returns a slog.Logger configured with an output writer and Level.
+// NewWithOutputLevel returns a logger writing to w at level l. The dedup
+// handler keeps the last value when a key is added twice, so scoped loggers
+// can override attributes without duplicate keys in the JSON.
 func NewWithOutputLevel(w io.Writer, l slog.Leveler) *slog.Logger {
-	opts := defaultOptions()
-	opts.Level = l
-	attrs := defaultAttrs()
+	opts := &slog.HandlerOptions{
+		AddSource:   true,
+		Level:       l,
+		ReplaceAttr: replaceAttr,
+	}
 	return slog.New(
 		slogdedup.NewOverwriteHandler(
-			slog.NewJSONHandler(w, opts).WithAttrs(attrs),
+			slog.NewJSONHandler(w, opts).WithAttrs(appAttrs()),
 			nil,
 		),
 	)
 }
 
-// Adapt returns a log.Logger for use with packages not yet compatible with log/slog.
+// Adapt returns a *log.Logger that writes through l, for dependencies that
+// only accept the standard log package.
 func Adapt(l *slog.Logger, level slog.Level) *log.Logger {
 	return slog.NewLogLogger(l.Handler(), level)
 }
 
-// FromContext returns the logger attached to a context.
+// FromContext returns the logger stored in ctx, or a new default logger, so
+// callers never have to nil-check.
 func FromContext(ctx context.Context) *slog.Logger {
-	logger, ok := ctx.Value(ContextKey).(*slog.Logger)
-	if !ok {
-		logger = New()
+	if logger, ok := ctx.Value(ContextKey).(*slog.Logger); ok {
+		return logger
 	}
-	return logger
+	return New()
 }
 
-// defaultOptions defines default logger options.
-func defaultOptions() *slog.HandlerOptions {
-	return &slog.HandlerOptions{
-		AddSource:   true,
-		ReplaceAttr: slogReplaceAttr,
-		Level:       Level,
-	}
-}
-
-// defaultAttrs defines default logger attributes.
-func defaultAttrs() []slog.Attr {
+// appAttrs groups the app identity attached to every line, so logs from
+// several services can be filtered by name and version.
+func appAttrs() []slog.Attr {
 	return []slog.Attr{
 		slog.Group("app",
 			slog.String("name", AppName),
@@ -102,41 +95,36 @@ func defaultAttrs() []slog.Attr {
 	}
 }
 
-// slogReplaceAttr adjusts the log output.
-func slogReplaceAttr(groups []string, a slog.Attr) slog.Attr {
-	// Limit application of these rules only to top-level keys
+// replaceAttr normalises output so every service's logs share one shape:
+// UTC times, "event" for the message, "err" for errors, no nil errors, and
+// durations in milliseconds.
+func replaceAttr(groups []string, a slog.Attr) slog.Attr {
+	// Rename only top-level keys; a nested "msg" belongs to the caller.
 	if len(groups) == 0 {
-		// Set time zone to UTC
-		if a.Key == slog.TimeKey {
+		switch a.Key {
+		case slog.TimeKey:
 			a.Value = slog.TimeValue(a.Value.Time().UTC())
 			return a
-		}
-		// Use event as the default MessageKey, remove if empty
-		if a.Key == slog.MessageKey {
-			a.Key = "event"
+		case slog.MessageKey:
 			if a.Value.String() == "" {
 				return slog.Attr{}
 			}
+			a.Key = "event"
 			return a
 		}
 	}
 
-	// Ensures error key is logged as err for consistency
 	if a.Key == "error" {
 		a.Key = "err"
 	}
-
-	// Remove error key=value when error is nil
 	if a.Equal(slog.Any("err", error(nil))) {
 		return slog.Attr{}
 	}
 
-	// Present durations as milliseconds
 	switch a.Key {
 	case "dur", "delay", "p95", "previous_p95", "remaining", "max_wait":
 		a.Value = slog.Float64Value(a.Value.Duration().Seconds() * 1000)
 	}
-
 	return a
 }
 ```
@@ -153,8 +141,11 @@ import (
 	"log/slog"
 )
 
-// Logger interface abstracts logging operations for testability.
+// Logger is the one logging method the service depends on, so tests can
+// pass a fake instead of a real handler.
 type Logger interface {
+	// LogAttrs logs msg at level with typed attributes, avoiding the
+	// allocations of the variadic any form.
 	LogAttrs(ctx context.Context, level slog.Level, msg string, attrs ...slog.Attr)
 }
 ```
@@ -164,89 +155,20 @@ type Logger interface {
 ````markdown
 # internal/logx
 
-Structured logging wrapper using Go's `log/slog` package.
-
-## Features
-
-- JSON output with UTC timestamps
-- Build info automatically attached to all logs
-- Deduplication of repeated attributes
-- Dynamic log level changes
-- Context-based logger propagation
-
-## Usage
-
-### Basic Logging
+Structured JSON logging on `log/slog`: UTC timestamps, app name and version on
+every line, `event` for the message and `err` for errors, and a runtime-
+adjustable level.
 
 ```go
+logx.AppName = "my-service" // before logx.New
 logger := logx.New()
-
-logger.LogAttrs(ctx, slog.LevelInfo, "create_config",
-    slog.String("config_id", configID),
-    slog.String("customer_id", customerID),
-)
-```
-
-### Error Logging
-
-```go
-if err != nil {
-    logger.LogAttrs(ctx, slog.LevelError, "create_config",
-        slog.String("config_id", configID),
-        slog.Any("err", err),
-    )
-}
-```
-
-### Grouped Attributes
-
-```go
-logger.LogAttrs(ctx, slog.LevelInfo, "handler_finished",
-    slog.Group("request",
-        slog.String("method", r.Method),
-        slog.String("path", r.URL.Path),
-    ),
-    slog.Group("response",
-        slog.Int("status_code", status),
-        slog.Int64("duration_ms", dur.Milliseconds()),
-    ),
-)
-```
-
-### Changing Log Level
-
-```go
+logger.LogAttrs(ctx, slog.LevelInfo, "create_config", slog.String("config_id", id))
 logx.Level.Set(slog.LevelDebug)
 ```
 
-### Setting App Info
-
-```go
-logx.AppName = "my-service"
-logx.AppRepo = "github.com/myorg/my-service"
-logx.AppVersion = "abc123"
-```
-
-## Output Format
+Each line looks like:
 
 ```json
-{
-  "time": "2024-01-15T10:30:00.000Z",
-  "level": "INFO",
-  "event": "create_config",
-  "config_id": "cfg_123",
-  "app": {
-    "name": "my-service",
-    "repo": "github.com/myorg/my-service",
-    "version": "abc123"
-  }
-}
+{"time":"2024-01-15T10:30:00Z","level":"INFO","event":"create_config","config_id":"cfg_123","app":{"name":"my-service","repo":"unknown","version":"abc123"}}
 ```
-
-## Conventions
-
-- Use `event` (not `msg`) for the log message
-- Use `err` (not `error`) for error values
-- Use `slog.LogAttrs` for better performance
-- Create scoped loggers with `.With()` for request-specific context
 ````

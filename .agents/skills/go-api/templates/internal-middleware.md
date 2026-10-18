@@ -1,8 +1,8 @@
-# internal/middleware Template
+# internal/middleware
 
-HTTP middleware pipeline for request processing.
-
-Replace `{MODULE_PATH}` with your Go module path.
+The middleware pipeline for cross-cutting concerns: panic recovery, tracing,
+metrics, dependency checks, and request logging. `Decorator` and `Pipeline`
+follow the service architecture's middleware pattern.
 
 ## middleware.go
 
@@ -36,25 +36,28 @@ import (
 	"{MODULE_PATH}/internal/traces"
 )
 
-// routePattern matches the content inside curly brackets.
+// routePattern captures each {name} in a route pattern, so path parameters
+// can be logged and traced by name.
 var routePattern = regexp.MustCompile(`\{([^{}]+)\}`)
 
-// Decorator is a middleware function.
+// Decorator adds one cross-cutting behaviour to a handler, so concerns like
+// logging and metrics stay out of handler code.
 type Decorator func(http.Handler) http.Handler
 
-// Pipeline wraps an http.Handler with optional logging, metrics and tracing.
+// Pipeline holds the middleware every route shares, so the chain is defined
+// once.
 type Pipeline struct {
+	// middleware runs in slice order, first entry outermost.
 	middleware []Decorator
 }
 
-// New returns a middleware Pipeline.
+// New returns a Pipeline that applies middleware in the order given.
 func New(middleware ...Decorator) *Pipeline {
-	p := &Pipeline{}
-	p.middleware = append(p.middleware, middleware...)
-	return p
+	return &Pipeline{middleware: slices.Clone(middleware)}
 }
 
-// Decorate wraps next in the defined middleware and executes the pipeline.
+// Decorate wraps next in the pipeline's middleware, applied in reverse so the
+// first entry runs first.
 func (p *Pipeline) Decorate(next http.Handler) http.Handler {
 	for _, mw := range slices.Backward(p.middleware) {
 		next = mw(next)
@@ -62,8 +65,10 @@ func (p *Pipeline) Decorate(next http.Handler) http.Handler {
 	return next
 }
 
-// AddRoutePattern adds the route pattern to the request context.
-func AddRoutePattern(mux *http.ServeMux) func(next http.Handler) http.Handler {
+// AddRoutePattern stores the matched route pattern, such as
+// "GET /items/{id}", in the request context, so logs, traces, and metrics
+// group by route rather than by raw path.
+func AddRoutePattern(mux *http.ServeMux) Decorator {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			_, route := mux.Handler(r)
@@ -73,24 +78,26 @@ func AddRoutePattern(mux *http.ServeMux) func(next http.Handler) http.Handler {
 	}
 }
 
-// InFlight tracks the number of requests currently being handled.
-func InFlight(m *metrics.Metrics, tracer trace.Tracer) func(next http.Handler) http.Handler {
+// InFlight tracks how many requests are being handled right now, which shows
+// saturation before latency does.
+func InFlight(m *metrics.Metrics, tracer trace.Tracer) Decorator {
 	active := m.RegisterGauge("api_requests_inflight_count")
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			_, span := tracer.Start(ctx, "middleware.InFlight")
+			_, span := tracer.Start(r.Context(), "middleware.InFlight")
 			defer span.End()
 
-			active.Add(1)
+			active.Inc()
 			defer active.Dec()
 			next.ServeHTTP(w, r)
 		})
 	}
 }
 
-// LogRouteAndTraceID attaches route pattern and Trace ID to the logger.
-func LogRouteAndTraceID(l *slog.Logger, tracer trace.Tracer) func(next http.Handler) http.Handler {
+// LogRouteAndTraceID logs one line per request with its route, path
+// parameters, status, size, and duration, tagged with the trace ID so a log
+// line leads straight to its trace.
+func LogRouteAndTraceID(l *slog.Logger, tracer trace.Tracer) Decorator {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -105,14 +112,11 @@ func LogRouteAndTraceID(l *slog.Logger, tracer trace.Tracer) func(next http.Hand
 				slog.String("http_method", r.Method),
 				slog.String("user_agent", r.Header.Get("User-Agent")),
 			}
-
-			// Extract path parameters
 			if segments := routePattern.FindAllStringSubmatch(route, -1); len(segments) > 0 {
 				pathSegs := []any{}
 				for _, seg := range segments {
 					if len(seg) == 2 {
-						key := seg[1]
-						pathSegs = append(pathSegs, slog.String(key, r.PathValue(key)))
+						pathSegs = append(pathSegs, slog.String(seg[1], r.PathValue(seg[1])))
 					}
 				}
 				reqAttrs = append(reqAttrs, slog.Group("path_segs", pathSegs...))
@@ -124,10 +128,8 @@ func LogRouteAndTraceID(l *slog.Logger, tracer trace.Tracer) func(next http.Hand
 			}
 
 			ww := &wrappedWriter{ResponseWriter: w}
-
 			defer func() {
 				dur := time.Since(start)
-
 				span.SetAttributes(
 					attribute.Int("http.response.status_code", ww.status),
 					attribute.Int("http.response.body.size", ww.bytesWritten),
@@ -145,11 +147,11 @@ func LogRouteAndTraceID(l *slog.Logger, tracer trace.Tracer) func(next http.Hand
 					slog.String("time", time.Now().Format(time.RFC3339)),
 				}
 
+				// A status of 0 means the handler never wrote a response.
 				level := slog.LevelInfo
-				if ww.status >= 500 || ww.status == 0 {
+				if ww.status >= http.StatusInternalServerError || ww.status == 0 {
 					level = slog.LevelError
 				}
-
 				sl.LogAttrs(ctx, level, "handler_finished",
 					slog.Group("request", reqAttrs...),
 					slog.Group("response", resAttrs...),
@@ -161,50 +163,52 @@ func LogRouteAndTraceID(l *slog.Logger, tracer trace.Tracer) func(next http.Hand
 	}
 }
 
-// PanicRecovery recovers from panics in an HTTP handler.
-func PanicRecovery(l *slog.Logger, m *metrics.Metrics) func(next http.Handler) http.Handler {
+// PanicRecovery logs and counts a handler panic with its stack trace, then
+// re-panics so net/http still aborts the connection as it would have.
+func PanicRecovery(l *slog.Logger, m *metrics.Metrics) Decorator {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			sl := l.With(
-				slog.Group("request",
-					slog.String("method", r.Method),
-					slog.String("path", r.URL.Path),
-				),
-			)
 			ctx := r.Context()
-
 			defer func() {
-				if rec := recover(); rec != nil {
-					panicType := "Unknown"
-					if err, ok := rec.(error); ok && errors.Is(err, http.ErrAbortHandler) {
-						panicType = "ErrAbortHandler"
-					}
-
-					sl.LogAttrs(ctx, slog.LevelInfo, "panic_recovered",
-						slog.Any("panic", panicType),
-						slog.String("stack_trace", string(debug.Stack())),
-					)
-					m.Count(ctx, "panics_total", "panic="+panicType)
-
-					panic(rec)
+				rec := recover()
+				if rec == nil {
+					return
 				}
+
+				// http.ErrAbortHandler is how a handler deliberately aborts a
+				// response, so it isn't logged as an error.
+				panicType, level := "Unknown", slog.LevelError
+				if err, ok := rec.(error); ok && errors.Is(err, http.ErrAbortHandler) {
+					panicType, level = "ErrAbortHandler", slog.LevelInfo
+				}
+
+				l.LogAttrs(ctx, level, "panic_recovered",
+					slog.Group("request",
+						slog.String("method", r.Method),
+						slog.String("path", r.URL.Path),
+					),
+					slog.String("panic", panicType),
+					slog.String("stack_trace", string(debug.Stack())),
+				)
+				m.Count(ctx, "panics_total", "panic="+panicType)
+
+				panic(rec)
 			}()
 			next.ServeHTTP(w, r)
 		})
 	}
 }
 
-// WithDependencies returns HTTP error if hard dependencies are unavailable.
-func WithDependencies(l *slog.Logger, d deps.Dependencies) func(next http.Handler) http.Handler {
+// WithDependencies answers 503 while MySQL or Redis is unavailable, so
+// clients get a clear, retryable error instead of a half-working response.
+func WithDependencies(l *slog.Logger, d deps.Dependencies) Decorator {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if d.MySQLFailed || d.RedisFailed {
-				sl := l.With(
-					slog.Group("request",
-						slog.String("method", r.Method),
-						slog.String("path", r.URL.Path),
-					),
-				)
+				sl := l.With(slog.Group("request",
+					slog.String("method", r.Method),
+					slog.String("path", r.URL.Path),
+				))
 				httpx.WriteJSON(r.Context(), sl, w, http.StatusServiceUnavailable,
 					map[string]string{"error": "Service Unavailable", "detail": "Missing dependencies"})
 				return
@@ -214,16 +218,17 @@ func WithDependencies(l *slog.Logger, d deps.Dependencies) func(next http.Handle
 	}
 }
 
-// WithMetrics instruments HTTP requests with metrics.
+// WithMetrics records request count, duration, and request and response
+// sizes per route, with the trace ID as an exemplar so a slow bucket links
+// to an example trace.
 func WithMetrics(m *metrics.Metrics, tracer trace.Tracer) Decorator {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			_, span := tracer.Start(ctx, "middleware.WithMetrics")
+			_, span := tracer.Start(r.Context(), "middleware.WithMetrics")
 			defer span.End()
 
-			routeOption := promhttp.WithLabelFromCtx("route", getRoute)
-			routeAndTraceOptions := []promhttp.Option{
+			routeOption := promhttp.WithLabelFromCtx("route", routeFromContext)
+			routeAndTrace := []promhttp.Option{
 				routeOption,
 				promhttp.WithExemplarFromContext(traceIDExemplar),
 			}
@@ -241,33 +246,36 @@ func WithMetrics(m *metrics.Metrics, tracer trace.Tracer) Decorator {
 						),
 						routeOption,
 					),
-					routeAndTraceOptions...,
+					routeAndTrace...,
 				),
-				routeAndTraceOptions...,
+				routeAndTrace...,
 			)
-
 			handler.ServeHTTP(w, r)
 		})
 	}
 }
 
-// TraceRequestData wraps handler with OpenTelemetry instrumentation.
+// TraceRequestData starts a server span per request, named by route pattern
+// so traces group like metrics do. The healthcheck is skipped because its
+// spans are noise.
 func TraceRequestData(next http.Handler) http.Handler {
 	return otelhttp.NewHandler(next, "server",
 		otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents),
-		otelhttp.WithFilter(func(req *http.Request) bool {
-			return req.URL.Path != "/healthcheck"
+		otelhttp.WithFilter(func(r *http.Request) bool {
+			return r.URL.Path != "/healthcheck"
 		}),
 		otelhttp.WithSpanNameFormatter(func(_ string, r *http.Request) string {
-			if routePattern, ok := contextx.RoutePatternFromContext(r.Context()); ok {
-				return routePattern
+			if route, ok := contextx.RoutePatternFromContext(r.Context()); ok {
+				return route
 			}
 			return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 		}),
 	)
 }
 
-// TraceResponseData sets span status from HTTP response codes.
+// TraceResponseData adds path parameters to the request span and sets its
+// status from the response code, so failed requests show as errors in the
+// trace view.
 func TraceResponseData(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ww := &wrappedWriter{ResponseWriter: w}
@@ -275,26 +283,25 @@ func TraceResponseData(next http.Handler) http.Handler {
 
 		if span.IsRecording() {
 			if route, ok := contextx.RoutePatternFromContext(r.Context()); ok {
-				segments := routePattern.FindAllStringSubmatch(route, -1)
-				for _, seg := range segments {
+				for _, seg := range routePattern.FindAllStringSubmatch(route, -1) {
 					if len(seg) == 2 {
-						key := seg[1]
-						span.SetAttributes(attribute.String("http.path."+key, r.PathValue(key)))
+						span.SetAttributes(attribute.String("http.path."+seg[1], r.PathValue(seg[1])))
 					}
 				}
 			}
 		}
 
 		defer func() {
-			if span.IsRecording() {
-				switch {
-				case ww.status >= http.StatusOK && ww.status < http.StatusBadRequest:
-					span.SetStatus(codes.Ok, "")
-				case ww.status >= http.StatusBadRequest:
-					span.SetStatus(codes.Error, fmt.Sprintf("HTTP %d", ww.status))
-				case ww.status == 0:
-					span.SetStatus(codes.Error, "No HTTP status set")
-				}
+			if !span.IsRecording() {
+				return
+			}
+			switch {
+			case ww.status == 0:
+				span.SetStatus(codes.Error, "No HTTP status set")
+			case ww.status >= http.StatusBadRequest:
+				span.SetStatus(codes.Error, fmt.Sprintf("HTTP %d", ww.status))
+			default:
+				span.SetStatus(codes.Ok, "")
 			}
 		}()
 
@@ -302,13 +309,15 @@ func TraceResponseData(next http.Handler) http.Handler {
 	})
 }
 
-func getRoute(ctx context.Context) string {
-	if route, ok := contextx.RoutePatternFromContext(ctx); ok {
-		return route
-	}
-	return ""
+// routeFromContext returns the stored route pattern for the metrics route
+// label, or "" when none was stored.
+func routeFromContext(ctx context.Context) string {
+	route, _ := contextx.RoutePatternFromContext(ctx)
+	return route
 }
 
+// traceIDExemplar attaches the trace ID to a metric observation, so Grafana
+// can jump from a metric to the trace behind it.
 func traceIDExemplar(ctx context.Context) prometheus.Labels {
 	if traceID := traces.GetTraceID(ctx); traceID != "" {
 		return prometheus.Labels{"traceID": traceID}
@@ -316,18 +325,24 @@ func traceIDExemplar(ctx context.Context) prometheus.Labels {
 	return nil
 }
 
-// wrappedWriter saves status code and bytes written.
+// wrappedWriter records the status and bytes a handler writes, which
+// http.ResponseWriter doesn't expose.
 type wrappedWriter struct {
 	http.ResponseWriter
-	status       int
+	// status is the response code; 0 until the handler writes.
+	status int
+	// bytesWritten is the response body size so far.
 	bytesWritten int
 }
 
+// WriteHeader records the status before passing it on.
 func (ww *wrappedWriter) WriteHeader(status int) {
 	ww.ResponseWriter.WriteHeader(status)
 	ww.status = status
 }
 
+// Write records the body size, and a 200 status if the handler wrote a body
+// without calling WriteHeader, matching net/http's own default.
 func (ww *wrappedWriter) Write(data []byte) (int, error) {
 	if ww.status == 0 {
 		ww.status = http.StatusOK
@@ -343,51 +358,23 @@ func (ww *wrappedWriter) Write(data []byte) (int, error) {
 ````markdown
 # internal/middleware
 
-HTTP middleware pipeline for cross-cutting concerns.
+Cross-cutting HTTP concerns, composed into one `Pipeline` that every route
+shares.
 
-## Available Middleware
+The first middleware passed to `New` is outermost: it sees the request first
+and the response last. Keep this order:
 
-| Middleware | Purpose |
-|------------|---------|
-| `PanicRecovery` | Catches panics, logs stack traces, records metrics |
-| `AddRoutePattern` | Stores route pattern in context for logging/tracing |
-| `TraceRequestData` | Creates OpenTelemetry spans with request data |
-| `TraceResponseData` | Sets span status based on HTTP response code |
-| `WithMetrics` | Records Prometheus request metrics |
-| `WithDependencies` | Returns 503 if MySQL/Redis unavailable |
-| `LogRouteAndTraceID` | Logs request/response with trace correlation |
-| `InFlight` | Tracks concurrent request count |
-
-## Usage
+1. `PanicRecovery`, outermost, so it catches panics from everything inside.
+2. `AddRoutePattern`, because tracing, metrics, and logging all read the
+   route.
+3. `TraceRequestData`, to start the span early.
+4. `TraceResponseData`, to set the span's status from the response.
+5. `WithMetrics`, to record request metrics.
+6. `WithDependencies`, to answer 503 when MySQL or Redis is down.
+7. `LogRouteAndTraceID`, to log with the full context.
+8. `InFlight`, to count active requests.
 
 ```go
-pipeline := middleware.New(
-    middleware.PanicRecovery(l, metric),
-    middleware.AddRoutePattern(mux),
-    middleware.TraceRequestData,
-    middleware.TraceResponseData,
-    middleware.WithMetrics(metric, tracer),
-    middleware.WithDependencies(l, d),
-    middleware.LogRouteAndTraceID(l, tracer),
-    middleware.InFlight(metric, tracer),
-)
-
 mux.Handle("GET /items", pipeline.Decorate(handler))
 ```
-
-## Middleware Order
-
-Order matters! The middleware executes in reverse order of definition:
-1. First defined = outermost (runs first on request, last on response)
-2. Last defined = innermost (runs last on request, first on response)
-
-Recommended order:
-1. PanicRecovery (catch panics from all middleware)
-2. AddRoutePattern (needed by tracing/logging)
-3. TraceRequestData (create span early)
-4. TraceResponseData (set span status)
-5. WithMetrics (record metrics)
-6. WithDependencies (fail fast if deps unavailable)
-7. LogRouteAndTraceID (log with full context)
-8. InFlight (track active requests)
 ````

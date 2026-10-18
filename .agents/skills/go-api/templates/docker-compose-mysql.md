@@ -1,6 +1,8 @@
-# MySQL Docker Compose Template
+# local/mysql
 
-Replace `{SERVICE_NAME}` and `{SERVICE_NAME_SNAKE}` with your service name.
+MySQL 8 for local development, created and seeded from `initdb.d` on first
+start. The passwords are local-only defaults that `make mysql-start` and
+`make run` expect; never reuse them elsewhere.
 
 ```yaml
 # local/mysql/docker-compose.yml
@@ -8,7 +10,6 @@ Replace `{SERVICE_NAME}` and `{SERVICE_NAME_SNAKE}` with your service name.
 services:
   mysql:
     image: mysql:8.0
-    platform: linux/arm64
     container_name: ${PROJECT_APP_NAME:-{SERVICE_NAME}}-mysql
     restart: always
     environment:

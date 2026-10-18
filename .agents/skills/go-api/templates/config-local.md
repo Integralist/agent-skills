@@ -1,10 +1,10 @@
-# Local Configuration Template
+# local/config
 
-Replace `{SERVICE_NAME}` and `{SERVICE_NAME_SNAKE}` with your service name.
+`local/config/api.json`, the config `make run` passes to the API. Its values
+match the local MySQL, Redis, and metrics ports; the MySQL password comes from `MYSQL_PASSWORD`,
+which `make run` sets.
 
 ```json
-// local/config/api.json
-
 {
   "addr": ":8080",
   "environment": "local",
@@ -33,13 +33,5 @@ Replace `{SERVICE_NAME}` and `{SERVICE_NAME_SNAKE}` with your service name.
 }
 ```
 
-## Configuration Fields
-
-| Field | Description |
-|-------|-------------|
-| `addr` | API server address (`:8080` for local) |
-| `environment` | Environment name (`local`, `dev`, `stg`, `prd`) |
-| `metrics.port` | Prometheus metrics endpoint port |
-| `mysql.*` | MySQL connection settings |
-| `redis.*` | Redis connection settings |
-| `timeouts.*` | HTTP server timeouts |
+Each field is documented on the matching `Config` struct field in
+[internal-config.md](internal-config.md).

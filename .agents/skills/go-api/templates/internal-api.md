@@ -1,8 +1,83 @@
-# internal/api Template
+# cmd/api and internal/api
 
-Replace `{SERVICE_NAME}` with your service name (kebab-case), `{SERVICE_NAME_PASCAL}` with PascalCase, and `{MODULE_PATH}` with your Go module path.
+`main` stays thin and hands off to `run`, which hands off to `api.Run`, as
+conventions-go's Commands section requires. `api.Run` builds the servers and
+blocks until the context is cancelled, then shuts down gracefully.
 
-## api.go
+## cmd/api/main.go
+
+```go
+// cmd/api/main.go
+
+package main
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"log/slog"
+	"os"
+	"os/signal"
+	"runtime"
+	"syscall"
+
+	"{MODULE_PATH}/internal/api"
+	"{MODULE_PATH}/internal/config"
+	"{MODULE_PATH}/internal/logx"
+)
+
+// Build details, overridden at link time with -ldflags "-X main.version=…",
+// so the healthcheck reports exactly which build is running.
+var (
+	// version is the release version, or "dev" for a local build.
+	version = "dev"
+	// gitCommit is the commit the binary was built from.
+	gitCommit = "unknown"
+	// buildDate is when the binary was built.
+	buildDate = "unknown"
+)
+
+// main parses flags, builds the logger, and cancels the context on SIGINT or
+// SIGTERM, then hands off to run so the program logic stays testable.
+func main() {
+	cfgPath := flag.String("cfg", "./local/config/api.json", "path to the JSON config file")
+	flag.Parse()
+
+	logx.AppName = "{SERVICE_NAME}"
+	logx.AppVersion = version
+	logger := logx.New()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	err := run(ctx, logger, *cfgPath)
+	stop() // os.Exit skips deferred calls, so release the signal handler first.
+	if err != nil {
+		logger.LogAttrs(ctx, slog.LevelError, "run", slog.Any("err", err))
+		os.Exit(1)
+	}
+}
+
+// run loads and validates the config, then serves until ctx is cancelled.
+// It returns errors rather than exiting, so main is the only caller of
+// os.Exit.
+func run(ctx context.Context, logger *slog.Logger, cfgPath string) error {
+	cfg, err := config.Load(cfgPath)
+	if err != nil {
+		return fmt.Errorf("main: failed to load config: %w", err)
+	}
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("main: invalid config: %w", err)
+	}
+
+	return api.Run(ctx, logger, cfg, api.BuildInfo{
+		Version:   version,
+		GitCommit: gitCommit,
+		BuildDate: buildDate,
+		GoVersion: runtime.Version(),
+	})
+}
+```
+
+## internal/api/api.go
 
 ```go
 // internal/api/api.go
@@ -17,8 +92,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -27,7 +100,6 @@ import (
 	"{MODULE_PATH}/internal/config"
 	"{MODULE_PATH}/internal/contextx"
 	"{MODULE_PATH}/internal/deps"
-	"{MODULE_PATH}/internal/httpx"
 	"{MODULE_PATH}/internal/metrics"
 	"{MODULE_PATH}/internal/middleware"
 	"{MODULE_PATH}/internal/mysql"
@@ -35,74 +107,85 @@ import (
 	"{MODULE_PATH}/internal/traces"
 )
 
-var (
-	apiReadTimeout  = time.Duration(10) * time.Second
-	apiWriteTimeout = time.Duration(10) * time.Second
-	component       = "api"
+const (
+	// component labels this binary's logs, metrics, and traces, so signals
+	// from several binaries in one service can be told apart.
+	component = "api"
+	// defaultReadTimeout bounds how long a client may take to send a request,
+	// so slow clients can't hold connections open. Config can override it.
+	defaultReadTimeout = 10 * time.Second
+	// defaultWriteTimeout bounds how long a handler may take to respond.
+	// Config can override it.
+	defaultWriteTimeout = 10 * time.Second
+	// shutdownTimeout caps graceful shutdown, so in-flight requests get time
+	// to finish without blocking a deploy indefinitely.
+	shutdownTimeout = 15 * time.Second
 )
 
-// BuildInfo holds build-time information.
+// BuildInfo identifies the running build, so the healthcheck can say which
+// version is deployed.
 type BuildInfo struct {
-	Version   string
+	// Version is the release version, or "dev" for a local build.
+	Version string
+	// GitCommit is the commit the binary was built from.
 	GitCommit string
+	// BuildDate is when the binary was built.
 	BuildDate string
+	// GoVersion is the Go toolchain that built the binary.
 	GoVersion string
 }
 
-// DefaultBuildInfo is used when build info is not injected.
-var DefaultBuildInfo = BuildInfo{
-	Version:   "dev",
-	GitCommit: "unknown",
-	BuildDate: "unknown",
-	GoVersion: "unknown",
-}
+// Run starts the API and metrics servers and blocks until ctx is cancelled,
+// then shuts both down gracefully. A dependency that fails to start is
+// logged and recorded rather than fatal, so the healthcheck stays reachable
+// and other routes answer 503.
+func Run(ctx context.Context, l *slog.Logger, cfg *config.Config, buildInfo BuildInfo) error {
+	ctx = contextx.WithComponent(ctx, component)
 
-// Run starts the API server.
-func Run(l *slog.Logger, cfg *config.Config, buildInfo BuildInfo) error {
-	ctx := contextx.WithComponent(context.Background(), component)
-
+	// d records which hard dependencies failed to start, so middleware can
+	// answer 503 consistently instead of each handler failing its own way.
 	d := deps.Dependencies{}
 
-	// Initialize tracing
+	// Tracing is best effort: the API still serves without it.
 	traceShutdown, _, err := traces.New(ctx, "{SERVICE_NAME}-"+component)
 	if err != nil {
-		err = fmt.Errorf("unable to start tracing: %w", err)
-		l.LogAttrs(ctx, slog.LevelError, "trace_create", slog.Any("err", err))
+		l.LogAttrs(ctx, slog.LevelError, "trace_create",
+			slog.Any("err", fmt.Errorf("api: failed to start tracing: %w", err)))
 	}
 	defer func() {
-		if traceShutdown != nil {
-			if shutdownErr := traceShutdown(context.WithoutCancel(ctx)); shutdownErr != nil {
-				l.LogAttrs(ctx, slog.LevelError, "trace_shutdown", slog.Any("err", shutdownErr))
-			}
+		if traceShutdown == nil {
+			return
+		}
+		// WithoutCancel lets buffered spans flush after ctx is cancelled.
+		if err := traceShutdown(context.WithoutCancel(ctx)); err != nil {
+			l.LogAttrs(ctx, slog.LevelError, "trace_shutdown", slog.Any("err", err))
 		}
 	}()
 
-	// Create metrics server
 	registry := prometheus.NewRegistry()
 	metric := metrics.New(registry, component, l)
 	createMetricStore(metric, component)
 	ms := metric.StartServer(ctx, l, cfg.Metrics.Host, cfg.Metrics.Port)
 
-	// Create Redis client
 	redisClient, err := redis.NewClient(ctx, l, cfg)
 	if err != nil {
-		werr := fmt.Errorf("failed to create redis client: %w", err)
-		l.LogAttrs(ctx, slog.LevelError, "redis_create", slog.Any("err", werr))
+		l.LogAttrs(ctx, slog.LevelError, "redis_create",
+			slog.Any("err", fmt.Errorf("api: failed to create redis client: %w", err)))
 		d.RedisFailed = true
 	}
-	_ = redisClient // Use in your handlers
+	_ = redisClient // Pass to the business layer once it exists.
 
-	// Create MySQL connection
 	db, err := mysql.New(ctx, cfg.MySQL, l)
 	if err != nil {
-		werr := fmt.Errorf("unable to start mysql: %w", err)
-		l.LogAttrs(ctx, slog.LevelError, "mysql_create", slog.Any("err", werr))
+		l.LogAttrs(ctx, slog.LevelError, "mysql_create",
+			slog.Any("err", fmt.Errorf("api: failed to start mysql: %w", err)))
 		d.MySQLFailed = true
 	} else {
 		defer db.Close()
 	}
 
-	// Create middleware pipeline
+	// The order matters: see the middleware README for why each sits where
+	// it does.
 	middlewareTracer := otel.Tracer("internal.middleware")
 	muxAPI := http.NewServeMux()
 	pipeline := middleware.New(
@@ -115,99 +198,92 @@ func Run(l *slog.Logger, cfg *config.Config, buildInfo BuildInfo) error {
 		middleware.LogRouteAndTraceID(l, middlewareTracer),
 		middleware.InFlight(metric, middlewareTracer),
 	)
+	// The healthcheck skips the dependency check, so it answers even when
+	// MySQL or Redis is down.
 	hc := middleware.New(metric.WithHealthCheckMetrics)
-	_ = pipeline // Use when registering routes
 
-	// Register routes
 	muxAPI.Handle("GET /healthcheck", hc.Decorate(healthcheck(l, buildInfo)))
+	// Register domain handlers here, for example:
+	// domain.NewHandlers(l, metric, svc).RegisterRoutes(muxAPI, pipeline, cfg)
+	_ = pipeline
 
-	// TODO: Register your domain handlers here
-	// Example:
-	// domainHandlers := domain.NewHandlers(l, metric, businessLayer)
-	// domainHandlers.RegisterRoutes(muxAPI, pipeline, cfg)
-
-	// Override timeouts from config
-	if cfg.Timeouts.APIReadTimeout != "" {
-		if d, err := time.ParseDuration(cfg.Timeouts.APIReadTimeout); err == nil {
-			apiReadTimeout = d
-		}
-	}
-	if cfg.Timeouts.APIWriteTimeout != "" {
-		if d, err := time.ParseDuration(cfg.Timeouts.APIWriteTimeout); err == nil {
-			apiWriteTimeout = d
-		}
-	}
-
-	s := http.Server{
+	s := &http.Server{
 		Addr:         cfg.Addr,
 		Handler:      muxAPI,
-		ReadTimeout:  apiReadTimeout,
-		WriteTimeout: apiWriteTimeout,
+		ReadTimeout:  parseTimeout(cfg.Timeouts.APIReadTimeout, defaultReadTimeout),
+		WriteTimeout: parseTimeout(cfg.Timeouts.APIWriteTimeout, defaultWriteTimeout),
 	}
 
-	// Handle graceful shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	// serveErr carries ListenAndServe's result, so a failure to bind ends Run
+	// instead of leaving it waiting on ctx.
+	serveErr := make(chan error, 1)
 	go func() {
-		signalType := <-quit
-		shutdownCtx := context.Background()
-
-		l.LogAttrs(shutdownCtx, slog.LevelWarn, "api_shutdown", slog.String("signal", signalType.String()))
-		if err := s.Shutdown(shutdownCtx); err != nil {
-			err = fmt.Errorf("unable to gracefully stop API server: %w", err)
-			l.LogAttrs(shutdownCtx, slog.LevelError, "api_shutdown", slog.Any("err", err))
-		}
-
-		l.LogAttrs(shutdownCtx, slog.LevelWarn, "metrics_shutdown", slog.String("signal", signalType.String()))
-		if err := ms.Shutdown(shutdownCtx); err != nil {
-			err = fmt.Errorf("unable to gracefully stop metrics server: %w", err)
-			l.LogAttrs(shutdownCtx, slog.LevelError, "metrics_shutdown", slog.Any("err", err))
-		}
+		l.LogAttrs(ctx, slog.LevelInfo, "api_start", slog.String("addr", cfg.Addr))
+		serveErr <- s.ListenAndServe()
 	}()
 
-	l.LogAttrs(ctx, slog.LevelInfo, "api_start")
-
-	if err := s.ListenAndServe(); err != nil {
-		if errors.Is(err, http.ErrServerClosed) {
-			l.LogAttrs(ctx, slog.LevelInfo, "api_serve",
-				slog.String("status", "stopped"),
-				slog.Any("err", err),
-			)
-			return nil
-		}
-		err = fmt.Errorf("api server failed to listen and serve requests: %w", err)
-		l.LogAttrs(ctx, slog.LevelError, "api_serve", slog.Any("err", err))
-		return err
+	select {
+	case err := <-serveErr:
+		return fmt.Errorf("api: failed to serve: %w", err)
+	case <-ctx.Done():
 	}
 
+	l.LogAttrs(ctx, slog.LevelWarn, "api_shutdown", slog.Any("cause", context.Cause(ctx)))
+	shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownTimeout)
+	defer cancel()
+
+	return errors.Join(
+		shutdown(shutdownCtx, "api", s),
+		shutdown(shutdownCtx, "metrics", ms),
+	)
+}
+
+// shutdown stops srv gracefully and names it in any error, so a failed
+// drain says which server it was.
+func shutdown(ctx context.Context, name string, srv *http.Server) error {
+	if err := srv.Shutdown(ctx); err != nil {
+		return fmt.Errorf("api: failed to stop %s server: %w", name, err)
+	}
 	return nil
 }
 
-// healthcheck returns an http.Handler that responds with application status.
+// parseTimeout returns the configured duration, or def when none is set.
+// config.Validate rejects malformed values, so a parse error can't reach
+// here unnoticed.
+func parseTimeout(s string, def time.Duration) time.Duration {
+	if d, err := time.ParseDuration(s); err == nil {
+		return d
+	}
+	return def
+}
+
+// healthcheck reports the build and uptime, so deploy checks and humans can
+// confirm which version is serving and since when.
 func healthcheck(l *slog.Logger, buildInfo BuildInfo) http.Handler {
 	startTime := time.Now()
 	hostname, _ := os.Hostname()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{
 			"build_date": buildInfo.BuildDate,
+			"git_commit": buildInfo.GitCommit,
 			"go_version": buildInfo.GoVersion,
 			"hostname":   hostname,
 			"launch":     startTime.Format(time.RFC3339),
 			"uptime":     time.Since(startTime).Truncate(time.Second).String(),
 			"version":    buildInfo.Version,
-			"git_commit": buildInfo.GitCommit,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
-			l.LogAttrs(r.Context(), slog.LevelError,
-				"failed to write healthcheck response", slog.Any("err", err))
+			l.LogAttrs(r.Context(), slog.LevelError, "healthcheck", slog.Any("err", err))
 		}
 	})
 }
 
-// createMetricStore registers all metrics for this application.
+// createMetricStore registers every metric the service records up front, so
+// a typo in a metric name fails at startup rather than silently dropping
+// data.
 func createMetricStore(m *metrics.Metrics, component string) {
 	m.StoreCreate(&metrics.Store{
 		Component: component,
@@ -228,44 +304,16 @@ func createMetricStore(m *metrics.Metrics, component string) {
 }
 ```
 
-## README.md
+## internal/api/README.md
 
 ````markdown
 # internal/api
 
-This package contains the main API server setup including:
+Builds and runs the HTTP API: server lifecycle, graceful shutdown, the
+middleware pipeline, route registration, the healthcheck, and metric
+registration.
 
-- HTTP server configuration and lifecycle management
-- Graceful shutdown handling
-- Middleware pipeline assembly
-- Route registration
-- Health check endpoint
-- Metrics store initialization
-
-## Usage
-
-The `Run` function is called from `cmd/api/main.go` to start the server:
-
-```go
-if err := api.Run(logger, cfg, buildInfo); err != nil {
-    logger.LogAttrs(ctx, slog.LevelError, "api_run", slog.Any("err", err))
-    os.Exit(1)
-}
-```
-
-## Middleware Pipeline
-
-The middleware executes in order:
-1. PanicRecovery - Catches panics and logs them
-2. AddRoutePattern - Stores route pattern in context
-3. TraceRequestData - Creates OpenTelemetry spans
-4. TraceResponseData - Sets span status from response
-5. WithMetrics - Records request metrics
-6. WithDependencies - Checks MySQL/Redis availability
-7. LogRouteAndTraceID - Structured request logging
-8. InFlight - Tracks concurrent requests
-
-## Adding New Routes
-
-Register handlers in the `Run` function after creating the middleware pipeline.
+`cmd/api/main.go` calls `api.Run(ctx, logger, cfg, buildInfo)`, which blocks
+until `ctx` is cancelled. Register domain routes in `Run`, after the pipeline
+is built.
 ````
