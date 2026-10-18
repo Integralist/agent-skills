@@ -261,7 +261,7 @@ authenticate via SSO on first use.
 | **delegate**                      | Choose and dispatch the right subagent for a task.                                                       |
 | **distill**                       | Shorten long prose without losing essential information.                                                 |
 | **domain-modeling**               | Define shared domain language and record architecture decisions.                                         |
-| **durable-rules**                 | Turn recurring findings into conventions, anti-patterns, or skill improvements.                          |
+| **durable-rules**                 | Turn session friction and recurring findings into checks, conventions, or skill changes.                 |
 | **eval**                          | Create and run skill evaluations, then compare with the previous run.                                    |
 | **execute-plan**                  | Compile, delegate, verify, and correct one plan slice at a time without model switching.                 |
 | **explain-code**                  | Explain what code does and why it matters to a newcomer, with a small visual.                            |
@@ -293,7 +293,6 @@ authenticate via SSO on first use.
 | **recap**                         | Summarize what is done, in progress, and next.                                                           |
 | **redesign**                      | Plan a simpler rebuild of a feature, subsystem, or codebase, with tests pinned first.                    |
 | **research**                      | Research a topic or repository and save a sourced reference under `docs/research/`.                      |
-| **retro**                         | Audit a coding session for missing guardrails, context bloat, and tool friction.                         |
 | **security-review-feedback**      | Validate vulnerability findings for reachability and exploitability before fixing.                       |
 | **show-me**                       | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.                       |
 | **skill-rewrite**                 | Rewrite a skill to be short and readable without losing its core behaviour.                              |
