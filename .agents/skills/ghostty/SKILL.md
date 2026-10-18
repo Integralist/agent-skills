@@ -1,47 +1,37 @@
 ---
 name: ghostty
 description: >-
-  Control Ghostty terminal (macOS) via AppleScript to manage panes, tabs,
-  and windows. Use when splitting the terminal, opening new tabs or windows,
-  running commands or tests out-of-band in a separate pane, spawning visible
-  subagents or interactive tools, sending keystrokes or text to a pane, or
-  inspecting active Ghostty terminals.
+  Control the Ghostty terminal on macOS through AppleScript: panes, tabs, and
+  windows. Use when splitting the terminal, opening a tab or window, running
+  a long command or test suite out of band in another pane, spawning a
+  visible subagent or interactive tool, sending text or keystrokes to a pane,
+  or listing open Ghostty terminals.
 metadata:
   model-tier: trivial
 ---
 
 # Ghostty Terminal Automation
 
-Automate Ghostty layout, tabs, splits, and process execution on macOS using
-AppleScript (`osascript`).
+Drive Ghostty's splits, tabs, windows, and processes on macOS with
+`osascript`, so heavy or interactive work runs in its own pane and only its
+result comes back to the agent.
 
-Reserve out-of-band splits and new tabs for heavy tasks: long-running suites
-(`make test-integration`, e2e, Docker builds), dev servers/watchers, interactive
-TUIs, or visual subagents. When launching a subagent in a pane, follow the
-[shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md), especially its
-completion and retry protocol. Verify completion from its recorded output
-before reporting success.
+**When to use a pane.** Use one for long suites (`make test-integration`,
+e2e, Docker builds), dev servers and watchers, interactive TUIs, and visible
+subagents. Run anything that finishes in under 3 seconds with under 50 lines
+of output (a single unit test, `git`, a file check) directly with the shell
+tool. Ghostty's AppleScript works only on macOS with Ghostty as the local
+terminal, so use the shell tool on Linux, in CI, or over SSH. The API can't
+read a pane's scrollback, so redirect any output you need to a log file. When
+a pane runs a subagent, follow
+[SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md), including its
+completion and retry protocol, and confirm completion from its recorded
+output before reporting success.
 
-## When Not to Use
-
-- **Fast or low-output commands:** Single unit tests, `git` commands, file
-  checks, or anything completing in `<3s` with `<50` lines of output. Run these
-  directly in standard tool execution (`bash`) to avoid AppleScript overhead.
-- **Non-macOS platforms:** Ghostty on Linux does not support AppleScript.
-- **Headless CI or SSH sessions:** Where Ghostty is not the local host terminal.
-- **Reading terminal scrollback directly:** Ghostty's AppleScript API does not
-  expose terminal buffer text. Always redirect output to log files.
-
-______________________________________________________________________
-
-## Preflight & Permissions
-
-Ghostty AppleScript control requires macOS Automation permissions (TCC) and
-Ghostty 1.4.0+ for `tty`/`pid` properties. Run preflight probes to verify
-connectivity and version:
+**Preflight.** Control needs macOS Automation (TCC) permission, and `tty`
+and `pid` need Ghostty 1.4.0 or later. Probe both once:
 
 ```bash
-# 1. Probe reachability & macOS Automation (TCC) permission
 osascript -e '
 with timeout of 5 seconds
   tell application "Ghostty" to get version
@@ -50,7 +40,6 @@ end timeout' >/dev/null 2>&1 || {
   exit 1
 }
 
-# 2. Probe terminal properties & version support (1.4.0+)
 TERM_COUNT=$(osascript -e 'tell application "Ghostty" to return count of terminals' 2>/dev/null)
 if [ "${TERM_COUNT:-0}" -gt 0 ]; then
   osascript -e 'tell application "Ghostty" to get tty of first terminal' >/dev/null 2>&1 || {
@@ -60,44 +49,32 @@ if [ "${TERM_COUNT:-0}" -gt 0 ]; then
 fi
 ```
 
-______________________________________________________________________
-
-## State Persistence
-
-Agent harnesses execute each tool call in an isolated subshell. State variables
-do not survive across separate conversation turns. Persist single-slot handles
-(`last-pane`, `last-job`) to a user-scoped temporary directory:
+**State.** Each tool call runs in a fresh subshell, so persist handles in a
+per-user directory. `last-pane` holds the most recently created or targeted
+pane, and each new split or job overwrites it; `last-job` holds the running
+job's log, pane, and runner script.
 
 ```bash
 STATE_DIR="/tmp/ghostty-skill-$(id -u)"
 mkdir -p "$STATE_DIR"
 ```
 
-> [!NOTE]
-> `last-pane` is a single-slot handle representing the most recently created or
-> targeted pane. Launching a new job or split overwrites this handle.
-
-______________________________________________________________________
-
-## Resolving the Target Terminal
-
-Ghostty registers all active terminals (standard windows and Quick Terminal
-overlays) under `every terminal`. Extract the caller TTY from session processes
-(checking child `$$` then parent `$PPID`), falling back to the front window if
-no TTY is present:
+**Caller TTY.** Ghostty lists every terminal, including Quick Terminal
+overlays, under `every terminal`. Find the caller's TTY from this shell or its
+parent, so a new pane opens beside the caller; with no TTY, the scripts fall
+back to the front window. Put this, with the state lines above, at the top of
+each create or launch command below:
 
 ```bash
 tty_dev=$(ps -o tty= -p $$ 2>/dev/null | grep -v '?' | tr -d ' ')
 [ -n "$tty_dev" ] || tty_dev=$(ps -o tty= -p $PPID 2>/dev/null | grep -v '?' | tr -d ' ')
-case "$tty_dev" in
-  '') TTY_DEV="" ;;
-  *)  TTY_DEV="/dev/$tty_dev" ;;
-esac
+case "$tty_dev" in '') TTY_DEV="" ;; *) TTY_DEV="/dev/$tty_dev" ;; esac
 ```
 
-______________________________________________________________________
+Pass values to AppleScript as positional arguments (`argv`), never by
+interpolating them into the script, to avoid escaping bugs.
 
-## Configuration Reference (`surface configuration`)
+## Surface configuration
 
 | Property                    | Type | Description                                        |
 | :-------------------------- | :--- | :------------------------------------------------- |
@@ -108,31 +85,16 @@ ______________________________________________________________________
 | `initial input`             | text | Text sent to the interactive shell after launch.   |
 | `environment variables`     | list | List of `"KEY=VALUE"` strings.                     |
 
-> [!NOTE]
-> **`command` vs `initial input`:**
->
-> - Setting `command` runs a direct non-interactive binary or runner script
->   (skipping `~/.zshrc`, which avoids 1Password, Touch ID, or startup rc
->   prompts). Setting `wait after command: true` keeps the pane open for review
->   until dismissed or closed by ID.
-> - Setting `initial input` launches your default login shell and types into it,
->   loading full shell aliases and rc files.
+Use `command` to run a binary or runner script without a login shell, which
+skips `~/.zshrc` and the 1Password, Touch ID, or rc prompts it can trigger;
+add `wait after command` to keep the pane open for review. Use
+`initial input` to start your login shell with its aliases and type into it.
 
-______________________________________________________________________
+## Create a split, tab, or window
 
-## Creating Splits, Tabs, and Windows
-
-Always pass variables as positional arguments (`argv`) to avoid escaping bugs.
-
-### 1. Interactive Split Pane
+**Split.** Directions are `right`, `down`, `left`, and `up`.
 
 ```bash
-STATE_DIR="/tmp/ghostty-skill-$(id -u)"
-mkdir -p "$STATE_DIR"
-
-tty_dev=$(ps -o tty= -p $$ 2>/dev/null | grep -v '?' | tr -d ' ')
-[ -n "$tty_dev" ] || tty_dev=$(ps -o tty= -p $PPID 2>/dev/null | grep -v '?' | tr -d ' ')
-case "$tty_dev" in '') TTY_DEV="" ;; *) TTY_DEV="/dev/$tty_dev" ;; esac
 TARGET_DIR="$PWD"
 INIT_INPUT="echo 'hello from split'"
 
@@ -163,24 +125,11 @@ APPLESCRIPT
 printf '%s\n' "$TARGET_ID" > "$STATE_DIR/last-pane"
 ```
 
-Directions: `right`, `down`, `left`, `up`.
-
-### 2. Create New Tab (Guarded for Quick Terminal)
-
-> [!WARNING]
-> **Quick Terminal Tab Restriction:**
-> Ghostty does not support tabs in the Quick Terminal overlay. Calling
-> `new tab` while in the Quick Terminal displays a blocking modal dialog.
-> Guard against this by checking window membership:
+**Tab.** The Quick Terminal has no tabs, and `new tab` there opens a blocking
+modal dialog, so this script opens a window instead when the caller isn't in
+a standard window:
 
 ```bash
-STATE_DIR="/tmp/ghostty-skill-$(id -u)"
-mkdir -p "$STATE_DIR"
-
-tty_dev=$(ps -o tty= -p $$ 2>/dev/null | grep -v '?' | tr -d ' ')
-[ -n "$tty_dev" ] || tty_dev=$(ps -o tty= -p $PPID 2>/dev/null | grep -v '?' | tr -d ' ')
-case "$tty_dev" in '') TTY_DEV="" ;; *) TTY_DEV="/dev/$tty_dev" ;; esac
-
 TARGET_ID=$(osascript - "$TTY_DEV" "$PWD" <<'APPLESCRIPT'
 on run argv
   set targetTty to item 1 of argv
@@ -223,12 +172,9 @@ APPLESCRIPT
 printf '%s\n' "$TARGET_ID" > "$STATE_DIR/last-pane"
 ```
 
-### 3. Create Standalone Window
+**Window.**
 
 ```bash
-STATE_DIR="/tmp/ghostty-skill-$(id -u)"
-mkdir -p "$STATE_DIR"
-
 TARGET_ID=$(osascript - "$PWD" <<'APPLESCRIPT'
 on run argv
   set targetDir to item 1 of argv
@@ -246,142 +192,134 @@ APPLESCRIPT
 printf '%s\n' "$TARGET_ID" > "$STATE_DIR/last-pane"
 ```
 
-______________________________________________________________________
+## Run a job out of band
 
-## Out-of-Band Job Execution Pattern
+Run a heavy suite or build in its own pane so its output stays out of the
+agent's context, then read only the result.
 
-Run heavy test suites or builds out-of-band to prevent token bloat in the agent
-context window. Write the command to a temporary runner script and pass the log
-path via `environment variables`:
+1. **Launch.** Write the command into a runner script, start it in a split
+   with the log path in `environment variables`, and record the job:
 
-### Step 1: Launch the Out-of-Band Job
+   ```bash
+   TIMESTAMP=$(date +%s)
+   RUNNER_SCRIPT="$STATE_DIR/runner-$TIMESTAMP.sh"
+   LOG_FILE="$STATE_DIR/job-$TIMESTAMP.log"
 
-```bash
-STATE_DIR="/tmp/ghostty-skill-$(id -u)"
-mkdir -p "$STATE_DIR"
-TIMESTAMP=$(date +%s)
-RUNNER_SCRIPT="$STATE_DIR/runner-$TIMESTAMP.sh"
-LOG_FILE="$STATE_DIR/job-$TIMESTAMP.log"
+   cat << 'EOF' > "$RUNNER_SCRIPT"
+   #!/bin/bash
+   set -o pipefail
+   : "${GHOSTTY_JOB_LOG:?GHOSTTY_JOB_LOG environment variable not set}"
+   {
+     # Insert actual heavy command here
+     make test-integration
 
-cat << 'EOF' > "$RUNNER_SCRIPT"
-#!/bin/bash
-set -o pipefail
-: "${GHOSTTY_JOB_LOG:?GHOSTTY_JOB_LOG environment variable not set}"
-{
-  # Insert actual heavy command here
-  make test-integration
+     EXIT=$?
+     command -v terminal-notifier >/dev/null 2>&1 && terminal-notifier \
+       -title "Ghostty Task" \
+       -message "Finished with exit code $EXIT" \
+       -activate com.mitchellh.ghostty \
+       -sound default
+     echo "__EXIT__:$EXIT"
+   } 2>&1 | tee "$GHOSTTY_JOB_LOG"
+   EOF
+   chmod +x "$RUNNER_SCRIPT"
 
-  EXIT=$?
-  command -v terminal-notifier >/dev/null 2>&1 && terminal-notifier \
-    -title "Ghostty Task" \
-    -message "Finished with exit code $EXIT" \
-    -activate com.mitchellh.ghostty \
-    -sound default
-  echo "__EXIT__:$EXIT"
-} 2>&1 | tee "$GHOSTTY_JOB_LOG"
-EOF
-chmod +x "$RUNNER_SCRIPT"
+   JOB_TERM_ID=$(osascript - "$TTY_DEV" "$PWD" "$RUNNER_SCRIPT" "$LOG_FILE" <<'APPLESCRIPT'
+   on run argv
+     set targetTty to item 1 of argv
+     set targetDir to item 2 of argv
+     set runnerPath to item 3 of argv
+     set logPath to item 4 of argv
+     tell application "Ghostty"
+       if targetTty is not "" and (count of (terminals whose tty is targetTty)) > 0 then
+         set myTerm to (first terminal whose tty is targetTty)
+       else
+         set myTerm to focused terminal of selected tab of front window
+       end if
+       set cfg to new surface configuration
+       set initial working directory of cfg to targetDir
+       set command of cfg to runnerPath
+       set environment variables of cfg to {"GHOSTTY_JOB_LOG=" & logPath}
+       set wait after command of cfg to true
+       set newTerm to split myTerm direction right with configuration cfg
+       return id of newTerm
+     end tell
+   end run
+   APPLESCRIPT
+   )
 
-tty_dev=$(ps -o tty= -p $$ 2>/dev/null | grep -v '?' | tr -d ' ')
-[ -n "$tty_dev" ] || tty_dev=$(ps -o tty= -p $PPID 2>/dev/null | grep -v '?' | tr -d ' ')
-case "$tty_dev" in '') TTY_DEV="" ;; *) TTY_DEV="/dev/$tty_dev" ;; esac
+   [ -n "$JOB_TERM_ID" ] || { echo "Failed to launch job surface."; exit 1; }
 
-JOB_TERM_ID=$(osascript - "$TTY_DEV" "$PWD" "$RUNNER_SCRIPT" "$LOG_FILE" <<'APPLESCRIPT'
-on run argv
-  set targetTty to item 1 of argv
-  set targetDir to item 2 of argv
-  set runnerPath to item 3 of argv
-  set logPath to item 4 of argv
-  tell application "Ghostty"
-    if targetTty is not "" and (count of (terminals whose tty is targetTty)) > 0 then
-      set myTerm to (first terminal whose tty is targetTty)
-    else
-      set myTerm to focused terminal of selected tab of front window
-    end if
-    set cfg to new surface configuration
-    set initial working directory of cfg to targetDir
-    set command of cfg to runnerPath
-    set environment variables of cfg to {"GHOSTTY_JOB_LOG=" & logPath}
-    set wait after command of cfg to true
-    set newTerm to split myTerm direction right with configuration cfg
-    return id of newTerm
-  end tell
-end run
-APPLESCRIPT
-)
+   printf 'LOG_FILE=%s\nJOB_TERM_ID=%s\nRUNNER=%s\n' \
+     "$LOG_FILE" "$JOB_TERM_ID" "$RUNNER_SCRIPT" > "$STATE_DIR/last-job"
+   printf '%s\n' "$JOB_TERM_ID" > "$STATE_DIR/last-pane"
 
-[ -n "$JOB_TERM_ID" ] || { echo "Failed to launch job surface."; exit 1; }
+   # Short initial check (up to 5s) in case the command is fast
+   for _ in $(seq 1 5); do
+     [ -f "$LOG_FILE" ] && grep -q '__EXIT__:' "$LOG_FILE" && break
+     sleep 1
+   done
+   ```
 
-# Persist job state and pane target for future turns
-printf 'LOG_FILE=%s\nJOB_TERM_ID=%s\nRUNNER=%s\n' \
-  "$LOG_FILE" "$JOB_TERM_ID" "$RUNNER_SCRIPT" > "$STATE_DIR/last-job"
-printf '%s\n' "$JOB_TERM_ID" > "$STATE_DIR/last-pane"
+   Done when `last-job` is written.
+2. **Check and harvest** on later turns. This is safe to repeat: it reports
+   running, done with the exit code and log tail, or an error if the pane
+   died before writing its sentinel, and on done or error it closes the pane
+   and cleans up:
 
-# Short initial check (up to 5s) in case command is fast
-for _ in $(seq 1 5); do
-  [ -f "$LOG_FILE" ] && grep -q '__EXIT__:' "$LOG_FILE" && break
-  sleep 1
-done
-```
+   ```bash
+   STATE_DIR="/tmp/ghostty-skill-$(id -u)"
+   [ -f "$STATE_DIR/last-job" ] || { echo "No active Ghostty job recorded."; exit 1; }
+   . "$STATE_DIR/last-job"
 
-### Step 2: Idempotent Status Check & Harvest
+   ALIVE=$(osascript - "$JOB_TERM_ID" <<'APPLESCRIPT'
+   on run argv
+     set targetId to item 1 of argv
+     tell application "Ghostty"
+       return (count of (terminals whose id is targetId))
+     end tell
+   end run
+   APPLESCRIPT
+   )
 
-Run this in subsequent turns to check progress, extract exit status, and close
-the completed pane:
+   if grep -q '__EXIT__:' "$LOG_FILE" 2>/dev/null; then
+     EXIT_CODE=$(grep -o '__EXIT__:[0-9]*' "$LOG_FILE" | tail -1 | cut -d: -f2)
+     echo "STATUS: DONE (exit $EXIT_CODE)"
+     echo "--- Log Tail ---"
+     tail -n 40 "$LOG_FILE"
 
-```bash
-STATE_DIR="/tmp/ghostty-skill-$(id -u)"
-[ -f "$STATE_DIR/last-job" ] || { echo "No active Ghostty job recorded."; exit 1; }
-. "$STATE_DIR/last-job"
+     osascript - "$JOB_TERM_ID" <<'APPLESCRIPT'
+   on run argv
+     set targetId to item 1 of argv
+     tell application "Ghostty"
+       try
+         close (first terminal whose id is targetId)
+       end try
+     end tell
+   end run
+   APPLESCRIPT
 
-ALIVE=$(osascript - "$JOB_TERM_ID" <<'APPLESCRIPT'
-on run argv
-  set targetId to item 1 of argv
-  tell application "Ghostty"
-    return (count of (terminals whose id is targetId))
-  end tell
-end run
-APPLESCRIPT
-)
+     [ "$(cat "$STATE_DIR/last-pane" 2>/dev/null)" = "$JOB_TERM_ID" ] && rm -f "$STATE_DIR/last-pane"
+     rm -f "$RUNNER" "$STATE_DIR/last-job"
+   elif [ "${ALIVE:-0}" = "0" ]; then
+     echo "STATUS: ERROR — pane $JOB_TERM_ID closed or crashed before writing sentinel."
+     [ -f "$LOG_FILE" ] && tail -n 40 "$LOG_FILE"
+     [ "$(cat "$STATE_DIR/last-pane" 2>/dev/null)" = "$JOB_TERM_ID" ] && rm -f "$STATE_DIR/last-pane"
+     rm -f "$RUNNER" "$STATE_DIR/last-job"
+     exit 1
+   else
+     LINE_COUNT=$(wc -l < "$LOG_FILE" 2>/dev/null || echo 0)
+     echo "STATUS: RUNNING ($LINE_COUNT log lines generated so far in pane $JOB_TERM_ID)"
+   fi
+   ```
 
-if grep -q '__EXIT__:' "$LOG_FILE" 2>/dev/null; then
-  EXIT_CODE=$(grep -o '__EXIT__:[0-9]*' "$LOG_FILE" | tail -1 | cut -d: -f2)
-  echo "STATUS: DONE (exit $EXIT_CODE)"
-  echo "--- Log Tail ---"
-  tail -n 40 "$LOG_FILE"
+   Done when it reports done or error.
 
-  # Close completed pane
-  osascript - "$JOB_TERM_ID" <<'APPLESCRIPT'
-on run argv
-  set targetId to item 1 of argv
-  tell application "Ghostty"
-    try
-      close (first terminal whose id is targetId)
-    end try
-  end tell
-end run
-APPLESCRIPT
+## Act on a saved pane
 
-  # Clean runner script and terminal job state
-  [ "$(cat "$STATE_DIR/last-pane" 2>/dev/null)" = "$JOB_TERM_ID" ] && rm -f "$STATE_DIR/last-pane"
-  rm -f "$RUNNER" "$STATE_DIR/last-job"
-elif [ "${ALIVE:-0}" = "0" ]; then
-  echo "STATUS: ERROR — pane $JOB_TERM_ID closed or crashed before writing sentinel."
-  [ -f "$LOG_FILE" ] && tail -n 40 "$LOG_FILE"
-  [ "$(cat "$STATE_DIR/last-pane" 2>/dev/null)" = "$JOB_TERM_ID" ] && rm -f "$STATE_DIR/last-pane"
-  rm -f "$RUNNER" "$STATE_DIR/last-job"
-  exit 1
-else
-  LINE_COUNT=$(wc -l < "$LOG_FILE" 2>/dev/null || echo 0)
-  echo "STATUS: RUNNING ($LINE_COUNT log lines generated so far in pane $JOB_TERM_ID)"
-fi
-```
-
-______________________________________________________________________
-
-## Interacting with a Target Pane
-
-### 1. Send Text Input (Bracketed Paste Safe)
+Start each of these with the target check, which loads `last-pane` (falling
+back to the last job's pane) and stops if that pane is gone. When closing a
+pane that's already gone, exit 0 instead, since the goal is met.
 
 ```bash
 STATE_DIR="/tmp/ghostty-skill-$(id -u)"
@@ -396,7 +334,11 @@ end run
 APPLESCRIPT
 )
 [ "${ALIVE:-0}" != "0" ] || { echo "Saved pane $TARGET_ID no longer exists."; rm -f "$STATE_DIR/last-pane"; exit 1; }
+```
 
+**Send text,** pasted safely, then Enter:
+
+```bash
 osascript - "$TARGET_ID" "git status" <<'APPLESCRIPT'
 on run argv
   set targetId to item 1 of argv
@@ -410,22 +352,9 @@ end run
 APPLESCRIPT
 ```
 
-### 2. Send Keystrokes & Modifiers
+**Send a keystroke** with modifiers, such as Ctrl-C:
 
 ```bash
-STATE_DIR="/tmp/ghostty-skill-$(id -u)"
-TARGET_ID=$(cat "$STATE_DIR/last-pane" 2>/dev/null)
-[ -n "$TARGET_ID" ] || { . "$STATE_DIR/last-job" 2>/dev/null; TARGET_ID="$JOB_TERM_ID"; }
-[ -n "$TARGET_ID" ] || { echo "No saved target pane."; exit 1; }
-
-ALIVE=$(osascript - "$TARGET_ID" <<'APPLESCRIPT'
-on run argv
-  tell application "Ghostty" to return (count of (terminals whose id is (item 1 of argv)))
-end run
-APPLESCRIPT
-)
-[ "${ALIVE:-0}" != "0" ] || { echo "Saved pane $TARGET_ID no longer exists."; rm -f "$STATE_DIR/last-pane"; exit 1; }
-
 osascript - "$TARGET_ID" <<'APPLESCRIPT'
 on run argv
   set targetId to item 1 of argv
@@ -437,22 +366,9 @@ end run
 APPLESCRIPT
 ```
 
-### 3. Close the Target Pane
+**Close the pane,** then clear `last-pane`:
 
 ```bash
-STATE_DIR="/tmp/ghostty-skill-$(id -u)"
-TARGET_ID=$(cat "$STATE_DIR/last-pane" 2>/dev/null)
-[ -n "$TARGET_ID" ] || { . "$STATE_DIR/last-job" 2>/dev/null; TARGET_ID="$JOB_TERM_ID"; }
-[ -n "$TARGET_ID" ] || { echo "No saved target pane."; exit 1; }
-
-ALIVE=$(osascript - "$TARGET_ID" <<'APPLESCRIPT'
-on run argv
-  tell application "Ghostty" to return (count of (terminals whose id is (item 1 of argv)))
-end run
-APPLESCRIPT
-)
-[ "${ALIVE:-0}" != "0" ] || { echo "Saved pane $TARGET_ID already closed."; rm -f "$STATE_DIR/last-pane"; exit 0; }
-
 osascript - "$TARGET_ID" <<'APPLESCRIPT'
 on run argv
   set targetId to item 1 of argv
@@ -466,11 +382,9 @@ APPLESCRIPT
 rm -f "$STATE_DIR/last-pane"
 ```
 
-______________________________________________________________________
+## List terminals
 
-## Inspection
-
-List all active Ghostty surfaces, titles, TTYs, and foreground PIDs:
+Show each surface's ID, TTY, foreground PID, and title:
 
 ```bash
 osascript -e '
