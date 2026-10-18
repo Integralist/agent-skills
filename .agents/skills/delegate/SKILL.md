@@ -1,6 +1,8 @@
 ---
 name: delegate
-description: Spawn an appropriate subagent to handle a task.
+description: >-
+  Hand a task to the best-matched subagent instead of doing it yourself. Use
+  when the user asks to delegate a task.
 disable-model-invocation: true
 argument-hint: <task description>
 metadata:
@@ -9,64 +11,37 @@ metadata:
 
 # Delegate to Agent
 
-Delegate the task to a subagent. Do not execute work directly.
+Hand the task to a subagent straight away; the subagent does the work, so
+spawn it before any reads or commands of your own.
 
-1. Parse everything after `/delegate` as the task description
-1. Select a subagent role from the table below
-1. Invoke the subagent immediately — no preliminary reads or
-   commands
-1. Report results
+1. **Take the task** from everything the user passed. Done when you can state
+   it in a sentence.
+2. **Pick the subagent** by role, using your platform's actual agent names,
+   and fall back to the general-purpose agent when no specialist exists:
 
-## Agent Selection
+   | Task                                | Role                        |
+   | ----------------------------------- | --------------------------- |
+   | Find code or files, trace deps      | Exploration                 |
+   | Design an approach or architecture  | Planning                    |
+   | Commands, multi-step work, refactor | General-purpose             |
+   | Code review                         | Review specialist           |
+   | Web research                        | Research specialist         |
 
-Route to the subagent that best matches the task. The roles
-below are descriptions, not agent names — use your platform's
-actual agent names.
+   Done when the role is chosen.
+3. **Spawn it** with the full task. Read-only work (find, trace, review,
+   research) can go to a fire-and-forget subagent. For editing or iterative
+   work, follow [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md):
+   use a delegate the user can talk to mid-flight, or keep the work in the
+   main thread, so objections don't pile up behind a large diff. Done when the
+   subagent is running.
+4. **Report** its results, following the shared completion and retry
+   protocol if it stopped early. Done when the user has the outcome.
 
-| Task Type                           | Subagent Role               |
-| ----------------------------------- | --------------------------- |
-| Find code/files, trace deps         | Exploration / investigation |
-| Design approach, architecture       | Planning                    |
-| Commands, multi-step work, refactor | General-purpose / workhorse |
-| Code review \*                      | Review specialist           |
-| Web research \*                     | Research specialist         |
-
-\* Fall back to your platform's general-purpose / workhorse
-agent if no specialist is available.
-
-## Anti-patterns
-
-- Reading files or running commands before delegating
-- "Let me quickly check..." before spawning the subagent
-
-## Steerability for editing tasks
-
-A fire-and-forget subagent is fine for read-only work (find,
-trace, review, research) — you consume the result at the end.
-For **editing or iterative tasks** (refactor, multi-step
-implementation), a subagent the user can't interrupt ploughs
-ahead while objections pile up, leaving a large diff to unwind.
-
-For those, prefer a primitive the user can talk to mid-flight — a
-named teammate (below) if the harness supports it, otherwise keep
-the work in the main thread rather than a sealed subagent. See
-[`shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)
-for the full rule, including completion and retry after a turn-limit stop.
-
-## Agent teams (if your harness supports it)
-
-For editing or iterative tasks, spawn the delegate as a named
-teammate the user can chat with directly:
-
-- Create a team named `delegate-{short-slug}` (a 2-3 word
-  kebab-case summary of the task, e.g. `delegate-fix-auth`).
-- Create a single task describing the work and spawn one agent
-  assigned to it. The agent prompt must include the full task
-  description, the working directory, and instructions to use all
-  relevant tools and to update `docs/**/*.md` or `**/README.md`
-  when behavior, public APIs, or usage patterns change.
-- Have the agent report findings back to the team lead and mark
-  the task completed when done.
-
-See [`shared/AGENT-TEAMS.md`](../shared/AGENT-TEAMS.md) for
-enablement instructions.
+**Agent teams.** Where the harness supports them (see
+[AGENT-TEAMS.md](../shared/AGENT-TEAMS.md)), make an editing delegate a named
+teammate: create a team `delegate-<slug>` (a 2–3 word kebab-case summary,
+such as `delegate-fix-auth`) with one task and one agent assigned to it. Give
+the agent the full task, the working directory, and instructions to use all
+relevant tools, to update `docs/**/*.md` or `**/README.md` when behaviour,
+public APIs, or usage change, and to report back to the team lead and mark
+the task complete when done.
