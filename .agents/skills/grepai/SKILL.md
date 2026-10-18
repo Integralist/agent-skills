@@ -1,39 +1,26 @@
 ---
 name: grepai
 description: >-
-  Semantic code search with grepai. Use when searching by intent
-  or concept rather than exact text (e.g. "where is rate limiting
-  implemented" when you don't know the naming conventions).
+  Search code by meaning with grepai. Use when searching by intent or concept
+  rather than exact text, such as "where is rate limiting implemented" in a
+  codebase whose naming you don't know, or when tracing a function's callers
+  across a large codebase.
 metadata:
   model-tier: trivial
 ---
 
-# grepai — semantic code search
+# grepai
 
-## When to use
+Find code by what it does rather than what it's called: concepts such as
+"authentication flow" or "error recovery logic", code in an unfamiliar
+codebase, and the callers of a function. For exact text or a regex, use `rg`.
 
-- Searching by concept or intent ("authentication flow",
-  "error recovery logic") when you don't know the exact names
-- Exploring unfamiliar codebases where naming conventions are unknown
-- Tracing callers of a function across a large codebase
-
-For exact text or regex pattern matching, use `rg` (ripgrep) instead.
-
-## Install (if not present)
-
-Check: `which grepai`
+**Install.** If `which grepai` finds nothing, run
+`brew install yoanbernabeu/tap/grepai`. `grepai -h` lists the subcommands.
 
 ```bash
-brew install yoanbernabeu/tap/grepai
-```
-
-Run `grepai -h` to learn available subcommands and options.
-
-## Quick start
-
-```bash
-grepai init                        # Initialize in your project
-grepai watch                       # Start indexing daemon
-grepai search "error handling"     # Search semantically
-grepai trace callers "Login"       # Find who calls a function
+grepai init                        # set up the project
+grepai watch                       # start the indexing daemon
+grepai search "error handling"     # search by meaning
+grepai trace callers "Login"       # find who calls a function
 ```
