@@ -265,6 +265,7 @@ authenticate via SSO on first use.
 | **eval**                          | Create and run skill evaluations, then compare with the previous run.                                    |
 | **execute-plan**                  | Compile, delegate, verify, and correct one plan slice at a time without model switching.                 |
 | **explain-code**                  | Explain what code does and why it matters to a newcomer, with a small visual.                            |
+| **fix-failing-tests**             | Diagnose supplied test failures, then fix them interactively.                                            |
 | **ghostty**                       | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.                           |
 | **git-metadata**                  | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.                    |
 | **go-api**                        | Scaffold a production-ready Go API with local tooling and observability.                                 |
@@ -305,7 +306,6 @@ authenticate via SSO on first use.
 | **teach**                         | Teach a concept using persistent lessons, missions, and progress records.                                |
 | **teach-with-slides**             | Teach a topic or concept through an educational slide deck.                                              |
 | **tech-docs**                     | Write or improve concise, maintainable technical documentation.                                          |
-| **test-feedback**                 | Diagnose supplied test failures, then fix them interactively.                                            |
 | **to-adr**                        | Extract genuine architecture decisions into standalone ADRs.                                             |
 | **to-plan**                       | Write a plan of vertical slices, outcome milestones, dependencies, and PR grouping.                      |
 | **to-prd**                        | Extract product goals, scope, and success measures into a PRD.                                           |

@@ -1,5 +1,5 @@
 ---
-name: test-feedback
+name: fix-failing-tests
 description: >-
   Diagnose and fix test failures from saved test output. Use when the user
   shares test output or says "tests fail".
@@ -7,7 +7,7 @@ metadata:
   model-tier: complex
 ---
 
-# Test Feedback
+# Fix Failing Tests
 
 Find the failures in a test-output file, have a read-only subagent diagnose
 their root causes, then apply the fixes in the main thread, where the user can

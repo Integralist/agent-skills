@@ -46,7 +46,7 @@ Prefer, in order:
    with the user, who can veto, adjust, or stop each one. This
    keeps the parallel-scan speed of a subagent while returning
    every edit to a steerable context. See `cleanup` and
-   `test-feedback` for worked examples.
+   `fix-failing-tests` for worked examples.
 1. **Verified-pattern fan-out.** When the edit is mechanical
    replication of one pattern across many independent files,
    establish and verify the pattern on a single representative case
