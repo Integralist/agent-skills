@@ -1,148 +1,76 @@
 ---
 name: teach
-description: Teach the user a new skill or concept, within this workspace.
+description: >-
+  Teach the user a skill or concept over several sessions, keeping the learning
+  state in the current workspace. Use when the user asks to learn a topic.
 disable-model-invocation: true
 argument-hint: What would you like to learn about?
 metadata:
   model-tier: complex
 ---
 
-The user wants you to teach them something. This is stateful — they intend to
-learn the topic over multiple sessions.
+# Teach
 
-## Teaching workspace
+Teach the user a topic across many sessions, with the current directory as the
+teaching workspace. Every lesson serves the user's mission, sits in their zone
+of proximal development (hard enough to stretch them, not so hard they stall),
+and rests on trusted sources rather than your parametric knowledge. Deep
+learning needs knowledge from high-trust resources, skills from interactive
+lessons, and wisdom from other practitioners; the mix varies by topic, from
+knowledge-heavy theoretical physics to skills-heavy yoga.
 
-Treat the current directory as a teaching workspace. Learning state lives in
-these files:
+**Workspace.** Create each file when it's first needed. The formats for
+`MISSION.md`, `RESOURCES.md`, `GLOSSARY.md`, and learning records are in
+[WORKSPACE-FILES.md](WORKSPACE-FILES.md).
 
-- `MISSION.md` — *why* the user wants the topic. Grounds all teaching. Format:
-  [MISSION-FORMAT.md](./MISSION-FORMAT.md).
-- `./reference/*.html` — reference materials: the compressed learnings from
-  lessons (cheat sheets, reference algorithms, syntax, yoga poses, glossaries).
-  Beautiful documents that print well and are designed for quick reference.
-- `RESOURCES.md` — resources to ground teaching in or to acquire knowledge from.
-  Format: [RESOURCES-FORMAT.md](./RESOURCES-FORMAT.md).
-- `./learning-records/*.md` — what the user has learned. Like architectural
-  decision records: capture non-obvious lessons and key insights that may need
-  revising or that drive future sessions. Used to calculate the zone of proximal
-  development. Titled `0001-<dash-case-name>.md`, number incrementing each time.
-  Format: [LEARNING-RECORD-FORMAT.md](./LEARNING-RECORD-FORMAT.md).
-- `./lessons/*.html` — lessons. A **lesson** is a single self-contained HTML
-  output teaching one tightly-scoped thing tied to the mission. The primary unit
-  of teaching.
-- `NOTES.md` — scratchpad for user preferences and working notes.
+- `MISSION.md`: why the user is learning this; every teaching decision traces
+  back to it.
+- `RESOURCES.md`: the vetted sources that lessons draw from.
+- `GLOSSARY.md`: the workspace's canonical terms, used in every lesson.
+- `learning-records/NNNN-slug.md`: what the user has shown they know, which
+  sets their zone of proximal development.
+- `lessons/NNNN-slug.html`: one lesson per file, the main unit of teaching.
+- `reference/*.html`: quick-reference sheets (syntax, algorithms, poses,
+  routines) that compress what lessons taught and that the user comes back
+  to. Make them print well.
+- `NOTES.md`: how the user likes to be taught, and anything else to keep in
+  mind when designing lessons.
 
-## Philosophy
+**Each session:**
 
-Deep learning needs three things:
+1. **Pin down the mission.** If `MISSION.md` is missing or vague, ask why the
+   user wants to learn this until you have a concrete outcome; without it
+   lessons drift into the abstract and you can't judge what's next. Done when
+   `MISSION.md` states a concrete goal.
+2. **Gather resources** until `RESOURCES.md` covers what the mission needs.
+   Fan out read-only research subagents, following
+   [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md), to find
+   and vet candidates and return annotated links; they change nothing. Done
+   when the next lesson's claims can all be sourced from `RESOURCES.md`.
+3. **Pick the next thing.** Teach what the user names, if they name
+   something. Otherwise read `learning-records/` and pick the most
+   mission-relevant skill in their zone. When they say they already know
+   something, write a learning record for it. Done when you've named one
+   tightly scoped skill.
+4. **Write the lesson,** then help the user open it with a single command.
+   Done when the lesson file exists and the user has the command.
+5. **Record what changed:** a learning record when the user shows real
+   understanding, a glossary term once they use it correctly, a reference
+   sheet for knowledge they'll reuse, and teaching preferences in `NOTES.md`.
+   Done when the workspace reflects what the user now knows.
 
-- **Knowledge** — captured from high-quality, high-trust resources.
-- **Skills** — acquired through highly-relevant interactive lessons you devise
-  from the knowledge.
-- **Wisdom** — from interacting with other learners and practitioners.
+**Lessons.** Each lesson is one self-contained, well-designed HTML file that
+teaches one skill, quickly, for a tangible win. Teach only the knowledge that
+skill needs, from trusted resources, then have the user practise it on a
+feedback loop that responds as immediately and automatically as possible:
+in-browser quizzes and tasks, guided real-world steps such as yoga poses, or
+scenario questions in the chat. Cite a source for every claim, use the
+workspace glossary's terms, and remind the user they can ask you follow-up
+questions. When an analogy would help, follow
+[ANALOGY-GUIDANCE.md](../shared/ANALOGY-GUIDANCE.md).
 
-Until `RESOURCES.md` is well-populated, focus on finding high-quality resources.
-Never trust your parametric knowledge. Fan out read-only research subagents to
-gather and vet candidates in parallel — review-only; do not modify code or run
-tools that change state — returning annotated links for `RESOURCES.md`. Follow
-the [shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md), including
-its completion and retry protocol. Lesson authoring and learner interaction
-stay in the main thread.
-
-Topics vary in mix: theoretical physics is more knowledge-based; yoga is more
-skills-based.
-
-## Lessons
-
-The main thing you produce — where knowledge and skills reach the user. Each
-lesson is one self-contained HTML file in `./lessons/`, titled
-`0001-<dash-case-name>.html` with the number incrementing each time.
-
-- **Beautiful** — clean, readable typography and layout; the user returns to
-  review them.
-- Teaches **one thing only**. Completable very quickly, giving a tangible win to
-  build on. Tied directly to the mission and in the user's zone of proximal
-  development.
-- Knowledge first gathered from trusted resources, then practice the skill via
-  an interactive feedback loop.
-- Littered with citations — links to external resources backing every claim.
-  This builds trust and gives a path to go deeper.
-- Include a reminder to ask the agent followup questions — you are the teacher
-  and can clarify anything.
-- Make opening a lesson as easy as possible — ideally a single CLI command that
-  opens the HTML in the browser.
-
-When an analogy could clarify an abstract concept, follow the shared
-[analogy guidance](../shared/ANALOGY-GUIDANCE.md).
-
-## The mission
-
-Every lesson ties to the mission — the user's reason for learning the topic.
-
-If the mission is unclear or `MISSION.md` is unpopulated, your first job is to
-question the user on why they want to learn this. Without it, knowledge isn't
-grounded in real-world goals, lessons feel abstract, and you can't judge what to
-teach next.
-
-## Zone of proximal development
-
-Each lesson should challenge the learner "just enough".
-
-If the user names an exact thing to learn, teach that. Otherwise find their zone
-of proximal development by:
-
-- Reading their `learning-records`.
-- Picking the most relevant thing for their mission that fits the zone.
-
-If the user says they already know a topic, record it in `learning-records`.
-
-## Acquiring knowledge & skills
-
-Design each lesson around a skill. Include only the knowledge that skill
-requires. Teach the knowledge first, then have the user practice via an
-interactive feedback loop.
-
-### Skills
-
-Teach skills through interactive lessons. Tools available:
-
-- Interactive lessons with quizzes and light in-browser tasks.
-- Lessons guiding the user through real-world steps (e.g. yoga poses).
-- In-agent quizzes: scenario-based questions about what they've learned.
-
-Each must run on a **feedback loop** giving feedback as immediately and
-automatically as possible.
-
-## Acquiring wisdom
-
-Wisdom comes from real-world interaction — testing skills outside the learning
-environment.
-
-When a question appears to need wisdom, attempt to answer, but default to
-delegating to a **community**: a place (online or offline) to test skills for
-real — a forum, subreddit, real-world class (budget permitting), or local
-interest group. Find high-reputation communities the user can join. If the user
-prefers not to join one, respect it.
-
-## Reference documents
-
-Create reference documents alongside lessons; lessons can reference them. They
-track raw units of knowledge useful across lessons. Lessons are rarely
-revisited; reference docs are — they're the compressed essence of a lesson, in a
-quick-reference format.
-
-Topics that lend themselves to reference:
-
-- Syntax and code snippets for programming
-- Algorithms and flowcharts for processes
-- Yoga poses and sequences for yoga
-- Exercises and routines for fitness
-- Glossaries for any topic with its own nomenclature
-
-Glossaries especially are essential. Once created, adhere to one in every
-lesson.
-
-## `NOTES.md`
-
-Record here any preferences the user expresses about how they want to be taught,
-or things to keep in mind, so you can refer back when designing lessons.
+**Wisdom.** When a question needs real-world experience, give your best
+answer, then point the user to a high-reputation community where they can
+test the skill for real: a forum, subreddit, class (budget permitting), or
+local group. If they'd rather not join one, respect that and note it in
+`RESOURCES.md`.
