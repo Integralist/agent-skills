@@ -14,8 +14,8 @@ metadata:
 Look at a problem, proposal, or design through six isolated perspectives,
 based on Edward de Bono's Six Thinking Hats, then pull out what matters.
 It's for breadth: for a consequential choice that needs a durable
-recommendation, use the decide skill; for cross-model review with approval
-gates, use consensus; and to find defects in existing code, use code-review.
+recommendation, use the decide skill, and to find defects in existing code,
+use code-review.
 
 **Input.** Take a topic or proposal and an optional perspective. If the topic
 is too vague to frame as one focused question, ask one clarifying question;
@@ -63,5 +63,4 @@ short framing sentence and 5–10 concise points, with no synthesis.
    outcome, any sentiment worth acknowledging, the strongest unresolved
    unknown, and a concrete next step. Leave an exploratory question open
    rather than forcing a decision; recommend decide for a consequential
-   choice that emerges, or consensus for a need for independent model
-   review. Done when the next step is named.
+   choice that emerges. Done when the next step is named.

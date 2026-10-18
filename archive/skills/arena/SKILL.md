@@ -36,7 +36,7 @@ the way the consensus skill finds its consultants
    shared path is shared mutable state. Done when the task, rubric,
    runners, and paths are set.
 2. **Fan out.** Spawn all N subagents in one message, in the background,
-   following [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md).
+   following [SUBAGENT-STEERABILITY.md](../../../.agents/skills/shared/SUBAGENT-STEERABILITY.md).
    Give each the task, the shared grounding path, its output path, and a
    request for the artifact plus a short rationale naming the alternatives
    it considered and rejected; without the rationale you can't tell a

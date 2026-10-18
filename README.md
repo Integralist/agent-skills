@@ -142,6 +142,8 @@ mcp/google-workspace/               # Google Workspace MCP server (all agents)
 └── skills/                         # One directory per skill (see table below)
     └── shared/                     # Cross-skill policies and references
 
+archive/skills/                     # Retired skills (not installed; see its README)
+
 scripts/                            # Makefile helpers (not installed anywhere)
 ├── step.sh                         # One status line per install action
 ├── install-claude-json.sh          # Merges mcpServers into ~/.claude.json
@@ -238,10 +240,8 @@ authenticate via SSO on first use.
 | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
 | [**agents-md**](.agents/skills/agents-md/SKILL.md)                                         | Make `AGENTS.md` canonical and point `CLAUDE.md` and `GEMINI.md` to it.                                  |
 | [**architect**](.agents/skills/architect/SKILL.md)                                         | Turn an idea into research, a specification, and an implementation plan.                                 |
-| [**arena**](.agents/skills/arena/SKILL.md)                                                 | Spawn N parallel candidates, pick the strongest, and graft in the best of the rest.                      |
 | [**bcp**](.agents/skills/bcp/SKILL.md)                                                     | Create a branch, commit changes, and open a PR or submit its stack.                                      |
 | [**branch**](.agents/skills/branch/SKILL.md)                                               | Create a feature branch named from the current task.                                                     |
-| [**caveman**](.agents/skills/caveman/SKILL.md)                                             | Use technically accurate, token-saving caveman speech.                                                   |
 | [**changelog**](.agents/skills/changelog/SKILL.md)                                         | Add a changelog entry for uncommitted or branch changes.                                                 |
 | [**clarify**](.agents/skills/clarify/SKILL.md)                                             | Resolve ambiguous requirements before work begins.                                                       |
 | [**cleanup**](.agents/skills/cleanup/SKILL.md)                                             | Audit AI-generated clutter, then apply approved fixes interactively.                                     |
@@ -250,7 +250,6 @@ authenticate via SSO on first use.
 | [**code-review**](.agents/skills/code-review/SKILL.md)                                     | Review diffs for correctness, security, reliability, performance, and maintainability.                   |
 | [**code-review-feedback**](.agents/skills/code-review-feedback/SKILL.md)                   | Verify review feedback before accepting or implementing it.                                              |
 | [**commit**](.agents/skills/commit/SKILL.md)                                               | Group related changes and create clear Git commits.                                                      |
-| [**consensus**](.agents/skills/consensus/SKILL.md)                                         | Reach cross-model consensus through gated discussion rounds.                                             |
 | [**conventions-go**](.agents/skills/conventions-go/SKILL.md)                               | Apply Go conventions when editing or reviewing `.go` files.                                              |
 | [**conventions-markdown**](.agents/skills/conventions-markdown/SKILL.md)                   | Apply Markdown conventions when editing or reviewing `.md` files.                                        |
 | [**conventions-mermaid**](.agents/skills/conventions-mermaid/SKILL.md)                     | Apply Mermaid conventions when creating or editing diagram files or blocks.                              |
@@ -258,7 +257,6 @@ authenticate via SSO on first use.
 | [**conventions-sql**](.agents/skills/conventions-sql/SKILL.md)                             | Apply SQL conventions when editing or creating migration files.                                          |
 | [**critique**](.agents/skills/critique/SKILL.md)                                           | Find logical weaknesses in a document and suggest fixes.                                                 |
 | [**decide**](.agents/skills/decide/SKILL.md)                                               | Compare consequential options and record a reasoned decision.                                            |
-| [**delegate**](.agents/skills/delegate/SKILL.md)                                           | Choose and dispatch the right subagent for a task.                                                       |
 | [**distill**](.agents/skills/distill/SKILL.md)                                             | Shorten long prose without losing essential information.                                                 |
 | [**domain-modeling**](.agents/skills/domain-modeling/SKILL.md)                             | Define shared domain language and record architecture decisions.                                         |
 | [**durable-rules**](.agents/skills/durable-rules/SKILL.md)                                 | Turn session friction and recurring findings into checks, conventions, or skill changes.                 |
@@ -266,11 +264,8 @@ authenticate via SSO on first use.
 | [**execute-plan**](.agents/skills/execute-plan/SKILL.md)                                   | Compile, delegate, verify, and correct one plan slice at a time without model switching.                 |
 | [**explain-code**](.agents/skills/explain-code/SKILL.md)                                   | Explain what code does and why it matters to a newcomer, with a small visual.                            |
 | [**fix-failing-tests**](.agents/skills/fix-failing-tests/SKILL.md)                         | Diagnose supplied test failures, then fix them interactively.                                            |
-| [**ghostty**](.agents/skills/ghostty/SKILL.md)                                             | Control Ghostty terminal (macOS) to manage splits, tabs, and out-of-band jobs.                           |
 | [**git-metadata**](.agents/skills/git-metadata/SKILL.md)                                   | Analyze Git history for churn, ownership risk, defect clusters, velocity, and crises.                    |
-| [**go-api**](.agents/skills/go-api/SKILL.md)                                               | Scaffold a production-ready Go API with local tooling and observability.                                 |
 | [**go-testing**](.agents/skills/go-testing/SKILL.md)                                       | Write Go unit, integration, fuzz, and benchmark tests.                                                   |
-| [**grepai**](.agents/skills/grepai/SKILL.md)                                               | Search code semantically when exact names are unknown.                                                   |
 | [**grill-me**](.agents/skills/grill-me/SKILL.md)                                           | Start a grilling session for a plan, decision, or idea.                                                  |
 | [**grill-with-docs**](.agents/skills/grill-with-docs/SKILL.md)                             | Grill an idea while updating its glossary and ADRs.                                                      |
 | [**grilling**](.agents/skills/grilling/SKILL.md)                                           | Stress-test assumptions through a structured, relentless interview.                                      |
@@ -281,7 +276,6 @@ authenticate via SSO on first use.
 | [**is-it-safe**](.agents/skills/is-it-safe/SKILL.md)                                       | Assess the worst credible consequence of committing or merging a change.                                 |
 | [**jira**](.agents/skills/jira/SKILL.md)                                                   | Create, edit, assign, transition, search, and verify Jira issues.                                        |
 | [**llm-stats**](.agents/skills/llm-stats/SKILL.md)                                         | Chart Artificial Analysis LLM benchmarks against cost, tokens, time, and speed as an offline HTML page.  |
-| [**markdown-to-skill**](.agents/skills/markdown-to-skill/SKILL.md)                         | Convert a directory of Markdown documents into agent skills.                                             |
 | [**model-stats**](.agents/skills/model-stats/SKILL.md)                                     | Chart AI model usage, cost, and effort from local coding-CLI logs as an HTML page.                       |
 | [**mutation-testing**](.agents/skills/mutation-testing/SKILL.md)                           | Check whether tests detect behavior changes with deliberate mutations.                                   |
 | [**mysql-index-audit**](.agents/skills/mysql-index-audit/SKILL.md)                         | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.                                 |
@@ -435,29 +429,24 @@ Delta. **code-review** checks both kinds of spec whenever a diff touches them.
 
 ## Choosing an analysis skill
 
-| Skill                                                                | Use when                                                                                   | Primary output                                                                     |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| [**code-module-review**](.agents/skills/code-module-review/SKILL.md) | Understand a feature's structure and assess module ownership                               | Mermaid maps and evidence-backed findings                                          |
-| [**code-review**](.agents/skills/code-review/SKILL.md)               | Code or a diff exists and you want defects identified                                      | Verified findings and open questions                                               |
-| [**explain-code**](.agents/skills/explain-code/SKILL.md)             | You are new to the repo and want to understand what code does and why it is useful         | Concise Problem/Solution explanation, visual, and optional PR-author clarification |
-| [**is-it-safe**](.agents/skills/is-it-safe/SKILL.md)                 | You need the worst credible outcome of committing or merging a change                      | Verdict and evidence-backed impact path                                            |
-| [**precedent**](.agents/skills/precedent/SKILL.md)                   | Work is correct and you want it to match the project's own patterns                        | Divergences citing the peer that sets each pattern                                 |
-| [**decide**](.agents/skills/decide/SKILL.md)                         | You must choose between consequential options                                              | Durable decision memo and recommendation                                           |
-| [**consensus**](.agents/skills/consensus/SKILL.md)                   | A complex design or implementation needs independent cross-model review and approval gates | Reviewed assessment or implementation with dissent preserved                       |
-| [**perspectives**](.agents/skills/perspectives/SKILL.md)             | You want quick breadth, brainstorming, or a structured "what are we missing?" pass         | Multi-perspective analysis and next step                                           |
-| [**arena**](.agents/skills/arena/SKILL.md)                           | One attempt at a non-trivial artifact risks locking in the wrong shape                     | One artifact synthesized from parallel candidates                                  |
+| Skill                                                                | Use when                                                                           | Primary output                                                                     |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [**code-module-review**](.agents/skills/code-module-review/SKILL.md) | Understand a feature's structure and assess module ownership                       | Mermaid maps and evidence-backed findings                                          |
+| [**code-review**](.agents/skills/code-review/SKILL.md)               | Code or a diff exists and you want defects identified                              | Verified findings and open questions                                               |
+| [**explain-code**](.agents/skills/explain-code/SKILL.md)             | You are new to the repo and want to understand what code does and why it is useful | Concise Problem/Solution explanation, visual, and optional PR-author clarification |
+| [**is-it-safe**](.agents/skills/is-it-safe/SKILL.md)                 | You need the worst credible outcome of committing or merging a change              | Verdict and evidence-backed impact path                                            |
+| [**precedent**](.agents/skills/precedent/SKILL.md)                   | Work is correct and you want it to match the project's own patterns                | Divergences citing the peer that sets each pattern                                 |
+| [**decide**](.agents/skills/decide/SKILL.md)                         | You must choose between consequential options                                      | Durable decision memo and recommendation                                           |
+| [**perspectives**](.agents/skills/perspectives/SKILL.md)             | You want quick breadth, brainstorming, or a structured "what are we missing?" pass | Multi-perspective analysis and next step                                           |
 
 Common sequences:
 
 - Unclear problem space: **perspectives** → **decide**
-- Consequential engineering choice: **decide** → **consensus**
-- Complex implementation: **consensus**, which invokes **code-review** before
-  cross-model implementation review
+- Consequential engineering choice: **decide**
 - Understand a PR, commit, or local code before reviewing: **explain-code**
 - Find defects in a pull request or local diff: **code-review**
 - New code that works but may not look like its neighbours: **precedent**
 - Quick meeting or brainstorming pass: **perspectives**
-- Non-trivial artifact where the first shape tends to stick: **arena**
 
 ## Claude-specific frontmatter
 

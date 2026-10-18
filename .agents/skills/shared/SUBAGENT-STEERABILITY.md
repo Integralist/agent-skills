@@ -57,8 +57,7 @@ Prefer, in order:
    Valid only when the transform is uniform, the files are
    independent, and a reviewed exemplar exists. If a file needs
    judgment the exemplar didn't settle, it is not this pattern —
-   fall back to the two-phase split. See `markdown-to-skill` and
-   `go-api`.
+   fall back to the two-phase split. See `tech-docs`.
 1. **A chat-able named teammate** (if the harness supports agent
    teams) — a delegate the user can talk to directly mid-flight,
    rather than a fire-and-forget dispatch. See
@@ -73,7 +72,7 @@ If a skill spawns subagents purely to review, critique, or
 verify — and the main thread owns all implementation — say so
 explicitly in the subagent prompt: *review-only; do not modify
 code or run tools that change state.* This is the pattern in
-`consensus`, `code-review`, `redesign`, and `decide`, and it is
+`code-review`, `redesign`, and `decide`, and it is
 why those skills need no steering gate.
 
 ## Model tier for the subagent

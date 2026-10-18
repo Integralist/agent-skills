@@ -15,8 +15,8 @@ Scaffold a production-ready Go API service: the handlers → service →
 repository layout, config, structured logging, middleware, metrics, and
 tracing, plus a Makefile that runs it locally with MySQL, Redis, and a
 Grafana observability stack. All generated Go follows
-[conventions-go](../conventions-go/SKILL.md) and its
-[service architecture](../conventions-go/references/SERVICE-ARCHITECTURE.md);
+[conventions-go](../../../.agents/skills/conventions-go/SKILL.md) and its
+[service architecture](../../../.agents/skills/conventions-go/references/SERVICE-ARCHITECTURE.md);
 the templates here are the files to generate, not a second set of rules.
 
 1. **Ask for the service name and module path:** a kebab-case name such as
@@ -36,7 +36,7 @@ the templates here are the files to generate, not a second set of rules.
 
 **Parallel scaffold.** The placeholder map is fixed, so instantiating the
 templates is a
-[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): generate one
+[verified-pattern fan-out](../../../.agents/skills/shared/SUBAGENT-STEERABILITY.md): generate one
 representative package (`internal/api`) first and confirm the substitutions
 and layout with the user, then have subagents instantiate the rest in
 parallel, following the shared completion and retry protocol.

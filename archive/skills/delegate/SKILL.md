@@ -30,7 +30,7 @@ spawn it before any reads or commands of your own.
    Done when the role is chosen.
 3. **Spawn it** with the full task. Read-only work (find, trace, review,
    research) can go to a fire-and-forget subagent. For editing or iterative
-   work, follow [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md):
+   work, follow [SUBAGENT-STEERABILITY.md](../../../.agents/skills/shared/SUBAGENT-STEERABILITY.md):
    use a delegate the user can talk to mid-flight, or keep the work in the
    main thread, so objections don't pile up behind a large diff. Done when the
    subagent is running.
@@ -38,7 +38,7 @@ spawn it before any reads or commands of your own.
    protocol if it stopped early. Done when the user has the outcome.
 
 **Agent teams.** Where the harness supports them (see
-[AGENT-TEAMS.md](../shared/AGENT-TEAMS.md)), make an editing delegate a named
+[AGENT-TEAMS.md](../../../.agents/skills/shared/AGENT-TEAMS.md)), make an editing delegate a named
 teammate: create a team `delegate-<slug>` (a 2–3 word kebab-case summary,
 such as `delegate-fix-auth`) with one task and one agent assigned to it. Give
 the agent the full task, the working directory, and instructions to use all

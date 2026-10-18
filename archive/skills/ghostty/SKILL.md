@@ -24,7 +24,7 @@ tool. Ghostty's AppleScript works only on macOS with Ghostty as the local
 terminal, so use the shell tool on Linux, in CI, or over SSH. The API can't
 read a pane's scrollback, so redirect any output you need to a log file. When
 a pane runs a subagent, follow
-[SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md), including its
+[SUBAGENT-STEERABILITY.md](../../../.agents/skills/shared/SUBAGENT-STEERABILITY.md), including its
 completion and retry protocol, and confirm completion from its recorded
 output before reporting success.
 

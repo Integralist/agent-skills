@@ -49,7 +49,7 @@ globally (the harness's skills directory, such as `~/.agents/skills/` or
      `Skill converted from <original-filename>`.
    - **Write** `<skills-dir>/<name>/SKILL.md`, replacing any existing
      frontmatter, with `<tier>` chosen by the
-     [model tier rules](../writing-for-agents/SKILL-MECHANICS.md#model-tier):
+     [model tier rules](../../../.agents/skills/writing-for-agents/SKILL-MECHANICS.md#model-tier):
 
      ```md
      ---
@@ -70,7 +70,7 @@ globally (the harness's skills directory, such as `~/.agents/skills/` or
    delivered.
 
 **Parallel apply.** Conversion is the same transform per file, so it suits a
-[verified-pattern fan-out](../shared/SUBAGENT-STEERABILITY.md): convert the
+[verified-pattern fan-out](../../../.agents/skills/shared/SUBAGENT-STEERABILITY.md): convert the
 first file yourself and show the result, and once the user approves its
 name, description, and frontmatter, have subagents convert the rest, one per
 file or batch, under the same step 4 rules. The user approves the transform
