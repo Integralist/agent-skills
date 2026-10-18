@@ -1,10 +1,10 @@
 ---
 name: polish
 description: >-
-  Rewrite a short passage — a paragraph, prompt, message, or comment —
-  for clarity and concision without changing its meaning. The light
-  companion to distill, for short prose where clarity, not preservation,
-  is the concern.
+  Rewrite a short passage (a paragraph, prompt, message, or comment) for
+  clarity and concision without changing its meaning. Use for short prose
+  where clarity matters more than preserving every detail; use distill for
+  long text.
 disable-model-invocation: true
 argument-hint: "[file path | pasted text]"
 metadata:
@@ -13,57 +13,34 @@ metadata:
 
 # Polish
 
-Rewrite a short passage to be clearer and tighter **without changing its
-meaning, facts, or intent**. Polish refines the surface; it never
-rewrites the substance.
+Rewrite a short passage to be clearer and tighter without changing its
+meaning, facts, or intent: polish the surface, never the substance. It's the
+light companion to [distill](../distill/SKILL.md), skipping distill's
+inventory and audit, so use it for prose you can see whole at once.
 
-This is the light companion to [`distill`](../distill/SKILL.md). distill
-runs an inventory-and-audit loop to guarantee no load-bearing detail is
-lost — worth it for plans, runbooks, and agent instructions. polish
-skips that ceremony: use it for short prose you can see whole at once,
-where clarity, not preservation, is the concern.
+**Target.** For pasted text, give the rewrite in chat and write nothing to
+disk. For a file, read it, propose the change, and write it only once the
+user approves. Ask when it's unclear which.
 
-## Input detection
+**Clarity,** since concision alone can leave prose short but murky:
 
-- **Text pasted in chat** — output the rewrite in chat. Write nothing to
-  disk.
-- **File path given** — read it, then propose the change and get
-  approval before writing (house rule).
-- **Ambiguous** — ask which the user wants.
+- Lead with the point: main clause first, conclusion before its
+  justification, no wind-up.
+- One idea per sentence; split a sentence that carries two.
+- Replace an "it", "this", or "they" with its noun when the antecedent isn't
+  unmistakable.
+- Name the thing rather than gesture at it.
+- Give items in a list or series the same grammatical shape.
+- Order sentences so each builds on the last, grouping related points.
 
-## Clarity moves
+**Concision.** Omit needless words, following
+[CONCISE-PROSE.md](../shared/CONCISE-PROSE.md).
 
-Clarity is the reason this skill exists — concision alone can leave prose
-short but still murky. Apply these:
+**Keep the author's.** Keep meaning, facts, and intent exactly, adding
+nothing that isn't there. Copy paths, identifiers, commands, values, and
+quoted text verbatim. Sharpen within the author's register and tone rather
+than flattening a deliberate voice. If the passage is already clear and
+tight, say so and make only small edits.
 
-- **Lead with the point.** Main clause first; conclusion before its
-  justification. Cut the wind-up.
-- **One idea per sentence.** Split a sentence that carries two.
-- **Kill ambiguous referents.** Replace an "it", "this", or "they" whose
-  antecedent isn't unmistakable with the noun itself.
-- **Concrete over vague.** Name the thing rather than gesture at it.
-- **Parallel structure.** Cast items in a list or series into the same
-  grammatical shape.
-- **Order by dependency.** Sequence sentences so each builds on the last;
-  group related points.
-
-## Concision
-
-Omit needless words — see
-[`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
-
-## Guardrails
-
-- Preserve meaning, facts, and the author's intent exactly. Never invent
-  or "improve" content that isn't there.
-- Keep exact tokens verbatim — paths, identifiers, commands, values,
-  quoted text.
-- Preserve the author's register and tone; sharpen clarity within it,
-  don't flatten a deliberate voice.
-- If the passage is already clear and tight, say so and make only minimal
-  edits. Don't manufacture changes to look productive.
-
-## Output
-
-Output the rewrite. If you cut or moved anything a reader might miss, add
-one line noting what and why — no formal audit (that's distill's job).
+**Output.** The rewrite, plus one line noting anything cut or moved that a
+reader might miss, and why.
