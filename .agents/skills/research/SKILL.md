@@ -1,260 +1,129 @@
 ---
 name: research
 description: >-
-  Research a topic, pattern, or codebase deeply and produce a reference
+  Research a topic, pattern, or codebase in depth and save a sourced reference
   document. Use when investigating a topic, exploring an external repository,
-  or conducting architecture research.
+  or doing architecture research.
 metadata:
   model-tier: complex
 ---
 
 # Research
 
-Produce a deep reference document for a topic or repository. By default, output
-goes to `docs/research/<yyyy-mm-dd>-<slug>.md` (date prefix from today's date)
-and serves as the foundation for later planning or implementation work.
+Produce a deep, cited reference document on a topic or repository, as the
+foundation for later planning or implementation. If the request is too vague
+to research, with no clear topic or repo, use the clarify skill first.
 
-When research is explicitly scoped to an active project, output goes to
-`projects/<project>/research.md` instead. Project-scoped research also ensures
-the project README exists and indexes the research artifact.
+**Where it goes.** By default, write `docs/research/<yyyy-mm-dd>-<slug>.md`
+with today's date. When the user or a coordinating skill names an active
+`projects/<project>/` directory, write `projects/<project>/research.md`
+instead. Ask when the scope is unclear, rather than creating a project
+directory because research might help planning later. For project scope:
 
-If the request is too vague to research (no clear topic or repo), elicit intent
-first via [`clarify`](../clarify/SKILL.md).
+- Create `projects/README.md` from
+  [PROJECTS-README.md](../shared/PROJECTS-README.md) and
+  `projects/<project>/README.md` from
+  [PROJECT-README.md](../shared/PROJECT-README.md) if either is missing.
+- Add one `research.md` row to the project's artifact table, and keep the
+  findings in `research.md` only.
 
-## Determine output scope
+**Mode.** A GitHub URL, `org/repo`, or bare repo name means code research;
+a topic, concept, or question means topic research.
 
-Use project scope when the user or a coordinating skill provides an active
-`projects/<project>/` directory. Otherwise use the standalone `docs/research/`
-output. Do not create a project directory merely because research might later
-be useful for planning; ask for the project when the scope is ambiguous.
+**Sources.** In both modes, search organizational knowledge sources as well
+as code and the web, following
+[KNOWLEDGE-SOURCES.md](../shared/KNOWLEDGE-SOURCES.md). Treat Confluence and
+Google Drive as primary sources alongside code and docs, and Slack as
+supporting context, not authority.
 
-For project-scoped research:
+1. **Check for existing research** in the project's `research.md` and in
+   `docs/research/`, matching on the slug and ignoring the date prefix:
+   "CI pipeline caching" is covered by `*-ci.md` or
+   `*-continuous-integration.md`, and `acme/widgets` by `*-widgets.md`. If a
+   match fully answers the question, summarise it and stop; if it covers the
+   topic in part, extend it rather than starting a second file. Done when
+   you know whether you're extending a document or writing a new one.
+2. **Research** in the mode that fits, below. Done when every question in
+   scope has cited findings or is listed as unknown.
+3. **Save** to the path above using the template, extending the existing
+   document if step 1 found one, then summarise the research for the user
+   and say where the full document is. Done when the document is written
+   and, for project scope, indexed in the project README.
 
-1. Ensure `projects/README.md` exists, creating it from
-   [`../shared/PROJECTS-README.md`](../shared/PROJECTS-README.md) when needed.
-2. Ensure `projects/<project>/README.md` exists, creating it from
-   [`../shared/PROJECT-README.md`](../shared/PROJECT-README.md) when needed.
-3. Add one document-level `research.md` row to the project artifact table.
-4. Keep research sections and findings only in `research.md`; do not duplicate
-   them in the project README.
+## Code research
 
-## Detect research mode
+1. **Locate the repo.** Take `{org}` and `{repo}` from the input: strip
+   `https://github.com/` and any trailing `.git` from a URL, or split
+   `org/repo` on `/`. With a known org, use `~/code/{org}/{repo}`, cloning it
+   there with `gh repo clone {org}/{repo} ~/code/{org}/{repo}` if it's
+   missing. For a bare name, search `~/code/*/{repo}`: use a single match,
+   and ask the user to choose among several or for the org if there's none.
+   Also ask when you're unsure what they want to know, the clone would land
+   somewhere unexpected, or the clone fails. Done when you have a local
+   path.
+2. **Gather a metadata snapshot** with these commands:
 
-| Input                                 | Mode               |
-| ------------------------------------- | ------------------ |
-| GitHub URL (`https://github.com/o/r`) | **Code research**  |
-| `org/repo` or bare repo name          | **Code research**  |
-| Topic, concept, or question           | **Topic research** |
+   ```bash
+   # Source revision, for citations
+   git -C {repo_path} remote -v
+   git -C {repo_path} rev-parse HEAD
+   # Churn hotspots: most-changed files in the last year
+   git -C {repo_path} log --format=format: --name-only --since="1 year ago" \
+     | sort | uniq -c | sort -nr | head -20
+   # Bus factor: all-time, then the last 6 months to spot absent contributors
+   git -C {repo_path} shortlog -sn --no-merges
+   git -C {repo_path} shortlog -sn --no-merges --since="6 months ago"
+   # Bug clusters: files most touched by fix commits
+   git -C {repo_path} log -i -E --grep="fix|bug|broken" --name-only --format='' \
+     | sort | uniq -c | sort -nr | head -20
+   # Commit velocity per month
+   git -C {repo_path} log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c
+   # Crisis patterns
+   git -C {repo_path} log --oneline --since="1 year ago" \
+     | grep -iE 'revert|hotfix|emergency|rollback'
+   ```
 
-## Check for existing research
+   Flag files that appear in both the churn hotspots and the bug clusters
+   as the highest-risk code. Done when the snapshot is captured.
+3. **Spawn one read-only subagent** on the cheapest adequate tier,
+   following [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md)
+   and its completion and retry protocol. Give it the repo path, the user's
+   goal, and the snapshot to decide what to read first. Tell it the work is
+   read-only (no code changes, file writes, or state-changing commands), to
+   use the session's relevant MCP servers (`gopls` for Go, `context7` for
+   library docs), to search the knowledge sources above for design docs and
+   discussions, and to note stale `docs/**/*.md` or `**/README.md` files.
+   Done when it returns complete findings.
 
-Before starting either mode, scan the active project's `research.md` when
-project scope is provided, and scan `docs/research/` for standalone documents
-that cover the topic or repo. Match on the slug portion;
-ignore the `yyyy-mm-dd-` date prefix — "CI pipeline caching" is
-covered by an existing `*-ci.md` or `*-continuous-integration.md`;
-the `fastly/spotless` repo is covered by `*-spotless.md`.
+The saved document starts with a **Project Metadata** section holding the
+snapshot and high-risk files, then follows the template.
 
-- **Exact or near match**: read it. If it covers what the user
-  needs, summarize and stop. If it covers the topic partially,
-  extend it (add/deepen sections) rather than creating a second
-  file.
-- **No match**: proceed with the mode below.
+## Topic research
 
-## Search organizational knowledge sources
+Use every tool: read source, fetch docs through MCP, search the web and the
+knowledge sources, and check sibling repositories in `../` for prior art.
 
-Beyond code and the web, search organizational knowledge sources
-in **both** modes — see
-[`../shared/KNOWLEDGE-SOURCES.md`](../shared/KNOWLEDGE-SOURCES.md)
-for the source catalog and the fallback rule when a source is
-unavailable.
+**Investigators.** When a topic has substantial independent questions,
+dispatch up to three read-only investigators under
+[the shared policy](../shared/SUBAGENT-STEERABILITY.md), each with a
+distinct question, scope, source paths or excerpts, and citation
+requirements. They don't inherit your conversation, skills, credentials, or
+MCP access, so verify what each can reach, fetch unavailable external
+sources yourself and pass excerpts, and grant only read-only tools. Require
+`COMPLETE` or `INCOMPLETE`, cited findings, conflicting evidence, unknowns,
+and sources checked, with a 40-turn budget and the shared completion and
+retry protocol. Reconcile and verify material claims yourself; you own the
+synthesis and the document. Keep quick lookups inline, and if delegation
+isn't available, say so and research inline.
 
-For research specifically, weight them as follows:
-
-- **Confluence** and **Google Drive** — primary sources alongside
-  code and web docs.
-- **Slack** — supporting context, not authoritative
-  documentation.
-
-## Mode A: Code research (repo by name or URL)
-
-### Parse input
-
-Extract `{org}` and `{repo}` from the argument:
-
-1. **GitHub URL** — strip `https://github.com/`, split on `/`,
-   remove any trailing `.git`.
-1. **`org/repo`** — split on `/`.
-1. **Bare repo name** — no `/`; `{org}` is unknown.
-
-### Locate locally
-
-1. If `{org}` is known, check `~/code/{org}/{repo}`.
-1. If only a bare name, search `~/code/*/{repo}`:
-   - One match: use it.
-   - Multiple: list them and ask which to use.
-   - None: ask the user for the org (or full URL) to clone.
-
-### Clone if missing
-
-If not found locally and `{org}` is known:
-
-```bash
-gh repo clone {org}/{repo} ~/code/{org}/{repo}
-```
-
-### Gather project metadata
-
-Run these git commands inside the repo to build a diagnostic
-snapshot. Capture the output and include it in the subagent
-prompt as context.
-
-**Source revision** — record the canonical GitHub remote and exact commit used
-for citations:
-
-```bash
-git -C {repo_path} remote -v
-git -C {repo_path} rev-parse HEAD
-```
-
-**Churn hotspots** — most-changed files in the last year:
-
-```bash
-git -C {repo_path} log --format=format: --name-only \
-  --since="1 year ago" \
-  | sort | uniq -c | sort -nr | head -20
-```
-
-**Bus factor** — contributors ranked by commit count:
-
-```bash
-git -C {repo_path} shortlog -sn --no-merges
-```
-
-Recent activity (last 6 months) to flag absent top contributors:
-
-```bash
-git -C {repo_path} shortlog -sn --no-merges \
-  --since="6 months ago"
-```
-
-**Bug clusters** — files most often touched in bug-fix commits:
-
-```bash
-git -C {repo_path} log -i -E --grep="fix|bug|broken" \
-  --name-only --format='' \
-  | sort | uniq -c | sort -nr | head -20
-```
-
-**Commit velocity** — commits per month:
-
-```bash
-git -C {repo_path} log --format='%ad' \
-  --date=format:'%Y-%m' | sort | uniq -c
-```
-
-**Crisis patterns** — reverts, hotfixes, and rollbacks:
-
-```bash
-git -C {repo_path} log --oneline --since="1 year ago" \
-  | grep -iE 'revert|hotfix|emergency|rollback'
-```
-
-**Cross-reference**: files in **both** churn hotspots and bug
-clusters are the highest-risk code. Flag these explicitly in the
-metadata passed to the subagent.
-
-### When in doubt, ask
-
-Don't guess. Stop and ask the user if:
-
-- The input is ambiguous (e.g. a bare name matching multiple orgs).
-- You aren't sure what the user wants to know about the repo.
-- The clone would go to an unexpected location.
-- The repo doesn't exist on GitHub (clone fails).
-
-### Spawn a subagent for code research
-
-Spawn a single general-purpose subagent on the cheapest model tier
-adequate to the research (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md),
-including its completion and retry protocol). The prompt must include:
-
-- The repo path (`~/code/{org}/{repo}`).
-- A statement that this is **read-only research**: investigate and
-  report only; do not modify code, write files, or run
-  state-changing commands.
-- The user's question or research goal.
-- The **project metadata** above — instruct the subagent to use it
-  to prioritize which code to read first.
-- Instructions to use file reading, search, and exploration to
-  investigate the codebase.
-- Instructions to use relevant MCP servers available in the
-  session (e.g. `gopls` for Go — `go_search`, `go_file_context`,
-  `go_package_api`; `context7` for library docs).
-- Instructions to search organizational knowledge sources
-  (Confluence/Drive for design docs, Slack for discussions about
-  the repo) — see "Search organizational knowledge sources".
-- Instructions to note any stale `docs/**/*.md` or `**/README.md`
-  files discovered during research.
-
-### Save findings
-
-Write to `projects/<project>/research.md` when project scope is active;
-otherwise write to `docs/research/<yyyy-mm-dd>-{repo}.md` (date prefix from
-today). Extend an existing document found earlier instead of creating a
-second one. A project-scoped document must be indexed by the project README.
-The document must include a **Project Metadata** section at the top
-with the git diagnostic snapshot (churn hotspots, bus factor, bug
-clusters, commit velocity, crisis patterns, high-risk files). Use
-the Mode B template below.
-
-Then summarize the research to the user and note where the full
-document was saved.
-
-## Mode B: Topic research
-
-Use for concepts, technologies, patterns — anything that isn't a
-specific repo.
-
-### Conduct research
-
-Study the topic deeply. Use every tool: read source code, explore
-the codebase, fetch docs via MCP, search the web, and check
-sibling repositories in the parent directory (`../`) for reference
-implementations or prior art. Also search organizational knowledge
-sources — Confluence, Google Drive, and Slack — per "Search
-organizational knowledge sources" above.
-
-### Read-only topic investigators
-
-When a topic contains substantial independent questions, dispatch up to three
-read-only investigators under
-[the shared policy](../shared/SUBAGENT-STEERABILITY.md).
-Give each a distinct question, scope, relevant instructions, source paths or
-excerpts, and citation requirements. Verify source/tool access; do not assume
-children inherit conversation, skills, credentials, or MCP access. Acquire
-unavailable external sources in the main thread and supply relevant excerpts.
-Grant only verified read-only tools; no file writes or external changes.
-Require `COMPLETE` / `INCOMPLETE`, cited findings, conflicting evidence,
-unknowns, and sources checked. Budget 40 turns per worker; apply shared
-completion/retry. Reconcile findings and verify material claims in the main
-thread, which owns synthesis and document writes. Keep quick lookups inline;
-if suitable delegation is unavailable, report it and research inline.
-
-### Output
-
-Write to `projects/<project>/research.md` when project scope is active;
-otherwise write to `docs/research/<yyyy-mm-dd>-<topic-slug>.md` (date prefix
-from today). Extend an existing document found earlier instead of creating a
-second one. Use this template:
+## Template
 
 ````markdown
 # {Topic}
 
 ## Overview
 
-{What this is and why it matters — one or two paragraphs.}
+{What this is and why it matters, in one or two paragraphs.}
 
 ## Key Concepts
 
@@ -262,38 +131,33 @@ second one. Use this template:
 
 ## Architecture / How It Works
 
-{Internal structure, data flow, component relationships.
-Use Mermaid diagrams for complex systems — validate with mmdc
-(see [`../conventions-mermaid`](../conventions-mermaid/SKILL.md)).}
+{Internal structure, data flow, component relationships, with Mermaid
+diagrams for complex systems.}
 
 ## API Surface / Interface
 
-{Public API, configuration options, CLI flags — whatever
-the consumer interacts with.}
+{Public API, configuration options, CLI flags: whatever the consumer
+touches.}
 
 ## Gotchas & Edge Cases
 
-{Surprising behavior, common mistakes, undocumented
-limitations.}
+{Surprising behaviour, common mistakes, undocumented limits.}
 
 ## Trade-offs
 
-{Design decisions and their consequences. What was chosen
-and what was given up.}
+{Design decisions, what was chosen, and what was given up.}
 
 ## References
 
 {Links to source files, external docs, RFCs, issues.}
 ````
 
-## Guidelines
-
-- Cite every factual claim inline: use `path/to/file.go:42` for code in the
-  document's repository, a commit-pinned absolute permalink for code in another
-  repository (see [`conventions-markdown`](../conventions-markdown/SKILL.md)),
-  and a URL for external docs. Label uncited claims "unverified assumption"
-  and state how to verify them.
-- Be exhaustive in coverage but concise in prose — omit needless
-  words, see [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
-  Exhaustive means no fact dropped, not more words per fact.
-- Wrap all Markdown output at 80 columns.
+**Writing it.** Cite every factual claim inline: `path/to/file.go:42` for
+code in the document's repository, a commit-pinned permalink for another
+repository, and a URL for external docs, following
+[conventions-markdown](../conventions-markdown/SKILL.md). Label an uncited
+claim "unverified assumption" and say how to verify it. Draw diagrams
+following [conventions-mermaid](../conventions-mermaid/SKILL.md). Cover
+everything but omit needless words, following
+[CONCISE-PROSE.md](../shared/CONCISE-PROSE.md): exhaustive means no fact
+dropped, not more words per fact. Wrap Markdown at 80 columns.
