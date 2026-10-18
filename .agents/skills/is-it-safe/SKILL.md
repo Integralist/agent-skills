@@ -1,9 +1,9 @@
 ---
 name: is-it-safe
 description: >-
-  Analyze the worst credible consequence of committing or merging a code
-  change. Invoke manually with /is-it-safe for the current branch or a specified
-  pull request.
+  Find the worst credible consequence of committing or merging a code change.
+  Use when the user asks whether the current branch, a commit or range, or a
+  pull request is safe to commit or merge.
 disable-model-invocation: true
 argument-hint: "[PR URL | PR number | commit/range | base ref]"
 metadata:
@@ -12,277 +12,176 @@ metadata:
 
 # Is It Safe?
 
-Answer one question: **what is the worst credible outcome if these exact
-changes are committed or merged?** Trace a concrete failure path and its impact.
-This is an adversarial impact analysis, not a general code review or a risk
-matrix. Focus the report on the strongest evidence-backed concern, not a long
-catalogue of hypothetical risks.
+Answer one question: what's the worst credible outcome if these exact changes
+are committed or merged? Trace one concrete failure path and its impact. This
+is adversarial impact analysis, not a code review or a risk matrix, so report
+the strongest evidence-backed concern rather than a catalogue of hypotheticals.
 
-## Timing
+**Read-only.** Edit, approve, commit, push, or merge nothing; post a PR comment
+only after the user approves it in step 6. Judge consequences and
+reachability, not style or maintainability. A test gap isn't proof of a
+defect, a passing suite isn't proof of safety, and no verdict claims absolute
+safety: say what you inspected and what supports the verdict.
 
-At the start of every run, record the Unix time with `date +%s`. Immediately
-before writing the final report, record it again and calculate elapsed
-wall-clock time. Include investigation and tool calls. Report
-the duration for every outcome, including `UNKNOWN` and no pending changes.
-If no reliable clock is available, report that timing could not be measured;
-do not estimate.
+1. **Start the clock.** Record `date +%s` at the start, and again just before
+   writing the report, and report the elapsed wall-clock time for every
+   outcome, including `UNKNOWN` and "nothing pending". If no reliable clock is
+   available, say timing couldn't be measured rather than estimating. Done
+   when the start time is recorded.
+2. **Resolve the change** under review:
+   - **No argument:** the current branch and worktree against the branch's
+     upstream: unpushed commits, staged and unstaged tracked changes, and
+     untracked non-ignored files, keeping committed and worktree changes
+     distinct. On the default branch, compare local `HEAD` with its
+     remote-tracking upstream (local `main` with `origin/main`), never the
+     branch with itself. With no upstream, use a remote default-branch ref
+     only when it's identifiable and a sound baseline. Use local refs, and say
+     a remote-tracking ref may be stale. If nothing is pending, say so and ask
+     for a commit, range, or PR; never assume the latest commit is the target.
+   - **PR URL or number:** review that PR's actual diff, not the checkout:
 
-## Resolve the change under review
+     ```sh
+     gh pr view "$PR" --json \
+       number,title,state,baseRefName,headRefName,baseRefOid,headRefOid,url
+     gh pr diff "$PR"
+     ```
 
-1. **No argument:** inspect the current branch and local worktree. Use the
-   branch's upstream tracking ref as the baseline. Include commits on the
-   current branch that are not in that upstream, staged and unstaged tracked
-   changes, and untracked non-ignored files. Keep committed branch changes and
-   worktree changes distinct while analyzing them.
+     Use `gh api` only for what those can't give, and check the endpoint's
+     response semantics first: a 404 from a branch-protection endpoint can
+     mean the branch isn't protected, not that it's missing. Encode a
+     slash-containing branch name used as one REST path parameter, or list
+     branches and filter for an exact match, and prefer the PR's head
+     metadata to assuming a branch exists. In jq, use `contains("text")` for
+     substrings (`"\."` is an invalid string escape). A failed request or jq
+     expression is a failed query, not evidence; fix it if the answer
+     matters, and return `UNKNOWN` naming the missing access if the PR still
+     can't be read.
+   - **Commit, range, or base ref:** exactly that target. Add no worktree
+     changes to an explicit range; for a base ref, compare it with `HEAD`
+     plus worktree changes, naming each scope in the report.
 
-   When the current branch is the default branch, compare local `HEAD` with its
-   remote-tracking upstream (for example, local `main` with `origin/main`). Do
-   not compare the branch name with itself. If no upstream is configured, use a
-   remote default-branch ref only when it is identifiable and provides a sound
-   baseline. Use locally available refs; mention that a remote-tracking ref may
-   be stale rather than silently treating it as current.
+   Done when the exact diff and baseline are identified, or the report says
+   why they couldn't be.
+3. **Trace the worst credible outcome.** Read the full diff, its intent, and
+   the files it touches, following callers, consumers, invariants,
+   configuration, or deploy and rollback paths only where they could change
+   the verdict. Scale to the diff (a few-line change needs a handful of
+   lookups), batch independent reads, and reuse evidence. Search for paths to
+   material harm, such as data loss or corruption, unauthorised access or
+   disclosure, broad availability or performance failure, broken
+   compatibility, or irreversible external effects, as prompts rather than a
+   checklist for the report. For the strongest candidate, trace **trigger →
+   changed behaviour → affected system or users → consequence**, with its
+   preconditions, blast radius, and guards or recovery paths from evidence. A
+   dramatic outcome with no reachable, evidenced path is speculation: drop it
+   or name the unresolved condition. Done when the strongest candidate has a
+   concrete trigger and causal path.
+4. **Try to disprove it** through callers, validation, feature gates, tests,
+   and safeguards.
+   - Run a targeted test only when it answers a material question and you've
+     confirmed, from runner configuration or authoritative docs, that it runs
+     in a disposable sandbox with no access to host files outside the
+     checkout, host credentials, or production. Otherwise skip it and say
+     why.
+   - When the candidate depends on cross-module callers or safeguards, have
+     one independent read-only subagent try to refute that exact path,
+     following [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md).
+     Give it the resolved revision and diff, the candidate chain, scoped
+     paths, and known evidence. Grant only verified read-only tools (no
+     tests, edits, or remote writes) and a 40-turn budget. Require
+     `COMPLETE` or `INCOMPLETE`, the paths inspected, cited safeguards and
+     counterevidence, and unknowns. Verify decisive evidence yourself and
+     keep the verdict in the main thread; if delegation isn't available,
+     say so and do the disproof yourself.
 
-   If there are no unpushed commits or worktree changes, report that there is
-   no pending change to assess. Ask for a commit SHA, range, or PR if the user
-   wants an already-pushed change assessed. Never assume the latest commit is
-   the intended target.
+   Cite evidence as `path/to/file.ext:line`, and separate verified facts from
+   assumptions, naming any unknown rather than guessing. Done when the
+   candidate is confirmed or refuted, safeguards are checked, and
+   decision-relevant unknowns are explicit; stop there, since more breadth
+   doesn't raise confidence.
+5. **Report** using the template below, verdict first. Done when the report
+   is delivered.
+6. **Offer a PR comment.** For a PR, end by asking "💬 Should I post a review
+   comment to the PR?" and post nothing unless the user says yes. Then post
+   one top-level comment, not inline ones, opening with this line and
+   followed by the verdict and its sections, without Model and Elapsed:
 
-2. **PR URL or number:** retrieve the PR metadata and actual diff using
-   read-only GitHub tools. Prefer these commands for PR metadata and the diff:
-
-   ```sh
-   gh pr view "$PR" --json \
-     number,title,state,baseRefName,headRefName,baseRefOid,headRefOid,url
-   gh pr diff "$PR"
+   ```txt
+   🤖 This review was written by an LLM agent (`<model ID>`, <effort> effort).
    ```
 
-   Review that PR, not the current checkout as a substitute.
-
-   Use `gh api` only when the needed information is not available through those
-   commands. Check the endpoint and its response semantics before interpreting
-   errors. Encode slash-containing branch names when they are a single REST
-   path parameter, or list branches and filter for an exact name. A 404 from a
-   branch-protection endpoint can mean the branch is not protected; do not
-   treat every 404 as proof that a branch or PR is missing. Prefer the PR's
-   reported head metadata over assuming a branch exists.
-
-   Use valid jq string escapes. For literal substring matches, use
-   `contains("text")`; `"\."` is invalid in a jq string. Treat a failed API
-   request or jq expression as a failed query, not evidence about the change.
-   Correct the query if the result matters. If the PR or diff still cannot be
-   accessed, return `UNKNOWN` and say what access or input is missing.
-
-3. **Commit, range, or base ref:** assess exactly the requested target. For an
-   explicit commit range, do not silently add unrelated worktree changes. For a
-   base ref, compare it with `HEAD` and include local worktree changes, noting
-   each scope in the report.
-
-**Done when:** the exact diff and its baseline are identified, or the report
-clearly says why they could not be identified.
-
-## Trace the worst credible outcome
-
-1. Read the full diff, change intent, and the files it touches. Follow a
-   caller, consumer, invariant, configuration, or deployment or rollback path
-   only when it can change the verdict. Scale the investigation to the diff: a
-   few-line change needs a handful of lookups, not a repository survey. Batch
-   independent reads and queries into one step, and reuse evidence already
-   gathered rather than fetching it again.
-
-2. Look for a plausible path to material harm, including data loss or
-   corruption, unauthorized access or disclosure, broad availability or
-   performance failure, broken compatibility, and irreversible or costly
-   external effects. Use these as search prompts, not as a checklist to dump
-   into the report.
-
-3. For the strongest candidate, trace the chain:
-   **trigger → changed behavior → affected system or users →
-   consequence**.
-   Establish preconditions, blast radius, and guards or recovery paths from
-   code or other evidence. A dramatic outcome without a reachable,
-   evidence-backed path is speculation; exclude it or label the unresolved
-   condition explicitly.
-
-4. Try to disprove the candidate. Check relevant callers, validations, feature
-   gates, tests, and safeguards. Run a targeted test only when it can answer a
-   material question and the runner provides a disposable sandbox with no access
-   to host files outside the checkout, host credentials, or production systems.
-   Confirm these protections from runner configuration or authoritative docs.
-   If you cannot confirm them, skip the test and report why. Passing tests do
-   not establish that a change is safe.
-
-   When the strongest candidate depends on cross-module callers or safeguards,
-   use one independent read-only subagent to try to refute that exact path.
-   Follow [the shared policy](../shared/SUBAGENT-STEERABILITY.md); supply the
-   resolved revision/diff, candidate chain, scoped paths, and known evidence.
-   Grant only verified read-only tools; no tests, edits, or remote writes.
-   Require `COMPLETE` / `INCOMPLETE`, inspected paths, cited safeguards and
-   counterevidence, and unknowns. Budget 40 turns; apply the shared
-   completion/retry protocol.
-   Verify decisive evidence yourself and keep the verdict/report in the main
-   thread. Keep small checks inline; if delegation is unavailable, report it
-   and perform the same disproof yourself. Do not widen into a general review.
-
-5. Separate verified facts from assumptions. Cite repository evidence as
-   `path/to/file.ext:line`; cite the PR or test evidence when relevant. If
-   missing context prevents a sound conclusion, state the specific unknown
-   rather than filling it in by guesswork.
-
-**Done when:** each reported failure path has a concrete trigger and causal
-path, safeguards have been checked, and decision-relevant unknowns are explicit.
-Stop gathering evidence once the strongest candidate is confirmed or refuted;
-more breadth does not raise confidence in the verdict. If no credible failure
-path remains, report that directly.
+   If the PR can't be reached or the post fails, say so. Done when the user
+   has answered and any approved comment is posted.
 
 ## Verdicts
 
-Choose one verdict based on the evidence. Do not calculate a numeric score or
-present an impact/likelihood matrix.
+Pick one from the evidence, with no numeric score or impact matrix, and keep
+the coloured marker beside it, since Markdown can't colour the word:
 
-- 🟢 **PROCEED** — no concrete material failure path was found in the
-  inspected scope. This is not a guarantee that the change is risk-free.
-- 🟡 **HOLD** — a credible material risk needs mitigation or an explicit
-  decision before commit or merge, but the evidence does not establish a
-  release-blocking outcome.
-- 🔴 **STOP** — evidence establishes a severe, release-blocking consequence
-  without an effective safeguard. Recommend against committing or merging
-  until it is addressed.
-- ⚪ **UNKNOWN** — the target, source, or critical behavior could not be
-  assessed reliably. Explain the missing access or evidence; `UNKNOWN` is not a
-  claim that the change is safe or unsafe.
-
-Use the colored emoji markers beside the bold verdict. Markdown does not provide
-portable text colors, so do not rely on styling the verdict word itself.
+- 🟢 **PROCEED:** no concrete material failure path in the inspected scope,
+  which isn't a guarantee of no risk.
+- 🟡 **HOLD:** a credible material risk needs mitigation or an explicit
+  decision first, but nothing establishes a release-blocking outcome.
+- 🔴 **STOP:** evidence establishes a severe, release-blocking consequence
+  with no effective safeguard; recommend against committing or merging until
+  it's fixed.
+- ⚪ **UNKNOWN:** the target, source, or critical behaviour couldn't be
+  assessed reliably. Name the missing access or evidence; this claims neither
+  safe nor unsafe.
 
 ## Report
 
-Keep the report concise and lead with the verdict. Apply
-[`voice-product`](../voice-product/SKILL.md) to explanatory prose: write for a
-human who may act on it, use plain language, and name who does what, under which
-condition, and with what observable impact. Explain unfamiliar terms. Preserve
-the causal path, preconditions, file-and-line evidence, uncertainty, and
-mitigation so another agent can act on the report. Report the single worst
-credible outcome first; include another concern only if independently material.
-Do not pad a `PROCEED` report with generic risks.
-
-Prefer concrete wording. For example, replace "Contributor-controlled test
-code could expose credentials" with: "If we run the PR's test without
-isolation, code from the PR runs on the test machine. It could read credentials
-stored there or change files available to that account. Run it only in an
-isolated environment without credentials; otherwise, skip it."
-
-For **Model**, report the session's exact model ID and effort level. Read
-effort from `$CLAUDE_EFFORT` in Claude Code or `$PI_REASONING_LEVEL` in Pi.
-Write `effort unknown` only when neither can be read.
-
-Use level-3 headings (`###`) in the report, selecting the template that
-matches the verdict:
-
-### Template for 🟡 HOLD or 🔴 STOP
-
-````markdown
-### Verdict
-
-🟡 **HOLD** (or 🔴 **STOP**) — <one-sentence recommendation and scope
-reviewed>
-
-- **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
-  (high effort)>
-- **Elapsed:** <measured duration, e.g. 2m 30s>
-
-### Worst thing that could happen
-
-<State the consequence in plain language. Name who or what would be affected.>
-
-### How it could happen
-
-<Trigger → changed behavior → impact, including important preconditions
-and blast radius. Cite the relevant code and safeguards.>
-
-### Before commit or merge
-
-<State the smallest useful mitigation, decision, or verification.>
-
-### What I couldn't confirm
-
-<List only unknowns that could change the verdict. Omit when none remain.>
-````
-
-### Template for 🟢 PROCEED
-
-````markdown
-### Verdict
-
-🟢 **PROCEED** — <one-sentence recommendation and scope reviewed>
-
-- **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
-  (high effort)>
-- **Elapsed:** <measured duration, e.g. 2m 30s>
-
-### Why no material risk was found
-
-<Explain why no concrete material failure path is reachable. Name what was
-checked and why the changed behavior remains bounded.>
-
-### Verified safeguards
-
-<Cite code, tests, configuration, or execution guards that keep the change
-safe, with path:line citations.>
-
-### What I couldn't confirm
-
-<List only unknowns that could change the verdict. Omit when none remain.>
-````
-
-### Template for ⚪ UNKNOWN
-
-````markdown
-### Verdict
-
-⚪ **UNKNOWN** — <one-sentence summary of what could not be assessed>
-
-- **Model:** <exact model ID and effort used, e.g. gemini-3.8-flash
-  (high effort)>
-- **Elapsed:** <measured duration, e.g. 2m 30s>
-
-### Why this could not be assessed
-
-<Explain why the target, source, or critical behavior could not be evaluated
-reliably. Name the missing access, unresolvable ref, or unavailable evidence.>
-
-### What is needed to proceed
-
-<State the specific input, permission, or command needed to unblock review.>
-````
-
-## Boundaries
-
-- Keep the analysis read-only: do not edit files, approve, commit, push, or
-  merge. Post a PR comment only after the user explicitly approves it below.
-- Review consequences and reachability, not style or unrelated maintainability
-  issues.
-- Do not equate a test gap with proof of a defect, or a passing test suite with
-  proof of safety.
-- Do not claim absolute safety. Say what was inspected and what evidence
-  supports the verdict.
-
-## PR comment
-
-After finishing the report for a PR, end by asking:
-
-> 💬 Should I post a review comment to the PR?
-
-Wait for the user's answer. Post nothing unless they explicitly approve. If
-approved, post one top-level PR comment, not inline comments. Start the comment
-with this line, filling in the model ID (kept in backticks) and effort from the
-report's **Model**:
+Keep it short. Apply [voice-product](../voice-product/SKILL.md) to the
+explanation: plain language for a human who may act on it, naming who does
+what, under which condition, with what observable impact, and explaining
+unfamiliar terms. Keep the causal path, preconditions, `path:line` evidence,
+uncertainty, and mitigation so another agent can act on it. Lead with the
+single worst outcome, add another only if it's independently material, and
+don't pad a PROCEED with generic risks.
 
 ```txt
-🤖 This review was written by an LLM agent (`<model ID>`, <effort> effort).
+BAD:  Contributor-controlled test code could expose credentials.
+GOOD: If we run the PR's test without isolation, code from the PR runs on the
+      test machine. It could read credentials stored there or change files
+      that account can reach. Run it only in an isolated environment without
+      credentials; otherwise, skip it.
 ```
 
-Then include the relevant verdict and the report sections matching that
-verdict, omitting **Model** and **Elapsed**. Keep
-file-and-line citations and actual change risks, safeguards, or missing
-requirements. If the PR cannot be accessed or the comment cannot be
-posted, explain that rather than claiming it was posted.
+For Model, give the session's exact model ID and effort, read from
+`$CLAUDE_EFFORT` in Claude Code or `$PI_REASONING_LEVEL` in Pi, or
+`effort unknown` if neither is set. Use the sections for your verdict:
+
+````md
+### Verdict
+
+🟡 **HOLD** — <one-sentence recommendation and the scope reviewed>
+
+- **Model:** <exact model ID and effort, e.g. gemini-3.8-flash (high effort)>
+- **Elapsed:** <measured duration, e.g. 2m 30s>
+
+<!-- HOLD or STOP -->
+### Worst thing that could happen
+<The consequence in plain language, and who or what it affects.>
+### How it could happen
+<Trigger → changed behaviour → impact, with preconditions, blast radius,
+and cited code and safeguards.>
+### Before commit or merge
+<The smallest useful mitigation, decision, or check.>
+
+<!-- PROCEED -->
+### Why no material risk was found
+<Why no concrete failure path is reachable: what you checked and why the
+changed behaviour stays bounded.>
+### Verified safeguards
+<Code, tests, configuration, or guards that keep it safe, with path:line.>
+
+<!-- HOLD, STOP, or PROCEED; omit when there are none -->
+### What I couldn't confirm
+<Only unknowns that could change the verdict.>
+
+<!-- UNKNOWN -->
+### Why this could not be assessed
+<The missing access, unresolvable ref, or unavailable evidence.>
+### What is needed to proceed
+<The input, permission, or command that would unblock the review.>
+````
