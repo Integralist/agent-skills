@@ -1,6 +1,9 @@
 ---
 name: consensus
-description: Cross-model consensus review with discussion rounds and user gates.
+description: >-
+  Cross-model review of an assessment and its implementation, with
+  discussion rounds and user approval gates. Use when a complex design or
+  implementation needs independent review from other AI CLIs.
 disable-model-invocation: true
 metadata:
   model-tier: complex
@@ -8,178 +11,138 @@ metadata:
 
 # Consensus
 
-You are the **host agent** (the harness running this skill). You
-orchestrate one or more **consulting agents** — other AI CLIs invoked
-headlessly — as second reviewers on both your assessment and your
-implementation, with user-approval gates between phases.
+You're the host agent. Use one or more consulting agents, other AI CLIs run
+headlessly, as second reviewers of your assessment and your implementation,
+with the user approving at a gate between phases. Advance a phase only when
+every consultant has reviewed, discussion has converged or hit its cap, and
+the user has approved.
 
-Advance phases only when (a) every consulting agent has reviewed, (b)
-discussion has converged or hit the cap, and (c) the user has approved at
-the gate.
-
-## Select The Workflow
-
-Use the variant the user requested. If none was specified, confirm one before
-setup:
-
-- **Full** — Phase A and its gate, then Phase B and its gate
-- **Assessment-only** — Phase A through A5; no implementation
-- **Implementation-only** — Phase B against a user-approved implementation
-  artifact: an assessment or plan
-
-**Single-agent** is a modifier for any variant. It lowers cost and feedback
-diversity without changing the phases or gates.
+**Workflow.** Use the variant the user asked for, and confirm one before
+setup if they didn't: **full** (phase A and its gate, then phase B and its
+gate), **assessment-only** (phase A to its gate, no implementation), or
+**implementation-only** (phase B against an assessment or plan the user has
+approved). **Single-agent** can modify any of them: cheaper and less diverse,
+with the same phases and gates.
 
 ## Setup
 
-**Select consultants** in this order:
+**Consultants.** Use the CLIs the user names ("use agy and codex").
+Otherwise detect them with `command -v agy gemini codex claude copilot`,
+excluding the host. Prefer `agy` (Google Antigravity, the Gemini CLI's
+successor) and skip `gemini` when both exist, to avoid duplicate Google
+coverage. If several are found and the user has no preference, ask,
+defaulting to all of them. If none are found, tell the user and ask whether
+to install one or go ahead without consensus; never skip consultation
+silently.
 
-1. User-specified ("use agy" / "use agy and codex").
-1. Detected on PATH: `command -v agy gemini codex claude copilot`. Exclude
-   the host itself. **Prefer `agy` over `gemini`** — Google Antigravity
-   (`agy`) is the successor to the Gemini CLI; if both are installed, use
-   `agy` and skip `gemini` to avoid duplicate Google-model coverage. Fall
-   back to `gemini` only when `agy` is absent.
-1. If multiple detected and no preference stated, ask. Default: all
-   detected (after the agy/gemini dedupe).
+- `agy -p "<prompt>"`: reads stdin, appended to the prompt.
+- `gemini -p "<prompt>" --output-format text`: reads stdin; use a
+  single-quoted heredoc for the prompt body.
+- `codex`: check `codex --help` before first use.
+- `claude -p "<prompt>"`: reads stdin; an independent-context reviewer
+  whatever the host.
+- `copilot -p "<prompt>" --allow-all-tools`: GitHub Copilot CLI.
+  `--allow-all-tools` is required headless, `-p` doesn't read stdin so put
+  the diff in the prompt body, and `--model <id>` pins a model.
+- Any other CLI: find its non-interactive prompt flag in `<cli> --help`
+  rather than guessing.
 
-If zero CLIs resolve, tell the user and ask whether to install one or
-proceed without consensus. Never silently skip consultation.
+**Prerequisites.** At least one consultant on PATH and the repo checked out
+locally, so `git diff` means something. Consultants send content to
+third-party APIs, so redact secrets, `.env` files, credentials, private
+keys, or anything you wouldn't paste into a third-party service, or ask the
+user before sending.
 
-**Detectable agent CLIs:**
+**Secondary lenses.** In A3 and B2, give each consultant one lens on top of
+the full core focus, cycling when there are more consultants than lenses:
+evidence gaps and known unknowns; failure modes and hidden costs; the
+strongest success case and what to preserve; alternatives that change the
+trade-off; process, reversibility, and the smallest useful next step.
 
-| CLI       | Headless invocation                         | Reads stdin?   | Notes                                                                                                                                                                                                        |
-| --------- | ------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `agy`     | `agy -p "<prompt>"`                         | Yes (appended) | Google Antigravity CLI — successor to `gemini`. Prefer over `gemini` when both are installed.                                                                                                                |
-| `gemini`  | `gemini -p "<prompt>" --output-format text` | Yes (appended) | Google's Gemini CLI. Use single-quoted heredoc for the prompt body. Skip if `agy` is present.                                                                                                                |
-| `codex`   | Verify with `codex --help` before first use | Verify         | OpenAI's Codex CLI.                                                                                                                                                                                          |
-| `claude`  | `claude -p "<prompt>"`                      | Yes            | Claude Code in headless mode. Useful as an independent-context reviewer regardless of the host.                                                                                                              |
-| `copilot` | `copilot -p "<prompt>" --allow-all-tools`   | No             | GitHub Copilot CLI (ChatGPT models). `--allow-all-tools` required for non-interactive mode; substitute the diff into the prompt body — `-p` does not read stdin. Use `--model <id>` to pin a specific model. |
+## Phase A: assessment
 
-For any CLI not listed, run `<cli> --help` and look for a
-non-interactive/prompt flag. Do not guess flags.
+1. **Discover,** in up to three rounds of reading code, tests, recent
+   commits, and convention files. Round 1 forms a hypothesis; round 2
+   attacks it (what it assumes, which edge cases break it, whether the
+   rejected alternative was dropped for a concrete reason); round 3 runs
+   only if round 2 found material gaps. If the plan has fuzzy terms or
+   hasn't been tested against the domain model, run the grill-with-docs
+   skill here with the user. If only a legacy `CONTEXT.md` exists, use it
+   and warn the user with `⚠️` to rename it to `GLOSSARY.md`. Done at the
+   first round with no new findings.
+2. **Write the assessment,** specific enough to review: not "we will add a
+   cache" but "in-process LRU keyed by `(tenant_id, query_hash)`, capacity
+   10k, TTL 5m, in `internal/cache/query.go`". For a written plan or doc, run
+   the critique skill on your draft first, so consultants spend their
+   attention on harder problems. Done when it follows this shape:
 
-**Prerequisites:** at least one consultant on PATH, repo available locally
-(so `git diff` is meaningful), and **no secrets** in the assessment or
-diff. Consulting agents send content to third-party APIs — if the diff
-includes `.env` files, credentials, private keys, or anything you would
-not paste into a third-party service, redact or ask the user before
-sending.
+   ```txt
+   ## Problem
+   <task in your own words, with constraints>
 
-## Phase A — Assessment
+   ## Proposed approach
+   <plan with specific files / functions / changes>
 
-**A1. Discovery (≤3 rounds).** Read relevant code, tests, recent commits,
-and convention files. Round 1: form a hypothesis. Round 2: attack it —
-what does it assume, what edge cases break it, was the rejected
-alternative dismissed for a concrete reason? Round 3 only if round 2
-surfaced material gaps. Stop at the first round with no new findings.
+   ## Key decisions and trade-offs
+   <each non-obvious choice with rejected alternatives and concrete reasons>
 
-If the plan has fuzzy terminology or hasn't been stress-tested against the
-project's domain model, explicitly invoke `grill-with-docs` here. It's a
-host-side, user-interactive step — it sharpens vocabulary against
-`GLOSSARY.md` and surfaces unstated assumptions before consultants see
-anything. If only legacy `CONTEXT.md` exists, use it and show the user a
-`⚠️` warning to rename it to `GLOSSARY.md`.
+   ## Risks and open questions
+   ```
 
-**A2. Write the assessment** as a concrete artifact:
+3. **Consultant review.** Send each consultant the review prompt in
+   parallel, so each reaches its own view first, with the A3 focus, its
+   lens, and the assessment. Merge duplicate findings into one stronger
+   finding, noting who raised it. Mark each finding **accept**, **reject
+   with reason** (a concrete fact: file, behaviour, constraint, number), or
+   **defer to user** (a judgment call). Done when every finding is marked.
+4. **Discuss,** up to two rounds per consultant: send the rebuttal prompt
+   only to those whose findings you rejected. Carry a disagreement between
+   two consultants into the gate rather than resolving it yourself. Done
+   when each dispute has converged or hit the cap.
+5. **Gate.** Show the revised assessment, which reviewers contributed what,
+   and an evidence ledger separating verified facts, assumptions, and
+   unknowns. Show unresolved positions side by side, each classed as a
+   factual dispute, a value or trade-off dispute, or missing evidence;
+   investigate factual ones where you can, and leave value disputes to the
+   user rather than researching them. Then stop: implementation waits for
+   approval. Loop back to step 2 or 3 if the user wants changes, and stop
+   entirely if they decline. Done when the user approves.
 
-```txt
-## Problem
-<task in your own words, with constraints>
+## Phase B: implementation
 
-## Proposed approach
-<plan with specific files / functions / changes>
+1. **Implement** the approved assessment or plan, then review your own
+   diff with the code-review skill, so consultants focus on cross-model
+   disagreement rather than the obvious. Done when the relevant tests,
+   lint, and build pass, or the user accepts a documented blocker.
+2. **Consultant review.** Pipe the diff to each consultant on stdin, which
+   avoids quoting problems, with the review prompt, the B2 focus, its lens,
+   and the approved artifact for intent. Merge and mark findings as in A3.
+   Done when every finding is marked.
+3. **Discuss** as in A4, then apply the accepted findings and rerun every
+   check those edits affect. Done when every finding is accepted, rejected
+   with evidence, or unresolved, and the required checks pass or the user
+   accepts the blocker.
+4. **Gate.** Present the final diff for the user to read with `git diff`,
+   the checks and their results, the fixes attributed by consultant, and
+   unresolved positions side by side. Then stop; the user does the final
+   review. Done when that's presented.
 
-## Key decisions and trade-offs
-<each non-obvious choice with rejected alternatives and concrete reasons>
+## Prompts
 
-## Risks and open questions
-```
+**A3 focus:** whether the approach solves the stated problem; missed edge
+cases and failure modes; wrong assumptions about the codebase, libraries, or
+external systems; underweighted hidden complexity; alternatives rejected
+without a concrete reason; missing risks; and the strongest part worth
+keeping.
 
-Be specific. "We will introduce a cache" is too vague; "in-process LRU
-keyed by `(tenant_id, query_hash)`, capacity 10k, TTL 5m, in
-`internal/cache/query.go`" is reviewable.
+**B2 focus:** correctness and edge cases; race conditions; security
+(injection, auth, secrets, fail-secure defaults, trust-boundary validation);
+tests of failure modes, not just the happy path; convention compliance;
+comment quality (a cold reader understands it, no LLM voice); and "compute,
+don't justify": every throttle, retry, batch, timeout, and TTL has a number
+with an operational reason.
 
-If the artifact is a written plan or doc, explicitly invoke `critique` against
-your own draft before A3. It catches logical fallacies and structural
-weaknesses cheaply with one model so consultants spend attention on harder
-things.
-
-**A3. Consultant review.** Send each selected CLI the review prompt below
-with `{focus}` = assessment focus list, `{secondary_lens}` = one rotating lens
-from the list below, and `{artifact}` = the A2 assessment. Run consultants in
-parallel so each reaches an independent recommendation before seeing any other
-opinion. Dedupe findings across agents — duplicates become one stronger
-finding; note which agent(s) raised each.
-
-For A3 and B2, assign secondary lenses across consultants, cycling when there
-are more agents than lenses:
-
-- Evidence gaps and known unknowns
-- Failure modes and hidden costs
-- Strongest success case and what should be preserved
-- Alternative approaches that change the trade-off
-- Process, reversibility, and the smallest useful next step
-
-Each consultant reviews the full core focus. The secondary lens adds breadth;
-it does not replace the common review.
-
-Categorize each finding: **Accept** (integrate), **Reject with reason**
-(concrete fact: file, behavior, constraint, number), or **Defer to user**
-(judgment call).
-
-**A4. Discussion (≤2 rounds per agent).** For each agent whose findings
-you rejected, send back the rebuttal prompt below — only to the agent(s)
-that raised the disputed findings. If two agents disagree with each other,
-carry that disagreement into A5; do not resolve it yourself.
-
-**A5. Gate — present consensus.** Show the user: revised assessment,
-"Reviewers contributed" attribution, and an evidence ledger that separates
-verified facts, assumptions, and unknowns. Present unresolved positions
-side-by-side and classify each as a factual dispute, value/trade-off dispute,
-or missing evidence. Investigate factual disputes when feasible; do not pretend
-value disputes can be resolved by more research. **Stop. Do not begin
-implementation before the gate.** If the user wants changes, loop back to A2
-or A3. If the user declines, stop entirely.
-
-## Phase B — Implementation
-
-**B1. Implement** the approved implementation artifact. Apply your normal
-review pass before handing the diff to consultants — consultant review is on
-top of self-review, not a substitute. Run `code-review` against your own diff
-here; it parallelizes review dimensions within one model and catches the
-obvious stuff so consultants in B2 focus on cross-model disagreement. Run the
-repository's relevant tests, lint, and build checks; do not advance until they
-pass or the user accepts a documented blocker.
-
-**B2. Consultant review.** Pipe the diff to each consultant on stdin
-(avoids quoting issues). Use the review prompt with `{focus}` = diff focus
-list, `{secondary_lens}` = the assigned rotating lens, and `{artifact}` = the
-approved implementation artifact (for intent context). Dedupe findings as in
-A3.
-
-Diff focus: correctness and edge cases; race conditions; security
-(injection, auth, secrets, fail-secure defaults, trust-boundary
-validation); test coverage of failure modes (not just happy path);
-convention compliance; comment quality (cold-reader test, no LLM voice);
-"compute don't justify" — every throttle/retry/batch/timeout/TTL has a
-number with operational justification.
-
-**B3. Discussion (≤2 rounds per agent).** Same protocol as A4. Account for every
-finding as accepted, rejected with evidence, or unresolved. Apply accepted
-findings, then rerun every relevant check affected by those edits. Do not
-advance while a required check fails unless the user accepts the documented
-blocker.
-
-**B4. Gate — present consensus-reviewed code.** Final diff (user runs
-`git diff`), checks run and results, summary of fixes attributed by agent, and
-"Unresolved" with positions side-by-side. Completion requires every finding
-accounted for and all required checks passing or explicitly accepted as
-blocked. Stop. The user does final review.
-
-## Prompt templates
-
-**Review prompt** (used in A3 and B2):
+**Review prompt** (A3 and B2):
 
 ```txt
 **Review-only — do not modify code or run tools that change state.** Produce written findings only. Do not edit files, run build/test/format commands, create commits, or otherwise change the workspace. The host agent owns all implementation. Read-only investigation (file reads, `grep`, `--help`) is fine. Respond with text only.
@@ -210,14 +173,7 @@ verified facts, assumptions, and unknowns. Do not rubber-stamp — only conclude
 ---
 ```
 
-A3 focus: whether the approach solves the stated problem; missed edge cases and
-failure modes; faulty assumptions about the codebase, libraries, or external
-systems; underweighted hidden complexity; alternatives rejected without
-concrete reason; missing risks; and the strongest part worth preserving.
-
-B2 focus: see B2 list above.
-
-**Rebuttal prompt** (used in A4 and B3):
+**Rebuttal prompt** (A4 and B3):
 
 ```txt
 **Review-only — do not modify code or run tools that change state.** Discussion round; respond with text only. Read-only investigation is fine.
@@ -240,7 +196,9 @@ My response per finding:
 For each finding I rejected, do you accept my reasoning, or still disagree? If still disagreeing, give your strongest counter-argument grounded in a specific fact (file, behavior, constraint). If you accept all my reasoning, say so explicitly.
 ```
 
-**Canonical invocation** (agy, B2 — diff on stdin):
+**Invocation** (agy in B2, diff on stdin; replace `main` with the real base
+branch, add `--output-format text` for `gemini`, and for a CLI that doesn't
+read stdin, put the diff in the prompt body, minding quoting and size):
 
 ```bash
 MERGE_BASE=$(git merge-base main HEAD)
@@ -250,33 +208,21 @@ PROMPT
 )"
 ```
 
-For `gemini` (when `agy` is not installed), append `--output-format text`.
-Replace `main` with the actual base branch. For other CLIs, adapt per the
-Setup table; if a CLI doesn't read stdin, substitute the diff into the
-prompt body (mind quoting and size limits).
+## Discipline
 
-## Discipline checklist
-
-- **Every claim is a hypothesis until verified.** Yours and the
-  consultant's. Memory vs. memory is not a rebuttal — cite a `grep`
-  result, `--help` output, docs URL fetched this session, or behavior
-  observed in a real run.
-- **Spot-check hallucinations on either side.** "CLI takes flag `--foo`" →
-  run `--help`. "API rejects X" → check docs or test it. "Line N has a
-  bug" → read line N. "Missing import X" → grep for X.
-- **Consultants have no working memory of the diff** — more likely than
-  you to catch what you missed, *and* more likely to fabricate. Same
-  evidentiary bar both ways.
-- **Don't over-defer.** If you can't state a fact that beats the
-  consultant's, hold your position and let it become Unresolved.
-- **Independent judgment per finding.** Five findings ≠ five accepts.
-- **No forced cross-agent reconciliation.** When two consultants disagree,
-  present both positions; do not synthesize.
-- **Separate kinds of disagreement.** Facts need evidence; values and
-  trade-offs need a user decision; unknowns need the smallest useful
-  evidence-gathering step.
-- **No phase skipping.** Don't begin implementation while waiting for the
-  gate, even if approval feels foregone.
+- **Every claim is a hypothesis until verified,** yours and theirs. Memory
+  against memory isn't a rebuttal: cite a `grep` result, `--help` output, a
+  doc fetched this session, or behaviour seen in a real run. Spot-check both
+  sides: a claimed flag means running `--help`, "line N has a bug" means
+  reading line N.
+- **Same bar both ways.** Consultants have no memory of the diff, so
+  they're likelier than you to catch a miss and likelier to make things up.
+- **Judge each finding on its own;** five findings aren't five accepts. Hold
+  your position when you can't state a fact that beats the consultant's, and
+  let it go to unresolved.
+- **Show disagreements between consultants side by side** rather than
+  blending them. Facts need evidence, values and trade-offs need the user,
+  and unknowns need the smallest step that would resolve them.
 - **Never write a consultant's response yourself.** If a CLI fails
-  (network, quota, syntax, prompt size), surface the error and ask whether
-  to retry, drop that agent, or proceed without consensus.
+  (network, quota, syntax, prompt size), show the error and ask whether to
+  retry, drop that consultant, or go ahead without consensus.
