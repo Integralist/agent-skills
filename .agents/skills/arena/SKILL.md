@@ -1,6 +1,9 @@
 ---
 name: arena
-description: Spawn parallel candidate attempts at a task and synthesize the strongest parts into a final artifact.
+description: >-
+  Parallel candidate attempts at one task, merged into a single best
+  artifact. Use when the user wants several independent attempts compared and
+  the strongest parts combined.
 disable-model-invocation: true
 metadata:
   model-tier: complex
@@ -8,73 +11,66 @@ metadata:
 
 # Arena
 
-Fan out N parallel attempts at the same task. Read every candidate end to end. Pick the strongest as the base. Graft the best ideas from the others into it. Verify the synthesized result.
+Fan out N parallel attempts at the same task, read every candidate end to
+end, pick the strongest as the base, graft the best ideas from the others
+into it, and verify the result. The arena runs autonomously, so open a todo
+list with one entry per step below before launching anything; it keeps a
+step from silently disappearing.
 
-## Start
+**Models.** Use the models the user names. Otherwise, if your harness lets
+you set a subagent's model, run each candidate on the strongest model from a
+different family your harness offers; if it offers one model, run it N times.
+For a judge from another family when your harness has none, use a CLI found
+the way the consensus skill finds its consultants
+(`command -v agy gemini codex claude copilot`).
 
-Open a todolist with one entry per phase before launching anything. The arena runs autonomously and the list keeps phases from silently disappearing.
+1. **Frame.** Every candidate gets the same prompt, so the prompt is the
+   contract. State the artifact each candidate produces. Turn what success
+   means for this task into 3–6 gradeable criteria, such as "adds a
+   `--dry-run` flag that skips writes" rather than "code is correct"; the
+   rubric is for picking, and candidates see only the task. Run one
+   candidate per model, more when the task spans several design directions,
+   or the same model N times when the work is generation-bound rather than
+   judgment-sensitive. Give each candidate its own output location, a git
+   worktree where possible or `/tmp/arena-<slug>/candidate-<n>/`, since a
+   shared path is shared mutable state. Done when the task, rubric,
+   runners, and paths are set.
+2. **Fan out.** Spawn all N subagents in one message, in the background,
+   following [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md).
+   Give each the task, the shared grounding path, its output path, and a
+   request for the artifact plus a short rationale naming the alternatives
+   it considered and rejected; without the rationale you can't tell a
+   principled structure from an accidental one when grafting. Retry a
+   candidate that hits its turn limit with a higher limit; if it still
+   produces nothing usable, carry on with N-1 and record the dropout. Done
+   when every candidate has finished or dropped out.
+3. **Cross-judge.** Once all candidates are done, never while they're still
+   writing (the judge would see partial output as dropouts), spawn one
+   read-only judge, preferably from a different model family from yours. It
+   sees the rubric and the candidates by path label, scores each criterion,
+   and recommends a base with its reasons. It runs while you read in step
+   4. Done when its verdict is in.
+4. **Pick a base.** Read every candidate end to end, since skimming favours
+   whichever looks most familiar, and score each against the rubric
+   criterion by criterion. Agreement with the judge confirms the pick;
+   disagreement means bias or an ambiguous rubric, so read both rationales
+   before deciding. Choose the candidate a future maintainer could extend
+   most easily without breaking invariants, preferring the cleaner boundary
+   or smaller surface when two tie. Done when the pick, the reason, and the
+   judge's verdict are in a short synthesis note beside the base.
+5. **Graft.** Walk each other candidate once more for what's worth porting,
+   usually one or two things each. Fold each in by hand, redesigning so the
+   result still holds one mental model rather than pasting. When the
+   candidates converge on one shape, that's strong agreement: ship it with
+   no graft. When they diverge wildly, step 1 was under-specified, so
+   reframe and rerun rather than averaging. Done when the note records each
+   graft and its source, and each rejection and why; the rejections teach
+   future readers most.
+6. **Verify** the merged artifact as you would any other output; the arena
+   earns no pass. A problem the arena missed means step 1 was wrong
+   (reframe and rerun) or a candidate caught it and you missed the graft
+   (back to step 5). Done when verification passes.
 
-1. Frame
-1. Fan out
-1. Cross-judge
-1. Pick
-1. Graft
-1. Verify
-
-## Phase A: Frame
-
-The N candidates will receive the same prompt, so the prompt is the contract. Get it right before spawning anything.
-
-1. State the artifact each candidate is producing.
-1. Derive the rubric. State what success looks like for *this* task, then turn it into 3-6 concrete gradeable criteria. Concrete: `Adds a --dry-run flag that skips writes`. Vague: `code is correct`. The rubric is the picker's tool in Phase D; candidates only see the task.
-1. Pick the runners. Use `arena runners` from `~/.cursor/rules/pstack-models.mdc` when present. Otherwise default to one each on `claude-fable-5-thinking-max`, `gpt-5.6-sol-max`, `grok-4.6-fast-xhigh`, `claude-opus-5-thinking-xhigh`. Spawn more when the arena covers multiple design directions. Same model N times when the work is generation-bound rather than judgment-sensitive.
-1. Assign output paths. Each candidate writes to its own location (a git worktree where possible, otherwise `/tmp/arena-<slug>/candidate-<n>/`). N candidates writing to the same path is shared mutable state and fails the the **separate-before-serializing-shared-state** principle skill test.
-
-## Phase B: Fan out
-
-Spawn all N subagents in one message with `run_in_background: true`. Give each
-the task, shared grounding path, output path, and instructions to produce an
-artifact and short rationale. Follow the [shared subagent
-guidance](../shared/SUBAGENT-STEERABILITY.md) for each run.
-
-The rationale is mandatory. Without it, the parent cannot tell whether a candidate's structure is principled or accidental, which makes Phase E grafting unreliable. Each rationale names the alternatives the candidate considered and what it rejected.
-
-If a candidate hits its turn limit, retry it with a higher limit before
-treating it as a dropout. If the retry still produces no usable output, proceed
-with N-1 and note the dropout in the synthesis record.
-
-## Phase C: Cross-judge
-
-After all Phase B candidates complete, choose one model from the `arena cross-judge pool` in `~/.cursor/rules/pstack-models.mdc` when present. Otherwise use `claude-fable-5-thinking-max`, `gpt-5.6-sol-max`, `grok-4.6-fast-xhigh`, `claude-opus-5-thinking-xhigh`. Prefer a different model family from the parent's. Spawn one readonly judge subagent on that model. It sees the rubric and the candidates by path label, scores each criterion, and recommends a base with rationale. It runs in parallel with the parent's reading in Phase D, not with the candidates themselves. Spawning while candidates are still writing means the judge sees partial or empty outputs and reports them as dropouts.
-
-## Phase D: Pick a base
-
-Read every candidate end to end before picking. Skimming N candidates surfaces only the candidate whose surface looks most familiar.
-
-Score each candidate against the rubric criterion by criterion, not on holistic feel. Compare against the cross-judge. Agreement on the base confirms the pick. Disagreement means one of you is biased or the rubric was ambiguous. Read both rationales before deciding.
-
-Pick the base on which candidate a future maintainer can extend most easily without breaking invariants. Prefer the cleaner boundary or smaller surface area when two feel tied, per the Laziness Protocol.
-
-Record the pick and the reason in a short synthesis note alongside the base artifact, including the cross-judge's verdict.
-
-## Phase E: Graft
-
-Walk each losing candidate once more and identify what is worth porting into the base. The signal is usually one or two things per candidate, not most of it.
-
-Fold each graft in by hand, per the **redesign-from-first-principles** principle skill. Don't paste mechanically. The result has to remain coherent under one mental model.
-
-Record what was grafted, from which candidate, and what was rejected and why. The rejection notes are the highest-signal part of the record. Future readers learn from what you considered and dropped, not just what you kept.
-
-When N candidates converge on the same shape, that is a strong agreement signal. Note the convergence in the record and ship the consensus shape. No graft is needed. When N candidates wildly diverge, Phase A was under-specified. Reframe and re-run rather than averaging the divergence.
-
-## Phase F: Verify
-
-The synthesized artifact has to hold up under the same scrutiny as any other output, per the **prove-it-works** principle skill. The arena does not earn you a pass.
-
-If verification surfaces a problem the arena did not catch, either Phase A was wrong (re-frame and re-run) or one candidate caught it and you missed the graft (go back to Phase E). Don't paper over.
-
-## Outputs
-
-One synthesized artifact and one short synthesis note naming the base, grafts
-(with source), rejections, turn-limit warnings after affected run summaries,
-dropouts, and verification result.
+**Output.** One merged artifact and a short synthesis note naming the base,
+grafts with their sources, rejections, dropouts, turn-limit warnings after
+the affected run summaries, and the verification result.
