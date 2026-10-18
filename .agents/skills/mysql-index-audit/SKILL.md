@@ -1,11 +1,10 @@
 ---
 name: mysql-index-audit
 description: >-
-  Audit a codebase for MySQL index correctness. Finds composite
-  indexes broken by leftmost-prefix violations, queries that only
-  partially use an index (index gaps), and index killers (leading
-  wildcards, function-wrapped columns, type mismatches). Static
-  analysis of schema + query code; reports EXPLAIN follow-ups.
+  Statically audit a codebase's MySQL indexes against the queries that use
+  them. Use when checking for leftmost-prefix violations, partially used
+  composite indexes, index killers such as leading wildcards or
+  function-wrapped columns, or redundant and missing indexes.
 disable-model-invocation: true
 argument-hint: '[path | --diff | --uncommitted]'
 metadata:
@@ -14,481 +13,271 @@ metadata:
 
 # MySQL Index Audit
 
-Statically audit a codebase for MySQL index correctness. The audit inventories
-every index definition and every query site it can find in the code, correlates
-them, and reports indexes that queries fail to use correctly — primarily
-**leftmost-prefix violations** (the index can't be used at all) and **index
-gaps** (the index is only partially used). It also flags the common "index
-killers" and surfaces opportunities (covering indexes, generated columns).
+Inventory every index definition and every query site in the code, correlate
+them, and report where queries fail to use an index: leftmost-prefix
+violations (the index can't be used) and gaps (it's only partly used), plus
+index killers and opportunities such as covering indexes and generated
+columns.
 
 > [!IMPORTANT]
-> This audit is **static** — it reads code, it does not connect to a database.
-> A static match against schema and query text is a strong signal, but the
-> optimizer's actual choice depends on live statistics (cardinality, table
-> size, row estimates). Every finding ends with an `EXPLAIN` command the user
-> runs to confirm. Treat findings as "verify with EXPLAIN", not "proven".
+> The audit reads code; it never connects to a database. A static match is a
+> strong signal, but the optimizer's choice depends on live statistics, so
+> every finding is "verify with `EXPLAIN`", not proven, and the report ends
+> with the `EXPLAIN` commands to run.
 
-## Input
+**Scope.** With a path or glob, audit it; with no argument, the whole repo.
+`--diff` takes files changed on the branch,
+`git diff --name-only "$(git merge-base HEAD main)"...HEAD` (or `master`), and
+`--uncommitted` takes `git diff --name-only HEAD` plus untracked files from
+`git status --porcelain`.
 
-The argument follows the skill invocation. Detect the mode:
+**Parallel inventories.** Steps 1 and 2 are independent, mechanical reads of
+the same files. When the harness supports subagents, run them as two
+concurrent subagents on the cheapest adequate tier, following
+[SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md) and its
+completion and retry protocol, then correlate in step 3; otherwise run them
+in turn.
 
-| Argument                  | Mode                                         |
-| ------------------------- | -------------------------------------------- |
-| File path or glob pattern | Audit the given path(s)                      |
-| No argument               | Audit the whole repository                   |
-| `--diff`                  | Scope to files changed on the branch vs main |
-| `--uncommitted`           | Scope to uncommitted changes                 |
+1. **Inventory the indexes,** one record each:
 
-For `--diff`, derive the changed file list with
-`git diff --name-only "$(git merge-base HEAD main)"...HEAD` (fall back to
-`master` if `main` does not exist). For `--uncommitted`, use
-`git diff --name-only HEAD` plus untracked files from `git status --porcelain`.
+   ```txt
+   { table, index_name, ordered_columns[], unique?, source_file:line }
+   ```
 
-## Step 1 — Inventory the indexes
+   Column order is the datum the whole audit hinges on, so copy it verbatim:
+   a wrong order here makes every finding downstream wrong. Search with `rg`:
+   - **Raw DDL** in migrations, `*.sql`, and SQL strings:
+     `CREATE\s+(UNIQUE\s+)?INDEX`, `ADD\s+(UNIQUE\s+)?(INDEX|KEY)`,
+     `PRIMARY\s+KEY`, and inline `(UNIQUE\s+)?(INDEX|KEY)\s+` in a
+     `CREATE TABLE` body.
+   - **GORM:** tags `gorm:"index"`, `gorm:"uniqueIndex"`,
+     `index:idx_name,priority:N`. Composite order comes from `priority`, not
+     source position.
+   - **Rails:** `add_index`, `t.index`. **Django:** `Meta.indexes`,
+     `index_together`, `db_index=True`, `unique_together`.
+     **Sequelize/TypeORM:** `@Index(`, `indexes: [`.
+     **SQLAlchemy/Alembic:** `Index(`, `op.create_index(`. **Ecto:**
+     `create index(`, `create unique_index(`.
 
-Find every index definition. **Column order is the critical datum** — capture
-the ordered column list verbatim from each definition; the whole audit hinges on
-it. Build one record per index:
+   Elsewhere, a composite's declared column order is its index order. Done
+   when every definition has a record.
+2. **Inventory the queries,** one record each:
 
-```txt
-{ table, index_name, ordered_columns[], unique?, source_file:line }
-```
+   ```txt
+   { table, predicate_columns[], operators[], order_by_columns[], select_columns[] }
+   ```
 
-Grep across the common MySQL code shapes. Use `rg` for these patterns:
+   `operators[]` marks each predicate column as equality (`=`, `IN`), range
+   (`>`, `<`, `>=`, `<=`, `BETWEEN`, `LIKE 'x%'`), or a killer (step 3).
+   Search raw SQL (`SELECT`, `WHERE`, `JOIN`, `ORDER BY`, `GROUP BY` in
+   strings and `*.sql`) and query builders (`.where(`, `.filter(`, `Where(`,
+   `find_by`, `.eq(`, `.in(`, `.order(`, `where:`, and the ORM's own forms).
+   - **Dynamic WHERE clauses,** whose columns depend on runtime input, can't
+     be resolved statically: list them under "Needs manual EXPLAIN" with
+     `file:line` rather than guessing. A static `OR :p IS NULL` catch-all is
+     fully visible, so it's a KILLER, not this.
+   - **CTEs and derived tables** are merged into the outer query by default,
+     so their predicates use base-table indexes; inventory them normally. A
+     body with `GROUP BY`, `DISTINCT`, `HAVING`, `LIMIT`, `UNION`, or an
+     aggregate or window function, and every recursive CTE, is materialised
+     into an unindexed temp table (`<derivedN>` in `EXPLAIN`, perhaps with an
+     `auto_key0`). List one that's filtered or joined after such a construct
+     under "Needs manual EXPLAIN".
 
-- **Raw DDL** (migrations, `*.sql`, embedded SQL strings):
-  - `CREATE\s+(UNIQUE\s+)?INDEX`
-  - `ADD\s+(UNIQUE\s+)?(INDEX|KEY)`
-  - `PRIMARY\s+KEY`
-  - inline `(UNIQUE\s+)?(INDEX|KEY)\s+` clauses inside a `CREATE TABLE` body
-- **ORM / framework declarations** (grep these code shapes regardless of the
-  host language):
-  - **Go / GORM:** struct tags — `gorm:"index"`, `gorm:"uniqueIndex"`,
-    `index:idx_name,priority:N` (priority sets composite column order)
-  - **Rails / ActiveRecord:** `add_index`, `t.index`
-  - **Django:** `Meta.indexes`, `index_together`, `db_index=True`,
-    `unique_together`
-  - **Sequelize / TypeORM:** `@Index(`, `indexes: [`
-  - **SQLAlchemy / Alembic:** `Index(`, `op.create_index(`
-  - **Ecto:** `create index(`, `create unique_index(`
+   Done when every query site has a record or a "Needs manual EXPLAIN" entry.
+3. **Classify** each query against the indexes on its table, using the
+   classifications below. Done when every query has a classification or is
+   clean.
+4. **Report** in the shape below. Done when every finding has its index,
+   query, classification, why, and fix, and the `EXPLAIN` follow-ups close
+   the report.
 
-> [!NOTE]
-> For composite indexes the **declaration order of the columns is the index
-> column order**. In GORM, ordering comes from the `priority` field, not source
-> position — read it carefully. A wrong column order recorded here produces
-> wrong findings downstream.
-
-## Step 2 — Inventory the queries
-
-Find every query site and extract, per query:
-
-```txt
-{ table, predicate_columns[], operators[], order_by_columns[], select_columns[] }
-```
-
-Where `operators[]` records, per predicate column, whether it is equality
-(`=`, `IN`), a range (`>`, `<`, `>=`, `<=`, `BETWEEN`, `LIKE 'x%'`), or a
-killer (function wrap, leading wildcard, type mismatch — see Step 3).
-
-Grep for:
-
-- **Raw SQL:** `SELECT`, `FROM`, `WHERE`, `JOIN`, `ORDER BY`, `GROUP BY`
-  fragments in strings and `*.sql` files.
-- **Query builders:** `.where(`, `.filter(`, `Where(`, `find_by`, `.eq(`,
-  `.in(`, `.order(`, `where:` keyword args, and similar per the ORM in use.
-
-> [!WARNING]
-> Dynamically built WHERE clauses (string concatenation, conditional predicate
-> assembly, query builders whose columns depend on runtime input) **cannot be
-> fully resolved statically**. Do not guess their column set. List them in the
-> report under "Needs manual EXPLAIN" with the file:line, so the user can run
-> `EXPLAIN` against the actual generated SQL. One shape is the exception: a
-> static `OR :p IS NULL` catch-all is fully visible in the source — classify it
-> as a KILLER (Step 3), not "needs EXPLAIN".
-
-> [!NOTE]
-> A **CTE or derived table** is either *merged* into the outer query or
-> *materialized* into an internal temp table. When **merged** (the default —
-> `derived_merge` optimizer switch on), predicates against it use the base
-> table's indexes, so inventory those queries normally. But a CTE body
-> containing `GROUP BY`, `DISTINCT`, `HAVING`, `LIMIT`, `UNION`, or an
-> aggregate/window function forces **materialization** (recursive CTEs always
-> materialize). A materialized CTE is an unindexed temp table — `EXPLAIN` shows
-> `<derivedN>` and base-table indexes no longer serve outer predicates against
-> it, though the optimizer may add an auto-generated key (`auto_key0`) for `ref`
-> access. Flag a CTE that is filtered or joined after a materialization-forcing
-> construct under "Needs manual EXPLAIN".
-
-## Step 3 — Correlate and classify
-
-For each query, match it against the indexes on the same table and classify it.
-The classifications below are the core of the audit.
+## Classifications
 
 > [!IMPORTANT]
-> **InnoDB indexes are clustered: every secondary index implicitly carries the
-> primary-key columns.** The table *is* its primary-key index, so a secondary
-> index on `(a)` is physically `(a, <pk>)`, and a secondary-index lookup that
-> needs other columns must then seek the clustered index by PK. Two
-> consequences drive findings below:
->
-> - A query selecting only the index's own columns **plus PK columns** is
->   already covered — don't recommend adding the PK to the index (see COVERING).
-> - A wide primary key bloats *every* secondary index on the table, slowing
->   writes and inflating storage. Flag wide or natural PKs as a cost multiplier.
+> InnoDB secondary indexes implicitly carry the primary-key columns: the
+> table is its PK index, so `(a)` is physically `(a, <pk>)`. A query
+> selecting only the index's columns plus the PK is already covered, so
+> never recommend adding the PK. A wide or natural PK bloats every secondary
+> index and slows writes, so flag it as a cost multiplier.
 
-### UNUSED — leftmost-prefix violation
-
-The query filters on indexed columns but **not the leftmost column** of the
-index. The index cannot be used at all; MySQL falls back to a full table scan
-(`type: ALL`).
+**UNUSED: leftmost-prefix violation.** The query filters on indexed columns
+but not the index's leftmost one, so the index can't be used and MySQL scans
+the table (`type: ALL`). Fix by reordering the index or adding one that leads
+with the queried column.
 
 ```sql
--- Index:  (last_name, country, state)
--- BAD: skips the leftmost column entirely -> index unusable
+-- Index (last_name, country, state): skips last_name, so unusable
 SELECT * FROM users WHERE country = 'UK';
 ```
 
-Fix: reorder the index so the queried column is leftmost, or add an index that
-leads with it.
-
-### PARTIAL — index gap
-
-The query uses the leftmost column(s) but **skips a column in the middle** of
-the index. MySQL uses the index up to the gap, then scans for the rest.
+**PARTIAL: index gap.** The query uses the leftmost columns but skips one in
+the middle, so MySQL seeks up to the gap and scans the rest. Predicate order
+in `WHERE` doesn't matter, since the optimizer reorders them; only which
+leading columns are present does. Fix by adding the skipped column to the
+query or an index matching the query's columns.
 
 ```sql
--- Index:  (last_name, country, state)
--- PARTIAL: uses index for `last_name` only; `country` is missing, so it cannot
--- seek on `state`. All 'Smith' rows are scanned to filter for 'California'.
+-- Index (last_name, country, state): seeks last_name only, then scans
+-- every 'Smith' for state, because country is missing
 SELECT * FROM users WHERE last_name = 'Smith' AND state = 'California';
 ```
 
-> [!NOTE]
-> The **order columns appear in the `WHERE` clause does not matter** — the
-> optimizer reorders predicates to match the index. What matters is that the
-> required leftmost columns are all **present**. So
-> `WHERE state = 'California' AND country = 'US' AND last_name = 'Smith'` uses
-> the full `(last_name, country, state)` index even though it is "out of order".
-
-Fix: include the skipped column in the query, or add a composite index matching
-the query's actual column set.
-
-### RANGE-then-equality ordering (equality before range)
-
-When designing a composite index, place **equality** columns (`=`, `IN`)
-*before* **range** columns (`>`, `<`, `>=`, `<=`, `BETWEEN`, `LIKE 'x%'`). A
-range predicate on an index column stops the index from being used for any
-column **to its right** — MySQL evaluates **one** range per index lookup, then
-filter-scans the remaining matched rows.
+**RANGE-ORDER: equality before range.** A range predicate stops the index
+being used for every column to its right: columns the index seeks on are
+access predicates (they lengthen `key_len`), and those after a range become
+filter predicates, read then discarded (`Using where`). So put equality
+columns first and one range last; with several ranges, only one benefits, so
+put the most selective last.
 
 ```sql
--- BAD: range column first -> only `created_at` is seekable
+-- BAD: only created_at is seekable; country is filtered row by row
 CREATE INDEX idx_users_created_country ON users (created_at, country);
-
--- The `>=` range halts index traversal at `created_at`; every matched row is
--- then scanned to filter `country`.
-SELECT * FROM users WHERE country = 'UK' AND created_at >= '2026-01-01';
-
--- GOOD: equality first, range last -> both columns used
+-- GOOD: seeks country = 'UK', then range-scans created_at within it
 CREATE INDEX idx_users_country_created ON users (country, created_at);
 
--- Seeks `country = 'UK'`, then range-scans `created_at` within it.
 SELECT * FROM users WHERE country = 'UK' AND created_at >= '2026-01-01';
 ```
 
-> [!NOTE]
-> The same applies when the query has multiple range predicates: only one
-> range column benefits from the index. Order the index so the most selective
-> range comes last and the rest are filtered.
+**KILLER.** These force a scan even with a matching index:
 
-> [!NOTE]
-> The vocabulary for this: columns the index can *seek* on are **access
-> predicates** — they set the scan's start and stop points; columns it can only
-> *check* after the seek are **filter predicates** — rows are read, then
-> discarded. A range turns every column to its right into a filter predicate.
-> `EXPLAIN` exposes the split: access predicates lengthen `key_len`, filter
-> predicates show as `Using where`. The audit's goal is to maximise access
-> predicates — equality columns first, then a single range.
-
-### Index killers
-
-Even with a matching index, these force a scan:
-
-| Killer           | Slow                            | Fast / Fix                                   |
+| Killer           | Slow                            | Fix                                          |
 | ---------------- | ------------------------------- | -------------------------------------------- |
 | Leading wildcard | `LIKE '%smith'`                 | `LIKE 'smith%'`                              |
 | Function wrap    | `WHERE YEAR(d) = 2026`          | `WHERE d >= '2026-01-01' AND d < '2027-...'` |
 | Function wrap    | `WHERE LOWER(name) = 'pikachu'` | functional index, or generated column        |
 | Type mismatch    | `WHERE varchar_id = 123`        | quote it: `WHERE varchar_id = '123'`         |
 
-A type mismatch (comparing a `VARCHAR` column to a numeric literal) forces MySQL
-to convert every row before comparing — the index is bypassed.
+A type mismatch converts every row before comparing. A catch-all predicate,
+`(col = ? OR ? IS NULL)` or `col = COALESCE(:p, col)`, makes the optimizer
+plan for every filter disabled, so it picks a full scan and keeps it even
+when a value is given. Fix it by building the WHERE clause from only the
+supplied predicates, still with bind parameters, so each shape gets its own
+plan.
 
-### KILLER — catch-all / smart-logic predicates
+**REDUNDANT.** An index that's a leftmost prefix of another, such as
+`(user_id)` beside `(user_id, created_at)`, is a drop candidate. Say in the
+report that dropping it speeds writes, since every insert, update, and delete
+maintains each index.
 
-A query that makes each filter optional with `OR :p IS NULL` (or
-`col = COALESCE(:p, col)`) forces the optimizer to plan for the worst case —
-every filter disabled — so it picks a full table scan and keeps that plan even
-when the caller supplies a value. Unlike a genuinely dynamic WHERE clause, this
-shape is fully visible in the source, so classify it here rather than deferring
-it to "Needs manual EXPLAIN".
+**MISSING.** A frequent `WHERE` or `JOIN` predicate has no index leading with
+its column; recommend a composite, equality columns first. A nested-loops
+join probes the driven table once per driving row, so an unindexed join or
+foreign-key column on that side is MISSING too.
 
-```sql
--- KILLER: any predicate may be NULL-disabled -> full scan, always
-SELECT * FROM employees
- WHERE (subsidiary_id = ? OR ? IS NULL)
-   AND (last_name     = ? OR ? IS NULL);
-```
+**INDEX-MERGE.** MySQL can intersect scans of separate indexes for `AND` and
+union them for `OR`. That's a plan to confirm with `EXPLAIN` and
+`EXPLAIN ANALYZE`, not proof of a defect. For `AND`, compare it with a
+composite ordered for the query. For `OR` across columns, the merge may be
+right, and a `UNION` rewrite is a measured alternative: keep the original row
+set by applying global `ORDER BY`/`LIMIT` to the combined result, and
+deduplicate by row identity or make the branches disjoint (`UNION` removes
+duplicate tuples; `UNION ALL` keeps them).
 
-Fix: build the WHERE clause dynamically, emitting only the predicates the caller
-supplied (still with bind parameters). Each resulting shape gets its own plan
-and uses the matching index.
+**COVERING.** The query selects only columns the index holds or could hold,
+so MySQL can answer from the index alone (`Using index`). Suggest adding the
+selected columns to the index key; MySQL has no PostgreSQL-style `INCLUDE`.
 
-### REDUNDANT / DUPLICATE indexes
-
-An index whose columns are a **leftmost prefix** of another index is
-redundant — the longer index already serves it. Flag it as a drop candidate.
-
-```txt
-idx_a (user_id)                <- redundant: prefix of idx_b
-idx_b (user_id, created_at)    <- keep
-```
-
-> [!NOTE]
-> Indexes are a **read-fast / write-slow** trade-off: every `INSERT`, `UPDATE`,
-> and `DELETE` must update each index, and each index costs storage. Removing
-> redundant indexes speeds up writes — call this out in the report.
-
-### MISSING index
-
-A frequent `WHERE`/`JOIN` predicate with no index whose leftmost column matches.
-Recommend a composite index ordered equality-columns-first.
-
-A **join** predicate needs an index just as a `WHERE` does. In a nested-loops
-join MySQL probes the joined ("driven") table once per driving row, so the join
-columns on the driven side — typically the foreign key — must be indexed, or
-each probe is a full scan. Flag an unindexed join/FK column as MISSING.
-
-### INDEX-MERGE — candidate plan, not automatic defect
-
-MySQL may combine scans from separate indexes: intersection for some `AND`
-predicates and union for some `OR` predicates. An `index_merge` plan is not
-proof of a missing composite index or a bottleneck. Confirm the plan with
-`EXPLAIN`; compare actual rows and timing with `EXPLAIN ANALYZE` where
-available.
-
-For `AND` predicates, compare an intersection plan with a composite index
-ordered for the query. For `OR` across columns, Index Merge may be appropriate;
-a `UNION` rewrite is a measured alternative, not a default.
-
-When rewriting `OR`, preserve the original row set and apply global
-`ORDER BY`/`LIMIT` to the combined results. `UNION` removes duplicate result
-tuples, while `UNION ALL` preserves them. Deduplicate by row identity (for
-example, union unique keys) or make branches disjoint so rows matching both
-predicates still appear once.
-
-### COVERING opportunity
-
-The query selects only columns that already live in (or could be added to) the
-index, so MySQL can answer it from the index alone (`Extra: Using index`, an
-"index-only scan"). Suggest extending the composite index to include the
-selected columns. Remember the PK columns are already present (see the InnoDB
-note above) — a select of indexed columns plus PK is covered as-is.
-
-> [!NOTE]
-> In PostgreSQL this is the `INCLUDE` clause
-> (`CREATE INDEX ... INCLUDE (col)`). In MySQL there is no `INCLUDE`; you
-> make an index covering by adding the columns to the index key itself.
-
-### GENERATED-COLUMN candidate
-
-When a query repeatedly filters or sorts on the **result of a function**
-(`JSON_EXTRACT(...)`, `LENGTH(...)`, a concatenation), MySQL cannot index the
-raw expression in a `WHERE`. Recommend a **generated column** plus an index on
-it, then pick the storage type per the guide below.
+**GENERATED-COLUMN.** A query that filters or sorts on a function result
+(`JSON_EXTRACT`, `LENGTH`, a concatenation) can't use an index on the raw
+column. Recommend a generated column with an index:
 
 ```sql
--- Slow: full scan, the JSON path is computed per row
+-- Slow: the JSON path is computed per row
 SELECT * FROM events WHERE JSON_EXTRACT(data, '$.id') = 10;
 
--- Fix: extract into a generated column and index it
 ALTER TABLE events
   ADD COLUMN event_id INT
     GENERATED ALWAYS AS (JSON_EXTRACT(data, '$.id')) STORED;
 CREATE INDEX idx_events_event_id ON events (event_id);
+
+-- For ORDER BY LENGTH(path) DESC LIMIT 10, a DESC index reads longest-first
+-- and removes "Using filesort"
+ALTER TABLE routes
+  ADD COLUMN path_length INT GENERATED ALWAYS AS (LENGTH(path)) STORED;
+CREATE INDEX idx_routes_version_length ON routes (version_id, path_length DESC);
 ```
 
-A descending generated-column index also removes a sort step for
-"longest/largest first" queries:
+`VIRTUAL`, the default, computes on read with no extra storage or write cost,
+so it suits cheap expressions and write-heavy tables. `STORED` computes on
+write and keeps the value in the row, so it suits expensive expressions,
+read-heavy tables, and sorting or aggregating on the value. MySQL can index
+either, but `STORED` is the more reliable way to make a function result
+searchable.
+
+**SORT-ORDER.** An `ORDER BY` whose columns and directions don't match an
+index's leading columns forces `Using filesort`. A mixed-direction sort needs
+an index that declares each direction, such as
+`(sale_date ASC, product_id DESC)` for
+`ORDER BY sale_date ASC, product_id DESC`. Descending index columns need
+MySQL 8.0+ (MariaDB 10.8+); earlier versions parse `DESC` and ignore it, so
+confirm the server version first. MySQL has no `NULLS FIRST/LAST`: `NULL`s
+sort first ascending and last descending.
+
+**PAGINATION.** `LIMIT n OFFSET m` reads and discards `m` rows on every call,
+so it slows with depth, and concurrent inserts shift pages, duplicating or
+skipping rows. Flag a large or user-driven `OFFSET` and recommend keyset
+pagination, which is constant time per page and stable under inserts. The
+trailing key column keeps rows that share a date from being skipped at a page
+boundary:
 
 ```sql
--- Query pattern: ORDER BY LENGTH(path_pattern) DESC LIMIT 10
-ALTER TABLE path_groups
-  ADD COLUMN path_pattern_length INT
-    GENERATED ALWAYS AS (LENGTH(path_pattern)) STORED;
-CREATE INDEX idx_version_matchtype_length
-  ON path_groups (version_id, match_type, path_pattern_length DESC);
--- The DESC index lets MySQL read longest-first from the start of the index,
--- eliminating "Using filesort".
-```
-
-#### VIRTUAL vs STORED
-
-Both store the *definition*; they differ in when the value is computed and
-whether it is materialized on disk.
-
-| Type      | On disk | Computed                     | Choose when                                                              |
-| --------- | :-----: | ---------------------------- | ------------------------------------------------------------------------ |
-| `VIRTUAL` |   No    | On read (`SELECT`)           | Default. Cheap expressions; write-heavy / read-light tables; saves space |
-| `STORED`  |   Yes   | On write (`INSERT`/`UPDATE`) | Expensive expressions; read-heavy tables; sorting on the value           |
-
-- `VIRTUAL` is the default — zero extra storage and no write amplification, and
-  the on-the-fly cost is negligible for cheap expressions (concatenation, basic
-  math).
-- `STORED` moves heavy computation to write time so reads stay instant — pick it
-  for expensive expressions and tables read far more than written.
-- `STORED` gives a static, physical value that indexes (and `ORDER BY ... DESC`)
-  can scan cleanly, so prefer it when sorting or aggregating on the generated
-  value — as the `path_pattern_length` example above does.
-
-> [!NOTE]
-> MySQL can index a `VIRTUAL` column too (it builds a hidden index structure
-> behind the scenes), but `STORED` materializes the value in the row itself —
-> the more reliable choice for turning an un-indexable function result into
-> static, searchable data.
-
-### SORT-ORDER — filesort from an unsatisfiable ORDER BY
-
-An `ORDER BY` whose columns and directions don't match an index's leading
-columns forces a `Using filesort` step. A mixed-direction sort
-(`ORDER BY a ASC, b DESC`) needs an index that declares those directions per
-column; a plain `(a, b)` index can't serve it.
-
-```sql
--- Needs a direction-matched index, else filesort:
-SELECT ... FROM sales ORDER BY sale_date ASC, product_id DESC;
-CREATE INDEX idx_sales_dt_pr ON sales (sale_date ASC, product_id DESC);
-```
-
-> [!IMPORTANT]
-> Descending index columns require **MySQL 8.0+** — before 8.0 (and MariaDB
-> before 10.8) the `DESC` keyword parses but is ignored, so the index is stored
-> ascending and the mixed-direction sort still filesorts. Confirm the server
-> version before recommending a directional index. MySQL 8.0 also has no
-> `NULLS FIRST/LAST`; `NULL`s sort first ascending, last descending.
-
-### PAGINATION — deep OFFSET scan
-
-`LIMIT n OFFSET m` makes MySQL read and discard all `m` skipped rows every call,
-so response time grows with page depth; concurrent inserts also shift the
-window, duplicating or skipping rows across pages. Flag any large or user-driven
-`OFFSET`.
-
-Fix: **keyset (seek) pagination** — carry the last row's sort key forward and
-seek past it with a row-value comparison, backed by an index on the sort
-columns. Constant time per page, stable under inserts.
-
-```sql
--- Instead of: ORDER BY sale_date DESC LIMIT 10 OFFSET 10000
 CREATE INDEX idx_sales_dt_id ON sales (sale_date, sale_id);
 SELECT * FROM sales
- WHERE (sale_date, sale_id) < (?, ?)   -- last row of previous page
+ WHERE (sale_date, sale_id) < (?, ?)   -- last row of the previous page
  ORDER BY sale_date DESC, sale_id DESC
  LIMIT 10;
 ```
 
-The trailing key column (`sale_id`) makes the order deterministic so rows
-sharing a `sale_date` aren't skipped at the page boundary.
+## Report
 
-## Step 4 — Report
-
-Present findings grouped by severity (High / Medium / Low). For each finding
-include:
-
-- The index definition (`file:line`) with its ordered columns
-- The offending query (`file:line`)
-- The classification (UNUSED / PARTIAL / RANGE-ORDER / KILLER / REDUNDANT /
-  MISSING / INDEX-MERGE / COVERING / GENERATED-COLUMN / SORT-ORDER / PAGINATION)
-- **Why it matters** (one line)
-- A **concrete fix** (reorder index columns, add a column to the query, add an
-  index, rewrite the predicate, add a generated column, drop a redundant index)
-
-Suggested skeleton:
+Group findings by severity. For each, give the index with its ordered columns
+and `file:line`, the query and its `file:line`, the classification, one line
+on why it matters, and a concrete fix.
 
 ````markdown
 ## MySQL Index Audit
 
-**Scope:** <path | branch-diff | uncommitted>
-**Indexes found:** <n>   **Query sites found:** <n>
+- **Scope:** <path | branch-diff | uncommitted>
+- **Indexes found:** <n>
+- **Query sites found:** <n>
 
-### High — index unused / partially used
+### High: index unused or partially used
 
 - **UNUSED** `users.idx_name_country_state (last_name, country, state)`
   (`db/schema.sql:42`)
   - Query `WHERE country = 'UK'` (`internal/users/repo.go:88`) skips the
-    leftmost column `last_name` -> full table scan.
-  - **Fix:** add an index leading with `country`, or reorder predicates to
-    include `last_name`.
+    leftmost column `last_name`, so the table is scanned.
+  - **Fix:** add an index leading with `country`, or include `last_name`.
 
-### Medium — killers, range ordering, missing indexes
+### Medium: killers, range ordering, missing indexes
 
-...
+### Low: redundant indexes, covering opportunities
 
-### Low — redundant indexes, covering opportunities
+### Needs manual EXPLAIN
 
-...
-
-### Needs manual EXPLAIN (dynamic queries)
-
-- `internal/search/builder.go:120` — WHERE clause built conditionally; columns
-  unknown statically.
-````
+- `internal/search/builder.go:120`: WHERE clause built conditionally.
 
 ### Verify with EXPLAIN
 
-Because the audit is static, end the report with the commands the user runs
-against a live database to confirm each finding:
-
 ```sql
--- Confirm which index (if any) the optimizer picks, and how:
-EXPLAIN SELECT ...;          -- check: key vs possible_keys, type, Extra
-EXPLAIN ANALYZE SELECT ...;  -- real row counts and timing (MySQL 8.0.18+)
+EXPLAIN SELECT ...;          -- key vs possible_keys, type, Extra
+EXPLAIN ANALYZE SELECT ...;  -- real rows and timing (MySQL 8.0.18+)
 
--- Find the slow queries to prioritise first:
+-- Find the slow queries to fix first
 SHOW VARIABLES LIKE 'slow_query_log';
 SHOW VARIABLES LIKE 'long_query_time';
 SET GLOBAL long_query_time = 0.5;
 SET GLOBAL slow_query_log = 'ON';
 ```
+````
 
-## Reference: reading EXPLAIN
+To read the `EXPLAIN` output, use
+[EXPLAIN-REFERENCE.md](EXPLAIN-REFERENCE.md).
 
-See [EXPLAIN-REFERENCE.md](EXPLAIN-REFERENCE.md) for criteria on interpreting
-`EXPLAIN` output (`type`, `key` vs `possible_keys`, `Extra` flags,
-leftmost-prefix rule).
-
-## Agent teams (if your harness supports it)
-
-If your harness supports parallel subagents, run Step 1 (index inventory) and
-Step 2 (query inventory) as two concurrent subagents over the same file set,
-then correlate their results in Step 3. This is faster on large codebases. On a
-single-agent harness, run the steps sequentially — the result is identical.
-
-Both inventory steps are mechanical file reads — run them on the cheapest model
-tier adequate to the task (see
-[`../shared/SUBAGENT-STEERABILITY.md`](../shared/SUBAGENT-STEERABILITY.md)).
-Apply its completion and retry protocol before correlating the results.
-
-## References
-
-- Source notes:
-  <https://gist.github.com/Integralist/51ae85eb6f522a6e8399cacefa385258>
-  (`Explain.md`, `Indexes.md`, `Virtual Columns.md`)
-- MySQL `EXPLAIN` output:
-  <https://dev.mysql.com/doc/refman/8.0/en/explain-output.html>
-- Index Merge optimization:
-  <https://dev.mysql.com/doc/refman/8.0/en/index-merge-optimization.html>
-- Generated columns:
-  <https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html>
-- SQL indexing reference (access vs filter predicates, clustered indexes, keyset
-  pagination): <https://use-the-index-luke.com/>
+**Sources:**
+[source notes](https://gist.github.com/Integralist/51ae85eb6f522a6e8399cacefa385258),
+[EXPLAIN output](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html),
+[Index Merge](https://dev.mysql.com/doc/refman/8.0/en/index-merge-optimization.html),
+[generated columns](https://dev.mysql.com/doc/refman/8.0/en/create-table-generated-columns.html),
+and [Use The Index, Luke](https://use-the-index-luke.com/).

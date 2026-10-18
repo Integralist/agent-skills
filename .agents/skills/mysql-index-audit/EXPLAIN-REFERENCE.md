@@ -1,6 +1,6 @@
 # Reference: reading EXPLAIN
 
-Inline criteria for interpreting the `EXPLAIN` output the user gathers.
+How to read the `EXPLAIN` output the user gathers for each finding.
 
 ## `type` — access method (fastest to slowest)
 
@@ -29,8 +29,8 @@ Inline criteria for interpreting the `EXPLAIN` output the user gathers.
 - `key_len` — bytes of the index actually used to seek. It counts only the
   **access-predicate** columns (those setting scan start/stop points), so a
   `key_len` shorter than the full composite index means a leftmost prefix stops
-  short — a column is missing or a range halted traversal (see PARTIAL and
-  RANGE-ORDER in the audit).
+  short — a column is missing or a range halted traversal (PARTIAL or
+  RANGE-ORDER).
 
 ## `Extra` — red flags and green lights
 
@@ -45,10 +45,3 @@ Inline criteria for interpreting the `EXPLAIN` output the user gathers.
 | `Using filesort`           | Bad      | Manual sort; index order didn't match `ORDER BY`.    |
 | `Using temporary`          | Bad      | Internal temp table (often `UNION`/`DISTINCT`).      |
 | `Dependent Subquery`       | Very bad | Subquery runs once per outer row.                    |
-
-## Leftmost-prefix rule
-
-An index on `(A, B, C)` can serve queries on `(A)`, `(A, B)`, or
-`(A, B, C)`. It **cannot** serve a query on only `(B)`, only `(C)`, or
-`(B, C)`. The `WHERE` clause order is irrelevant; column **presence** of
-the leftmost prefix is what matters.
