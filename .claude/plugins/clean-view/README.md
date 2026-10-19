@@ -12,7 +12,7 @@ the prompt.
   **Stuck**, **Stopped** or **All done** as the job changes.
 - **Task details:** Click **Details** beside a task to open a live pane with
   its status, reported progress, run time, and last visible activity. Use
-  **← Prev** and **Next →** to move between tasks, **Stop entire run** to end
+  **Previous task** and **Next task** (↑/↓ walks the buttons) to move between tasks, **Stop entire run** to end
   the run, and **Esc** or **Close** to close the pane.
 - **How the plan arrives:** the mod gives Claude two tools, `plan_steps` and
   `report_progress`, and blocks every other tool until a plan exists. A to-do

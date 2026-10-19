@@ -81,6 +81,8 @@ let isNextTurnReport = false
 let permissionMode: string | undefined
 // The main loop's running turn, which the details pane's Stop ends.
 let mainTurnId: string | undefined
+// The pane button holding the focus ring; the per-frame redraw would otherwise reset it to Prev.
+let focusedButton: string | undefined
 // Files read during the active step, so the activity shows real progress the model hasn't reported.
 let readsInStep = 0
 let readsStepId: string | null = null
@@ -122,7 +124,8 @@ async function recordActivity($: $, summary: string, inProgress: boolean, at?: n
 
 async function openDetails($: $, taskId: string) {
   await update($, selectedTaskId, () => taskId)
-  await $.ui.open({ id: DETAILS_PANE, title: 'Task details', focus: true, closeOnEscape: true, holdToasts: true, rows: 12 })
+  focusedButton = undefined
+  await $.ui.open({ id: DETAILS_PANE, title: 'Task details', focus: true, closeOnEscape: true, holdToasts: true, rows: 17 })
 }
 
 async function pageDetails($: $, step: number) {
@@ -517,6 +520,11 @@ export function registerCleanView(on: On) {
     )
   })
 
+  on('ui.focus', { requestId: DETAILS_PANE }, async ($, e, next) => {
+    focusedButton = e.element
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
   on('ui.close', async ($, e, next) => {
     if (e.id === DETAILS_PANE) await update($, selectedTaskId, () => null)
     return next(e)
@@ -549,7 +557,7 @@ export function registerCleanView(on: On) {
     )
 
     return (
-      <Box flexDirection="column">
+      <Box flexDirection="column" paddingX={2} paddingY={1}>
         <Text>
           <Text color={tone}>●</Text> <Text bold>{task.name}</Text>  <Text dimColor>{index + 1}/{list.tasks.length}</Text>
         </Text>
@@ -562,13 +570,13 @@ export function registerCleanView(on: On) {
         {field('Elapsed', duration(now - list.startedAt))}
         {field('Activity', activity)}
         <Text> </Text>
-        <Box flexDirection="row" gap={1}>
-          <Button key="clean-view-details-prev" label="← Prev" onPress={() => void pageDetails($, -1)} />
-          <Button key="clean-view-details-next" label="Next →" onPress={() => void pageDetails($, 1)} />
+        <Box flexDirection="column">
+          <Button key="clean-view-details-prev" label="Previous task" autoFocus={focusedButton === 'clean-view-details-prev' || undefined} onPress={() => void pageDetails($, -1)} />
+          <Button key="clean-view-details-next" label="Next task" autoFocus={focusedButton === 'clean-view-details-next' || undefined} onPress={() => void pageDetails($, 1)} />
           {isLive && mainTurnId !== undefined && (
-            <Button key="clean-view-details-stop" label="Stop entire run" onPress={() => void $.turn.abort({ turnId: mainTurnId! })} />
+            <Button key="clean-view-details-stop" label="Stop entire run" autoFocus={focusedButton === 'clean-view-details-stop' || undefined} onPress={() => void $.turn.abort({ turnId: mainTurnId! })} />
           )}
-          <Button key="clean-view-details-close" label="Close" onPress={() => void $.ui.close({ id: DETAILS_PANE })} />
+          <Button key="clean-view-details-close" label="Close" autoFocus={focusedButton === 'clean-view-details-close' || undefined} onPress={() => void $.ui.close({ id: DETAILS_PANE })} />
         </Box>
         <Text dimColor>Stop ends the entire run · Esc closes this pane</Text>
       </Box>
