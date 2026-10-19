@@ -37,6 +37,16 @@
     "portal": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://{{ op://Employee/Portal MCP/URL }}/api/mcp-actions/v1"]
+    },
+    "slack": {
+      "description": "Slack workspace search, channels, and messaging",
+      "exposure": "codemode",
+      "url": "https://mcp.slack.com/mcp",
+      "oauth": {
+        "clientId": "{{ op://Employee/Slack MCP/clientId }}",
+        "callbackUrl": "http://localhost:3118/callback",
+        "scope": "search:read.public,search:read.private,search:read.mpim,search:read.im,search:read.files,search:read.users,channels:history,groups:history,mpim:history,im:history,chat:write,canvases:read,canvases:write,reactions:write,users:read,users:read.email,channels:read,groups:read,im:read,mpim:read,files:read,emoji:read"
+      }
     }
   }
 }
