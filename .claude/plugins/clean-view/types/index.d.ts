@@ -8,7 +8,7 @@ export type CleanViewTask = {
   hasReported: boolean
 }
 
-export type CleanViewPhase = 'idle' | 'working' | 'needsYou' | 'stuck' | 'stopped' | 'done'
+export type CleanViewPhase = 'idle' | 'working' | 'needsYou' | 'stuck' | 'stopped' | 'ended' | 'done'
 
 export type CleanViewChecklist = {
   title: string

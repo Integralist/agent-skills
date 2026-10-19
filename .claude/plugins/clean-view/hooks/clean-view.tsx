@@ -6,8 +6,10 @@ import {
   EMPTY,
   METER_CELLS,
   addTask,
+  asksPerson,
   clampPercent,
   duration,
+  endsWithQuestion,
   errorSentence,
   fit,
   fromTodos,
@@ -36,6 +38,7 @@ const ALWAYS_ALLOWED = new Set(['ToolSearch', 'TodoWrite', 'TaskCreate', 'TaskUp
 const NEEDS_OK = 'Claude needs your OK to continue'
 const HAS_QUESTION = 'Claude has a question for you'
 const WAITING = 'Claude is waiting for your reply'
+const ASKED = 'Claude asked you a question above'
 const SAID_NO = 'you said no to a step, so Claude paused'
 const KEEPS_FAILING = 'a step keeps failing, Claude is trying another way'
 const REFUSED = "Claude couldn't help with that request"
@@ -58,6 +61,8 @@ type $ = EngineInterface
 let ticker: Timer | undefined
 let failures = 0
 let isNextTurnCommand = false
+// The session's permission mode, as the last classic hook carried it; unknown until one does.
+let permissionMode: string | undefined
 
 function startTicker($: $) {
   if (ticker !== undefined) return
@@ -239,12 +244,25 @@ export function registerCleanView(on: On) {
     return ran
   }).catch(($, e, next) => next(e))
 
-  // A permission dialog is about to open. classic.Notification says the same,
-  // but does not reach a mod where an organization manages Claude Code.
+  // A permission dialog is about to open, unless the mode settles the ask with
+  // nobody asked (auto mode's classifier, a bypass). classic.Notification says
+  // the same, but does not reach a mod where an organization manages Claude Code.
   on('tool.check', async ($, e, next) => {
     const verdict = await next(e)
-    if (verdict.decision === 'ask' && e.agentId === undefined && e.tool_use_id !== undefined) await edit($, needsYou(NEEDS_OK))
+    const isMain = e.agentId === undefined && e.tool_use_id !== undefined
+    if (verdict.decision === 'ask' && isMain && asksPerson(permissionMode)) await edit($, needsYou(NEEDS_OK))
     return verdict
+  }).catch(($, e, next) => next(e))
+
+  // Shift+Tab can change the mode mid-turn, so each prompt and each tool's end refreshes it.
+  on('classic.UserPromptSubmit', async ($, e, next) => {
+    if (e.permission_mode !== undefined) permissionMode = e.permission_mode
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
+  on('classic.PostToolUse', async ($, e, next) => {
+    if (e.permission_mode !== undefined) permissionMode = e.permission_mode
+    return next(e)
   }).catch(($, e, next) => next(e))
 
   on('tool.call', { tool: PLAN_TOOL }, async ($, e) => {
@@ -284,13 +302,16 @@ export function registerCleanView(on: On) {
         if (list.phase === 'stuck') return list
         // No plan means no tools ran (the plan gate): a plain reply, nothing to track.
         if (!hasPlan(list)) return { ...list, phase: 'idle', needsYouReason: null }
-        if (list.tasks.some(one => one.status !== 'done')) return { ...list, phase: 'needsYou', needsYouReason: WAITING }
+        // Steps left over need the person only when the turn ended on a question.
+        if (list.tasks.some(one => one.status !== 'done')) {
+          return endsWithQuestion(e.answer) ? { ...list, phase: 'needsYou', needsYouReason: ASKED } : { ...list, phase: 'ended', needsYouReason: null }
+        }
         return { ...list, phase: 'done', needsYouReason: null }
       })
       const done = await read($, checklist)
-      if (done.phase === 'done') {
+      if (done.phase === 'done' || done.phase === 'ended') {
         $.clock.after(COLLAPSE_MS, () => {
-          void edit($, list => (list.startedAt === done.startedAt && list.phase === 'done' ? { ...list, isCollapsed: true } : list))
+          void edit($, list => (list.startedAt === done.startedAt && list.phase === done.phase ? { ...list, isCollapsed: true } : list))
         })
       }
     }
@@ -336,7 +357,7 @@ export function registerCleanView(on: On) {
     const took = duration(now - list.startedAt)
     const header = headerOf(list, took, Text)
 
-    if (list.phase === 'done' && list.isCollapsed) {
+    if ((list.phase === 'done' || list.phase === 'ended') && list.isCollapsed) {
       return (
         <Box flexDirection="row" justifyContent="space-between">
           {header}
@@ -354,7 +375,7 @@ export function registerCleanView(on: On) {
           {header}
           {button}
         </Box>
-        {list.tasks.map((one, i) => row(one, i === firstUpcoming, list.phase === 'needsYou', frame, nameWidth, Text))}
+        {list.tasks.map((one, i) => row(one, i === firstUpcoming, list.phase === 'needsYou' || list.phase === 'ended', frame, nameWidth, Text))}
       </Box>
     )
   })
@@ -377,6 +398,12 @@ function headerOf(list: CleanViewChecklist, took: string, Text: TextElement) {
       return <Text color="yellow">⚠ Stuck: {list.stuckReason}</Text>
     case 'stopped':
       return <Text>■ Stopped · {list.title} · you pressed Esc</Text>
+    case 'ended':
+      return (
+        <Text>
+          ■ Ended · {list.title} · {list.tasks.filter(one => one.status === 'done').length} of {list.tasks.length} steps done
+        </Text>
+      )
     case 'done':
       return (
         <Text>

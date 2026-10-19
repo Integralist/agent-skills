@@ -23,11 +23,11 @@ const BAND = (columns = 80) => ({
   viewport: { columns: columns + 5, rows: 30 },
 })
 
-type World = { toasts: string[]; ran: string[]; clock: MockClock }
+type World = { toasts: string[]; ran: string[]; clock: MockClock; verdict: 'allow' | 'ask' }
 
 /** The engine beneath the mod: store, clock, a Haiku that names jobs, tools that succeed. */
 function world(on: On): World {
-  const w: World = { toasts: [], ran: [], clock: mock.clock(on) }
+  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow' }
   mock.store(on)
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
@@ -47,6 +47,8 @@ function world(on: On): World {
   on('turn.start', ($, e) => ({ turnId: e.turnId }))
   on('turn.complete', ($, e) => ({ text: e.answer }))
   on('classic.Notification', () => ({}))
+  on('classic.UserPromptSubmit', () => ({}))
+  on('tool.check', () => ({ decision: w.verdict }))
   on('tool.call', ($, e) => {
     w.ran.push(String(e.tool))
     return { result: 'ok' }
@@ -133,6 +135,20 @@ describe('checklist', () => {
     expect(texts).toContain('Claude needs your OK to continue')
   })
 
+  for (const [mode, shows] of [['default', true], ['auto', false], ['bypassPermissions', false], ['dontAsk', false]] as const) {
+    test(`a permission ask in ${mode} mode ${shows ? 'shows' : 'does not show'} Needs you`, async ($, on) => {
+      const w = world(on)
+      w.verdict = 'ask'
+      await start($)
+      await prompt($, 'Build my landing page')
+      await $.classic.UserPromptSubmit({ prompt: 'Build my landing page', permission_mode: mode })
+      await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
+      const texts = (await rows($, 'terminal')).join('\n')
+      if (shows) expect(texts).toContain('Claude needs your OK to continue')
+      else expect(texts).not.toContain('Needs you')
+    })
+  }
+
   test('finishing shows All done, then one line after 5 seconds', async ($, on) => {
     const w = world(on)
     await start($)
@@ -174,6 +190,19 @@ describe('after the turn', () => {
     await stopMidPlan($)
     const texts = (await rows($, 'terminal')).join('\n')
     expect(texts).toContain('Needs you')
+    expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
+  })
+
+  test('a turn that ends mid-plan without a question reads Ended, not Needs you', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+    await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
+    await $.turn.complete({ answer: 'Built the page.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+    const texts = (await rows($, 'terminal')).join('\n')
+    expect(texts).not.toContain('Needs you')
+    expect(texts).toMatch(/■ Ended · Build my landing page · 1 of 2 steps done/)
     expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
   })
 

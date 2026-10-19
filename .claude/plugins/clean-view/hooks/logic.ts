@@ -196,6 +196,19 @@ export function meter(one: CleanViewTask, frame: number): string {
   return '█'.repeat(filled) + '░'.repeat(METER_CELLS - filled)
 }
 
+// Modes that settle a permission ask with nobody asked: a classifier, a bypass, a refusal.
+const SETTLED_ALONE = new Set(['auto', 'bypassPermissions', 'dontAsk'])
+
+/** True when an ask in this permission mode opens a dialog for the person; an unknown mode might. */
+export function asksPerson(mode: string | undefined): boolean {
+  return mode === undefined || !SETTLED_ALONE.has(mode)
+}
+
+/** True when a turn's last words put a question to the person. */
+export function endsWithQuestion(answer: string): boolean {
+  return answer.trim().endsWith('?')
+}
+
 export function label(one: CleanViewTask, isFirstUpcoming: boolean, isPaused = false): string {
   if (one.status === 'done') return 'Done'
   if (one.status === 'active' && isPaused) return 'Paused'
