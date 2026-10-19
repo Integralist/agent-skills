@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { CommandInfo, ConfigRow, On } from 'claude-code'
 
-import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
+import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, isSlashCommand, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
 
 const OPTIONS = ['default', 'sonnet', 'opus', 'haiku', 'fable', 'best', 'opusplan']
 const IDS: Record<string, string> = {
@@ -253,6 +253,16 @@ describe('switching', () => {
     await type($, '/compact now please thanks')
     await type($, 'Summarize the notes from this meeting please', 'turn-1')
     expect(w.sets).toEqual([])
+  })
+
+  test('classifies a prompt that starts with an absolute file path', async ($, on) => {
+    expect(isSlashCommand('/compact now')).toBe(true)
+    expect(isSlashCommand('/var/folders/1k/tmp/Screenshot.png\n\nmake this fancier')).toBe(false)
+    const w = world(on, 'opus', 'trivial')
+    await start($)
+    await automodel($, 'on')
+    await type($, '/var/folders/1k/tmp/Screenshot\\ 2026-10-19.png\n\nSummarize this screenshot in three bullets')
+    expect(w.sets).toEqual(['haiku'])
   })
 
   test('uses the skill\'s model-tier without asking the classifier', async ($, on) => {

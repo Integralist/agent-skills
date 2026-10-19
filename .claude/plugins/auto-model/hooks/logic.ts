@@ -30,6 +30,11 @@ const ACKS = new Set([
   'yes please', 'please do', 'next',
 ])
 
+/** A slash command (`/compact`, `/commit args`), not a leading file path (`/var/folders/...`). */
+export function isSlashCommand(text: string): boolean {
+  return /^\/[a-zA-Z0-9:_-]+(?:\s|$)/.test(text.trimStart())
+}
+
 /** A reply to what Claude just said: fewer than four words, or a plain go-ahead. */
 export function isShortReply(text: string): boolean {
   const plain = text.toLowerCase().replace(/[^\p{L}\p{N}\s']/gu, ' ').replace(/\s+/g, ' ').trim()

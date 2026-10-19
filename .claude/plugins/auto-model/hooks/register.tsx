@@ -11,6 +11,7 @@ import {
   displayName,
   guessLevel,
   isShortReply,
+  isSlashCommand,
   isWarm,
   lineOf,
   parseLevel,
@@ -206,7 +207,7 @@ export const register: Register = on => {
         !(await read($, isOn)) ||
         e.origin.kind !== 'composer' ||
         e.turnId !== undefined ||
-        e.text.trimStart().startsWith('/') ||
+        isSlashCommand(e.text) ||
         isShortReply(e.text)
       if (!skip) {
         const row = await modelRow($)
