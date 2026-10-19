@@ -33,6 +33,7 @@ export const EMPTY: CleanViewChecklist = {
   title: '',
   phase: 'idle',
   tasks: [],
+  activity: null,
   needsYouReason: null,
   stuckReason: null,
   startedAt: 0,
@@ -58,10 +59,8 @@ export function newJob(startedAt: number, title: string): CleanViewChecklist {
     title,
     phase: 'working',
     startedAt,
-    tasks: [
-      task(`${PLACEHOLDER_PREFIX}understand`, 'Understand your request', 'active'),
-      task(`${PLACEHOLDER_PREFIX}plan`, 'Plan the steps', 'upcoming'),
-    ],
+    activity: { summary: 'Thinking...', at: startedAt, inProgress: true },
+    tasks: [task(`${PLACEHOLDER_PREFIX}thinking`, 'Thinking...', 'active')],
   }
 }
 

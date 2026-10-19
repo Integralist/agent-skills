@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On, Timer } from 'claude-code'
 
-import type { CleanViewChecklist, CleanViewTask } from '../types'
+import type { CleanViewActivity, CleanViewChecklist, CleanViewTask } from '../types'
 import {
   EMPTY,
   METER_CELLS,
@@ -53,6 +53,7 @@ const REFUSED = "Claude couldn't help with that request"
 
 const enabled = atom({ plugin: 'clean-view', key: 'cleanViewEnabled' } as const, true)
 const checklist = atom({ plugin: 'clean-view', key: 'checklist' } as const, EMPTY)
+const selectedTaskId = atom({ plugin: 'clean-view', key: 'selectedTaskId' } as const, null as string | null)
 const tick = atom({ plugin: 'clean-view', key: 'tick' } as const, 0)
 
 const SECTION = `# Clean View checklist
@@ -96,6 +97,29 @@ async function edit($: $, fn: (list: CleanViewChecklist) => CleanViewChecklist) 
   await update($, checklist, list => fn(list ?? EMPTY))
 }
 
+async function recordActivity($: $, summary: string, inProgress: boolean, at?: number) {
+  const timestamp = at ?? await $.clock.now()
+  await edit($, list => ({ ...list, activity: { summary, at: timestamp, inProgress } }))
+}
+
+async function toggleTaskInspector($: $, taskId: string | null) {
+  await update($, selectedTaskId, current => (current === taskId ? null : taskId))
+}
+
+function toolActivity(tool: string, finished = false): string {
+  switch (tool.toLowerCase()) {
+    case 'bash': return finished ? 'Finished running a command' : 'Running a command'
+    case 'read': return finished ? 'Finished reading files' : 'Reading files'
+    case 'grep':
+    case 'find':
+    case 'ls': return finished ? 'Finished searching the project' : 'Searching the project'
+    case 'edit':
+    case 'write': return finished ? 'Finished updating files' : 'Updating files'
+    case 'codemode': return finished ? 'Finished running a script' : 'Running a script'
+    default: return finished ? 'Finished using a tool' : 'Using a tool'
+  }
+}
+
 async function setEnabled($: $, value: boolean) {
   await update($, enabled, () => value)
   await $.store.set(STORE_KEY, value)
@@ -122,6 +146,7 @@ async function nameJob($: $, text: string, startedAt: number) {
 async function startJob($: $, text: string) {
   const startedAt = await $.clock.now()
   failures = 0
+  await update($, selectedTaskId, () => null)
   await edit($, () => newJob(startedAt, PLACEHOLDER_TITLE))
   startTicker($)
   if (text !== '') void nameJob($, text, startedAt).catch(() => undefined)
@@ -153,7 +178,12 @@ function unstuck(list: CleanViewChecklist): CleanViewChecklist {
 async function finish($: $, fn: (list: CleanViewChecklist, now: number) => CleanViewChecklist) {
   const now = await $.clock.now()
   stopTicker()
-  await edit($, list => (list.phase === 'idle' ? list : fn({ ...list, finishedAt: now }, now)))
+  await edit($, list => {
+    if (list.phase === 'idle') return list
+    const finished = fn({ ...list, finishedAt: now }, now)
+    const summary = finished.phase === 'stopped' ? 'Run stopped' : finished.phase === 'stuck' ? 'Run needs attention' : finished.phase === 'waiting' ? 'Waiting for background work' : finished.phase === 'needsYou' ? 'Waiting for your reply' : finished.phase === 'ended' ? 'Run ended' : 'Run finished'
+    return { ...finished, activity: { summary, at: now, inProgress: false } }
+  })
 }
 
 export function registerCleanView(on: On) {
@@ -254,16 +284,33 @@ export function registerCleanView(on: On) {
     }
 
     await edit($, backToWork)
-    if (e.tool === 'TodoWrite') await edit($, current => fromTodos(current, e.todos))
-    if (e.tool === 'TaskUpdate') await edit($, current => updateTask(current, e.taskId, e.status, e.subject))
+    if (!PLAN_UPDATERS.has(tool)) {
+      await recordActivity($, tool === 'AskUserQuestion' ? 'Waiting for your answer' : toolActivity(tool), tool !== 'AskUserQuestion')
+    }
+    if (e.tool === 'TodoWrite') {
+      const at = await $.clock.now()
+      await edit($, current => ({ ...fromTodos(current, e.todos), activity: { summary: 'Task list updated', at, inProgress: false } }))
+    }
+    if (e.tool === 'TaskUpdate') {
+      const at = await $.clock.now()
+      await edit($, current => ({ ...updateTask(current, e.taskId, e.status, e.subject), activity: { summary: 'Task list updated', at, inProgress: false } }))
+    }
     if (e.tool === 'AskUserQuestion') await edit($, needsYou(HAS_QUESTION))
 
     const ran = await next(e)
 
     await edit($, backToWork)
+    if (tool === 'AskUserQuestion' && ran.deny === undefined) await recordActivity($, 'Answer received', false)
+    if (!PLAN_UPDATERS.has(tool) && tool !== 'AskUserQuestion') {
+      const summary = ran.isError === true ? 'A tool call failed' : toolActivity(tool, true)
+      await recordActivity($, summary, false)
+    }
     if (e.tool === 'TaskCreate' && ran.deny === undefined && ran.isError !== true) {
       const made = ran.result as { task?: { id?: string; subject?: string } } | undefined
-      if (made?.task?.id !== undefined) await edit($, current => addTask(current, made.task!.id!, made.task!.subject ?? e.subject))
+      if (made?.task?.id !== undefined) {
+        const at = await $.clock.now()
+        await edit($, current => ({ ...addTask(current, made.task!.id!, made.task!.subject ?? e.subject), activity: { summary: 'Task list updated', at, inProgress: false } }))
+      }
     }
     if (ran.deny !== undefined) return ran
     if (ran.isError === true) {
@@ -286,7 +333,10 @@ export function registerCleanView(on: On) {
   on('tool.check', async ($, e, next) => {
     const verdict = await next(e)
     const isMain = e.agentId === undefined && e.tool_use_id !== undefined
-    if (verdict.decision === 'ask' && isMain && asksPerson(permissionMode)) await edit($, needsYou(NEEDS_OK))
+    if (verdict.decision === 'ask' && isMain && asksPerson(permissionMode)) {
+      await edit($, needsYou(NEEDS_OK))
+      await recordActivity($, 'Waiting for permission', false)
+    }
     return verdict
   }).catch(($, e, next) => next(e))
 
@@ -305,7 +355,9 @@ export function registerCleanView(on: On) {
     const steps = (e as { steps?: unknown }).steps
     const names = Array.isArray(steps) ? steps.filter((s): s is string => typeof s === 'string') : []
     await ensureJob($)
-    await edit($, list => planSteps(list, names))
+    const at = await $.clock.now()
+    await edit($, list => ({ ...planSteps(list, names), activity: { summary: 'Plan updated', at, inProgress: false } }))
+    await update($, selectedTaskId, () => null)
     const count = (await read($, checklist)).tasks.length
     return { result: `Planned ${count} steps. The first one has started.` }
   })
@@ -315,13 +367,20 @@ export function registerCleanView(on: On) {
     const name = typeof input.task === 'string' ? input.task : ''
     const percent = typeof input.percent === 'number' ? input.percent : Number(input.percent)
     await ensureJob($)
-    await edit($, list => reportProgress(list, name, percent))
+    const at = await $.clock.now()
+    await edit($, list => ({ ...reportProgress(list, name, percent), activity: { summary: 'Progress reported', at, inProgress: false } }))
     return { result: `Progress noted: ${clampPercent(percent)}%.` }
   })
 
   on('classic.Notification', async ($, e, next) => {
-    if (e.notification_type === 'permission_prompt') await edit($, needsYou(NEEDS_OK))
-    if (e.notification_type === 'elicitation_dialog') await edit($, needsYou(HAS_QUESTION))
+    if (e.notification_type === 'permission_prompt') {
+      await edit($, needsYou(NEEDS_OK))
+      await recordActivity($, 'Waiting for permission', false)
+    }
+    if (e.notification_type === 'elicitation_dialog') {
+      await edit($, needsYou(HAS_QUESTION))
+      await recordActivity($, 'Waiting for your answer', false)
+    }
     return next(e)
   }).catch(($, e, next) => next(e))
 
@@ -383,6 +442,8 @@ export function registerCleanView(on: On) {
       />
     )
     const list = await read($, checklist)
+    const selectedId = await read($, selectedTaskId)
+    const selectedTask = list.tasks.find(one => one.id === selectedId)
     if (!isEnabled || list.phase === 'idle') {
       return (
         <Box flexDirection="row" justifyContent="flex-end">
@@ -396,9 +457,25 @@ export function registerCleanView(on: On) {
     const now = isLive ? await $.clock.now() : (list.finishedAt ?? list.startedAt)
     const took = duration(now - list.startedAt)
     const header = headerOf(list, took, Text)
+    const firstUpcoming = list.tasks.findIndex(one => one.status === 'upcoming')
+    const selectedIndex = selectedTask ? list.tasks.indexOf(selectedTask) : -1
+    const selectedStatus = selectedTask ? label(selectedTask, selectedIndex === firstUpcoming, PAUSED.has(list.phase)) : ''
+    const lastActivity = list.activity
+      ? `${list.activity.summary} · ${list.activity.inProgress ? `for ${duration(now - list.activity.at)}` : `${duration(now - list.activity.at)} ago`}`
+      : 'No visible activity recorded yet'
+    const inspector = selectedTask ? (
+      <Box key="clean-view-task-details" flexDirection="column" marginTop={1}>
+        <Text bold>Task details · {selectedTask.name}</Text>
+        <Text>Status: {selectedStatus} · Progress: {selectedTask.status === 'done' ? 'Complete' : selectedTask.hasReported ? `${selectedTask.percent}% reported` : 'No percentage reported yet'}</Text>
+        <Text>Run elapsed: {took}</Text>
+        <Text>Last visible activity: {lastActivity}</Text>
+        <Text>Press Esc to stop the entire run; remaining tasks will not continue.</Text>
+        <Button key="clean-view-task-details-close" label="Close details" onPress={() => void toggleTaskInspector($, selectedTask.id)} />
+      </Box>
+    ) : null
 
     // A blank line above the band keeps it clear of the spinner line.
-    if ((list.phase === 'done' || list.phase === 'ended') && list.isCollapsed) {
+    if ((list.phase === 'done' || list.phase === 'ended') && list.isCollapsed && !inspector) {
       return (
         <Box key="clean-view-band" marginTop={1} flexDirection="row" justifyContent="space-between">
           {header}
@@ -408,15 +485,24 @@ export function registerCleanView(on: On) {
     }
 
     // icon + space, name, space, 10-cell meter, two spaces, 7-cell label
-    const nameWidth = Math.max(8, e.props.bodyColumns - (2 + 1 + METER_CELLS + 2 + 7))
-    const firstUpcoming = list.tasks.findIndex(one => one.status === 'upcoming')
+    const nameWidth = Math.max(8, e.props.bodyColumns - (2 + 1 + METER_CELLS + 2 + 7 + 8))
     return (
       <Box key="clean-view-band" marginTop={1} flexDirection="column">
         <Box key="clean-view-header" flexDirection="row" justifyContent="space-between" marginBottom={1}>
           {header}
           {button}
         </Box>
-        {list.tasks.map((one, i) => row(one, i === firstUpcoming, PAUSED.has(list.phase), frame, nameWidth, Text))}
+        {list.tasks.map((one, i) => (
+          <Box key={`clean-view-task-row-${one.id}`} flexDirection="row" justifyContent="space-between">
+            {row(one, i === firstUpcoming, PAUSED.has(list.phase), frame, nameWidth, Text)}
+            <Button
+              key={`clean-view-task-inspect-${one.id}`}
+              label={selectedTask?.id === one.id ? 'Hide' : 'Details'}
+              onPress={() => void toggleTaskInspector($, one.id)}
+            />
+          </Box>
+        ))}
+        {inspector}
       </Box>
     )
   })

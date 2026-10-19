@@ -127,6 +127,31 @@ describe('checklist', () => {
     expect(texts).toMatch(/▶ Build the pricing section\s+[█░]{10}\s+Working/)
   })
 
+  test('clicking a task shows its details and whole-run stop guidance', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Inspect the files', 'Run the checks'] })
+    await $.tool.call({ tool: PROGRESS, task: 'Inspect the files', percent: 45 })
+
+    const ui = await $.ui.mount({ ...BAND(), surface: 'terminal' })
+    const detailsButton = 'clean-view-task-inspect-step-0-Inspect the files'
+    expect(await ui.find({ key: detailsButton })).toBeDefined()
+    await ui.press({ key: detailsButton })
+    let texts = (await ui.findAll({ type: 'Text' })).map(one => one.text).join('\n')
+    expect(texts).toContain('Task details')
+    expect(texts).toContain('Inspect the files')
+    expect(texts).toContain('45%')
+    expect(texts).toContain('Last visible activity')
+    expect(texts).toContain('Progress reported · 0s ago')
+    expect(texts).toContain('Press Esc to stop the entire run')
+
+    await ui.press({ key: 'clean-view-task-details-close' })
+    texts = (await ui.findAll({ type: 'Text' })).map(one => one.text).join('\n')
+    expect(texts).not.toContain('Task details')
+    await ui.unmount()
+  })
+
   test('a permission prompt shows Needs you', async ($, on) => {
     world(on)
     await start($)
@@ -214,6 +239,27 @@ describe('after the turn', () => {
     const texts = (await rows($, 'terminal')).join('\n')
     expect(texts).not.toContain('Needs you')
     expect(texts).not.toContain('Understand your request')
+  })
+
+  test('a new request shows Thinking instead of the completed checklist', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Finish the old task')
+    await $.tool.call({ tool: PLAN, steps: ['Finish the old task'] })
+    await $.tool.call({ tool: PROGRESS, task: 'Finish the old task', percent: 100 })
+    await $.turn.complete({ answer: 'Done.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+
+    await $.turn.start({ text: 'Start a new task', turnId: 'turn-2' })
+    const beforePlan = (await rows($, 'terminal')).join('\n')
+    expect(beforePlan).toContain('Thinking...')
+    expect(beforePlan).not.toContain('Finish the old task')
+    expect(beforePlan).not.toContain('Understand your request')
+    expect(beforePlan).not.toContain('Plan the steps')
+
+    await $.tool.call({ tool: PLAN, steps: ['Start the new task'] })
+    const afterPlan = (await rows($, 'terminal')).join('\n')
+    expect(afterPlan).toContain('Start the new task')
+    expect(afterPlan).not.toContain('Thinking...')
   })
 
   test('a plan stopped part way reads Paused, not Working', async ($, on) => {
