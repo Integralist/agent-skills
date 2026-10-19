@@ -23,11 +23,13 @@ const BAND = (columns = 80) => ({
   viewport: { columns: columns + 5, rows: 30 },
 })
 
-type World = { toasts: string[]; ran: string[]; clock: MockClock; verdict: 'allow' | 'ask' }
+type Agent = { id: string; description: string; type: string; status: string }
+type World = { toasts: string[]; ran: string[]; clock: MockClock; verdict: 'allow' | 'ask'; agents: Agent[] }
 
 /** The engine beneath the mod: store, clock, a Haiku that names jobs, tools that succeed. */
 function world(on: On): World {
-  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow' }
+  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [] }
+  on('agent.list', () => ({ value: w.agents as never }))
   mock.store(on)
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('command.register', ($, e) => ({ value: { command: e.name } }))
@@ -204,6 +206,54 @@ describe('after the turn', () => {
     expect(texts).not.toContain('Needs you')
     expect(texts).toMatch(/■ Ended · Build my landing page · 1 of 2 steps done/)
     expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
+  })
+
+  describe('with background agents', () => {
+    const running: Agent = { id: 'a1', description: 'Check the page', type: 'general-purpose', status: 'running' }
+    const finished: Agent = { id: 'a2', description: 'Read the notes', type: 'general-purpose', status: 'completed' }
+
+    async function endTurn($: Engine, answer: string) {
+      await prompt($, 'Build my landing page')
+      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+      await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
+      await $.turn.complete({ answer, durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+    }
+
+    test('a turn that ends while an agent runs reads Waiting, not Needs you or Ended', async ($, on) => {
+      const w = world(on)
+      w.agents = [running, finished]
+      await start($)
+      await endTurn($, 'I have started a check in the background.')
+      const texts = (await rows($, 'terminal')).join('\n')
+      expect(texts).toMatch(/⏳ Waiting on 1 background agent · Build my landing page/)
+      expect(texts).not.toContain('Needs you')
+      expect(texts).not.toContain('Ended')
+    })
+
+    test('a question still reads Needs you while an agent runs', async ($, on) => {
+      const w = world(on)
+      w.agents = [running]
+      await start($)
+      await endTurn($, 'Which colour?')
+      const texts = (await rows($, 'terminal')).join('\n')
+      expect(texts).toContain('Needs you')
+    })
+
+    test('the agent reporting back resumes the same checklist', async ($, on) => {
+      const w = world(on)
+      w.agents = [running]
+      await start($)
+      await endTurn($, 'I have started a check in the background.')
+      w.agents = [{ ...running, status: 'completed' }]
+      const note = '<task-notification>Check the page finished</task-notification>'
+      await $.prompt.submit({ text: note, wait: false, origin: { kind: 'task-notification' } })
+      await $.turn.start({ text: note, turnId: 'turn-2' })
+      const texts = (await rows($, 'terminal')).join('\n')
+      expect(texts).toMatch(/Build my landing page · /)
+      expect(texts).toMatch(/✓ Build the page/)
+      expect(texts).toMatch(/▶ Check it/)
+      expect(texts).not.toContain('Waiting on')
+    })
   })
 
   test('a slash command clears a band left waiting', async ($, on) => {

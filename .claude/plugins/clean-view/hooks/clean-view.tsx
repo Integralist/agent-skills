@@ -39,6 +39,8 @@ const NEEDS_OK = 'Claude needs your OK to continue'
 const HAS_QUESTION = 'Claude has a question for you'
 const WAITING = 'Claude is waiting for your reply'
 const ASKED = 'Claude asked you a question above'
+// An agent in one of these is still at work and will report back on its own.
+const AGENT_AT_WORK = new Set(['pending', 'running', 'waiting'])
 const SAID_NO = 'you said no to a step, so Claude paused'
 const KEEPS_FAILING = 'a step keeps failing, Claude is trying another way'
 const REFUSED = "Claude couldn't help with that request"
@@ -61,6 +63,8 @@ type $ = EngineInterface
 let ticker: Timer | undefined
 let failures = 0
 let isNextTurnCommand = false
+// The next turn is a background agent reporting back, not a new request.
+let isNextTurnReport = false
 // The session's permission mode, as the last classic hook carried it; unknown until one does.
 let permissionMode: string | undefined
 
@@ -194,6 +198,7 @@ export function registerCleanView(on: On) {
 
   on('prompt.submit', async ($, e, next) => {
     isNextTurnCommand = e.command !== undefined
+    isNextTurnReport = e.origin.kind === 'task-notification' && e.turnId === undefined
     // A slash command's output would sit under a stale band; clear one left waiting.
     if (isNextTurnCommand) await edit($, list => (list.phase === 'working' ? list : { ...list, phase: 'idle' }))
     return next(e)
@@ -202,8 +207,17 @@ export function registerCleanView(on: On) {
   on('turn.start', async ($, e, next) => {
     if (e.agentId === undefined) {
       const isCommand = isNextTurnCommand
+      const isReport = isNextTurnReport
       isNextTurnCommand = false
-      if (!isCommand && e.text.trim() !== '') await startJob($, e.text)
+      isNextTurnReport = false
+      const list = await read($, checklist)
+      if (isReport && list.phase === 'waiting') {
+        // The work the checklist was waiting on came back: carry on with the same plan.
+        await edit($, current => ({ ...current, phase: 'working', finishedAt: null, waitingOn: undefined }))
+        startTicker($)
+      } else if (!isCommand && e.text.trim() !== '') {
+        await startJob($, e.text)
+      }
     }
     return next(e)
   })
@@ -298,13 +312,17 @@ export function registerCleanView(on: On) {
     } else if (e.reason === 'aborted') {
       await finish($, list => ({ ...list, phase: 'stopped', needsYouReason: null }))
     } else {
+      const atWork = (await $.agent.list().catch(() => [])).filter(agent => AGENT_AT_WORK.has(agent.status)).length
       await finish($, list => {
         if (list.phase === 'stuck') return list
         // No plan means no tools ran (the plan gate): a plain reply, nothing to track.
         if (!hasPlan(list)) return { ...list, phase: 'idle', needsYouReason: null }
-        // Steps left over need the person only when the turn ended on a question.
+        // Steps left over need the person only when the turn ended on a question;
+        // with agents still at work, Claude carries on when they report back.
         if (list.tasks.some(one => one.status !== 'done')) {
-          return endsWithQuestion(e.answer) ? { ...list, phase: 'needsYou', needsYouReason: ASKED } : { ...list, phase: 'ended', needsYouReason: null }
+          if (endsWithQuestion(e.answer)) return { ...list, phase: 'needsYou', needsYouReason: ASKED }
+          if (atWork > 0) return { ...list, phase: 'waiting', needsYouReason: null, waitingOn: atWork }
+          return { ...list, phase: 'ended', needsYouReason: null }
         }
         return { ...list, phase: 'done', needsYouReason: null }
       })
@@ -398,6 +416,12 @@ function headerOf(list: CleanViewChecklist, took: string, Text: TextElement) {
       return <Text color="yellow">⚠ Stuck: {list.stuckReason}</Text>
     case 'stopped':
       return <Text>■ Stopped · {list.title} · you pressed Esc</Text>
+    case 'waiting':
+      return (
+        <Text>
+          ⏳ Waiting on {list.waitingOn ?? 1} background agent{list.waitingOn === 1 ? '' : 's'} · {list.title}
+        </Text>
+      )
     case 'ended':
       return (
         <Text>
