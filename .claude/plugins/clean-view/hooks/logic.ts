@@ -65,12 +65,15 @@ export function newJob(startedAt: number, title: string): CleanViewChecklist {
   }
 }
 
-/** Lays out the plan: every step upcoming but the first, which starts now. */
+/** Lays out the plan: steps already done stay done, and the first unfinished one starts now. */
 export function planSteps(list: CleanViewChecklist, steps: readonly string[]): CleanViewChecklist {
+  const done = new Set(list.tasks.filter(one => one.status === 'done').map(one => one.name.toLowerCase()))
   const names = steps.map(cleanName).slice(0, 8)
-  const tasks = (names.length > 0 ? names : [FALLBACK_NAME]).map((name, i) =>
-    task(`step-${i}-${name}`, name, i === 0 ? 'active' : 'upcoming'),
+  let tasks = (names.length > 0 ? names : [FALLBACK_NAME]).map((name, i) =>
+    task(`step-${i}-${name}`, name, done.has(name.toLowerCase()) ? 'done' : 'upcoming'),
   )
+  const first = tasks.findIndex(one => one.status !== 'done')
+  if (first !== -1) tasks = tasks.map((one, i) => (i === first ? { ...one, status: 'active' } : one))
   return { ...list, tasks }
 }
 

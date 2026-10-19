@@ -32,8 +32,12 @@ const PROGRESS_TOOL = `mcp__${PLUGIN}__report_progress`
 const FRAME_MS = 250
 const COLLAPSE_MS = 5000
 const FAILURES_TO_STUCK = 3
+// Tool calls the checklist may sit unchanged through before the next one is sent back.
+const QUIET_CALLS = 8
 const PLACEHOLDER_TITLE = 'Your request'
 const ALWAYS_ALLOWED = new Set(['ToolSearch', 'TodoWrite', 'TaskCreate', 'TaskUpdate', 'AskUserQuestion', PLAN_TOOL, PROGRESS_TOOL])
+// Tools that change the checklist, so a call to one restarts the quiet-call count.
+const PLAN_UPDATERS = new Set([PLAN_TOOL, PROGRESS_TOOL, 'TodoWrite', 'TaskCreate', 'TaskUpdate'])
 
 const NEEDS_OK = 'Claude needs your OK to continue'
 const HAS_QUESTION = 'Claude has a question for you'
@@ -57,6 +61,7 @@ The person sees a plain checklist of your plan instead of your tool calls.
 
 - For every request, even a quick question, call \`${PLAN_TOOL}\` first with every step of the job, 2 to 8 short names in order. Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
 - Call \`${PROGRESS_TOOL}\` as real progress happens, and with percent 100 the moment a step finishes.
+- If the job grows past your plan (extra checks, cleanup, undoing changes, a new kind of work), call \`${PLAN_TOOL}\` again with the full updated list before you do it. Keep finished step names the same so they stay checked off.
 - Write every step name in plain English a non-technical person understands, under 40 characters, starting with a verb, like "Build the pricing section".
 - Never put file paths, file names, commands, code or tool names in a step name.`
 
@@ -64,6 +69,7 @@ type $ = EngineInterface
 
 let ticker: Timer | undefined
 let failures = 0
+let quietCalls = 0
 let isNextTurnCommand = false
 // The next turn is a background agent reporting back, not a new request.
 let isNextTurnReport = false
@@ -162,7 +168,7 @@ export function registerCleanView(on: On) {
     await $.tool.register({
       name: 'plan_steps',
       description:
-        'Lay out every step of the job up front so the person sees the plan: 2 to 8 short plain-English step names in order, each under 40 characters and starting with a verb. The first step starts right away.',
+        'Lay out every step of the job up front so the person sees the plan: 2 to 8 short plain-English step names in order, each under 40 characters and starting with a verb. The first step starts right away. If the job grows past the plan, call it again with the full updated list and keep finished step names unchanged.',
       inputSchema: {
         type: 'object',
         properties: { steps: { type: 'array', items: { type: 'string' }, minItems: 1, maxItems: 8 } },
@@ -212,6 +218,7 @@ export function registerCleanView(on: On) {
       const isReport = isNextTurnReport
       isNextTurnCommand = false
       isNextTurnReport = false
+      quietCalls = 0
       const list = await read($, checklist)
       // A plan left part way (Esc, a pause, a question, background work) carries on:
       // a typed prompt is usually a re-steer, and a report is the work coming back.
@@ -234,6 +241,16 @@ export function registerCleanView(on: On) {
     const isEnabled = await isOn($)
     if (isEnabled && isRunning(list) && !hasPlan(list) && !ALWAYS_ALLOWED.has(tool)) {
       return { deny: `Clean View: call ${PLAN_TOOL} first to lay out the steps of this job (load it with ToolSearch if it is deferred), then try again.` }
+    }
+
+    // Work the checklist doesn't show: after QUIET_CALLS calls with no plan or progress update, send one back.
+    if (PLAN_UPDATERS.has(tool)) {
+      quietCalls = 0
+    } else if (isEnabled && isRunning(list) && hasPlan(list) && !ALWAYS_ALLOWED.has(tool) && ++quietCalls > QUIET_CALLS) {
+      quietCalls = 0
+      return {
+        deny: `Clean View: the checklist hasn't changed in ${QUIET_CALLS} tool calls. If the work has grown past these steps, call ${PLAN_TOOL} with the full updated list; otherwise call ${PROGRESS_TOOL} for the current step. Then try again.`,
+      }
     }
 
     await edit($, backToWork)

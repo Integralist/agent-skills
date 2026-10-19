@@ -13,6 +13,10 @@ the prompt.
 - **How the plan arrives:** the mod gives Claude two tools, `plan_steps` and
   `report_progress`, and blocks every other tool until a plan exists. A to-do
   list (TodoWrite, TaskCreate) also counts as the plan.
+- **Plan drift:** after 8 tool calls with no plan or progress update, the next
+  call is sent back once, asking Claude to call `plan_steps` again with the
+  updated list or report progress. A second `plan_steps` keeps finished steps
+  checked off.
 - **Cost:** each new job makes one small Haiku call to name it.
 
 > [!WARNING]

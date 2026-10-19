@@ -345,6 +345,50 @@ describe('plan first', () => {
   })
 })
 
+describe('replanning', () => {
+  const ls = { tool: 'Bash', command: 'ls', description: 'list' }
+
+  test('plan_steps called again keeps finished steps done and starts the first unfinished one', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section'] })
+    await $.tool.call({ tool: PROGRESS, task: 'Read your brand notes', percent: 100 })
+    await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section', 'Tidy the formatting'] })
+    const texts = (await rows($, 'terminal')).join('\n')
+    expect(texts).toMatch(/✓ Read your brand notes\s+█{10}\s+Done/)
+    expect(texts).toMatch(/▶ Build the pricing section\s+[█░]{10}\s+Working/)
+    expect(texts).toMatch(/○ Tidy the formatting\s+░{10}\s+Next/)
+  })
+
+  test('denies one call after 8 tool calls with no plan or progress update, then starts counting again', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section'] })
+    for (let i = 0; i < 8; i++) expect((await $.tool.call(ls)).deny).toBeUndefined()
+    const drift = await $.tool.call(ls)
+    expect(drift.deny).toContain('plan_steps')
+    expect(drift.deny).toContain('report_progress')
+    // The retry goes through, and a progress report restarts the count.
+    expect((await $.tool.call(ls)).deny).toBeUndefined()
+    await $.tool.call({ tool: PROGRESS, task: 'Read your brand notes', percent: 50 })
+    for (let i = 0; i < 8; i++) expect((await $.tool.call(ls)).deny).toBeUndefined()
+    expect((await $.tool.call(ls)).deny).toContain('plan_steps')
+  })
+
+  test('a to-do update resets the quiet-call count, and a subagent\'s calls are not counted', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section'] })
+    for (let i = 0; i < 20; i++) expect((await $.tool.call({ ...ls, agentId: 'agent-1' })).deny).toBeUndefined()
+    for (let i = 0; i < 8; i++) await $.tool.call(ls)
+    await $.tool.call({ tool: 'TaskUpdate', taskId: '1', status: 'in_progress' })
+    for (let i = 0; i < 8; i++) expect((await $.tool.call(ls)).deny).toBeUndefined()
+  })
+})
+
 describe('turning it off', () => {
   test('/simple off leaves only the button, and is remembered', async ($, on) => {
     world(on)
