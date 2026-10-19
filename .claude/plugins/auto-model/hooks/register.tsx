@@ -15,6 +15,7 @@ import {
   lineOf,
   parseLevel,
   rankOf,
+  requestText,
   skillPaths,
   tierFromFrontmatter,
 } from './logic'
@@ -41,7 +42,12 @@ async function modelRow($: $) {
   return (await $.config.list()).find(row => row.key === 'model')
 }
 
+/**
+ * The classifier's tier, else the word-based guess. Each outcome goes to the
+ * debug log, so a wrong pick shows which path made it.
+ */
 async function classify($: $, text: string, smallest: string): Promise<AutoModelLevel> {
+  let why: string
   try {
     const reply = await $.model.complete({
       model: smallest,
@@ -50,10 +56,18 @@ async function classify($: $, text: string, smallest: string): Promise<AutoModel
       maxTokens: 8,
       timeoutMs: 4000,
     })
-    return (reply.isAnswered ? parseLevel(reply.text) : undefined) ?? guessLevel(text)
-  } catch {
-    return guessLevel(text)
+    const level = reply.isAnswered ? parseLevel(reply.text) : undefined
+    if (level !== undefined) {
+      $.ui.log(`auto-model: classifier said ${level}`, { to: 'debug' })
+      return level
+    }
+    why = reply.isAnswered ? `unreadable answer ${JSON.stringify(reply.text)}` : reply.reason
+  } catch (err) {
+    why = String(err)
   }
+  const guess = guessLevel(text)
+  $.ui.log(`auto-model: classifier gave no tier (${why}); keyword guess ${guess}`, { to: 'debug' })
+  return guess
 }
 
 /** The `model-tier` the skill's own SKILL.md declares, project copy first. */
@@ -181,7 +195,7 @@ export const register: Register = on => {
         const row = await modelRow($)
         const lines = availableLines(row?.options)
         if (lines.length > 0) {
-          const level = await classify($, e.text, lines[0] ?? 'haiku')
+          const level = await classify($, requestText(e.text), lines[0] ?? 'haiku')
           // A typed prompt while the cache is warm is likely the same task, so
           // only a bigger tier is worth re-sending the history uncached. A typed
           // skill (below) starts a new task, and routes by its tier.

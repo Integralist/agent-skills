@@ -8,6 +8,8 @@ export const LINES = ['haiku', 'sonnet', 'opus', 'fable'] as const
 
 export const CLASSIFIER_SYSTEM = [
   'Sort the request into exactly one tier. Answer with the one word only.',
+  'Classify the immediate action requested in this turn, not broader project goals mentioned as background.',
+  'Words that only name a command, file or tool are not the task: "update the skill\'s review subcommand" is moderate.',
   'trivial: quick, mechanical jobs and short writing. Commit, branch, summarize, sort, extract, rename, translate, reformat, a short factual answer, an email, a post, a PR body, a ticket, a small edit.',
   'moderate: the default for hands-on work. Building or changing software, debugging, fixing tests, analysis, long documents, anything touching several files or tools.',
   'complex: project planning and big-picture thinking. Specs, plans, research, architecture, design decisions, code or security review.',
@@ -36,9 +38,23 @@ export function isShortReply(text: string): boolean {
   return plain.split(' ').length < 4
 }
 
+const FENCED = /^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1[ \t]*$/gm
+const INLINE_CODE = /`[^`\n]+`/g
+const QUOTED = /^>.*$/gm
+
+/**
+ * What the user wrote, without fenced blocks, inline code or `>` quotes, in one
+ * line: a quoted word (`review`) names a thing, not the task. Pastes arrive
+ * unmarked, so only fenced or quoted ones are left out. All quoted: as given.
+ */
+export function requestText(text: string): string {
+  const own = text.replace(FENCED, ' ').replace(INLINE_CODE, ' ').replace(QUOTED, ' ').replace(/\s+/g, ' ').trim()
+  return own === '' ? text : own
+}
+
 const FRONTIER = /\b(migrat\w*|deep research|for hours|entire (codebase|repo\w*|system)|whole (codebase|repo\w*)|large[- ]scale|re-?architect\w*|ground[- ]up|from scratch)\b/i
 const COMPLEX = /\b(research|analy[sz]\w*|plan\w*|design\w*|architect\w*|review\w*|spec|strateg\w*|roadmap|trade-?offs?)\b/i
-const MODERATE = /\b(build|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|doc(ument)?s?)\b/i
+const MODERATE = /\b(build|update\w*|skills?|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|doc(ument)?s?)\b/i
 const TRIVIAL = /\b(summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was)|email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
 
 /** The word-based guess used when the quick check fails; moderate when in doubt. */

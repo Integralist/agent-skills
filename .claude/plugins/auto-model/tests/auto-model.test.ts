@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { CommandInfo, ConfigRow, On } from 'claude-code'
 
-import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, parseLevel, skillPaths, tierFromFrontmatter } from '../hooks/logic'
+import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, parseLevel, requestText, skillPaths, tierFromFrontmatter } from '../hooks/logic'
 
 const OPTIONS = ['default', 'sonnet', 'opus', 'haiku', 'fable', 'best', 'opusplan']
 const IDS: Record<string, string> = {
@@ -13,6 +13,18 @@ const IDS: Record<string, string> = {
 }
 const PRESENTATION = { isFullscreen: false, columns: 120 }
 const HOME = '/home/me'
+// The prompt that wrongly routed to Opus: it only names a `review` subcommand.
+const FIRST_PROMPT = [
+  'can you update the hunk skill to make dealing with all my latest comment replies easier?',
+  '',
+  'so for example, in Pi, I used the hunk skill (with the `review` subcommand) after already commenting on a `hunk diff` in a separate shell.',
+  '',
+  '````',
+  ' All 9 existing Hunk notes now have replies. I preserved and refreshed the uncommitted diff, found no additional findings.',
+  '````',
+  '',
+  'it would be nice to not have to manually say that all the time? maybe there is a subcommand in the hunk skill already to do that sort of thing, if not can you suggest something we could add',
+].join('\n')
 const TRIVIAL_SKILL = '---\nname: commit\ndescription: >-\n  Create git commits.\nmetadata:\n  model-tier: trivial\n---\n# Commit\n'
 const COMPLEX_SKILL = '---\nname: commit\nmetadata:\n  model-tier: complex\n---\n'
 const COMMANDS: CommandInfo[] = [
@@ -43,9 +55,22 @@ describe('logic', () => {
     expect(guessLevel('Summarize this paragraph for me please')).toBe('trivial')
     expect(guessLevel('Draft an email to the team about Friday')).toBe('trivial')
     expect(guessLevel('Implement retries in the HTTP client and add tests')).toBe('moderate')
+    expect(guessLevel('Update the hunk skill, that sort of thing')).toBe('moderate')
     expect(guessLevel('Plan the rollout for the new token service')).toBe('complex')
     expect(guessLevel('Migrate the entire codebase from Python 2 to Python 3')).toBe('frontier')
     expect(guessLevel('Thoughts on the weather tomorrow afternoon')).toBe('moderate')
+  })
+
+  test('keeps only what the user wrote, not quoted text or code', () => {
+    expect(requestText('Fix the `review` step\n```\nreview the plan\n```\nthanks')).toBe('Fix the step thanks')
+    expect(requestText('Tidy this\n````md\n```bash\nplan\n```\n````\n')).toBe('Tidy this')
+    expect(requestText('Update the docs\n> please review the spec\nok')).toBe('Update the docs ok')
+    expect(requestText('```\nonly code\n```')).toBe('```\nonly code\n```')
+  })
+
+  test('does not read a quoted command name as the task', () => {
+    expect(guessLevel(requestText(FIRST_PROMPT))).toBe('moderate')
+    expect(guessLevel(requestText('Please review this PR for security issues'))).toBe('complex')
   })
 
   test('steps down to the next line that exists', () => {
@@ -85,6 +110,8 @@ type World = {
   level: string
   refuse: string[]
   asked: number
+  prompts: string[]
+  logs: string[]
   files: Record<string, string>
   clock: MockClock
 }
@@ -92,7 +119,7 @@ type World = {
 /** The engine beneath the mod: the model row, the session model, a classifier, skill files. */
 function world(on: On, start: string, level = 'complex', refuse: string[] = []): World {
   const clock = mock.clock(on, { now: Date.UTC(2026, 9, 19) })
-  const w: World = { model: start, sets: [], toasts: [], level, refuse, asked: 0, files: {}, clock }
+  const w: World = { model: start, sets: [], toasts: [], level, refuse, asked: 0, prompts: [], logs: [], files: {}, clock }
   mock.store(on)
   on('config.list', () => {
     const row: ConfigRow = {
@@ -121,10 +148,10 @@ function world(on: On, start: string, level = 'complex', refuse: string[] = []):
     if (text === undefined) throw new Error(`ENOENT: ${e.path}`)
     return { value: text }
   })
-  on('model.complete', () => ({
+  on('model.complete', ($, e) => ({
     value: {
       isAnswered: true as const,
-      text: (w.asked++, w.level),
+      text: (w.asked++, w.prompts.push(e.prompt), w.level),
       usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
     },
   }))
@@ -132,7 +159,10 @@ function world(on: On, start: string, level = 'complex', refuse: string[] = []):
     w.toasts.push(e.text)
     return { value: undefined }
   })
-  on('ui.log', () => ({ value: undefined }))
+  on('ui.log', ($, e) => {
+    w.logs.push(e.text)
+    return { value: undefined }
+  })
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.submit', ($, e) => ({ text: e.text }))
@@ -165,6 +195,31 @@ async function type($: Engine, text: string, turnId?: string) {
 }
 
 describe('switching', () => {
+  test('asks the classifier about the user\'s own words only', async ($, on) => {
+    const w = world(on, 'haiku', 'moderate')
+    await start($)
+    await automodel($, 'on')
+    await type($, 'Rename the helper in this file please\n```\nplan review design\n```')
+    expect(w.prompts).toEqual(['Rename the helper in this file please'])
+  })
+
+  test('logs what the classifier said', async ($, on) => {
+    const w = world(on, 'haiku', 'complex')
+    await start($)
+    await automodel($, 'on')
+    await type($, 'Plan the rollout for the new token service')
+    expect(w.logs).toContain('auto-model: classifier said complex')
+  })
+
+  test('logs why it fell back on the words, and what they gave', async ($, on) => {
+    const w = world(on, 'haiku', 'medium')
+    await start($)
+    await automodel($, 'on')
+    await type($, 'Plan the rollout for the new token service')
+    expect(w.logs).toContain('auto-model: classifier gave no tier (unreadable answer "medium"); keyword guess complex')
+    expect(w.sets).toEqual(['opus'])
+  })
+
   test('switches on a new prompt and shows a toast', async ($, on) => {
     const w = world(on, 'opus', 'trivial')
     await start($)
