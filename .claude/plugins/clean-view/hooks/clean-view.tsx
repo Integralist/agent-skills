@@ -35,6 +35,9 @@ const FAILURES_TO_STUCK = 3
 // Tool calls the checklist may sit unchanged through before the next one is sent back.
 const QUIET_CALLS = 8
 const PLACEHOLDER_TITLE = 'Your request'
+const DETAILS_PANE = 'clean-view-details'
+// Cells the `[ Details ]` button takes at the end of each task row.
+const DETAILS_BUTTON_CELLS = 11
 const ALWAYS_ALLOWED = new Set(['ToolSearch', 'TodoWrite', 'TaskCreate', 'TaskUpdate', 'AskUserQuestion', PLAN_TOOL, PROGRESS_TOOL])
 // Tools that change the checklist, so a call to one restarts the quiet-call count.
 const PLAN_UPDATERS = new Set([PLAN_TOOL, PROGRESS_TOOL, 'TodoWrite', 'TaskCreate', 'TaskUpdate'])
@@ -61,7 +64,7 @@ const SECTION = `# Clean View checklist
 The person sees a plain checklist of your plan instead of your tool calls.
 
 - For every request, even a quick question, call \`${PLAN_TOOL}\` first with every step of the job, 2 to 8 short names in order. Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
-- Call \`${PROGRESS_TOOL}\` as real progress happens, and with percent 100 the moment a step finishes.
+- Call \`${PROGRESS_TOOL}\` after each item of a step (each file read, check run or section written), and at least every 3 tool calls, so the person never watches a percent sit still. Pass 100 the moment a step finishes.
 - If the job grows past your plan (extra checks, cleanup, undoing changes, a new kind of work), call \`${PLAN_TOOL}\` again with the full updated list before you do it. Keep finished step names the same so they stay checked off.
 - Write every step name in plain English a non-technical person understands, under 40 characters, starting with a verb, like "Build the pricing section".
 - Never put file paths, file names, commands, code or tool names in a step name.`
@@ -76,6 +79,21 @@ let isNextTurnCommand = false
 let isNextTurnReport = false
 // The session's permission mode, as the last classic hook carried it; unknown until one does.
 let permissionMode: string | undefined
+// The main loop's running turn, which the details pane's Stop ends.
+let mainTurnId: string | undefined
+// Files read during the active step, so the activity shows real progress the model hasn't reported.
+let readsInStep = 0
+let readsStepId: string | null = null
+
+function countRead(list: CleanViewChecklist): string {
+  const stepId = list.tasks.find(one => one.status === 'active')?.id ?? null
+  if (stepId !== readsStepId) {
+    readsStepId = stepId
+    readsInStep = 0
+  }
+  readsInStep++
+  return `Read ${readsInStep} file${readsInStep === 1 ? '' : 's'} in this step`
+}
 
 function startTicker($: $) {
   if (ticker !== undefined) return
@@ -102,14 +120,23 @@ async function recordActivity($: $, summary: string, inProgress: boolean, at?: n
   await edit($, list => ({ ...list, activity: { summary, at: timestamp, inProgress } }))
 }
 
-async function toggleTaskInspector($: $, taskId: string | null) {
-  await update($, selectedTaskId, current => (current === taskId ? null : taskId))
+async function openDetails($: $, taskId: string) {
+  await update($, selectedTaskId, () => taskId)
+  await $.ui.open({ id: DETAILS_PANE, title: 'Task details', focus: true, closeOnEscape: true, holdToasts: true, rows: 12 })
+}
+
+async function pageDetails($: $, step: number) {
+  const list = await read($, checklist)
+  const id = await read($, selectedTaskId)
+  const index = Math.max(0, list.tasks.findIndex(one => one.id === id))
+  const next = list.tasks[Math.min(list.tasks.length - 1, Math.max(0, index + step))]
+  if (next) await update($, selectedTaskId, () => next.id)
 }
 
 function toolActivity(tool: string, finished = false): string {
   switch (tool.toLowerCase()) {
     case 'bash': return finished ? 'Finished running a command' : 'Running a command'
-    case 'read': return finished ? 'Finished reading files' : 'Reading files'
+    case 'read': return finished ? 'Finished reading a file' : 'Reading a file'
     case 'grep':
     case 'find':
     case 'ls': return finished ? 'Finished searching the project' : 'Searching the project'
@@ -244,6 +271,7 @@ export function registerCleanView(on: On) {
 
   on('turn.start', async ($, e, next) => {
     if (e.agentId === undefined) {
+      mainTurnId = e.turnId
       const isCommand = isNextTurnCommand
       const isReport = isNextTurnReport
       isNextTurnCommand = false
@@ -302,7 +330,11 @@ export function registerCleanView(on: On) {
     await edit($, backToWork)
     if (tool === 'AskUserQuestion' && ran.deny === undefined) await recordActivity($, 'Answer received', false)
     if (!PLAN_UPDATERS.has(tool) && tool !== 'AskUserQuestion') {
-      const summary = ran.isError === true ? 'A tool call failed' : toolActivity(tool, true)
+      const summary = ran.isError === true
+        ? 'A tool call failed'
+        : tool.toLowerCase() === 'read'
+          ? countRead(await read($, checklist))
+          : toolActivity(tool, true)
       await recordActivity($, summary, false)
     }
     if (e.tool === 'TaskCreate' && ran.deny === undefined && ran.isError !== true) {
@@ -442,8 +474,6 @@ export function registerCleanView(on: On) {
       />
     )
     const list = await read($, checklist)
-    const selectedId = await read($, selectedTaskId)
-    const selectedTask = list.tasks.find(one => one.id === selectedId)
     if (!isEnabled || list.phase === 'idle') {
       return (
         <Box flexDirection="row" justifyContent="flex-end">
@@ -458,24 +488,9 @@ export function registerCleanView(on: On) {
     const took = duration(now - list.startedAt)
     const header = headerOf(list, took, Text)
     const firstUpcoming = list.tasks.findIndex(one => one.status === 'upcoming')
-    const selectedIndex = selectedTask ? list.tasks.indexOf(selectedTask) : -1
-    const selectedStatus = selectedTask ? label(selectedTask, selectedIndex === firstUpcoming, PAUSED.has(list.phase)) : ''
-    const lastActivity = list.activity
-      ? `${list.activity.summary} · ${list.activity.inProgress ? `for ${duration(now - list.activity.at)}` : `${duration(now - list.activity.at)} ago`}`
-      : 'No visible activity recorded yet'
-    const inspector = selectedTask ? (
-      <Box key="clean-view-task-details" flexDirection="column" marginTop={1}>
-        <Text bold>Task details · {selectedTask.name}</Text>
-        <Text>Status: {selectedStatus} · Progress: {selectedTask.status === 'done' ? 'Complete' : selectedTask.hasReported ? `${selectedTask.percent}% reported` : 'No percentage reported yet'}</Text>
-        <Text>Run elapsed: {took}</Text>
-        <Text>Last visible activity: {lastActivity}</Text>
-        <Text>Press Esc to stop the entire run; remaining tasks will not continue.</Text>
-        <Button key="clean-view-task-details-close" label="Close details" onPress={() => void toggleTaskInspector($, selectedTask.id)} />
-      </Box>
-    ) : null
 
     // A blank line above the band keeps it clear of the spinner line.
-    if ((list.phase === 'done' || list.phase === 'ended') && list.isCollapsed && !inspector) {
+    if ((list.phase === 'done' || list.phase === 'ended') && list.isCollapsed) {
       return (
         <Box key="clean-view-band" marginTop={1} flexDirection="row" justifyContent="space-between">
           {header}
@@ -484,8 +499,8 @@ export function registerCleanView(on: On) {
       )
     }
 
-    // icon + space, name, space, 10-cell meter, two spaces, 7-cell label
-    const nameWidth = Math.max(8, e.props.bodyColumns - (2 + 1 + METER_CELLS + 2 + 7 + 8))
+    // icon + space, name, space, 10-cell meter, two spaces, 7-cell label, a gap, the Details button
+    const nameWidth = Math.max(8, e.props.bodyColumns - (2 + 1 + METER_CELLS + 2 + 7 + 1 + DETAILS_BUTTON_CELLS))
     return (
       <Box key="clean-view-band" marginTop={1} flexDirection="column">
         <Box key="clean-view-header" flexDirection="row" justifyContent="space-between" marginBottom={1}>
@@ -495,14 +510,67 @@ export function registerCleanView(on: On) {
         {list.tasks.map((one, i) => (
           <Box key={`clean-view-task-row-${one.id}`} flexDirection="row" justifyContent="space-between">
             {row(one, i === firstUpcoming, PAUSED.has(list.phase), frame, nameWidth, Text)}
-            <Button
-              key={`clean-view-task-inspect-${one.id}`}
-              label={selectedTask?.id === one.id ? 'Hide' : 'Details'}
-              onPress={() => void toggleTaskInspector($, one.id)}
-            />
+            <Button key={`clean-view-task-inspect-${one.id}`} label="Details" onPress={() => void openDetails($, one.id)} />
           </Box>
         ))}
-        {inspector}
+      </Box>
+    )
+  })
+
+  on('ui.close', async ($, e, next) => {
+    if (e.id === DETAILS_PANE) await update($, selectedTaskId, () => null)
+    return next(e)
+  })
+
+  // Reading the tick redraws the pane each frame, so its times and progress stay live.
+  on('ui.render', { component: 'Pane', requestId: DETAILS_PANE }, async ($, e) => {
+    const { Box, Text, Button } = $.ui.resolve(e)
+    const list = await read($, checklist)
+    const id = await read($, selectedTaskId)
+    const index = Math.max(0, list.tasks.findIndex(one => one.id === id))
+    const task = list.tasks[index]
+    if (!task) return <Text dimColor>No task to show.</Text>
+
+    const isLive = isRunning(list)
+    if (isLive) await read($, tick)
+    const now = isLive ? await $.clock.now() : (list.finishedAt ?? list.startedAt)
+    const isPaused = PAUSED.has(list.phase)
+    const tone = task.status === 'done' ? 'green' : task.status === 'upcoming' ? 'gray' : isPaused ? 'yellow' : 'cyan'
+    const status = label(task, index === list.tasks.findIndex(one => one.status === 'upcoming'), isPaused)
+    const progress = task.status === 'done' ? 'Complete' : task.hasReported ? `${task.percent}% reported` : 'No percentage reported yet'
+    const activity = list.activity
+      ? `${list.activity.summary} · ${list.activity.inProgress ? `for ${duration(now - list.activity.at)}` : `${duration(now - list.activity.at)} ago`}`
+      : 'No visible activity recorded yet'
+    const field = (name: string, value: string, color?: string) => (
+      <Text key={`clean-view-details-${name}`}>
+        <Text dimColor>{name.padEnd(10)}</Text>
+        <Text color={color}>{value}</Text>
+      </Text>
+    )
+
+    return (
+      <Box flexDirection="column">
+        <Text>
+          <Text color={tone}>●</Text> <Text bold>{task.name}</Text>  <Text dimColor>{index + 1}/{list.tasks.length}</Text>
+        </Text>
+        <Text> </Text>
+        {field('Status', status, tone)}
+        <Text key="clean-view-details-Progress">
+          <Text dimColor>{'Progress'.padEnd(10)}</Text>
+          <Text color={tone}>{meter(task, 0)}</Text>  {progress}
+        </Text>
+        {field('Elapsed', duration(now - list.startedAt))}
+        {field('Activity', activity)}
+        <Text> </Text>
+        <Box flexDirection="row" gap={1}>
+          <Button key="clean-view-details-prev" label="← Prev" onPress={() => void pageDetails($, -1)} />
+          <Button key="clean-view-details-next" label="Next →" onPress={() => void pageDetails($, 1)} />
+          {isLive && mainTurnId !== undefined && (
+            <Button key="clean-view-details-stop" label="Stop entire run" onPress={() => void $.turn.abort({ turnId: mainTurnId! })} />
+          )}
+          <Button key="clean-view-details-close" label="Close" onPress={() => void $.ui.close({ id: DETAILS_PANE })} />
+        </Box>
+        <Text dimColor>Stop ends the entire run · Esc closes this pane</Text>
       </Box>
     )
   })

@@ -195,7 +195,9 @@ export function meter(one: CleanViewTask, frame: number): string {
     return Array.from({ length: METER_CELLS }, (_, i) => ((i - at + METER_CELLS) % METER_CELLS < 3 ? '█' : '░')).join('')
   }
   const filled = Math.round(one.percent / 10)
-  return '█'.repeat(filled) + '░'.repeat(METER_CELLS - filled)
+  // Between reports the next cell pulses, so a step waiting on its next report still looks alive.
+  if (filled >= METER_CELLS || frame % 2 === 0) return '█'.repeat(filled) + '░'.repeat(METER_CELLS - filled)
+  return '█'.repeat(filled) + '▒' + '░'.repeat(METER_CELLS - filled - 1)
 }
 
 // Modes that settle a permission ask with nobody asked: a classifier, a bypass, a refusal.

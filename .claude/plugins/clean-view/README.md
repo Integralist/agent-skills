@@ -10,9 +10,10 @@ the prompt.
   A checklist above the prompt shows the job's name, how long it has run, and
   each step with a 10-cell meter. The header switches to **Needs you**,
   **Stuck**, **Stopped** or **All done** as the job changes.
-- **Task details:** Click **Details** beside a task to see its status, reported
-  progress, run time, and last visible activity. Press **Esc** to stop the
-  entire run; remaining tasks will not continue automatically.
+- **Task details:** Click **Details** beside a task to open a live pane with
+  its status, reported progress, run time, and last visible activity. Use
+  **← Prev** and **Next →** to move between tasks, **Stop entire run** to end
+  the run, and **Esc** or **Close** to close the pane.
 - **How the plan arrives:** the mod gives Claude two tools, `plan_steps` and
   `report_progress`, and blocks every other tool until a plan exists. A to-do
   list (TodoWrite, TaskCreate) also counts as the plan.

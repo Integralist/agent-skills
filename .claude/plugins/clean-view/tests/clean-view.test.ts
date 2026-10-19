@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
-import { cleanName } from '../hooks/logic'
+import { cleanName, meter } from '../hooks/logic'
 
 const PLUGIN = 'clean-view'
 const PLAN = 'mcp__clean-view__plan_steps'
@@ -23,12 +23,46 @@ const BAND = (columns = 80) => ({
   viewport: { columns: columns + 5, rows: 30 },
 })
 
-type Agent = { id: string; description: string; type: string; status: string }
-type World = { toasts: string[]; ran: string[]; clock: MockClock; verdict: 'allow' | 'ask'; agents: Agent[] }
+const DETAILS = 'clean-view-details'
+const PANE = {
+  plugin: PLUGIN,
+  component: 'Pane' as const,
+  requestId: DETAILS,
+  props: {
+    title: 'Task details',
+    isFocused: true,
+    bodyColumns: 80,
+    placement: 'inline' as const,
+    scroll: { offset: 0, bodyRows: 12, totalRows: 0 },
+    view: {},
+  },
+  viewport: { columns: 85, rows: 30 },
+}
 
-/** The engine beneath the mod: store, clock, a Haiku that names jobs, tools that succeed. */
+type Agent ={ id: string; description: string; type: string; status: string }
+type Opened = { id: string; title?: string; focus?: true; closeOnEscape?: true; holdToasts?: true }
+type World = {
+  toasts: string[]
+  ran: string[]
+  clock: MockClock
+  verdict: 'allow' | 'ask'
+  agents: Agent[]
+  opened: Opened[]
+  aborted: string[]
+}
+
+/** The engine beneath the mod: store, clock, a Haiku that names jobs, tools that succeed, panes that open. */
 function world(on: On): World {
-  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [] }
+  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [], opened: [], aborted: [] }
+  on('ui.open', ($, e) => {
+    w.opened.push(e)
+    return { value: { isPlaced: true as const } }
+  })
+  on('ui.close', () => ({ value: undefined }))
+  on('turn.abort', ($, e) => {
+    w.aborted.push(e.turnId)
+    return { value: undefined }
+  })
   on('agent.list', () => ({ value: w.agents as never }))
   mock.store(on)
   on('session.start', ($, e) => ({ cwd: e.cwd }))
@@ -46,6 +80,7 @@ function world(on: On): World {
     },
   }))
   on('prompt.submit', ($, e) => ({ text: e.text }))
+  on('prompt.compose', () => ({ sections: [] }))
   on('turn.start', ($, e) => ({ turnId: e.turnId }))
   on('turn.complete', ($, e) => ({ text: e.answer }))
   on('classic.Notification', () => ({}))
@@ -89,7 +124,52 @@ describe('plain names', () => {
   })
 })
 
+describe('meter', () => {
+  test('a reported step pulses the next cell between reports', () => {
+    const one = { id: 'step-0', name: 'Read the files', status: 'active' as const, percent: 60, hasReported: true }
+    expect(meter(one, 0)).toBe('██████░░░░')
+    expect(meter(one, 1)).toBe('██████▒░░░')
+    expect(meter(one, 2)).toBe('██████░░░░')
+    expect(meter({ ...one, percent: 100 }, 1)).toBe('██████████')
+  })
+})
+
 describe('checklist', () => {
+  test('the checklist prompt asks for a report after each item', async ($, on) => {
+    world(on)
+    await start($)
+    const composed = await $.prompt.compose({
+      model: 'claude-opus-5-5',
+      promptModel: 'claude-opus-5-5',
+      surfaces: ['terminal'],
+      tools: [],
+      outputStyle: null,
+      traits: [],
+    })
+    const text = composed.sections.map(one => one.text).join('\n')
+    expect(text).toContain('after each item')
+    expect(text).toContain('at least every 3 tool calls')
+  })
+
+  test('the details pane counts the files read in the active step', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Open ten files and summarise them')
+    await $.tool.call({ tool: PLAN, steps: ['Read the files', 'Summarise them'] })
+    const activity = async () => {
+      const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
+      const texts = (await pane.findAll({ type: 'Text' })).map(one => one.text).join('\n')
+      await pane.unmount()
+      return texts
+    }
+    for (const file_path of ['a.ts', 'b.ts', 'c.ts']) await $.tool.call({ tool: 'Read', file_path })
+    expect(await activity()).toContain('Read 3 files in this step')
+
+    await $.tool.call({ tool: PROGRESS, task: 'Read the files', percent: 100 })
+    await $.tool.call({ tool: 'Read', file_path: 'd.ts' })
+    expect(await activity()).toContain('Read 1 file in this step')
+  })
+
   test('a to-do list and a 60% report draw done, active, next and up-next rows', async ($, on) => {
     world(on)
     await start($)
@@ -127,29 +207,51 @@ describe('checklist', () => {
     expect(texts).toMatch(/▶ Build the pricing section\s+[█░]{10}\s+Working/)
   })
 
-  test('clicking a task shows its details and whole-run stop guidance', async ($, on) => {
+  test('a task row and its Details button fit on one line', async ($, on) => {
     world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Inspect every file in the whole project', 'Run the checks'] })
+    for (const columns of [60, 80, 120]) {
+      const ui = await $.ui.mount({ ...BAND(columns), surface: 'terminal' })
+      const row = (await ui.findAll({ type: 'Text' })).map(one => one.text).find(text => text.includes('Working'))
+      expect(row).toBeDefined()
+      // The row text, a gap and the 11-cell `[ Details ]` button share the body width.
+      expect(row!.length + 1 + 11).toBeLessThanOrEqual(columns)
+      await ui.unmount()
+    }
+  })
+
+  test('Details opens a live task pane that pages through tasks and can stop the run', async ($, on) => {
+    const w = world(on)
     await start($)
     await prompt($, 'Build my landing page')
     await $.tool.call({ tool: PLAN, steps: ['Inspect the files', 'Run the checks'] })
     await $.tool.call({ tool: PROGRESS, task: 'Inspect the files', percent: 45 })
 
-    const ui = await $.ui.mount({ ...BAND(), surface: 'terminal' })
-    const detailsButton = 'clean-view-task-inspect-step-0-Inspect the files'
-    expect(await ui.find({ key: detailsButton })).toBeDefined()
-    await ui.press({ key: detailsButton })
-    let texts = (await ui.findAll({ type: 'Text' })).map(one => one.text).join('\n')
-    expect(texts).toContain('Task details')
-    expect(texts).toContain('Inspect the files')
-    expect(texts).toContain('45%')
-    expect(texts).toContain('Last visible activity')
-    expect(texts).toContain('Progress reported · 0s ago')
-    expect(texts).toContain('Press Esc to stop the entire run')
+    const band = await $.ui.mount({ ...BAND(), surface: 'terminal' })
+    await band.press({ key: 'clean-view-task-inspect-step-0-Inspect the files' })
+    await band.unmount()
+    expect(w.opened.at(-1)).toMatchObject({ id: DETAILS, focus: true, closeOnEscape: true, holdToasts: true })
 
-    await ui.press({ key: 'clean-view-task-details-close' })
-    texts = (await ui.findAll({ type: 'Text' })).map(one => one.text).join('\n')
-    expect(texts).not.toContain('Task details')
-    await ui.unmount()
+    const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
+    const text = async () => (await pane.findAll({ type: 'Text' })).map(one => one.text).join('\n')
+    expect(await text()).toContain('Inspect the files')
+    expect(await text()).toContain('1/2')
+    expect(await text()).toMatch(/Progress\s+[█░]{10}\s+45% reported/)
+    expect(await text()).toContain('Progress reported · 0s ago')
+
+    await w.clock.advance(5000)
+    await pane.redraw()
+    expect(await text()).toContain('Progress reported · 5s ago')
+
+    await pane.press({ key: 'clean-view-details-next' })
+    expect(await text()).toContain('Run the checks')
+    expect(await text()).toContain('2/2')
+
+    await pane.press({ key: 'clean-view-details-stop' })
+    expect(w.aborted).toEqual(['turn-1'])
+    await pane.unmount()
   })
 
   test('a permission prompt shows Needs you', async ($, on) => {
