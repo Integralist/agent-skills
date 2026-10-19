@@ -11,8 +11,10 @@ import {
   displayName,
   guessLevel,
   isShortReply,
+  isWarm,
   lineOf,
   parseLevel,
+  rankOf,
   skillPaths,
   tierFromFrontmatter,
 } from './logic'
@@ -30,6 +32,8 @@ const MUTED = '#7D8590'
 
 const isOn = atom({ plugin: 'auto-model', key: 'isOn' } as const, false)
 const pendingModel = atom({ plugin: 'auto-model', key: 'pendingModel' } as const, null)
+// When the last main-loop turn ended; null before the session's first.
+const lastTurnAt = atom({ plugin: 'auto-model', key: 'lastTurnAt' } as const, null)
 
 type $ = EngineInterface
 
@@ -83,10 +87,14 @@ async function commandLevel($: $, command: string, smallest: string): Promise<Au
   return level
 }
 
-/** Switches to the best line for `level` the plan accepts; quiet when already there. */
-async function switchTo($: $, level: AutoModelLevel, current: string, lines: readonly string[]) {
+/**
+ * Switches to the best line for `level` the plan accepts; quiet when already
+ * there. With `stepUpOnly` it never moves to a smaller line.
+ */
+async function switchTo($: $, level: AutoModelLevel, current: string, lines: readonly string[], stepUpOnly = false) {
   for (const line of candidatesFor(level, lines)) {
     if (lineOf(current) === line) return
+    if (stepUpOnly && rankOf(line) <= rankOf(current)) return
     const set = await $.config.set({ key: 'model', value: line })
     if (set.deny !== undefined) continue
     const model = await $.session.model()
@@ -174,7 +182,11 @@ export const register: Register = on => {
         const lines = availableLines(row?.options)
         if (lines.length > 0) {
           const level = await classify($, e.text, lines[0] ?? 'haiku')
-          await switchTo($, level, await $.session.model(), lines)
+          // A typed prompt while the cache is warm is likely the same task, so
+          // only a bigger tier is worth re-sending the history uncached. A typed
+          // skill (below) starts a new task, and routes by its tier.
+          const warm = isWarm(await read($, lastTurnAt), await $.clock.now())
+          await switchTo($, level, await $.session.model(), lines, warm)
         }
       }
     } catch (err) {
@@ -232,7 +244,11 @@ export const register: Register = on => {
   })
 
   on('turn.complete', async ($, e, next) => {
-    if (e.agentId === undefined) await update($, pendingModel, () => null)
+    if (e.agentId === undefined) {
+      await update($, pendingModel, () => null)
+      const now = await $.clock.now()
+      await update($, lastTurnAt, () => now)
+    }
     return next(e)
   })
 

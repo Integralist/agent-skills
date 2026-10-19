@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from 'claude-code/testing'
-import type { Engine } from 'claude-code/testing'
+import type { Engine, MockClock } from 'claude-code/testing'
 import type { CommandInfo, ConfigRow, On } from 'claude-code'
 
 import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, parseLevel, skillPaths, tierFromFrontmatter } from '../hooks/logic'
@@ -39,12 +39,13 @@ describe('logic', () => {
     expect(isShortReply('Refactor the auth module to use the new token client')).toBe(false)
   })
 
-  test('falls back on the words, complex when in doubt', () => {
+  test('falls back on the words, moderate when in doubt', () => {
     expect(guessLevel('Summarize this paragraph for me please')).toBe('trivial')
-    expect(guessLevel('Draft an email to the team about Friday')).toBe('moderate')
-    expect(guessLevel('Implement retries in the HTTP client and add tests')).toBe('complex')
+    expect(guessLevel('Draft an email to the team about Friday')).toBe('trivial')
+    expect(guessLevel('Implement retries in the HTTP client and add tests')).toBe('moderate')
+    expect(guessLevel('Plan the rollout for the new token service')).toBe('complex')
     expect(guessLevel('Migrate the entire codebase from Python 2 to Python 3')).toBe('frontier')
-    expect(guessLevel('Thoughts on the weather tomorrow afternoon')).toBe('complex')
+    expect(guessLevel('Thoughts on the weather tomorrow afternoon')).toBe('moderate')
   })
 
   test('steps down to the next line that exists', () => {
@@ -85,11 +86,13 @@ type World = {
   refuse: string[]
   asked: number
   files: Record<string, string>
+  clock: MockClock
 }
 
 /** The engine beneath the mod: the model row, the session model, a classifier, skill files. */
 function world(on: On, start: string, level = 'complex', refuse: string[] = []): World {
-  const w: World = { model: start, sets: [], toasts: [], level, refuse, asked: 0, files: {} }
+  const clock = mock.clock(on, { now: Date.UTC(2026, 9, 19) })
+  const w: World = { model: start, sets: [], toasts: [], level, refuse, asked: 0, files: {}, clock }
   mock.store(on)
   on('config.list', () => {
     const row: ConfigRow = {
@@ -134,8 +137,16 @@ function world(on: On, start: string, level = 'complex', refuse: string[] = []):
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('prompt.submit', ($, e) => ({ text: e.text }))
   on('command.run', () => ({ text: 'engine ran it' }))
+  on('turn.complete', () => ({ text: '' }))
   return w
 }
+
+/** A main-loop turn ends, so the prompt cache now holds the conversation. */
+async function finishTurn($: Engine) {
+  await $.turn.complete({ answer: 'done', durationMs: 1, isAborted: false, turnId: 'turn-0', reason: 'answer' })
+}
+
+const MINUTE = 60_000
 
 async function start($: Engine) {
   await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
@@ -234,6 +245,45 @@ describe('switching', () => {
     const off = await automodel($, 'off')
     expect(w.model).toBe('opus')
     expect(off.text).toContain('back to')
+  })
+
+  test('keeps a bigger model for a smaller prompt while the cache is warm', async ($, on) => {
+    const w = world(on, 'opus', 'trivial')
+    await start($)
+    await automodel($, 'on')
+    await finishTurn($)
+    await w.clock.advance(10 * MINUTE)
+    await type($, 'Summarize the notes from this meeting into three bullets')
+    expect(w.sets).toEqual([])
+  })
+
+  test('a typed skill starts a new task, so it routes by its tier even while the cache is warm', async ($, on) => {
+    const w = world(on, 'opus', 'complex')
+    w.files[`${HOME}/.claude/skills/commit/SKILL.md`] = TRIVIAL_SKILL
+    await start($)
+    await automodel($, 'on')
+    await finishTurn($)
+    await run($, 'commit')
+    expect(w.sets).toEqual(['haiku'])
+  })
+
+  test('steps up while the cache is warm', async ($, on) => {
+    const w = world(on, 'haiku', 'complex')
+    await start($)
+    await automodel($, 'on')
+    await finishTurn($)
+    await type($, 'Plan the rollout for the new token service')
+    expect(w.sets).toEqual(['opus'])
+  })
+
+  test('steps down once the cache has gone cold', async ($, on) => {
+    const w = world(on, 'opus', 'trivial')
+    await start($)
+    await automodel($, 'on')
+    await finishTurn($)
+    await w.clock.advance(61 * MINUTE)
+    await type($, 'Summarize the notes from this meeting into three bullets')
+    expect(w.sets).toEqual(['haiku'])
   })
 
   test('picking a model by hand turns it off', async ($, on) => {

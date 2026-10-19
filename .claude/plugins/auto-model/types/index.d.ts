@@ -5,6 +5,7 @@ declare module 'claude-code' {
     'auto-model': {
       isOn: boolean
       pendingModel: string | null
+      lastTurnAt: number | null
     }
   }
 }

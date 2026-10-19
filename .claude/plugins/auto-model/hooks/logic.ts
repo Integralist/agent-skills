@@ -8,11 +8,11 @@ export const LINES = ['haiku', 'sonnet', 'opus', 'fable'] as const
 
 export const CLASSIFIER_SYSTEM = [
   'Sort the request into exactly one tier. Answer with the one word only.',
-  'trivial: quick, mechanical jobs. Commit, branch, summarize, sort, extract, rename, translate, reformat, a short factual answer.',
-  'moderate: short writing or a small, contained task. An email, a post, a PR body, a ticket, a small edit, a simple question about one file.',
-  'complex: the default for anything that matters. Building or changing software, debugging, research, analysis, long documents, planning, anything touching several files or tools.',
-  'frontier: only the very hardest. Deep research that runs for hours, a very large build or migration, a problem the complex tier would likely fall short on.',
-  'When unsure, say complex.',
+  'trivial: quick, mechanical jobs and short writing. Commit, branch, summarize, sort, extract, rename, translate, reformat, a short factual answer, an email, a post, a PR body, a ticket, a small edit.',
+  'moderate: the default for hands-on work. Building or changing software, debugging, fixing tests, analysis, long documents, anything touching several files or tools.',
+  'complex: project planning and big-picture thinking. Specs, plans, research, architecture, design decisions, code or security review.',
+  'frontier: only the very hardest thinking. Redesigning a whole codebase or system, planning a very large migration, deep research that runs for hours.',
+  'When unsure, say moderate.',
 ].join('\n')
 
 /** Reads the classifier's one-word answer; undefined when it named no tier. */
@@ -37,17 +37,33 @@ export function isShortReply(text: string): boolean {
 }
 
 const FRONTIER = /\b(migrat\w*|deep research|for hours|entire (codebase|repo\w*|system)|whole (codebase|repo\w*)|large[- ]scale|re-?architect\w*|ground[- ]up|from scratch)\b/i
-const COMPLEX = /\b(build|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|research|analy[sz]\w*|plan\w*|design\w*|architect\w*|review\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|spec|doc(ument)?s?)\b/i
-const MODERATE = /\b(email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
-const TRIVIAL = /\b(summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was))\b/i
+const COMPLEX = /\b(research|analy[sz]\w*|plan\w*|design\w*|architect\w*|review\w*|spec|strateg\w*|roadmap|trade-?offs?)\b/i
+const MODERATE = /\b(build|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|doc(ument)?s?)\b/i
+const TRIVIAL = /\b(summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was)|email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
 
-/** The word-based guess used when the quick check fails; complex when in doubt. */
+/** The word-based guess used when the quick check fails; moderate when in doubt. */
 export function guessLevel(text: string): AutoModelLevel {
   if (FRONTIER.test(text)) return 'frontier'
   if (COMPLEX.test(text)) return 'complex'
   if (MODERATE.test(text)) return 'moderate'
   if (TRIVIAL.test(text)) return 'trivial'
-  return 'complex'
+  return 'moderate'
+}
+
+// How long the prompt cache keeps a conversation after its last request. A
+// switch inside it re-sends the whole history uncached, so only a step up is
+// worth that; once it has lapsed, a switch costs nothing extra.
+export const WARM_MS = 60 * 60 * 1000
+
+/** True while the last main-loop turn is recent enough for its cache to be warm. */
+export function isWarm(lastTurnAt: number | null, now: number): boolean {
+  return lastTurnAt !== null && now - lastTurnAt < WARM_MS
+}
+
+/** A line's place, smallest first; -1 for a model outside the four lines. */
+export function rankOf(model: string): number {
+  const line = lineOf(model)
+  return line === undefined ? -1 : LINES.indexOf(line as (typeof LINES)[number])
 }
 
 /** The model lines this install offers, smallest first. */
