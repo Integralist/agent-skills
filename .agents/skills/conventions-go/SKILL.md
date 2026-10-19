@@ -6,7 +6,7 @@ description: >-
   guide covering naming, error handling, testing, HTTP handlers, caching,
   concurrency, and observability.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 > [!NOTE]

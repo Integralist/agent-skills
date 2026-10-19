@@ -6,7 +6,7 @@ description: >-
 disable-model-invocation: true
 argument-hint: Optional topic to teach
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Teach With Slides

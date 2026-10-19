@@ -6,7 +6,7 @@ description: >-
   guide covering modern typing, tooling (ruff, mypy, uv), project structure,
   error handling, and testing.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 > [!NOTE]

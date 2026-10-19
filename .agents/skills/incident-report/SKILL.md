@@ -6,7 +6,7 @@ description: >-
   in a customer-facing service and asks to write an incident report, document
   the incident, write up what happened, or create a postmortem.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Incident Report

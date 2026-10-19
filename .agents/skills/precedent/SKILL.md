@@ -7,7 +7,7 @@ description: >-
   judge project conformance.
 argument-hint: "[path | --uncommitted]"
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Precedent

@@ -8,7 +8,7 @@ description: >-
   doesn't happen again; or at the end of a plan or piece of work.
 disable-model-invocation: true
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Durable Rules

@@ -5,7 +5,7 @@ description: >-
   creating any *.sql file. SQL migration conventions covering simple DDL,
   idempotency, batching ALTER statements, comments, and formatting.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 > [!NOTE]

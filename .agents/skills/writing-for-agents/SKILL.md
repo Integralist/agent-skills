@@ -4,7 +4,7 @@ description: >-
   MANDATORY for any work on agent-facing documents. Load this before creating
   or editing a skill, or modifying AGENTS.md, CLAUDE.md, or GEMINI.md.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 Write agent documents — skills, AGENTS.md, anything an agent reads — so the

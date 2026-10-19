@@ -6,7 +6,7 @@ description: >-
   to remove AI tells, humanize text, or unslop something.
 argument-hint: "[file path | pasted text | (empty for latest message)]"
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Unslop

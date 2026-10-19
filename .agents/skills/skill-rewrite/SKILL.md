@@ -4,7 +4,7 @@ description: >-
   Rewrite an existing skill to be short and readable without losing its core
   behaviour. Use when the user asks to rewrite, simplify, or slim down a skill.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 Rewrite a skill so the user can read it in one pass and change it without fear.

@@ -6,7 +6,7 @@ description: >-
   code has clean module boundaries; where new logic should live or which
   module should own it; or how the code could be reshaped.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Code Module Review

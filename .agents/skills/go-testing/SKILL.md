@@ -5,7 +5,7 @@ description: >-
   creating, editing, or updating tests, test helpers, mocks, fuzz
   tests, or benchmarks in Go projects.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Go Testing

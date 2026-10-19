@@ -4,7 +4,7 @@ description: >-
   Investigate bugs, failing tests, or unexpected behavior through root-cause
   analysis. Use when debugging issues or diagnosing test failures.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Systematic Debugging

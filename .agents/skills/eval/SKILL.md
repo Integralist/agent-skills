@@ -7,7 +7,7 @@ description: >-
 disable-model-invocation: true
 argument-hint: "[skill-name]"
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Eval

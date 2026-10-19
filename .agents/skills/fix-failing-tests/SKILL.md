@@ -4,7 +4,7 @@ description: >-
   Diagnose and fix test failures from saved test output. Use when the user
   shares test output or says "tests fail".
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Fix Failing Tests

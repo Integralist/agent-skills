@@ -6,7 +6,7 @@ description: >-
   Use for a newcomer walkthrough or to understand the purpose of code; not for
   finding defects, approving a merge, or a stakeholder update.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Explain Code

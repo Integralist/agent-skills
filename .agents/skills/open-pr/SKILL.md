@@ -5,7 +5,7 @@ description: >-
   create, open, or write a PR.
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch:*), Bash(git merge-base:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr edit:*), Bash(mmdc:*)
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Open PR

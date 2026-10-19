@@ -7,7 +7,7 @@ description: >-
   product, management, or other non-engineers.
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(ls:*)
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Summarize for Product

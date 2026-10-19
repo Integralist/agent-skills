@@ -6,7 +6,7 @@ description: >-
   or Mark's voice, once or for all replies.
 argument-hint: "[--all | --off | text to rewrite]"
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Integralist Voice

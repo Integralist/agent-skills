@@ -8,7 +8,7 @@ description: >-
 disable-model-invocation: true
 argument-hint: '[path | --diff | --uncommitted]'
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # MySQL Index Audit

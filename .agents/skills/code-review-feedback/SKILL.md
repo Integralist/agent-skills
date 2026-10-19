@@ -4,7 +4,7 @@ description: >-
   Pressure-test code-review feedback before acting on it. Use when receiving
   review feedback or evaluating suggested code changes.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Code Review Feedback

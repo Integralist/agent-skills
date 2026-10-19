@@ -6,7 +6,7 @@ description: >-
 disable-model-invocation: true
 argument-hint: What would you like to learn about?
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Teach

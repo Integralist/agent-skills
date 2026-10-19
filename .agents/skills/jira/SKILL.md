@@ -6,7 +6,7 @@ description: >-
   or look up a Jira issue.
 disable-model-invocation: true
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Jira

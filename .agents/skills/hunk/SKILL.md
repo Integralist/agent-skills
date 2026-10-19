@@ -9,7 +9,7 @@ argument-hint: >-
   [review | comments | done | branch | staged | <commit-sha> | PR #<num> |
   <owner/repo>#<num> | <pr-url>]
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Hunk Interactive Code Review

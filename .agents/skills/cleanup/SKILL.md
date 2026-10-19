@@ -6,7 +6,7 @@ description: >-
 disable-model-invocation: true
 argument-hint: '[path | glob]'
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Cleanup

@@ -3,7 +3,7 @@ name: bcp
 description: Branch, commit, and open a PR in one step.
 disable-model-invocation: true
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Branch → Commit → PR

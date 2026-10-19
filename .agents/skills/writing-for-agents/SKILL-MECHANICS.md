@@ -26,14 +26,16 @@ metadata:
 
 Pick the tier from the hardest work the skill does, not its length:
 
-- `trivial` — mechanical jobs: commit, branch, recap, reformat.
-- `moderate` — short writing or one contained task: a PR body, a ticket.
-- `complex` — building or changing software, debugging, research, planning,
-  multi-file work, or interviews driven by short replies.
-- `frontier` — work `complex` would fall short on: codebase-wide redesigns,
-  very large migrations.
+- `trivial` — mechanical jobs and short writing: commit, branch, recap,
+  reformat, a PR body, a ticket.
+- `moderate` — building or changing software, debugging, multi-file work.
+- `complex` — project planning and big-picture thinking: specs, plans,
+  research, architecture, design decisions, domain modelling, code or security review,
+  and interviews driven by short replies, such as grilling.
+- `frontier` — thinking `complex` would fall short on: redesigning a whole
+  codebase or system, or planning a very large migration.
 
-When unsure, choose `complex`.
+When unsure, choose `moderate`.
 
 ## Allowed tools
 

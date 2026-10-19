@@ -6,7 +6,7 @@ description: >-
   on it.
 disable-model-invocation: true
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Critique

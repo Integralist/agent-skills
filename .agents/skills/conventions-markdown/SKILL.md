@@ -5,7 +5,7 @@ description: >-
   editing or creating any *.md file. Markdown formatting, repository-link,
   and linting conventions.
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Markdown Conventions

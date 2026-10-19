@@ -5,7 +5,7 @@ description: >-
   tests. Use when the user asks about mutation testing, surviving mutants,
   mutation scores, or whether tests would catch a regression.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Mutation Testing

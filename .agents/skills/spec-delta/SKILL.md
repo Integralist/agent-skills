@@ -5,7 +5,7 @@ description: >-
   Records the change as a Behavioural Delta in a projects/<date>-<slug>/ spec.
   Use when a bug fix, refactor, or ad-hoc change touches a living spec.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Spec Delta

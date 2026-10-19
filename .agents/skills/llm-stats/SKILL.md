@@ -8,7 +8,7 @@ description: >-
 disable-model-invocation: true
 argument-hint: "[--demo | --input <CSV/JSON> | --refresh] [--benchmark <key>] [--x cost|tokens|time|price|speed]"
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # LLM stats

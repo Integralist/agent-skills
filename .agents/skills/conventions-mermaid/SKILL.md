@@ -5,7 +5,7 @@ description: >-
   diagram blocks in Markdown. Load this before creating, editing, or
   validating Mermaid diagrams.
 metadata:
-  model-tier: moderate
+  model-tier: trivial
 ---
 
 # Mermaid Conventions

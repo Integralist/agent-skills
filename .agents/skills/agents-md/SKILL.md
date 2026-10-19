@@ -7,7 +7,7 @@ description: >-
   instructions.
 argument-hint: "[--learn]"
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 # Agents-MD
