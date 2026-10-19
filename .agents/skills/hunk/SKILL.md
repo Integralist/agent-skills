@@ -6,8 +6,8 @@ description: >-
   Use when the user asks to review with Hunk or to answer their Hunk notes.
 disable-model-invocation: true
 argument-hint: >-
-  [review | comments | done | branch | staged | <commit-sha> | PR #<num> |
-  <owner/repo>#<num> | <pr-url>]
+  [review | comments | address | done | branch | staged | <commit-sha> |
+  PR #<num> | <owner/repo>#<num> | <pr-url>]
 metadata:
   model-tier: moderate
 ---
@@ -59,6 +59,8 @@ done
    - **`comments`:** keep the loaded target and every thread, and run
      [Answering user notes](#answering-user-notes); with no user notes, say
      so and stop without changing the session.
+   - **`address`:** keep the loaded target, run
+     [Addressing all feedback](#addressing-all-feedback), and stop.
    - **Review with existing user notes** (check with
      `hunk session comment list "$SESSION_ID" --type user --json`): keep the
      target and every thread, skip step 2, inspect in step 3, answer the
@@ -117,14 +119,17 @@ done
      --start <utf16-start> --end <utf16-end> --tone info --focus --json
    ```
 
-   Give a short overview in chat and the next step: reply "next", or press
-   `c` in Hunk to leave a note and tell you to read it. Done when the notes
-   are applied, stop 1 is highlighted, and the overview is in chat.
+   Give a short overview in chat and the next step: leave notes in Hunk with
+   `c`, then run `address`; or reply "next" to walk the stops one by one.
+   Done when the notes are applied, stop 1 is highlighted, and the overview
+   is in chat.
 5. **Loop** on each user turn:
    - **"next", "prev", or another file or hunk:** clear highlights, navigate
      there, and highlight the expression with `--tone current --focus`.
    - **`comments`, or asks you to read or answer their notes:** run
      [Answering user notes](#answering-user-notes).
+   - **`address`, or asks you to deal with all their feedback:** run
+     [Addressing all feedback](#addressing-all-feedback).
    - **`done`, "stop", "done", or "clear":** clear agent state, restore the
      working tree with
      `hunk session reload "$SESSION_ID" -- diff --watch --json`, leave the
@@ -197,6 +202,36 @@ in chat doesn't count: every handled note gets a reply under it in Hunk.
    and reply text for a retry, and don't call the batch complete. Done when
    the target is unchanged and every reply is visible, or the failure is
    reported.
+
+## Addressing all feedback
+
+Settle every thread in one pass, so the user can leave notes and say
+`address` instead of steering each one. Invoking `address` approves the edits
+the notes ask for.
+
+1. **Classify each thread** from
+   `hunk session comment list "$SESSION_ID" --type all --json`:
+   - **Resolved:** the request is fully met (question answered, edit made
+     and verified) and the user's last message acknowledges it ("ok",
+     "done", "thanks", or says to drop it).
+   - **Pending:** anything else, including a thread whose last reply is
+     mine and unacknowledged, since the user may not have read it yet.
+
+   Done when every thread is classified; when unsure, call it pending.
+2. **Confirm deletions.** List each resolved thread (root note ID, anchor,
+   one-line summary) and the count of notes to remove, say deletion can't
+   be undone, and wait for an explicit yes. Done when the user confirms, or
+   declines and the threads are kept.
+3. **Delete confirmed threads** with
+   `hunk session comment rm "$SESSION_ID" "<id>" --json` for each reply and
+   then the root note. Done when no confirmed thread remains, or a failed
+   `rm` is recorded with its error.
+4. **Answer pending threads** with
+   [Answering user notes](#answering-user-notes), making requested edits
+   without asking again. Done when that section's steps are done.
+5. **Report** in chat how many threads you deleted, answered, and changed,
+   any failures, and the threads still waiting on the user. Done when the
+   report is in chat.
 
 ## Loading a pull request
 
