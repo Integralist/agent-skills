@@ -42,6 +42,8 @@ install-tools:
 install-pi: install-tools
 	@$(STEP) --section "Pi"
 	@$(STEP) "Crit Pi skills → ~/.pi/agent/skills/" bash -c 'cd "$$HOME" && crit install pi --force'
+	@mkdir -p ~/.pi/agent/skills/slack
+	@$(STEP) "slack skill → ~/.pi/agent/skills/slack/" cp .pi/agent/skills/slack/SKILL.md ~/.pi/agent/skills/slack/SKILL.md
 	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 	@for package in git:github.com/Integralist/pi-auto-model git:github.com/Integralist/pi-statusbar npm:pi-intercom git:github.com/Integralist/pi-subagents git:github.com/Integralist/pi-btw git:github.com/Integralist/pi-transcript-enhancer git:github.com/Integralist/pi-context-shake git:github.com/Integralist/pi-skill-argument-hints git:github.com/Integralist/pi-event-hooks git:github.com/Integralist/pi-prompt-history git:github.com/Integralist/pi-clean-view; do \
 		$(STEP) --timeout $(PKG_TIMEOUT) --optional "$$package" pi install "$$package" --no-approve; \
