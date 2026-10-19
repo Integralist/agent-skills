@@ -208,6 +208,39 @@ describe('after the turn', () => {
     expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
   })
 
+  describe('after Esc or a pause', () => {
+    async function halfDone($: Engine, end: { answer: string; reason: 'answer' | 'aborted' }) {
+      await prompt($, 'Build my landing page')
+      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+      await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
+      await $.turn.complete({ answer: end.answer, durationMs: 1000, isAborted: end.reason === 'aborted', turnId: 'turn-1', reason: end.reason })
+    }
+
+    test('Esc mid-plan reads Stopped, with the running step Paused, not Working', async ($, on) => {
+      world(on)
+      await start($)
+      await halfDone($, { answer: '', reason: 'aborted' })
+      const texts = (await rows($, 'terminal')).join('\n')
+      expect(texts).toMatch(/■ Stopped · Build my landing page · you pressed Esc/)
+      expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
+      expect(texts).not.toContain('Working')
+    })
+
+    for (const end of [{ answer: '', reason: 'aborted' }, { answer: 'Built the page.', reason: 'answer' }, { answer: 'Which colour?', reason: 'answer' }] as const) {
+      test(`a typed prompt after ${end.reason === 'aborted' ? 'Esc' : end.answer} carries on with the same plan`, async ($, on) => {
+        world(on)
+        await start($)
+        await halfDone($, end)
+        await $.turn.start({ text: 'Use blue for the buttons instead', turnId: 'turn-2' })
+        const texts = (await rows($, 'terminal')).join('\n')
+        expect(texts).toMatch(/Build my landing page · /)
+        expect(texts).toMatch(/✓ Build the page/)
+        expect(texts).toMatch(/▶ Check it/)
+        expect(texts).not.toMatch(/Stopped|Ended|Needs you|Understand your request/)
+      })
+    }
+  })
+
   describe('with background agents', () => {
     const running: Agent = { id: 'a1', description: 'Check the page', type: 'general-purpose', status: 'running' }
     const finished: Agent = { id: 'a2', description: 'Read the notes', type: 'general-purpose', status: 'completed' }

@@ -39,6 +39,8 @@ const NEEDS_OK = 'Claude needs your OK to continue'
 const HAS_QUESTION = 'Claude has a question for you'
 const WAITING = 'Claude is waiting for your reply'
 const ASKED = 'Claude asked you a question above'
+// Phases where a plan was left part way; its active step draws as Paused.
+const PAUSED = new Set(['needsYou', 'stopped', 'waiting', 'ended'])
 // An agent in one of these is still at work and will report back on its own.
 const AGENT_AT_WORK = new Set(['pending', 'running', 'waiting'])
 const SAID_NO = 'you said no to a step, so Claude paused'
@@ -211,9 +213,12 @@ export function registerCleanView(on: On) {
       isNextTurnCommand = false
       isNextTurnReport = false
       const list = await read($, checklist)
-      if (isReport && list.phase === 'waiting') {
-        // The work the checklist was waiting on came back: carry on with the same plan.
-        await edit($, current => ({ ...current, phase: 'working', finishedAt: null, waitingOn: undefined }))
+      // A plan left part way (Esc, a pause, a question, background work) carries on:
+      // a typed prompt is usually a re-steer, and a report is the work coming back.
+      const isPaused = PAUSED.has(list.phase) && hasPlan(list)
+      const resumes = isReport ? list.phase === 'waiting' : !isCommand && e.text.trim() !== '' && isPaused
+      if (resumes) {
+        await edit($, current => ({ ...current, phase: 'working', finishedAt: null, needsYouReason: null, waitingOn: undefined }))
         startTicker($)
       } else if (!isCommand && e.text.trim() !== '') {
         await startJob($, e.text)
@@ -393,7 +398,7 @@ export function registerCleanView(on: On) {
           {header}
           {button}
         </Box>
-        {list.tasks.map((one, i) => row(one, i === firstUpcoming, list.phase === 'needsYou' || list.phase === 'ended', frame, nameWidth, Text))}
+        {list.tasks.map((one, i) => row(one, i === firstUpcoming, PAUSED.has(list.phase), frame, nameWidth, Text))}
       </Box>
     )
   })
