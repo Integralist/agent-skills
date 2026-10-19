@@ -380,9 +380,10 @@ export function registerCleanView(on: On) {
     const took = duration(now - list.startedAt)
     const header = headerOf(list, took, Text)
 
+    // A blank line above the band keeps it clear of the spinner line.
     if ((list.phase === 'done' || list.phase === 'ended') && list.isCollapsed) {
       return (
-        <Box flexDirection="row" justifyContent="space-between">
+        <Box key="clean-view-band" marginTop={1} flexDirection="row" justifyContent="space-between">
           {header}
           {button}
         </Box>
@@ -393,7 +394,7 @@ export function registerCleanView(on: On) {
     const nameWidth = Math.max(8, e.props.bodyColumns - (2 + 1 + METER_CELLS + 2 + 7))
     const firstUpcoming = list.tasks.findIndex(one => one.status === 'upcoming')
     return (
-      <Box flexDirection="column">
+      <Box key="clean-view-band" marginTop={1} flexDirection="column">
         <Box flexDirection="row" justifyContent="space-between">
           {header}
           {button}

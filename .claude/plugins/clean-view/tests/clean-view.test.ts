@@ -151,6 +151,24 @@ describe('checklist', () => {
     })
   }
 
+  test('the band keeps a blank line above it, away from the spinner, open or collapsed', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Build the page'] })
+    for (const surface of SURFACES) {
+      const ui = await $.ui.mount({ ...BAND(), surface })
+      expect((await ui.find({ key: 'clean-view-band' }))?.props.marginTop).toBe(1)
+      await ui.unmount()
+    }
+    await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
+    await $.turn.complete({ answer: 'Done.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+    await w.clock.advance(5000)
+    const ui = await $.ui.mount({ ...BAND(), surface: 'terminal' })
+    expect((await ui.find({ key: 'clean-view-band' }))?.props.marginTop).toBe(1)
+    await ui.unmount()
+  })
+
   test('finishing shows All done, then one line after 5 seconds', async ($, on) => {
     const w = world(on)
     await start($)
