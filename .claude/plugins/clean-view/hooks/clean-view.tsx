@@ -395,7 +395,7 @@ export function registerCleanView(on: On) {
     const firstUpcoming = list.tasks.findIndex(one => one.status === 'upcoming')
     return (
       <Box key="clean-view-band" marginTop={1} flexDirection="column">
-        <Box flexDirection="row" justifyContent="space-between">
+        <Box key="clean-view-header" flexDirection="row" justifyContent="space-between" marginBottom={1}>
           {header}
           {button}
         </Box>

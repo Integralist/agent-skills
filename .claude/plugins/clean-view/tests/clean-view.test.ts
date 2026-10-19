@@ -169,6 +169,18 @@ describe('checklist', () => {
     await ui.unmount()
   })
 
+  test('the open band keeps a blank line between its title row and the task list', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Build the page'] })
+    for (const surface of SURFACES) {
+      const ui = await $.ui.mount({ ...BAND(), surface })
+      expect((await ui.find({ key: 'clean-view-header' }))?.props.marginBottom).toBe(1)
+      await ui.unmount()
+    }
+  })
+
   test('finishing shows All done, then one line after 5 seconds', async ($, on) => {
     const w = world(on)
     await start($)
