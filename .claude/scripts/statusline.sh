@@ -32,19 +32,16 @@ if [[ "${output_style}" != "default" && -n "${output_style}" && "${output_style}
     style_label="${output_style}"
 fi
 
-if [[ -n "${effort_level}" && -n "${style_label}" ]]; then
-    model_suffix="${effort_level} · ${style_label}"
-elif [[ -n "${effort_level}" ]]; then
-    model_suffix="${effort_level}"
-else
-    model_suffix="${style_label}"
+# Auto Model tier, written by the auto-model mod (.claude/plugins/auto-model);
+# empty when Auto Model is off or hasn't routed this session yet.
+session_id=$(echo "${input}" | jq -r '.session_id // empty')
+tier=""
+if [[ "${session_id}" =~ ^[A-Za-z0-9_-]+$ ]]; then
+    tier=$(cat "${TMPDIR:-/tmp}/claude-auto-model/${session_id}" 2>/dev/null)
 fi
 
-if [[ -n "${model_suffix}" ]]; then
-    model_display="${model_name} (${model_suffix})"
-else
-    model_display="${model_name}"
-fi
+# e.g. "Opus 5.5 medium · explanatory (complex)"
+model_display="${model_name}${effort_level:+ ${effort_level}}${style_label:+ · ${style_label}}${tier:+ (${tier})}"
 
 # Get current directory basename
 dir_name=$(basename "$current_dir")

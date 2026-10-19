@@ -11,6 +11,10 @@ at `xhigh`.
   seconds). Those tiers map to the `haiku`, `sonnet`, `opus` and `fable`
   lines that the `/config` model row offers. A 10-second toast names the new
   model.
+- **Status line:** the tier of the model in use is written to
+  `$TMPDIR/claude-auto-model/<session-id>`, and `.claude/scripts/statusline.sh`
+  shows it as `Opus 5.5 medium (complex)`. The OS clears the temp folder, so
+  files from ended sessions don't pile up.
 - **Skills:** running a skill by slash command uses the tier its `SKILL.md`
   declares, read from the project's `.claude/skills/` first, then
   `~/.claude/skills/`:

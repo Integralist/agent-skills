@@ -18,6 +18,7 @@ import {
   requestText,
   skillPaths,
   tierFromFrontmatter,
+  tierPath,
 } from './logic'
 
 const COMMAND = 'automodel'
@@ -102,17 +103,32 @@ async function commandLevel($: $, command: string, smallest: string): Promise<Au
 }
 
 /**
+ * Writes the tier of the model in use for the status line; '' clears it. A
+ * failed write only loses the label, so it never stops a switch or turn-off.
+ */
+async function recordTier($: $, tier: AutoModelLevel | '') {
+  try {
+    const path = tierPath(await $.env.get('TMPDIR'), await $.session.id())
+    if (path !== undefined) await $.fs.write(path, tier)
+  } catch (err) {
+    $.ui.log(`auto-model: could not record the tier: ${String(err)}`, { to: 'debug' })
+  }
+}
+
+/**
  * Switches to the best line for `level` the plan accepts; quiet when already
- * there. With `stepUpOnly` it never moves to a smaller line.
+ * there. With `stepUpOnly` it never moves to a smaller line, and the tier on
+ * the status line stays the bigger model's.
  */
 async function switchTo($: $, level: AutoModelLevel, current: string, lines: readonly string[], stepUpOnly = false) {
   for (const line of candidatesFor(level, lines)) {
-    if (lineOf(current) === line) return
+    if (lineOf(current) === line) return recordTier($, level)
     if (stepUpOnly && rankOf(line) <= rankOf(current)) return
     const set = await $.config.set({ key: 'model', value: line })
     if (set.deny !== undefined) continue
     const model = await $.session.model()
     await update($, pendingModel, () => model)
+    await recordTier($, level)
     $.ui.toast(`Auto Model: ${displayName(model)} (${level})`, { timeoutMs: TOAST_MS })
     return
   }
@@ -133,6 +149,7 @@ async function turnOff($: $, restore: boolean): Promise<string> {
   await $.store.set(STORE_ON, false)
   await update($, isOn, () => false)
   await update($, pendingModel, () => null)
+  await recordTier($, '')
   const previous = await $.store.get(STORE_PREVIOUS)
   await $.store.delete(STORE_PREVIOUS)
   if (!restore || typeof previous !== 'string') return 'Auto Model is off.'

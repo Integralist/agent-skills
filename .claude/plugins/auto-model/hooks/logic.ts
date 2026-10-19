@@ -135,3 +135,12 @@ export function skillPaths(name: string, cwd: string, home: string | undefined):
   const file = `.claude/skills/${name}/SKILL.md`
   return home === undefined ? [`${cwd}/${file}`] : [`${cwd}/${file}`, `${home}/${file}`]
 }
+
+/**
+ * Where the status line reads this session's tier. The temp folder, so the OS
+ * clears files from ended sessions; none for a non-plain session id.
+ */
+export function tierPath(tmpdir: string | undefined, sessionId: string): string | undefined {
+  if (tmpdir === undefined || !/^[A-Za-z0-9_-]+$/.test(sessionId)) return undefined
+  return `${tmpdir.replace(/\/+$/, '')}/claude-auto-model/${sessionId}`
+}

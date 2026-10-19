@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { CommandInfo, ConfigRow, On } from 'claude-code'
 
-import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, parseLevel, requestText, skillPaths, tierFromFrontmatter } from '../hooks/logic'
+import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
 
 const OPTIONS = ['default', 'sonnet', 'opus', 'haiku', 'fable', 'best', 'opusplan']
 const IDS: Record<string, string> = {
@@ -25,6 +25,9 @@ const FIRST_PROMPT = [
   '',
   'it would be nice to not have to manually say that all the time? maybe there is a subcommand in the hunk skill already to do that sort of thing, if not can you suggest something we could add',
 ].join('\n')
+const TMPDIR = '/var/tmp-me/'
+const SESSION = 'session-1'
+const TIER_FILE = '/var/tmp-me/claude-auto-model/session-1'
 const TRIVIAL_SKILL = '---\nname: commit\ndescription: >-\n  Create git commits.\nmetadata:\n  model-tier: trivial\n---\n# Commit\n'
 const COMPLEX_SKILL = '---\nname: commit\nmetadata:\n  model-tier: complex\n---\n'
 const COMMANDS: CommandInfo[] = [
@@ -95,6 +98,13 @@ describe('logic', () => {
     expect(skillPaths('commit:commit', '/repo', '/home/me')).toEqual([])
   })
 
+  test('keeps the tier file in the temp folder, by a plain session id only', () => {
+    expect(tierPath('/var/tmp-me/', 'abc-123')).toBe('/var/tmp-me/claude-auto-model/abc-123')
+    expect(tierPath('/tmp', 'abc-123')).toBe('/tmp/claude-auto-model/abc-123')
+    expect(tierPath(undefined, 'abc-123')).toBeUndefined()
+    expect(tierPath('/tmp', '../escape')).toBeUndefined()
+  })
+
   test('never sends max effort', () => {
     expect(clampEffort('max')).toBe('xhigh')
     expect(clampEffort('high')).toBe('high')
@@ -113,13 +123,14 @@ type World = {
   prompts: string[]
   logs: string[]
   files: Record<string, string>
+  written: Record<string, string>
   clock: MockClock
 }
 
 /** The engine beneath the mod: the model row, the session model, a classifier, skill files. */
 function world(on: On, start: string, level = 'complex', refuse: string[] = []): World {
   const clock = mock.clock(on, { now: Date.UTC(2026, 9, 19) })
-  const w: World = { model: start, sets: [], toasts: [], level, refuse, asked: 0, prompts: [], logs: [], files: {}, clock }
+  const w: World = { model: start, sets: [], toasts: [], level, refuse, asked: 0, prompts: [], logs: [], files: {}, written: {}, clock }
   mock.store(on)
   on('config.list', () => {
     const row: ConfigRow = {
@@ -142,7 +153,12 @@ function world(on: On, start: string, level = 'complex', refuse: string[] = []):
   on('session.model', () => ({ value: IDS[w.model] ?? w.model }))
   on('command.list', () => ({ value: COMMANDS }))
   on('session.cwd', () => ({ value: '/tmp' }))
-  on('env.get', ($, e) => ({ value: e.name === 'HOME' ? HOME : undefined }))
+  on('env.get', ($, e) => ({ value: e.name === 'HOME' ? HOME : e.name === 'TMPDIR' ? TMPDIR : undefined }))
+  on('session.id', () => ({ value: SESSION }))
+  on('fs.write', ($, e) => {
+    w.written[e.path] = e.text
+    return { value: undefined }
+  })
   on('fs.read', ($, e) => {
     const text = w.files[e.path]
     if (text === undefined) throw new Error(`ENOENT: ${e.path}`)
@@ -339,6 +355,29 @@ describe('switching', () => {
     await w.clock.advance(61 * MINUTE)
     await type($, 'Summarize the notes from this meeting into three bullets')
     expect(w.sets).toEqual(['haiku'])
+  })
+
+  test('records the tier of the model in use for the status line', async ($, on) => {
+    const w = world(on, 'haiku', 'complex')
+    await start($)
+    await automodel($, 'on')
+    await type($, 'Plan the rollout for the new token service')
+    expect(w.written[TIER_FILE]).toBe('complex')
+    await finishTurn($)
+    w.level = 'trivial'
+    await type($, 'Summarize the notes from this meeting into three bullets')
+    expect(w.written[TIER_FILE]).toBe('complex')
+    await automodel($, 'off')
+    expect(w.written[TIER_FILE]).toBe('')
+  })
+
+  test('records the tier when the model already fits', async ($, on) => {
+    const w = world(on, 'opus', 'complex')
+    await start($)
+    await automodel($, 'on')
+    await type($, 'Plan the rollout for the new token service')
+    expect(w.sets).toEqual([])
+    expect(w.written[TIER_FILE]).toBe('complex')
   })
 
   test('picking a model by hand turns it off', async ($, on) => {
