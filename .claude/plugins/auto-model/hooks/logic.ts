@@ -12,7 +12,7 @@ export const CLASSIFIER_SYSTEM = [
   'Words that only name a command, file or tool are not the task: "update the skill\'s review subcommand" is moderate.',
   'trivial: quick, mechanical jobs and short writing. Commit, branch, summarize, sort, extract, rename, translate, reformat, a short factual answer, a repo-state check (is a commit, branch or slice merged, what changed, who touched a file), an email, a post, a PR body, a ticket, a small edit.',
   'moderate: the default for hands-on work. Building or changing software, debugging, fixing tests, audits of code quality or behaviour, long documents, anything touching several files.',
-  'complex: project planning and big-picture thinking. Specs, plans, research, architecture, design decisions, code or security review.',
+  'complex: project planning and big-picture thinking. Specs, plans, slices, task lists, research, architecture, design decisions, code or security review (including updating a spec, plan, slice, or task list to cover how a feature will be implemented or tested).',
   'frontier: only the very hardest thinking. Redesigning a whole codebase or system, planning a very large migration, deep research that runs for hours.',
   'When unsure between moderate and complex, say moderate.',
 ].join('\n')
@@ -26,8 +26,15 @@ export function parseLevel(text: string): AutoModelLevel | undefined {
 const ACKS = new Set([
   'yes', 'y', 'yep', 'yeah', 'ok', 'okay', 'k', 'sure', 'no', 'nope', 'thanks',
   'thank you', 'go', 'go ahead', 'go on', 'continue', 'keep going', 'do it',
-  'proceed', 'lgtm', 'sounds good', 'looks good', 'carry on', 'ship it',
+  'proceed', 'proceed with edits', 'proceed with the edits',
+  'proceed with updates', 'proceed with the updates',
+  'proceed with changes', 'proceed with the changes',
+  'apply', 'implement', 'approve', 'approved',
+  'lgtm', 'sounds good', 'looks good', 'carry on', 'ship it',
   'yes please', 'please do', 'next',
+  'show a diff', 'show the diff', 'show full diff', 'show the full diff',
+  'show a full diff', 'show proposed diff', 'show the proposed diff',
+  'show a proposed diff',
 ])
 
 /** A slash command (`/compact`, `/commit args`), not a leading file path (`/var/folders/...`). */
@@ -58,18 +65,18 @@ export function requestText(text: string): string {
 }
 
 const FRONTIER = /\b(migrat\w*|deep research|for hours|entire (codebase|repo\w*|system)|whole (codebase|repo\w*)|large[- ]scale|re-?architect\w*|ground[- ]up|from scratch)\b/i
-const COMPLEX = /\b(research|analy[sz]\w*|plan\w*|design\w*|architect\w*|review\w*|spec|strateg\w*|roadmap|trade-?offs?)\b/i
 // A repo-state lookup ("has it been merged", "which branch"): checked before
-// MODERATE, whose `pr`, `repo` and `files` would otherwise claim it.
+// COMPLEX and MODERATE, whose `slice`, `pr`, `repo` and `files` would otherwise claim it.
 const REPO_STATE = /\b(?:(?:has|have|had|is|was|were|been)\b[^.?!]*\bmerged|which branch|what changed)\b/i
+const COMPLEX = /\b(research|analy[sz]\w*|plan\w*|slices?|task[- ]lists?|design\w*|architect\w*|review\w*|spec|strateg\w*|roadmap|trade-?offs?)\b/i
 const MODERATE = /\b(build|update\w*|skills?|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|doc(ument)?s?)\b/i
 const TRIVIAL = /\b(summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was)|email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
 
 /** The word-based guess used when the quick check fails; moderate when in doubt. */
 export function guessLevel(text: string): AutoModelLevel {
   if (FRONTIER.test(text)) return 'frontier'
-  if (COMPLEX.test(text)) return 'complex'
   if (REPO_STATE.test(text)) return 'trivial'
+  if (COMPLEX.test(text)) return 'complex'
   if (MODERATE.test(text)) return 'moderate'
   if (TRIVIAL.test(text)) return 'trivial'
   return 'moderate'

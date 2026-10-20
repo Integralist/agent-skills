@@ -51,6 +51,8 @@ describe('logic', () => {
     expect(isShortReply('ok!')).toBe(true)
     expect(isShortReply('keep going')).toBe(true)
     expect(isShortReply('Do it.')).toBe(true)
+    expect(isShortReply('Proceed with the updates.')).toBe(true)
+    expect(isShortReply('show the proposed diff')).toBe(true)
     expect(isShortReply('Refactor the auth module to use the new token client')).toBe(false)
   })
 
@@ -60,6 +62,7 @@ describe('logic', () => {
     expect(guessLevel('Implement retries in the HTTP client and add tests')).toBe('moderate')
     expect(guessLevel('Update the hunk skill, that sort of thing')).toBe('moderate')
     expect(guessLevel('Plan the rollout for the new token service')).toBe('complex')
+    expect(guessLevel('Update Slice 3 and the task list to cover how local tracing will be tested')).toBe('complex')
     expect(guessLevel('Migrate the entire codebase from Python 2 to Python 3')).toBe('frontier')
     expect(guessLevel('Thoughts on the weather tomorrow afternoon')).toBe('moderate')
   })

@@ -31,17 +31,15 @@ const COMMAND = 'simple'
 const STORE_KEY = 'cleanViewEnabled'
 const PLAN_TOOL = `mcp__${PLUGIN}__plan_steps`
 const PROGRESS_TOOL = `mcp__${PLUGIN}__report_progress`
-const FRAME_MS = 250
+const FRAME_MS = 100
 const COLLAPSE_MS = 5000
 const FAILURES_TO_STUCK = 3
-// Tool calls the checklist may sit unchanged through before the next one is sent back.
-const QUIET_CALLS = 8
 const PLACEHOLDER_TITLE = 'Your request'
 const DETAILS_PANE = 'clean-view-details'
 // Cells the `[ Details ]` button takes at the end of each task row.
 const DETAILS_BUTTON_CELLS = 11
 const ALWAYS_ALLOWED = new Set(['ToolSearch', 'TodoWrite', 'TaskCreate', 'TaskUpdate', 'AskUserQuestion', PLAN_TOOL, PROGRESS_TOOL])
-// Tools that change the checklist, so a call to one restarts the quiet-call count.
+// Tools that update the checklist directly.
 const PLAN_UPDATERS = new Set([PLAN_TOOL, PROGRESS_TOOL, 'TodoWrite', 'TaskCreate', 'TaskUpdate'])
 
 const NEEDS_OK = 'Claude needs your OK to continue'
@@ -68,8 +66,8 @@ const SECTION = `# Clean View checklist
 The person sees a plain checklist of your plan instead of your tool calls.
 
 - For every request, even a quick question, call \`${PLAN_TOOL}\` first with every step of the job, 1 to 8 short names in order. Only include steps that perform actual work; never add a filler final step like "Prepare next action" or "Summarize findings". Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
-- Call \`${PROGRESS_TOOL}\` after each item of a step (each file read, check run or section written), and at least every 3 tool calls, so the person never watches a percent sit still. Pass 100 the moment a step finishes.
-- Batch \`${PLAN_TOOL}\` and \`${PROGRESS_TOOL}\` in the same response as your next tool call instead of spending a separate turn on them alone. Only pass 100 after you have read a step's tool output and confirmed the step is done; when the final step is ready to answer, reply directly and Clean View completes it automatically.
+- Never spend a turn calling \`${PROGRESS_TOOL}\` or \`${PLAN_TOOL}\` alone. Always call them in the same response as your next real tool call.
+- Call \`${PROGRESS_TOOL}\` with 100 when a step finishes (bundled with the first tool call of the next step), or alongside a tool call when a step has taken several tool calls. Only pass 100 after you have read a step's tool output and confirmed the step is done; when the final step is ready to answer, reply directly and Clean View completes it automatically.
 - Keep internal reasoning before tool calls brief (1 to 2 sentences) so the checklist never sits idle on a long thinking pause.
 - If the job grows past your plan (extra checks, cleanup, undoing changes, a new kind of work), call \`${PLAN_TOOL}\` again with the full updated list before you do it. Keep finished step names the same so they stay checked off.
 - Write every step name in plain English a non-technical person understands, under 40 characters, starting with a verb, like "Build the pricing section".
@@ -79,7 +77,7 @@ type $ = EngineInterface
 
 let ticker: Timer | undefined
 let failures = 0
-let quietCalls = 0
+let enforcedForRun = true
 let isNextTurnCommand = false
 // The next turn is a background agent reporting back, not a new request.
 let isNextTurnReport = false
@@ -303,11 +301,11 @@ export function registerCleanView(on: On) {
   on('turn.start', async ($, e, next) => {
     if (e.agentId === undefined) {
       mainTurnId = e.turnId
+      enforcedForRun = await isOn($)
       const isCommand = isNextTurnCommand
       const isReport = isNextTurnReport
       isNextTurnCommand = false
       isNextTurnReport = false
-      quietCalls = 0
       const list = await read($, checklist)
       // A plan left part way (Esc, a pause, a question, background work) carries on:
       // a typed prompt is usually a re-steer, and a report is the work coming back.
@@ -345,7 +343,6 @@ export function registerCleanView(on: On) {
     if (e.agentId !== undefined) return next(e)
     const tool = String(e.tool)
     if (tool === PLAN_TOOL || tool === PROGRESS_TOOL) {
-      quietCalls = 0
       return queuePlanUpdate(async () => {
         await edit($, backToWork)
         return next(e)
@@ -354,18 +351,8 @@ export function registerCleanView(on: On) {
     await pendingPlanUpdate
     const list = await read($, checklist)
     const isEnabled = await isOn($)
-    if (isEnabled && isRunning(list) && !hasPlan(list) && !ALWAYS_ALLOWED.has(tool)) {
+    if (enforcedForRun && isEnabled && isRunning(list) && !hasPlan(list) && !ALWAYS_ALLOWED.has(tool)) {
       return { deny: `Clean View: call ${PLAN_TOOL} first to lay out the steps of this job (load it with ToolSearch if it is deferred), then try again.` }
-    }
-
-    // Work the checklist doesn't show: after QUIET_CALLS calls with no plan or progress update, send one back.
-    if (PLAN_UPDATERS.has(tool)) {
-      quietCalls = 0
-    } else if (isEnabled && isRunning(list) && hasPlan(list) && !ALWAYS_ALLOWED.has(tool) && ++quietCalls > QUIET_CALLS) {
-      quietCalls = 0
-      return {
-        deny: `Clean View: the checklist hasn't changed in ${QUIET_CALLS} tool calls. If the work has grown past these steps, call ${PLAN_TOOL} with the full updated list; otherwise call ${PROGRESS_TOOL} for the current step. Then try again.`,
-      }
     }
 
     await edit($, backToWork)

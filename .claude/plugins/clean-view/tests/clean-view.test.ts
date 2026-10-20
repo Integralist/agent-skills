@@ -180,7 +180,7 @@ describe('checklist', () => {
     await pane.unmount()
   })
 
-  test('the checklist prompt asks for a report after each item', async ($, on) => {
+  test('the checklist prompt forbids standalone progress turns and waits for tool output before reporting 100%', async ($, on) => {
     world(on)
     await start($)
     const composed = await $.prompt.compose({
@@ -192,8 +192,8 @@ describe('checklist', () => {
       traits: [],
     })
     const text = composed.sections.map(one => one.text).join('\n')
-    expect(text).toContain('after each item')
-    expect(text).toContain('at least every 3 tool calls')
+    expect(text).toContain('Never spend a turn calling `mcp__clean-view__report_progress` or `mcp__clean-view__plan_steps` alone')
+    expect(text).toContain("read a step's tool output and confirmed the step is done")
   })
 
   test('the details pane counts the files read in the active step', async ($, on) => {
@@ -602,31 +602,18 @@ describe('replanning', () => {
     expect(finalTexts).toMatch(/✓ Check the page\s+█{10}\s+Done/)
   })
 
-  test('denies one call after 8 tool calls with no plan or progress update, then starts counting again', async ($, on) => {
+  test('does not block tool calls after a plan exists and does not enforce the plan gate when toggled on mid-run', async ($, on) => {
     world(on)
     await start($)
     await prompt($, 'Build my landing page')
     await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section'] })
-    for (let i = 0; i < 8; i++) expect((await $.tool.call(ls)).deny).toBeUndefined()
-    const drift = await $.tool.call(ls)
-    expect(drift.deny).toContain('plan_steps')
-    expect(drift.deny).toContain('report_progress')
-    // The retry goes through, and a progress report restarts the count.
-    expect((await $.tool.call(ls)).deny).toBeUndefined()
-    await $.tool.call({ tool: PROGRESS, task: 'Read your brand notes', percent: 50 })
-    for (let i = 0; i < 8; i++) expect((await $.tool.call(ls)).deny).toBeUndefined()
-    expect((await $.tool.call(ls)).deny).toContain('plan_steps')
-  })
+    for (let i = 0; i < 20; i++) expect((await $.tool.call(ls)).deny).toBeUndefined()
 
-  test('a to-do update resets the quiet-call count, and a subagent\'s calls are not counted', async ($, on) => {
-    world(on)
-    await start($)
-    await prompt($, 'Build my landing page')
-    await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section'] })
-    for (let i = 0; i < 20; i++) expect((await $.tool.call({ ...ls, agentId: 'agent-1' })).deny).toBeUndefined()
-    for (let i = 0; i < 8; i++) await $.tool.call(ls)
-    await $.tool.call({ tool: 'TaskUpdate', taskId: '1', status: 'in_progress' })
-    for (let i = 0; i < 8; i++) expect((await $.tool.call(ls)).deny).toBeUndefined()
+    // Starting a turn while Clean View is off does not enforce the plan gate if toggled on mid-turn
+    await simple($, 'off')
+    await $.turn.start({ text: 'Second task started while off', turnId: 'turn-2' })
+    await simple($, 'on')
+    expect((await $.tool.call(ls)).deny).toBeUndefined()
   })
 })
 
