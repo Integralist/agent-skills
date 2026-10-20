@@ -64,6 +64,13 @@ describe('logic', () => {
     expect(guessLevel('Thoughts on the weather tomorrow afternoon')).toBe('moderate')
   })
 
+  test('reads a repo-state check as trivial, not as hands-on work', () => {
+    expect(guessLevel('can you check projects/x/ and see if slice 3.1 has been merged into main')).toBe('trivial')
+    expect(guessLevel('Is the PR merged yet?')).toBe('trivial')
+    expect(guessLevel('Which branch has that commit?')).toBe('trivial')
+    expect(guessLevel('Fix the merge conflict in the build script')).toBe('moderate')
+  })
+
   test('keeps only what the user wrote, not quoted text or code', () => {
     expect(requestText('Fix the `review` step\n```\nreview the plan\n```\nthanks')).toBe('Fix the step thanks')
     expect(requestText('Tidy this\n````md\n```bash\nplan\n```\n````\n')).toBe('Tidy this')
