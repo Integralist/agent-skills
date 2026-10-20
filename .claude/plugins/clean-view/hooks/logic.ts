@@ -49,8 +49,16 @@ export function hasPlan(list: CleanViewChecklist): boolean {
   return list.tasks.length > 0 && list.tasks.every(task => !task.id.startsWith(PLACEHOLDER_PREFIX))
 }
 
-function task(id: string, name: string, status: CleanViewTask['status']): CleanViewTask {
-  return { id, name, status, percent: status === 'done' ? 100 : 0, hasReported: false }
+function task(id: string, name: string, status: CleanViewTask['status'], at?: number): CleanViewTask {
+  return {
+    id,
+    name,
+    status,
+    percent: status === 'done' ? 100 : 0,
+    hasReported: false,
+    ...(status !== 'upcoming' && at !== undefined ? { startedAt: at } : {}),
+    ...(status === 'done' && at !== undefined ? { finishedAt: at } : {}),
+  }
 }
 
 export function newJob(startedAt: number, title: string): CleanViewChecklist {
@@ -60,19 +68,32 @@ export function newJob(startedAt: number, title: string): CleanViewChecklist {
     phase: 'working',
     startedAt,
     activity: { summary: 'Thinking...', at: startedAt, inProgress: true },
-    tasks: [task(`${PLACEHOLDER_PREFIX}thinking`, 'Thinking...', 'active')],
+    tasks: [task(`${PLACEHOLDER_PREFIX}thinking`, 'Thinking...', 'active', startedAt)],
   }
 }
 
 /** Lays out the plan: steps already done stay done, and the first unfinished one starts now. */
-export function planSteps(list: CleanViewChecklist, steps: readonly string[]): CleanViewChecklist {
-  const done = new Set(list.tasks.filter(one => one.status === 'done').map(one => one.name.toLowerCase()))
+export function planSteps(list: CleanViewChecklist, steps: readonly string[], at = list.startedAt): CleanViewChecklist {
+  const kept = new Map(list.tasks.map(one => [one.name.toLowerCase(), one]))
   const names = steps.map(cleanName).slice(0, 8)
-  let tasks = (names.length > 0 ? names : [FALLBACK_NAME]).map((name, i) =>
-    task(`step-${i}-${name}`, name, done.has(name.toLowerCase()) ? 'done' : 'upcoming'),
-  )
+  let tasks = (names.length > 0 ? names : [FALLBACK_NAME]).map((name, i): CleanViewTask => {
+    const before = kept.get(name.toLowerCase())
+    if (before?.status === 'done') {
+      return {
+        ...task(`step-${i}-${name}`, name, 'done', at),
+        startedAt: before.startedAt ?? at,
+        finishedAt: before.finishedAt ?? at,
+      }
+    }
+    return {
+      ...task(`step-${i}-${name}`, name, 'upcoming'),
+      ...(before?.startedAt !== undefined ? { startedAt: before.startedAt } : {}),
+    }
+  })
   const first = tasks.findIndex(one => one.status !== 'done')
-  if (first !== -1) tasks = tasks.map((one, i) => (i === first ? { ...one, status: 'active' } : one))
+  if (first !== -1) {
+    tasks = tasks.map((one, i) => (i === first ? { ...one, status: 'active', startedAt: one.startedAt ?? at } : one))
+  }
   return { ...list, tasks }
 }
 
@@ -81,16 +102,33 @@ function same(a: string, b: string): boolean {
 }
 
 /** Every step from `index` on: the one at `index` active, the rest upcoming unless done. */
-function activate(tasks: CleanViewTask[], index: number, percent: number, hasReported: boolean): CleanViewTask[] {
+function activate(tasks: CleanViewTask[], index: number, percent: number, hasReported: boolean, at: number): CleanViewTask[] {
   return tasks.map((one, i) => {
-    if (i < index) return { ...one, status: 'done', percent: 100 }
-    if (i === index) return { ...one, status: 'active', percent, hasReported }
-    return one.status === 'active' ? { ...one, status: 'upcoming' } : one
+    if (i < index) {
+      return {
+        ...one,
+        status: 'done',
+        percent: 100,
+        startedAt: one.startedAt ?? at,
+        finishedAt: one.finishedAt ?? at,
+      }
+    }
+    if (i === index) {
+      return {
+        ...one,
+        status: 'active',
+        percent,
+        hasReported,
+        startedAt: one.startedAt ?? at,
+        finishedAt: undefined,
+      }
+    }
+    return one.status === 'active' ? { ...one, status: 'upcoming', finishedAt: undefined } : one
   })
 }
 
 /** Moves the plan forward for a report on `name`: earlier steps check off, 100 starts the next. */
-export function reportProgress(list: CleanViewChecklist, name: string, percent: number): CleanViewChecklist {
+export function reportProgress(list: CleanViewChecklist, name: string, percent: number, at = list.startedAt): CleanViewChecklist {
   const clean = cleanName(name)
   const p = clampPercent(percent)
   let tasks = list.tasks.filter(one => !one.id.startsWith(PLACEHOLDER_PREFIX))
@@ -100,11 +138,15 @@ export function reportProgress(list: CleanViewChecklist, name: string, percent: 
     index = active === -1 ? tasks.length : active
     tasks = [...tasks.slice(0, index), task(`step-x${tasks.length}-${clean}`, clean, 'upcoming'), ...tasks.slice(index)]
   }
-  tasks = activate(tasks, index, p, true)
+  tasks = activate(tasks, index, p, true, at)
   if (p >= 100) {
-    tasks = tasks.map((one, i) => (i === index ? { ...one, status: 'done', percent: 100 } : one))
+    tasks = tasks.map((one, i) =>
+      i === index
+        ? { ...one, status: 'done', percent: 100, startedAt: one.startedAt ?? at, finishedAt: one.finishedAt ?? at }
+        : one,
+    )
     const next = tasks.findIndex((one, i) => i > index && one.status !== 'done')
-    if (next !== -1) tasks = activate(tasks, next, 0, false)
+    if (next !== -1) tasks = activate(tasks, next, 0, false, at)
   }
   return { ...list, tasks }
 }
@@ -112,29 +154,44 @@ export function reportProgress(list: CleanViewChecklist, name: string, percent: 
 type TodoItem = { content: string; status: 'pending' | 'in_progress' | 'completed'; activeForm?: string }
 
 /** A to-do list as the plan: completed rows done, the in-progress one active. */
-export function fromTodos(list: CleanViewChecklist, todos: readonly TodoItem[]): CleanViewChecklist {
+export function fromTodos(list: CleanViewChecklist, todos: readonly TodoItem[], at = list.startedAt): CleanViewChecklist {
   const kept = new Map(list.tasks.map(one => [one.name.toLowerCase(), one]))
   let tasks = todos.map((todo, i): CleanViewTask => {
     const name = cleanName(todo.content)
     const before = kept.get(name.toLowerCase())
-    if (todo.status === 'completed') return { ...task(`todo-${i}-${name}`, name, 'done') }
+    if (todo.status === 'completed') {
+      return {
+        ...task(`todo-${i}-${name}`, name, 'done', at),
+        startedAt: before?.startedAt ?? at,
+        finishedAt: before?.finishedAt ?? at,
+      }
+    }
     if (todo.status === 'in_progress') {
-      return { id: `todo-${i}-${name}`, name, status: 'active', percent: before?.percent ?? 0, hasReported: before?.hasReported ?? false }
+      return {
+        id: `todo-${i}-${name}`,
+        name,
+        status: 'active',
+        percent: before?.percent ?? 0,
+        hasReported: before?.hasReported ?? false,
+        startedAt: before?.startedAt ?? at,
+      }
     }
     return task(`todo-${i}-${name}`, name, 'upcoming')
   })
   if (!tasks.some(one => one.status === 'active')) {
     const first = tasks.findIndex(one => one.status === 'upcoming')
-    if (first !== -1) tasks = tasks.map((one, i) => (i === first ? { ...one, status: 'active' } : one))
+    if (first !== -1) {
+      tasks = tasks.map((one, i) => (i === first ? { ...one, status: 'active', startedAt: one.startedAt ?? at } : one))
+    }
   }
   return { ...list, tasks }
 }
 
 /** A task the TaskCreate tool made, added as an upcoming row (or the active one if none is). */
-export function addTask(list: CleanViewChecklist, id: string, subject: string): CleanViewChecklist {
+export function addTask(list: CleanViewChecklist, id: string, subject: string, at = list.startedAt): CleanViewChecklist {
   const tasks = list.tasks.filter(one => !one.id.startsWith(PLACEHOLDER_PREFIX))
   const status = tasks.some(one => one.status === 'active') ? 'upcoming' : 'active'
-  return { ...list, tasks: [...tasks, task(`task-${id}`, cleanName(subject), status)] }
+  return { ...list, tasks: [...tasks, task(`task-${id}`, cleanName(subject), status, at)] }
 }
 
 /** A TaskUpdate: its new status and subject on the matching row. */
@@ -143,6 +200,7 @@ export function updateTask(
   id: string,
   status: 'pending' | 'in_progress' | 'completed' | 'deleted' | undefined,
   subject: string | undefined,
+  at = list.startedAt,
 ): CleanViewChecklist {
   const key = `task-${id}`
   const index = list.tasks.findIndex(one => one.id === key)
@@ -151,16 +209,28 @@ export function updateTask(
   let tasks = list.tasks.map(one => (one.id === key && subject !== undefined ? { ...one, name: cleanName(subject) } : one))
   if (status === 'in_progress') {
     tasks = tasks.map((one, i) =>
-      i === index ? { ...one, status: 'active' } : one.status === 'active' ? { ...one, status: 'upcoming' } : one,
+      i === index
+        ? { ...one, status: 'active', startedAt: one.startedAt ?? at, finishedAt: undefined }
+        : one.status === 'active'
+          ? { ...one, status: 'upcoming', finishedAt: undefined }
+          : one,
     )
   } else if (status === 'completed') {
-    tasks = tasks.map((one, i) => (i === index ? { ...one, status: 'done', percent: 100 } : one))
+    tasks = tasks.map((one, i) =>
+      i === index
+        ? { ...one, status: 'done', percent: 100, startedAt: one.startedAt ?? at, finishedAt: one.finishedAt ?? at }
+        : one,
+    )
     if (!tasks.some(one => one.status === 'active')) {
       const next = tasks.findIndex(one => one.status === 'upcoming')
-      if (next !== -1) tasks = tasks.map((one, i) => (i === next ? { ...one, status: 'active' } : one))
+      if (next !== -1) {
+        tasks = tasks.map((one, i) => (i === next ? { ...one, status: 'active', startedAt: one.startedAt ?? at } : one))
+      }
     }
   } else if (status === 'pending') {
-    tasks = tasks.map((one, i) => (i === index ? { ...one, status: 'upcoming', percent: 0 } : one))
+    tasks = tasks.map((one, i) =>
+      i === index ? { ...one, status: 'upcoming', percent: 0, startedAt: undefined, finishedAt: undefined } : one,
+    )
   }
   return { ...list, tasks }
 }
@@ -184,6 +254,11 @@ export function duration(ms: number): string {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
   return m > 0 ? `${m}m ${s}s` : `${s}s`
+}
+
+export function taskElapsed(one: CleanViewTask, now: number): string {
+  if (one.status === 'upcoming' || one.startedAt === undefined) return 'Not started yet'
+  return duration((one.finishedAt ?? now) - one.startedAt)
 }
 
 /** Ten cells: full, filled to the percent, a moving sweep, or empty. */

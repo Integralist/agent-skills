@@ -12,6 +12,8 @@ export type CleanViewTask = {
   status: CleanViewTaskStatus
   percent: number
   hasReported: boolean
+  startedAt?: number
+  finishedAt?: number
 }
 
 /** One item of a step's raw log: a thinking block, a tool call as the model wrote it, or a tool's result. */

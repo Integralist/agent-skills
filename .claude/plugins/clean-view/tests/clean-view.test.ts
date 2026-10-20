@@ -288,11 +288,23 @@ describe('checklist', () => {
 
     await w.clock.advance(5000)
     await pane.redraw()
+    expect(await text()).toMatch(/Elapsed\s+5s/)
     expect(await text()).toContain('Progress reported · 5s ago')
 
     await pane.press({ key: 'clean-view-details-next' })
     expect(await text()).toContain('Run the checks')
     expect(await text()).toContain('2/2')
+    expect(await text()).toMatch(/Elapsed\s+Not started yet/)
+
+    await $.tool.call({ tool: PROGRESS, task: 'Inspect the files', percent: 100 })
+    await w.clock.advance(3000)
+    await pane.redraw()
+    // Step 2 has been active for 3s (while total run is 8s)
+    expect(await text()).toMatch(/Elapsed\s+3s/)
+
+    // Step 1 is done and stays frozen at 5s
+    await pane.press({ key: 'clean-view-details-prev' })
+    expect(await text()).toMatch(/Elapsed\s+5s/)
 
     await pane.press({ key: 'clean-view-details-stop' })
     expect(w.aborted).toEqual(['turn-1'])

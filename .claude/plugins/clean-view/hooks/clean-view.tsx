@@ -22,6 +22,7 @@ import {
   newJob,
   planSteps,
   reportProgress,
+  taskElapsed,
   updateTask,
 } from './logic'
 
@@ -314,16 +315,24 @@ export function registerCleanView(on: On) {
       const resumes = isReport ? list.phase === 'waiting' : !isCommand && e.text.trim() !== '' && isPaused
       if (resumes) {
         const resumedAt = await $.clock.now()
-        await edit($, current => ({
-          ...current,
-          phase: 'working',
-          startedAt: current.finishedAt !== null ? current.startedAt + Math.max(0, resumedAt - current.finishedAt) : current.startedAt,
-          activity: { summary: 'Resumed the task list', at: resumedAt, inProgress: true },
-          finishedAt: null,
-          isCollapsed: false,
-          needsYouReason: null,
-          waitingOn: undefined,
-        }))
+        await edit($, current => {
+          const pauseMs = current.finishedAt !== null ? Math.max(0, resumedAt - current.finishedAt) : 0
+          return {
+            ...current,
+            phase: 'working',
+            startedAt: current.startedAt + pauseMs,
+            tasks: current.tasks.map(one =>
+              one.status === 'active' && one.startedAt !== undefined
+                ? { ...one, startedAt: one.startedAt + pauseMs }
+                : one,
+            ),
+            activity: { summary: 'Resumed the task list', at: resumedAt, inProgress: true },
+            finishedAt: null,
+            isCollapsed: false,
+            needsYouReason: null,
+            waitingOn: undefined,
+          }
+        })
         startTicker($)
       } else if (!isCommand && e.text.trim() !== '') {
         await startJob($, e.text)
@@ -370,13 +379,13 @@ export function registerCleanView(on: On) {
     if (e.tool === 'TodoWrite') {
       await queuePlanUpdate(async () => {
         const at = await $.clock.now()
-        await edit($, current => ({ ...fromTodos(current, e.todos), activity: { summary: 'Task list updated', at, inProgress: false } }))
+        await edit($, current => ({ ...fromTodos(current, e.todos, at), activity: { summary: 'Task list updated', at, inProgress: false } }))
       })
     }
     if (e.tool === 'TaskUpdate') {
       await queuePlanUpdate(async () => {
         const at = await $.clock.now()
-        await edit($, current => ({ ...updateTask(current, e.taskId, e.status, e.subject), activity: { summary: 'Task list updated', at, inProgress: false } }))
+        await edit($, current => ({ ...updateTask(current, e.taskId, e.status, e.subject, at), activity: { summary: 'Task list updated', at, inProgress: false } }))
       })
     }
     if (e.tool === 'AskUserQuestion') await edit($, needsYou(HAS_QUESTION))
@@ -401,7 +410,7 @@ export function registerCleanView(on: On) {
       const made = ran.result as { task?: { id?: string; subject?: string } } | undefined
       if (made?.task?.id !== undefined) {
         const at = await $.clock.now()
-        await edit($, current => ({ ...addTask(current, made.task!.id!, made.task!.subject ?? e.subject), activity: { summary: 'Task list updated', at, inProgress: false } }))
+        await edit($, current => ({ ...addTask(current, made.task!.id!, made.task!.subject ?? e.subject, at), activity: { summary: 'Task list updated', at, inProgress: false } }))
       }
     }
     if (ran.deny !== undefined) return ran
@@ -448,7 +457,7 @@ export function registerCleanView(on: On) {
     const names = Array.isArray(steps) ? steps.filter((s): s is string => typeof s === 'string') : []
     await ensureJob($)
     const at = await $.clock.now()
-    await edit($, list => ({ ...planSteps(list, names), activity: { summary: 'Plan updated', at, inProgress: false } }))
+    await edit($, list => ({ ...planSteps(list, names, at), activity: { summary: 'Plan updated', at, inProgress: false } }))
     await update($, selectedTaskId, () => null)
     const updated = await read($, checklist)
     const doneCount = updated.tasks.filter(one => one.status === 'done').length
@@ -466,7 +475,7 @@ export function registerCleanView(on: On) {
     const percent = typeof input.percent === 'number' ? input.percent : Number(input.percent)
     await ensureJob($)
     const at = await $.clock.now()
-    await edit($, list => ({ ...reportProgress(list, name, percent), activity: { summary: 'Progress reported', at, inProgress: false } }))
+    await edit($, list => ({ ...reportProgress(list, name, percent, at), activity: { summary: 'Progress reported', at, inProgress: false } }))
     return { result: `Progress noted: ${clampPercent(percent)}%.` }
   })
 
@@ -502,10 +511,17 @@ export function registerCleanView(on: On) {
           if (endsWithQuestion(e.answer)) return { ...list, phase: 'needsYou', needsYouReason: ASKED }
           if (atWork > 0) return { ...list, phase: 'waiting', needsYouReason: null, waitingOn: atWork }
           if (!list.tasks.some(one => one.status === 'upcoming')) {
+            const finishedAt = list.finishedAt ?? 0
             return {
               ...list,
               phase: 'done',
-              tasks: list.tasks.map(one => ({ ...one, status: 'done', percent: 100 })),
+              tasks: list.tasks.map(one => ({
+                ...one,
+                status: 'done',
+                percent: 100,
+                startedAt: one.startedAt ?? finishedAt,
+                finishedAt: one.finishedAt ?? finishedAt,
+              })),
               needsYouReason: null,
             }
           }
@@ -651,7 +667,7 @@ export function registerCleanView(on: On) {
           <Text dimColor>{'Progress'.padEnd(10)}</Text>
           <Text color={tone}>{meter(task, 0)}</Text>  {progress}
         </Text>
-        {field('Elapsed', duration(now - list.startedAt))}
+        {field('Elapsed', taskElapsed(task, list.finishedAt ?? now))}
         {field('Activity', activity)}
         <Text> </Text>
         <Text>
