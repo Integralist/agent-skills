@@ -85,6 +85,7 @@ function world(on: On): World {
   on('turn.complete', ($, e) => ({ text: e.answer }))
   on('classic.Notification', () => ({}))
   on('classic.UserPromptSubmit', () => ({}))
+  on('classic.PermissionDenied', () => ({}))
   on('tool.check', () => ({ decision: w.verdict }))
   on('tool.call', ($, e) => {
     w.ran.push(String(e.tool))
@@ -335,6 +336,17 @@ describe('checklist', () => {
     })
   }
 
+  test('a denied permission ask clears Needs you', async ($, on) => {
+    const w = world(on)
+    w.verdict = 'ask'
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
+    expect((await rows($, 'terminal')).join('\n')).toContain('Needs you')
+    await $.classic.PermissionDenied({ tool_name: 'Bash', tool_input: { command: 'make test' }, tool_use_id: 'toolu_1', reason: 'blocked by the classifier' })
+    expect((await rows($, 'terminal')).join('\n')).not.toContain('Needs you')
+  })
+
   test('the band keeps a blank line above it, away from the spinner, open or collapsed', async ($, on) => {
     const w = world(on)
     await start($)
@@ -459,6 +471,27 @@ describe('after the turn', () => {
       expect(texts).toMatch(/■ Stopped · Build my landing page · you pressed Esc/)
       expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
       expect(texts).not.toContain('Working')
+    })
+
+    test('a late end of the Esc-stopped turn does not stop the turn that took over', async ($, on) => {
+      world(on)
+      await start($)
+      await halfDone($, { answer: '', reason: 'aborted' })
+      await $.turn.start({ text: 'Use blue for the buttons instead', turnId: 'turn-2' })
+      await $.turn.complete({ answer: '', durationMs: 1000, isAborted: true, turnId: 'turn-1', reason: 'aborted' })
+      const texts = (await rows($, 'terminal')).join('\n')
+      expect(texts).not.toContain('Stopped')
+      expect(texts).toMatch(/▶ Check it/)
+    })
+
+    test('an end that arrives after the next turn started does not stop it', async ($, on) => {
+      world(on)
+      await start($)
+      await prompt($, 'Build my landing page')
+      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+      await $.turn.start({ text: 'Use blue for the buttons instead', turnId: 'turn-2' })
+      await $.turn.complete({ answer: '', durationMs: 1000, isAborted: true, turnId: 'turn-1', reason: 'aborted' })
+      expect((await rows($, 'terminal')).join('\n')).not.toContain('Stopped')
     })
 
     for (const end of [{ answer: '', reason: 'aborted' }, { answer: 'Built the page.', reason: 'answer' }, { answer: 'Which colour?', reason: 'answer' }] as const) {

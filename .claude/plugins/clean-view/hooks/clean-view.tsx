@@ -439,6 +439,12 @@ export function registerCleanView(on: On) {
     return next(e)
   }).catch(($, e, next) => next(e))
 
+  // An ask the classifier refused never reaches tool.call, so nothing else clears Needs you.
+  on('classic.PermissionDenied', async ($, e, next) => {
+    await edit($, backToWork)
+    return next(e)
+  }).catch(($, e, next) => next(e))
+
   on('tool.call', { tool: PLAN_TOOL }, async ($, e) => {
     const steps = (e as { steps?: unknown }).steps
     const names = Array.isArray(steps) ? steps.filter((s): s is string => typeof s === 'string') : []
@@ -480,6 +486,8 @@ export function registerCleanView(on: On) {
 
   on('turn.complete', async ($, e, next) => {
     if (e.agentId !== undefined) return next(e)
+    // An Esc-stopped turn can end after a queued prompt's turn started; it must not stop that one.
+    if (mainTurnId !== undefined && e.turnId !== mainTurnId) return next(e)
     if (e.reason === 'error') {
       await finish($, list => ({ ...list, phase: 'stuck', stuckReason: errorSentence(e.answer), needsYouReason: null }))
     } else if (e.reason === 'refusal') {
