@@ -39,11 +39,11 @@ at `xhigh`.
   replies such as "yes" or "keep going"), built-in slash commands, messages
   sent while Claude is working, and helper agents.
 - **Prompt cache:** a switch re-sends the whole conversation uncached. So for
-  an hour after a turn ends, while the cache is warm, a typed prompt only steps
-  up to a bigger model; a smaller tier keeps the current one, as it is likely
-  the same task. A skill you run by slash command starts a new task, so it
-  always uses its own tier: over a long job the cheaper model repays the
-  re-send.
+  an hour after a turn ends, while the cache is warm, a typed prompt or a skill
+  run by slash command only steps up to a bigger model; a smaller tier keeps
+  the current one, as it is likely the same task and the cheaper model would be
+  handed the whole context. Once the cache has gone cold, a switch costs
+  nothing extra and either goes by its tier.
 - **Fallbacks:** if the quick check fails, a keyword guess is used, with
   `moderate` when in doubt. If the plan refuses a model, it steps down a line.
 - **Turning it off:** restores the model you used before. Picking a model by

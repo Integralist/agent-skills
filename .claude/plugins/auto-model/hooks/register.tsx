@@ -214,9 +214,9 @@ export const register: Register = on => {
         const lines = availableLines(row?.options)
         if (lines.length > 0) {
           const level = await classify($, requestText(e.text), lines[0] ?? 'haiku')
-          // A typed prompt while the cache is warm is likely the same task, so
-          // only a bigger tier is worth re-sending the history uncached. A typed
-          // skill (below) starts a new task, and routes by its tier.
+          // A prompt while the cache is warm is likely the same task, so only a
+          // bigger tier is worth re-sending the history uncached. A skill (below)
+          // gets the same check.
           const warm = isWarm(await read($, lastTurnAt), await $.clock.now())
           await switchTo($, level, await $.session.model(), lines, warm)
         }
@@ -227,13 +227,15 @@ export const register: Register = on => {
     return next(e)
   }).catch(($, e, next) => next(e))
 
-  // A skill (`/commit`) switches by its level; typed prompts are handled above.
+  // A skill (`/commit`) switches by its level; prompts are handled above. While
+  // the cache is warm, a skill only switches up, same as a prompt.
   on('command.run', async ($, e, next) => {
     try {
       if (e.origin.kind === 'composer' && (await read($, isOn))) {
         const lines = availableLines((await modelRow($))?.options)
         const level = lines.length > 0 ? await commandLevel($, e.command, lines[0] ?? 'haiku') : undefined
-        if (level !== undefined) await switchTo($, level, await $.session.model(), lines)
+        const warm = isWarm(await read($, lastTurnAt), await $.clock.now())
+        if (level !== undefined) await switchTo($, level, await $.session.model(), lines, warm)
       }
     } catch (err) {
       $.ui.log(`auto-model: command.run: ${String(err)}`, { to: 'debug' })

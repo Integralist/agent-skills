@@ -345,12 +345,23 @@ describe('switching', () => {
     expect(w.sets).toEqual([])
   })
 
-  test('a typed skill starts a new task, so it routes by its tier even while the cache is warm', async ($, on) => {
+  test('keeps a bigger model for a smaller skill while the cache is warm', async ($, on) => {
     const w = world(on, 'opus', 'complex')
     w.files[`${HOME}/.claude/skills/commit/SKILL.md`] = TRIVIAL_SKILL
     await start($)
     await automodel($, 'on')
     await finishTurn($)
+    await run($, 'commit')
+    expect(w.sets).toEqual([])
+  })
+
+  test('a skill steps down once the cache has gone cold', async ($, on) => {
+    const w = world(on, 'opus', 'complex')
+    w.files[`${HOME}/.claude/skills/commit/SKILL.md`] = TRIVIAL_SKILL
+    await start($)
+    await automodel($, 'on')
+    await finishTurn($)
+    await w.clock.advance(61 * MINUTE)
     await run($, 'commit')
     expect(w.sets).toEqual(['haiku'])
   })
