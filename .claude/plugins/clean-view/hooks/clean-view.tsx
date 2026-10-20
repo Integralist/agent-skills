@@ -655,7 +655,7 @@ export function registerCleanView(on: On) {
         {field('Activity', activity)}
         <Text> </Text>
         <Text>
-          <Text bold>Step log</Text>
+          <Text bold>Step log · newest first</Text>
           {lines.length > innerRows && <Text dimColor>{`  ${offset + 1}-${offset + visible.length} of ${lines.length} (scroll to view)`}</Text>}
         </Text>
         <Box borderStyle="round" borderDimColor flexDirection="column" height={innerRows + 2} overflow="hidden" paddingX={1}>

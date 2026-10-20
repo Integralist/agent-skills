@@ -167,6 +167,7 @@ describe('checklist', () => {
     const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
     const text = async () => (await pane.findAll({ type: 'Text' })).map(one => one.text).join('\n')
     const first = await text()
+    expect(first).toContain('Step log · newest first')
     expect(first).toContain('→ Read {"file_path":"a.ts"}')
     expect(first).toContain('→ Bash {"command":"git status"}')
     expect(first).toContain('← ok')
