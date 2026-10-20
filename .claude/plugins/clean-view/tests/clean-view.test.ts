@@ -421,19 +421,19 @@ describe('after the turn', () => {
     world(on)
     await start($)
     await prompt($, 'Build my landing page')
-    await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+    await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it', 'Publish it'] })
     await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
     await $.turn.complete({ answer: 'Built the page.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
     const texts = (await rows($, 'terminal')).join('\n')
     expect(texts).not.toContain('Needs you')
-    expect(texts).toMatch(/■ Ended · Build my landing page · 1 of 2 steps done/)
+    expect(texts).toMatch(/■ Ended · Build my landing page · 1 of 3 steps done/)
     expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
   })
 
   describe('after Esc or a pause', () => {
     async function halfDone($: Engine, end: { answer: string; reason: 'answer' | 'aborted' }) {
       await prompt($, 'Build my landing page')
-      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it', 'Publish it'] })
       await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
       await $.turn.complete({ answer: end.answer, durationMs: 1000, isAborted: end.reason === 'aborted', turnId: 'turn-1', reason: end.reason })
     }
@@ -546,11 +546,47 @@ describe('replanning', () => {
     await prompt($, 'Build my landing page')
     await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section'] })
     await $.tool.call({ tool: PROGRESS, task: 'Read your brand notes', percent: 100 })
-    await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section', 'Tidy the formatting'] })
+    const replanned = await $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section', 'Tidy the formatting'] })
+    expect(replanned.result).toBe('Planned 3 steps (1 already done). Active step: "Build the pricing section" — do not re-report finished steps.')
     const texts = (await rows($, 'terminal')).join('\n')
     expect(texts).toMatch(/✓ Read your brand notes\s+█{10}\s+Done/)
     expect(texts).toMatch(/▶ Build the pricing section\s+[█░]{10}\s+Working/)
     expect(texts).toMatch(/○ Tidy the formatting\s+░{10}\s+Next/)
+  })
+
+  test('batches plan_steps and report_progress with sibling tools in the same turn, excludes pause time, and auto-completes the final step', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+
+    // Parallel tool calls in one assistant turn: plan_steps + Read
+    const [planned, firstRead] = await Promise.all([
+      $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section', 'Check the page'] }),
+      $.tool.call({ tool: 'Read', file_path: 'notes.md' }),
+    ])
+    expect(planned.result).toBe('Planned 3 steps. The first one has started.')
+    expect(firstRead.deny).toBeUndefined()
+
+    // Parallel tool calls: report_progress(100) + Bash logs Bash under step 2
+    await Promise.all([
+      $.tool.call({ tool: PROGRESS, task: 'Read your brand notes', percent: 100 }),
+      $.tool.call({ tool: 'Bash', command: 'npm test' }),
+    ])
+
+    // Pause after 4s of work, sit idle for 60s, then resume: timer excludes the 60s pause
+    await w.clock.advance(4000)
+    await $.turn.complete({ answer: 'Which colour?', durationMs: 4000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+    await w.clock.advance(60000)
+    await $.turn.start({ text: 'Use blue', turnId: 'turn-2' })
+    expect((await rows($, 'terminal')).join('\n')).toContain('Build my landing page · 4s')
+
+    // Advance to the final step and finish the turn without an extra report_progress(100): auto-completes to All done
+    await $.tool.call({ tool: PROGRESS, task: 'Build the pricing section', percent: 100 })
+    await w.clock.advance(3000)
+    await $.turn.complete({ answer: 'All done.', durationMs: 3000, isAborted: false, turnId: 'turn-2', reason: 'answer' })
+    const finalTexts = (await rows($, 'terminal')).join('\n')
+    expect(finalTexts).toContain('✓ All done · Build my landing page · took 7s')
+    expect(finalTexts).toMatch(/✓ Check the page\s+█{10}\s+Done/)
   })
 
   test('denies one call after 8 tool calls with no plan or progress update, then starts counting again', async ($, on) => {

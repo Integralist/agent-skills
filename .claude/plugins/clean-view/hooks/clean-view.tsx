@@ -66,8 +66,10 @@ const SECTION = `# Clean View checklist
 
 The person sees a plain checklist of your plan instead of your tool calls.
 
-- For every request, even a quick question, call \`${PLAN_TOOL}\` first with every step of the job, 2 to 8 short names in order. Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
+- For every request, even a quick question, call \`${PLAN_TOOL}\` first with every step of the job, 1 to 8 short names in order. Only include steps that perform actual work; never add a filler final step like "Prepare next action" or "Summarize findings". Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
 - Call \`${PROGRESS_TOOL}\` after each item of a step (each file read, check run or section written), and at least every 3 tool calls, so the person never watches a percent sit still. Pass 100 the moment a step finishes.
+- Batch \`${PLAN_TOOL}\` and \`${PROGRESS_TOOL}\` in the same response as your next tool call instead of spending a separate turn on them alone. Only pass 100 after you have read a step's tool output and confirmed the step is done; when the final step is ready to answer, reply directly and Clean View completes it automatically.
+- Keep internal reasoning before tool calls brief (1 to 2 sentences) so the checklist never sits idle on a long thinking pause.
 - If the job grows past your plan (extra checks, cleanup, undoing changes, a new kind of work), call \`${PLAN_TOOL}\` again with the full updated list before you do it. Keep finished step names the same so they stay checked off.
 - Write every step name in plain English a non-technical person understands, under 40 characters, starting with a verb, like "Build the pricing section".
 - Never put file paths, file names, commands, code or tool names in a step name.`
@@ -91,6 +93,13 @@ let readsInStep = 0
 let readsStepId: string | null = null
 let logSeq = 0
 let maxLogScroll = 0
+let pendingPlanUpdate: Promise<unknown> = Promise.resolve()
+
+function queuePlanUpdate<T>(fn: () => Promise<T>): Promise<T> {
+  const next = pendingPlanUpdate.then(fn, fn)
+  pendingPlanUpdate = next.then(() => undefined, () => undefined)
+  return next
+}
 
 function countRead(list: CleanViewChecklist): string {
   const stepId = list.tasks.find(one => one.status === 'active')?.id ?? null
@@ -246,7 +255,7 @@ export function registerCleanView(on: On) {
     await $.tool.register({
       name: 'plan_steps',
       description:
-        'Lay out every step of the job up front so the person sees the plan: 2 to 8 short plain-English step names in order, each under 40 characters and starting with a verb. The first step starts right away. If the job grows past the plan, call it again with the full updated list and keep finished step names unchanged.',
+        'Lay out every step of the job up front so the person sees the plan: 1 to 8 short plain-English step names in order, each under 40 characters and starting with a verb. The first step starts right away. If the job grows past the plan, call it again with the full updated list and keep finished step names unchanged.',
       inputSchema: {
         type: 'object',
         properties: { steps: { type: 'array', items: { type: 'string' }, minItems: 1, maxItems: 8 } },
@@ -304,7 +313,17 @@ export function registerCleanView(on: On) {
       const isPaused = PAUSED.has(list.phase) && hasPlan(list)
       const resumes = isReport ? list.phase === 'waiting' : !isCommand && e.text.trim() !== '' && isPaused
       if (resumes) {
-        await edit($, current => ({ ...current, phase: 'working', finishedAt: null, needsYouReason: null, waitingOn: undefined }))
+        const resumedAt = await $.clock.now()
+        await edit($, current => ({
+          ...current,
+          phase: 'working',
+          startedAt: current.finishedAt !== null ? current.startedAt + Math.max(0, resumedAt - current.finishedAt) : current.startedAt,
+          activity: { summary: 'Resumed the task list', at: resumedAt, inProgress: true },
+          finishedAt: null,
+          isCollapsed: false,
+          needsYouReason: null,
+          waitingOn: undefined,
+        }))
         startTicker($)
       } else if (!isCommand && e.text.trim() !== '') {
         await startJob($, e.text)
@@ -316,6 +335,14 @@ export function registerCleanView(on: On) {
   on('tool.call', async ($, e, next) => {
     if (e.agentId !== undefined) return next(e)
     const tool = String(e.tool)
+    if (tool === PLAN_TOOL || tool === PROGRESS_TOOL) {
+      quietCalls = 0
+      return queuePlanUpdate(async () => {
+        await edit($, backToWork)
+        return next(e)
+      })
+    }
+    await pendingPlanUpdate
     const list = await read($, checklist)
     const isEnabled = await isOn($)
     if (isEnabled && isRunning(list) && !hasPlan(list) && !ALWAYS_ALLOWED.has(tool)) {
@@ -341,12 +368,16 @@ export function registerCleanView(on: On) {
       await recordTaskLog($, 'call', `→ ${tool} ${JSON.stringify(input)}`)
     }
     if (e.tool === 'TodoWrite') {
-      const at = await $.clock.now()
-      await edit($, current => ({ ...fromTodos(current, e.todos), activity: { summary: 'Task list updated', at, inProgress: false } }))
+      await queuePlanUpdate(async () => {
+        const at = await $.clock.now()
+        await edit($, current => ({ ...fromTodos(current, e.todos), activity: { summary: 'Task list updated', at, inProgress: false } }))
+      })
     }
     if (e.tool === 'TaskUpdate') {
-      const at = await $.clock.now()
-      await edit($, current => ({ ...updateTask(current, e.taskId, e.status, e.subject), activity: { summary: 'Task list updated', at, inProgress: false } }))
+      await queuePlanUpdate(async () => {
+        const at = await $.clock.now()
+        await edit($, current => ({ ...updateTask(current, e.taskId, e.status, e.subject), activity: { summary: 'Task list updated', at, inProgress: false } }))
+      })
     }
     if (e.tool === 'AskUserQuestion') await edit($, needsYou(HAS_QUESTION))
 
@@ -419,8 +450,14 @@ export function registerCleanView(on: On) {
     const at = await $.clock.now()
     await edit($, list => ({ ...planSteps(list, names), activity: { summary: 'Plan updated', at, inProgress: false } }))
     await update($, selectedTaskId, () => null)
-    const count = (await read($, checklist)).tasks.length
-    return { result: `Planned ${count} steps. The first one has started.` }
+    const updated = await read($, checklist)
+    const doneCount = updated.tasks.filter(one => one.status === 'done').length
+    const activeTask = updated.tasks.find(one => one.status === 'active')
+    const result =
+      doneCount > 0 && activeTask
+        ? `Planned ${updated.tasks.length} steps (${doneCount} already done). Active step: "${activeTask.name}" — do not re-report finished steps.`
+        : `Planned ${updated.tasks.length} steps. The first one has started.`
+    return { result }
   })
 
   on('tool.call', { tool: PROGRESS_TOOL }, async ($, e) => {
@@ -464,6 +501,14 @@ export function registerCleanView(on: On) {
         if (list.tasks.some(one => one.status !== 'done')) {
           if (endsWithQuestion(e.answer)) return { ...list, phase: 'needsYou', needsYouReason: ASKED }
           if (atWork > 0) return { ...list, phase: 'waiting', needsYouReason: null, waitingOn: atWork }
+          if (!list.tasks.some(one => one.status === 'upcoming')) {
+            return {
+              ...list,
+              phase: 'done',
+              tasks: list.tasks.map(one => ({ ...one, status: 'done', percent: 100 })),
+              needsYouReason: null,
+            }
+          }
           return { ...list, phase: 'ended', needsYouReason: null }
         }
         return { ...list, phase: 'done', needsYouReason: null }
