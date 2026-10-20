@@ -26,6 +26,7 @@ const COMMAND = 'automodel'
 const STORE_ON = 'isOn'
 const STORE_PREVIOUS = 'previousModel'
 const TOAST_MS = 10_000
+const MAX_CLASSIFIER_CHARS = 12_000
 
 const GOLD = '#F2C46D'
 const SLATE = '#262B33'
@@ -40,6 +41,8 @@ const lastTurnAt = atom({ plugin: 'auto-model', key: 'lastTurnAt' } as const, nu
 
 type $ = EngineInterface
 
+const refusedLines = new Set<string>()
+
 async function modelRow($: $) {
   return (await $.config.list()).find(row => row.key === 'model')
 }
@@ -53,8 +56,9 @@ async function classify($: $, text: string, smallest: string): Promise<AutoModel
   try {
     const reply = await $.model.complete({
       model: smallest,
+      effort: 'low',
       system: CLASSIFIER_SYSTEM,
-      prompt: text,
+      prompt: text.slice(0, MAX_CLASSIFIER_CHARS),
       maxTokens: 8,
       timeoutMs: 4000,
     })
@@ -123,10 +127,14 @@ async function recordTier($: $, tier: AutoModelLevel | '') {
  */
 async function switchTo($: $, level: AutoModelLevel, current: string, lines: readonly string[], stepUpOnly = false) {
   for (const line of candidatesFor(level, lines)) {
+    if (refusedLines.has(line)) continue
     if (lineOf(current) === line) return recordTier($, level)
     if (stepUpOnly && rankOf(line) <= rankOf(current)) return
     const set = await $.config.set({ key: 'model', value: line })
-    if (set.deny !== undefined) continue
+    if (set.deny !== undefined) {
+      refusedLines.add(line)
+      continue
+    }
     const model = await $.session.model()
     await update($, pendingModel, () => model)
     await recordTier($, level)
@@ -175,6 +183,7 @@ async function status($: $): Promise<string> {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     try {
+      refusedLines.clear()
       await update($, isOn, () => false)
       if ((await $.store.get(STORE_ON)) === true) await update($, isOn, () => true)
       await $.command.register({

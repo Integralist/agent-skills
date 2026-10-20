@@ -316,10 +316,14 @@ describe('switching', () => {
     expect(w.asked).toBe(0)
   })
 
-  test('steps down when the plan refuses the pick', async ($, on) => {
+  test('steps down when the plan refuses the pick, and remembers the refused line', async ($, on) => {
     const w = world(on, 'haiku', 'frontier', ['fable'])
     await start($)
     await automodel($, 'on')
+    await type($, 'Plan and run the migration of every service to the new platform')
+    expect(w.sets).toEqual(['opus'])
+    // Remove fable from w.refuse: switchTo should still stay on opus because fable was remembered as refused.
+    w.refuse.length = 0
     await type($, 'Plan and run the migration of every service to the new platform')
     expect(w.sets).toEqual(['opus'])
   })
