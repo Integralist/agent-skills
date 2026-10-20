@@ -1,4 +1,4 @@
-import type { CleanViewChecklist, CleanViewTask } from '../types'
+import type { CleanViewChecklist, CleanViewLogEntry, CleanViewTask } from '../types'
 
 export const MAX_NAME = 40
 export const METER_CELLS = 10
@@ -220,8 +220,34 @@ export function label(one: CleanViewTask, isFirstUpcoming: boolean, isPaused = f
   return isFirstUpcoming ? 'Next' : 'Up next'
 }
 
+// The newest entries a step's raw log keeps, and the characters each entry keeps.
+export const LOG_ENTRIES = 200
+export const LOG_ENTRY_CHARS = 4000
+
+const ANSI = /\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g
+const CONTROL = /[\x00-\x08\x0b-\x1f\x7f-\x9f\ud800-\udfff\u{10eeee}]/gu
+
+function sanitizeLog(text: string): string {
+  return text.replace(ANSI, '').replace(/\r/g, '').replace(/\t/g, '  ').toWellFormed().replace(CONTROL, '')
+}
+
+function clip(text: string): string {
+  const clean = sanitizeLog(text)
+  return clean.length <= LOG_ENTRY_CHARS ? clean : `${clean.slice(0, LOG_ENTRY_CHARS).toWellFormed()}…`
+}
+
+/**
+ * Adds `text` to the last entry when it has the same `key` (a block streaming
+ * in pieces), else a new entry at the end; keeps the newest LOG_ENTRIES.
+ */
+export function appendLog(log: readonly CleanViewLogEntry[], kind: CleanViewLogEntry['kind'], key: string, text: string): CleanViewLogEntry[] {
+  const last = log.at(-1)
+  if (last?.key === key) return [...log.slice(0, -1), { ...last, text: clip(last.text + text) }]
+  return [...log, { kind, key, text: clip(text) }].slice(-LOG_ENTRIES)
+}
+
 /** A name sized to the column: cut with "…" when it would wrap, padded otherwise. */
 export function fit(name: string, width: number): string {
   if (name.length <= width) return name.padEnd(width)
-  return `${name.slice(0, Math.max(0, width - 1))}…`
+  return `${name.slice(0, Math.max(0, width - 1)).toWellFormed()}…`
 }

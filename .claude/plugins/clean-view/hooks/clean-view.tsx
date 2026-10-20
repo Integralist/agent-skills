@@ -1,11 +1,12 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, On, Timer } from 'claude-code'
 
-import type { CleanViewActivity, CleanViewChecklist, CleanViewTask } from '../types'
+import type { CleanViewActivity, CleanViewChecklist, CleanViewLogEntry, CleanViewTask } from '../types'
 import {
   EMPTY,
   METER_CELLS,
   addTask,
+  appendLog,
   asksPerson,
   clampPercent,
   duration,
@@ -57,6 +58,8 @@ const REFUSED = "Claude couldn't help with that request"
 const enabled = atom({ plugin: 'clean-view', key: 'cleanViewEnabled' } as const, true)
 const checklist = atom({ plugin: 'clean-view', key: 'checklist' } as const, EMPTY)
 const selectedTaskId = atom({ plugin: 'clean-view', key: 'selectedTaskId' } as const, null as string | null)
+const taskLogs = atom({ plugin: 'clean-view', key: 'taskLogs' } as const, {} as Record<string, CleanViewLogEntry[]>)
+const logScroll = atom({ plugin: 'clean-view', key: 'logScroll' } as const, 0)
 const tick = atom({ plugin: 'clean-view', key: 'tick' } as const, 0)
 
 const SECTION = `# Clean View checklist
@@ -86,6 +89,8 @@ let focusedButton: string | undefined
 // Files read during the active step, so the activity shows real progress the model hasn't reported.
 let readsInStep = 0
 let readsStepId: string | null = null
+let logSeq = 0
+let maxLogScroll = 0
 
 function countRead(list: CleanViewChecklist): string {
   const stepId = list.tasks.find(one => one.status === 'active')?.id ?? null
@@ -122,10 +127,18 @@ async function recordActivity($: $, summary: string, inProgress: boolean, at?: n
   await edit($, list => ({ ...list, activity: { summary, at: timestamp, inProgress } }))
 }
 
+async function recordTaskLog($: $, kind: CleanViewLogEntry['kind'], text: string) {
+  const stepId = (await read($, checklist)).tasks.find(one => one.status === 'active')?.id
+  if (!stepId) return
+  const key = `${kind}-${++logSeq}`
+  await update($, taskLogs, logs => ({ ...(logs ?? {}), [stepId]: appendLog(logs?.[stepId] ?? [], kind, key, text) }))
+}
+
 async function openDetails($: $, taskId: string) {
   await update($, selectedTaskId, () => taskId)
+  await update($, logScroll, () => 0)
   focusedButton = undefined
-  await $.ui.open({ id: DETAILS_PANE, title: 'Task details', focus: true, closeOnEscape: true, holdToasts: true, rows: 17 })
+  await $.ui.open({ id: DETAILS_PANE, title: 'Task details', focus: true, closeOnEscape: true, holdToasts: true, rows: 24 })
 }
 
 async function pageDetails($: $, step: number) {
@@ -133,7 +146,10 @@ async function pageDetails($: $, step: number) {
   const id = await read($, selectedTaskId)
   const index = Math.max(0, list.tasks.findIndex(one => one.id === id))
   const next = list.tasks[Math.min(list.tasks.length - 1, Math.max(0, index + step))]
-  if (next) await update($, selectedTaskId, () => next.id)
+  if (next) {
+    await update($, selectedTaskId, () => next.id)
+    await update($, logScroll, () => 0)
+  }
 }
 
 function toolActivity(tool: string, finished = false): string {
@@ -177,6 +193,8 @@ async function startJob($: $, text: string) {
   const startedAt = await $.clock.now()
   failures = 0
   await update($, selectedTaskId, () => null)
+  await update($, taskLogs, () => ({}))
+  await update($, logScroll, () => 0)
   await edit($, () => newJob(startedAt, PLACEHOLDER_TITLE))
   startTicker($)
   if (text !== '') void nameJob($, text, startedAt).catch(() => undefined)
@@ -318,6 +336,10 @@ export function registerCleanView(on: On) {
     if (!PLAN_UPDATERS.has(tool)) {
       await recordActivity($, tool === 'AskUserQuestion' ? 'Waiting for your answer' : toolActivity(tool), tool !== 'AskUserQuestion')
     }
+    if (!ALWAYS_ALLOWED.has(tool)) {
+      const { tool: _t, tool_use_id: _id, agentId: _a, consent: _c, requestMeta: _m, ...input } = e as Record<string, unknown>
+      await recordTaskLog($, 'call', `→ ${tool} ${JSON.stringify(input)}`)
+    }
     if (e.tool === 'TodoWrite') {
       const at = await $.clock.now()
       await edit($, current => ({ ...fromTodos(current, e.todos), activity: { summary: 'Task list updated', at, inProgress: false } }))
@@ -331,6 +353,10 @@ export function registerCleanView(on: On) {
     const ran = await next(e)
 
     await edit($, backToWork)
+    if (!ALWAYS_ALLOWED.has(tool) && ran.deny === undefined) {
+      const out = ran.text ?? (typeof ran.result === 'string' ? ran.result : JSON.stringify(ran.result) ?? '')
+      await recordTaskLog($, ran.isError === true ? 'error' : 'result', ran.isError === true ? `← error: ${out}` : `← ${out}`)
+    }
     if (tool === 'AskUserQuestion' && ran.deny === undefined) await recordActivity($, 'Answer received', false)
     if (!PLAN_UPDATERS.has(tool) && tool !== 'AskUserQuestion') {
       const summary = ran.isError === true
@@ -525,6 +551,11 @@ export function registerCleanView(on: On) {
     return next(e)
   }).catch(($, e, next) => next(e))
 
+  on('ui.scroll', { requestId: DETAILS_PANE }, async ($, e) => {
+    await update($, logScroll, offset => Math.max(0, Math.min(maxLogScroll, (offset ?? 0) + e.by)))
+    return {}
+  }).catch(($, e, next) => next(e))
+
   on('ui.close', async ($, e, next) => {
     if (e.id === DETAILS_PANE) await update($, selectedTaskId, () => null)
     return next(e)
@@ -538,6 +569,14 @@ export function registerCleanView(on: On) {
     const index = Math.max(0, list.tasks.findIndex(one => one.id === id))
     const task = list.tasks[index]
     if (!task) return <Text dimColor>No task to show.</Text>
+    const logs = [...((await read($, taskLogs))[task.id] ?? [])].reverse()
+    const lines = logs.flatMap(entry =>
+      entry.text.split('\n').map((line, i) => ({ key: `${entry.key}-${i}`, kind: entry.kind, text: fit(line, Math.max(10, e.props.bodyColumns - 8)) })),
+    )
+    const innerRows = Math.max(4, Math.min(12, e.props.scroll.bodyRows - 18))
+    maxLogScroll = Math.max(0, lines.length - innerRows)
+    const offset = Math.min(await read($, logScroll), maxLogScroll)
+    const visible = lines.slice(offset, offset + innerRows)
 
     const isLive = isRunning(list)
     if (isLive) await read($, tick)
@@ -569,6 +608,20 @@ export function registerCleanView(on: On) {
         </Text>
         {field('Elapsed', duration(now - list.startedAt))}
         {field('Activity', activity)}
+        <Text> </Text>
+        <Text>
+          <Text bold>Step log</Text>
+          {lines.length > innerRows && <Text dimColor>{`  ${offset + 1}-${offset + visible.length} of ${lines.length} (scroll to view)`}</Text>}
+        </Text>
+        <Box borderStyle="round" borderDimColor flexDirection="column" height={innerRows + 2} overflow="hidden" paddingX={1}>
+          {visible.length === 0 ? (
+            <Text dimColor>Nothing recorded for this step yet</Text>
+          ) : (
+            visible.map(line => (
+              <Text key={`clean-view-log-${line.key}`} color={line.kind === 'error' ? 'red' : undefined} dimColor={line.kind === 'result'}>{line.text}</Text>
+            ))
+          )}
+        </Box>
         <Text> </Text>
         <Box flexDirection="column">
           <Button key="clean-view-details-prev" label="Previous task" autoFocus={focusedButton === 'clean-view-details-prev' || undefined} onPress={() => void pageDetails($, -1)} />

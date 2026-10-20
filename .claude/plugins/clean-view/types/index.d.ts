@@ -14,6 +14,13 @@ export type CleanViewTask = {
   hasReported: boolean
 }
 
+/** One item of a step's raw log: a thinking block, a tool call as the model wrote it, or a tool's result. */
+export type CleanViewLogEntry = {
+  kind: 'thinking' | 'call' | 'result' | 'error'
+  key: string
+  text: string
+}
+
 export type CleanViewPhase = 'idle' | 'working' | 'needsYou' | 'stuck' | 'stopped' | 'waiting' | 'ended' | 'done'
 
 export type CleanViewChecklist = {
@@ -36,6 +43,8 @@ declare module 'claude-code' {
       cleanViewEnabled: boolean
       checklist: CleanViewChecklist
       selectedTaskId: string | null
+      taskLogs: Record<string, CleanViewLogEntry[]>
+      logScroll: number
       tick: number
     }
   }

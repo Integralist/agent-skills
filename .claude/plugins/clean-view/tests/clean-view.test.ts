@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
-import { cleanName, meter } from '../hooks/logic'
+import { LOG_ENTRIES, LOG_ENTRY_CHARS, appendLog, cleanName, meter } from '../hooks/logic'
 
 const PLUGIN = 'clean-view'
 const PLAN = 'mcp__clean-view__plan_steps'
@@ -134,7 +134,51 @@ describe('meter', () => {
   })
 })
 
+describe('raw log', () => {
+  test('pieces of one block join, new blocks add an entry, and the oldest entries and longest texts are cut', () => {
+    let log = appendLog([], 'thinking', 'b0', 'Let me ')
+    log = appendLog(log, 'thinking', 'b0', 'think.')
+    log = appendLog(log, 'call', 'b1', 'Read ')
+    expect(log).toEqual([
+      { kind: 'thinking', key: 'b0', text: 'Let me think.' },
+      { kind: 'call', key: 'b1', text: 'Read ' },
+    ])
+
+    for (let i = 0; i < LOG_ENTRIES + 5; i++) log = appendLog(log, 'result', `r${i}`, 'ok')
+    expect(log).toHaveLength(LOG_ENTRIES)
+    expect(log[0].key).toBe('r5')
+
+    const long = appendLog([], 'result', 'r', 'x'.repeat(LOG_ENTRY_CHARS + 50))[0].text
+    expect(long).toHaveLength(LOG_ENTRY_CHARS + 1)
+    expect(long.endsWith('…')).toBe(true)
+  })
+})
+
 describe('checklist', () => {
+  test('the details pane shows a step\'s raw tool calls and results, newest first', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Check the config')
+    await $.tool.call({ tool: PLAN, steps: ['Read the config', 'Report back'] })
+    await $.tool.call({ tool: 'Read', file_path: 'a.ts' })
+    await $.tool.call({ tool: 'Grep', pattern: 'port', agentId: 'agent-1' })
+    await $.tool.call({ tool: 'Bash', command: 'git status' })
+
+    const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
+    const text = async () => (await pane.findAll({ type: 'Text' })).map(one => one.text).join('\n')
+    const first = await text()
+    expect(first).toContain('→ Read {"file_path":"a.ts"}')
+    expect(first).toContain('→ Bash {"command":"git status"}')
+    expect(first).toContain('← ok')
+    // A subagent's calls are its own work, not this step's.
+    expect(first).not.toContain('Grep')
+    expect(first.indexOf('Bash {')).toBeLessThan(first.indexOf('Read {'))
+
+    await pane.press({ key: 'clean-view-details-next' })
+    expect(await text()).toContain('Nothing recorded for this step yet')
+    await pane.unmount()
+  })
+
   test('the checklist prompt asks for a report after each item', async ($, on) => {
     world(on)
     await start($)
