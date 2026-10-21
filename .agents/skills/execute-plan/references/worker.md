@@ -21,7 +21,8 @@ a design choice.
 even if more unchecked tasks are visible.
 
 1. Inspect the existing changes in the files you'll touch and keep them.
-2. Follow the task's tests and code as written, building it as
+2. Follow the task's tests, and any code it gives, as written, and implement
+   the rest from its description, building it as
    [BUILD-ITEM.md](../../shared/BUILD-ITEM.md) describes, except that the
    coordinator owns ticking boxes. Prove the test fails on its assertion, not on
    a compile error, then make it pass. For a task with no code, use its runnable

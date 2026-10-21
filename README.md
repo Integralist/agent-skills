@@ -74,7 +74,7 @@ Shared skills, agents, rules, and configuration for AI coding assistants
 | [**to-plan**](.agents/skills/to-plan/SKILL.md)                                             | Write a plan of vertical slices, outcome milestones, dependencies, and PR grouping.                      |
 | [**to-prd**](.agents/skills/to-prd/SKILL.md)                                               | Extract product goals, scope, and success measures into a PRD.                                           |
 | [**to-spec**](.agents/skills/to-spec/SKILL.md)                                             | Write an implementation-ready feature spec with scope and acceptance criteria.                           |
-| [**to-tasks**](.agents/skills/to-tasks/SKILL.md)                                           | Compile a plan slice into a mechanical TDD task document with verbatim code.                             |
+| [**to-tasks**](.agents/skills/to-tasks/SKILL.md)                                           | Compile a plan slice into a mechanical TDD task document with verbatim tests.                            |
 | [**unslop**](.agents/skills/unslop/SKILL.md)                                               | Cut AI tells and machine cadence from prose to restore human voice.                                      |
 | [**voice-adhd**](.agents/skills/voice-adhd/SKILL.md)                                       | Reply in an ADHD-friendly shape once, or for the whole session with `--all`.                             |
 | [**voice-integralist**](.agents/skills/voice-integralist/SKILL.md)                         | Write in Integralist's voice once, or for the whole session with `--all`.                                |

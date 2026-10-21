@@ -6,7 +6,7 @@ test-first steps yourself.
 
 **Build it test-first.** Write a failing test and run it. It must fail on its
 assertion; a compile error doesn't count. Then make it pass and tidy up. When a
-task gives you the test and code, follow them as written. Never weaken a test
+task gives you a test or code, follow it as written. Never weaken a test
 to make it pass. Run the project's tests, and update docs when behaviour or
 usage changes.
 

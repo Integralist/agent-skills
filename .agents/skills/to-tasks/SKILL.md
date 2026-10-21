@@ -12,9 +12,11 @@ metadata:
 # To Tasks
 
 Turn a plan, or what this session has worked out, into a task list a less
-capable agent can retrace step by step: verbatim tests, verbatim code, and a
-runnable check per task. You walk the code once so the executor doesn't have
-to. Write the list; don't run it.
+capable agent can implement without a design choice: verbatim tests that fix
+the contract, the implementation described precisely, and a runnable check per
+task. You walk the code once so the executor doesn't have to. Write the list
+and leave running and implementing to the executor; the tests are its gate,
+so writing the code yourself only pays for it twice.
 
 **Stop and ask.** Follow the source as given, but when something is missing,
 contradictory, or looks like the wrong design, tell the user and wait. Don't
@@ -31,15 +33,19 @@ fill the gap with a guess.
 
 3. **Write the tasks** in order, so each works once the ones above it are done.
    Each task must clear the bar: given only this document and a shell, a less
-   capable agent can complete it without writing code of its own, making a
-   design choice, or opening a file not named here. If a task needs a judgment
-   call, supply what's missing or split it.
+   capable agent can complete it without making a design choice or opening a
+   file not named here. If a task needs a judgment call, supply what's missing
+   or split it.
 
    - Give each task the parts shown in the template below: what it
      delivers, its location, a stub if the test needs one to compile, the
-     failing test (red) with its command and the assertion failure to expect,
-     the implementation (green), and a runnable Verify. A task with no code,
-     such as adding a dependency, still gets a runnable Verify.
+     failing test (red) with its command and why it fails, the implementation
+     (green), and a runnable Verify. A task with no code, such as adding a
+     dependency, still gets a runnable Verify.
+   - Describe the implementation: the behaviour, the approach, and an existing
+     `path:line` pattern to follow. Write it verbatim only where a capable
+     agent could still get it subtly wrong, such as concurrency, security, or
+     a tricky algorithm.
    - Write tests as [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) describes.
    - When the source has milestones, give each task a `Supports:` line naming
      the milestones it serves. The mapping is many-to-many:
@@ -113,15 +119,12 @@ Conventions and gotchas:
 {verbatim test}
 ```
 
-Run `{command}`; expect `{assertion failure}`.
+Run `{command}`; it fails because {why the assertion fails}.
 
-**Implementation (green)** — add to `{path}`:
+**Implementation (green)** — in `{path}`: {behaviour, approach, and the
+`path:line` pattern to follow; a verbatim block only for a tricky part}.
 
-```{language}
-{verbatim implementation}
-```
-
-**Verify:** `{command}` → `{expected output}`.
+**Verify:** `{command}` passes when {observable pass condition}.
 
 - [ ] Task {n} complete
 `````
