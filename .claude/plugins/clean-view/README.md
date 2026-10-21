@@ -22,8 +22,8 @@ the prompt.
 - **Cost:** each new job makes one small Haiku call to name it.
 
 > [!WARNING]
-> Where an organization manages Claude Code, `prompt.compose` and
-> `classic.Notification` hooks don't run in a mod you install. The system
-> prompt section is then skipped; the tool descriptions and the plan-first
-> gate still steer Claude to plan, and Needs you still shows for permission
-> prompts through `tool.check`.
+> Where an organization manages Claude Code, a managed plugin can skip a mod's
+> `prompt.compose` and `classic.*` hooks. The system prompt section is then
+> skipped; the tool descriptions and the plan-first gate still steer Claude to
+> plan. The permission mode is then unknown, so Needs you can show for an ask
+> auto mode settles alone; the next model request clears it.

@@ -86,6 +86,9 @@ function world(on: On): World {
   on('classic.Notification', () => ({}))
   on('classic.UserPromptSubmit', () => ({}))
   on('classic.PermissionDenied', () => ({}))
+  on('turn.step', async function* ($, e) {
+    return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null, usage: null }
+  })
   on('tool.check', () => ({ decision: w.verdict }))
   on('tool.call', ($, e) => {
     w.ran.push(String(e.tool))
@@ -100,6 +103,11 @@ async function start($: Engine) {
 
 async function prompt($: Engine, text: string) {
   await $.turn.start({ text, turnId: 'turn-1' })
+}
+
+/** Sends one model request of the turn, reading its stream to the end. */
+async function step($: Engine, agentId?: string) {
+  for await (const _ of $.turn.step({ turnId: 'turn-1', index: 1, model: 'claude-opus-5-5', messageCount: 3, agentId }));
 }
 
 async function simple($: Engine, args: string) {
@@ -345,6 +353,27 @@ describe('checklist', () => {
     expect((await rows($, 'terminal')).join('\n')).toContain('Needs you')
     await $.classic.PermissionDenied({ tool_name: 'Bash', tool_input: { command: 'make test' }, tool_use_id: 'toolu_1', reason: 'blocked by the classifier' })
     expect((await rows($, 'terminal')).join('\n')).not.toContain('Needs you')
+  })
+
+  test('a new model step clears Needs you when a managed plugin hides the mode', async ($, on) => {
+    const w = world(on)
+    w.verdict = 'ask'
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
+    expect((await rows($, 'terminal')).join('\n')).toContain('Needs you')
+    await step($)
+    expect((await rows($, 'terminal')).join('\n')).not.toContain('Needs you')
+  })
+
+  test('a subagent step leaves Needs you up', async ($, on) => {
+    const w = world(on)
+    w.verdict = 'ask'
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
+    await step($, 'agent-1')
+    expect((await rows($, 'terminal')).join('\n')).toContain('Needs you')
   })
 
   test('the band keeps a blank line above it, away from the spinner, open or collapsed', async ($, on) => {

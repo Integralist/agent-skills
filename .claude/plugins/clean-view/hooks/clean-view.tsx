@@ -445,6 +445,13 @@ export function registerCleanView(on: On) {
     return next(e)
   }).catch(($, e, next) => next(e))
 
+  // A new model request means any ask was settled, even where a managed plugin
+  // skips the classic hooks that carry the mode and the classifier's refusal.
+  on('turn.step', async function* ($, e, next) {
+    if (e.agentId === undefined) await edit($, backToWork)
+    return yield* next(e)
+  })
+
   on('tool.call', { tool: PLAN_TOOL }, async ($, e) => {
     const steps = (e as { steps?: unknown }).steps
     const names = Array.isArray(steps) ? steps.filter((s): s is string => typeof s === 'string') : []
