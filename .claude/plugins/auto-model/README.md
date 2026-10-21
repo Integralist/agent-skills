@@ -3,6 +3,9 @@
 Picks the main conversation's model for each typed prompt or skill; caps effort
 at `xhigh`.
 
+For selection, routing, and fallback rules, see the
+[model state diagrams](docs/model-state.md).
+
 - **Turn it on or off:** run `/automodel on`, `/automodel off` or
   `/automodel status`, or click the `Auto Model: On/Off` chip at the right of
   the prompt footer. The setting is saved across sessions.
