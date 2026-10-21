@@ -215,6 +215,14 @@ redundant or stale, keep it.
 
 ## Errors
 
+Decide which outcomes are ordinary for the operation before choosing error
+types. Handle a failure inside a module only if it can still fulfill the
+caller's contract; otherwise return an error the caller can act on. Never
+present unresolved corruption, denied authorization, or a violated invariant
+as success. Retry only operations safe to repeat, and stop on cancellation or
+deadline. After recovery, can the caller tell whether the operation succeeded
+and what it can safely do next?
+
 Pick the form by how callers react:
 
 - **Wrapped** with `fmt.Errorf` and `%w`: the default; adds context and keeps

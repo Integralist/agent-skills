@@ -7,9 +7,11 @@ of [conventions-go](../SKILL.md). Helper names here (`errorsx`, `httpx`,
 `traces.WithSpan`, `withDBMetrics`, `middleware.Pipeline`, `CacheManager`)
 show the pattern; in an existing repo, use its equivalents.
 
-**Layers.** Requests flow handlers → service → repository, and no layer skips
-the next. Business logic lives in the service and data access in the
-repository.
+**Layers.** Requests normally flow handlers → service → repository.
+Business logic lives in the service and data access in the repository. Do not
+bypass a layer that owns required behaviour, but do not add pass-through
+methods solely to satisfy the diagram. Follow the existing architecture and
+compatibility requirements when deciding whether a layer is needed.
 
 **Files.** Split each layer by resource: `handlers.go` plus `handlers_*.go`
 (such as `handlers_config.go` and `handlers_errors.go`), `service.go` plus
