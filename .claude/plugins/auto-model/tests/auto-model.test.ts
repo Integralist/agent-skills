@@ -193,6 +193,7 @@ function world(on: On, start: string, level = 'complex', refuse: string[] = []):
   })
   on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('session.end', ($, e) => ({ sessionId: e.sessionId }))
   on('prompt.submit', ($, e) => ({ text: e.text }))
   on('command.run', () => ({ text: 'engine ran it' }))
   on('turn.complete', () => ({ text: '' }))
@@ -208,6 +209,10 @@ const MINUTE = 60_000
 
 async function start($: Engine) {
   await $.session.start({ cwd: '/tmp', surface: 'terminal', isInteractive: true })
+}
+
+async function endSession($: Engine) {
+  await $.session.end({ reason: 'clear', sessionId: SESSION, resume: { flag: '--resume', value: SESSION, command: `claude --resume ${SESSION}` } })
 }
 
 async function automodel($: Engine, args: string) {
@@ -267,6 +272,7 @@ describe('switching', () => {
     await type($, '/compact now please thanks')
     await type($, 'Summarize the notes from this meeting please', 'turn-1')
     expect(w.sets).toEqual([])
+    await endSession($)
     await start($)
     await type($, 'hello')
     expect(w.sets).toEqual(['haiku'])
@@ -350,14 +356,19 @@ describe('switching', () => {
     expect(off.text).toContain('back to')
   })
 
-  test('keeps a bigger model for a smaller prompt while the cache is warm', async ($, on) => {
-    const w = world(on, 'opus', 'trivial')
+  test('keeps a bigger model for a smaller prompt while the cache is warm, even across a reload', async ($, on) => {
+    const w = world(on, 'opus', 'complex')
     await start($)
     await automodel($, 'on')
+    await type($, 'Plan the rollout for the new token service')
     await finishTurn($)
+    await start($)
     await w.clock.advance(10 * MINUTE)
+    w.level = 'trivial'
     await type($, 'Summarize the notes from this meeting into three bullets')
+    await finishTurn($)
     expect(w.sets).toEqual([])
+    expect(w.written[TIER_FILE]).toBe('complex')
   })
 
   test('keeps a bigger model for a smaller skill while the cache is warm', async ($, on) => {

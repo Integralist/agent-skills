@@ -38,11 +38,11 @@ const isOn = atom({ plugin: 'auto-model', key: 'isOn' } as const, false)
 const pendingModel = atom({ plugin: 'auto-model', key: 'pendingModel' } as const, null)
 // When the last main-loop turn ended; null before the session's first.
 const lastTurnAt = atom({ plugin: 'auto-model', key: 'lastTurnAt' } as const, null)
+const hasRoutedTier = atom({ plugin: 'auto-model', key: 'hasRoutedTier' } as const, false)
 
 type $ = EngineInterface
 
 const refusedLines = new Set<string>()
-let hasRoutedTier = false
 
 async function modelRow($: $) {
   return (await $.config.list()).find(row => row.key === 'model')
@@ -113,7 +113,7 @@ async function commandLevel($: $, command: string, smallest: string): Promise<Au
  * failed write only loses the label, so it never stops a switch or turn-off.
  */
 async function recordTier($: $, tier: AutoModelLevel | 'auto' | '') {
-  hasRoutedTier = tier !== '' && tier !== 'auto'
+  await update($, hasRoutedTier, () => tier !== '' && tier !== 'auto')
   try {
     const path = tierPath(await $.env.get('TMPDIR'), await $.session.id())
     if (path !== undefined) await $.fs.write(path, tier)
@@ -186,13 +186,11 @@ async function status($: $): Promise<string> {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     try {
-      hasRoutedTier = false
       refusedLines.clear()
-      await update($, lastTurnAt, () => null)
       await update($, isOn, () => false)
       if ((await $.store.get(STORE_ON)) === true) {
         await update($, isOn, () => true)
-        await recordTier($, 'auto')
+        if (!(await read($, hasRoutedTier)) && (await read($, lastTurnAt)) === null) await recordTier($, 'auto')
       }
       await $.command.register({
         name: COMMAND,
@@ -203,6 +201,12 @@ export const register: Register = on => {
     } catch (err) {
       $.ui.log(`auto-model: could not start: ${String(err)}`, { to: 'debug' })
     }
+    return next(e)
+  })
+
+  on('session.end', async ($, e, next) => {
+    await update($, hasRoutedTier, () => false)
+    await update($, lastTurnAt, () => null)
     return next(e)
   })
 
@@ -300,7 +304,7 @@ export const register: Register = on => {
       await update($, pendingModel, () => null)
       const now = await $.clock.now()
       await update($, lastTurnAt, () => now)
-      if ((await read($, isOn)) && !hasRoutedTier) await recordTier($, '')
+      if ((await read($, isOn)) && !(await read($, hasRoutedTier))) await recordTier($, '')
     }
     return next(e)
   })

@@ -6,6 +6,7 @@ declare module 'claude-code' {
       isOn: boolean
       pendingModel: string | null
       lastTurnAt: number | null
+      hasRoutedTier: boolean
     }
   }
 }
