@@ -53,6 +53,8 @@ describe('logic', () => {
     expect(isShortReply('Do it.')).toBe(true)
     expect(isShortReply('Proceed with the updates.')).toBe(true)
     expect(isShortReply('show the proposed diff')).toBe(true)
+    expect(isShortReply('hello', false)).toBe(false)
+    expect(isShortReply('hello', true)).toBe(true)
     expect(isShortReply('Refactor the auth module to use the new token client')).toBe(false)
   })
 
@@ -255,14 +257,20 @@ describe('switching', () => {
     expect(w.toasts).toEqual(['Auto Model: Haiku 5.5 (trivial)'])
   })
 
-  test('stays put on a short reply, a slash command and a mid-turn message', async ($, on) => {
+  test('stays put on a short reply, a slash command and a mid-turn message, and classifies a short first prompt', async ($, on) => {
     const w = world(on, 'opus', 'trivial')
     await start($)
     await automodel($, 'on')
     await type($, 'keep going')
+    await finishTurn($)
+    expect(w.written[TIER_FILE]).toBe('')
     await type($, '/compact now please thanks')
     await type($, 'Summarize the notes from this meeting please', 'turn-1')
     expect(w.sets).toEqual([])
+    await start($)
+    await type($, 'hello')
+    expect(w.sets).toEqual(['haiku'])
+    expect(w.written[TIER_FILE]).toBe('trivial')
   })
 
   test('classifies a prompt that starts with an absolute file path', async ($, on) => {
@@ -396,6 +404,10 @@ describe('switching', () => {
     const w = world(on, 'haiku', 'complex')
     await start($)
     await automodel($, 'on')
+    expect(w.written[TIER_FILE]).toBe('auto')
+    w.written[TIER_FILE] = ''
+    await start($)
+    expect(w.written[TIER_FILE]).toBe('auto')
     await type($, 'Plan the rollout for the new token service')
     expect(w.written[TIER_FILE]).toBe('complex')
     await finishTurn($)

@@ -42,6 +42,7 @@ const lastTurnAt = atom({ plugin: 'auto-model', key: 'lastTurnAt' } as const, nu
 type $ = EngineInterface
 
 const refusedLines = new Set<string>()
+let hasRoutedTier = false
 
 async function modelRow($: $) {
   return (await $.config.list()).find(row => row.key === 'model')
@@ -111,7 +112,8 @@ async function commandLevel($: $, command: string, smallest: string): Promise<Au
  * Writes the tier of the model in use for the status line; '' clears it. A
  * failed write only loses the label, so it never stops a switch or turn-off.
  */
-async function recordTier($: $, tier: AutoModelLevel | '') {
+async function recordTier($: $, tier: AutoModelLevel | 'auto' | '') {
+  hasRoutedTier = tier !== '' && tier !== 'auto'
   try {
     const path = tierPath(await $.env.get('TMPDIR'), await $.session.id())
     if (path !== undefined) await $.fs.write(path, tier)
@@ -149,6 +151,7 @@ async function turnOn($: $): Promise<string> {
   await $.store.set(STORE_PREVIOUS, row?.value ?? null)
   await $.store.set(STORE_ON, true)
   await update($, isOn, () => true)
+  await recordTier($, 'auto')
   return 'Auto Model is on. Each new prompt picks its model.'
 }
 
@@ -183,9 +186,14 @@ async function status($: $): Promise<string> {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     try {
+      hasRoutedTier = false
       refusedLines.clear()
+      await update($, lastTurnAt, () => null)
       await update($, isOn, () => false)
-      if ((await $.store.get(STORE_ON)) === true) await update($, isOn, () => true)
+      if ((await $.store.get(STORE_ON)) === true) {
+        await update($, isOn, () => true)
+        await recordTier($, 'auto')
+      }
       await $.command.register({
         name: COMMAND,
         description: 'Auto Model: pick the model for each prompt (on, off, status)',
@@ -212,12 +220,13 @@ export const register: Register = on => {
 
   on('prompt.submit', async ($, e, next) => {
     try {
+      const lastTurn = await read($, lastTurnAt)
       const skip =
         !(await read($, isOn)) ||
         e.origin.kind !== 'composer' ||
         e.turnId !== undefined ||
         isSlashCommand(e.text) ||
-        isShortReply(e.text)
+        isShortReply(e.text, lastTurn !== null)
       if (!skip) {
         const row = await modelRow($)
         const lines = availableLines(row?.options)
@@ -226,7 +235,7 @@ export const register: Register = on => {
           // A prompt while the cache is warm is likely the same task, so only a
           // bigger tier is worth re-sending the history uncached. A skill (below)
           // gets the same check.
-          const warm = isWarm(await read($, lastTurnAt), await $.clock.now())
+          const warm = isWarm(lastTurn, await $.clock.now())
           await switchTo($, level, await $.session.model(), lines, warm)
         }
       }
@@ -291,6 +300,7 @@ export const register: Register = on => {
       await update($, pendingModel, () => null)
       const now = await $.clock.now()
       await update($, lastTurnAt, () => now)
+      if ((await read($, isOn)) && !hasRoutedTier) await recordTier($, '')
     }
     return next(e)
   })

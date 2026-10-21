@@ -42,11 +42,12 @@ export function isSlashCommand(text: string): boolean {
   return /^\/[a-zA-Z0-9:_-]+(?:\s|$)/.test(text.trimStart())
 }
 
-/** A reply to what Claude just said: fewer than four words, or a plain go-ahead. */
-export function isShortReply(text: string): boolean {
+/** A reply to what Claude just said: a plain go-ahead, or under four words after a turn. */
+export function isShortReply(text: string, hasPriorTurn = true): boolean {
   const plain = text.toLowerCase().replace(/[^\p{L}\p{N}\s']/gu, ' ').replace(/\s+/g, ' ').trim()
   if (plain === '') return true
   if (ACKS.has(plain)) return true
+  if (!hasPriorTurn) return false
   return plain.split(' ').length < 4
 }
 
@@ -70,7 +71,7 @@ const FRONTIER = /\b(migrat\w*|deep research|for hours|entire (codebase|repo\w*|
 const REPO_STATE = /\b(?:(?:has|have|had|is|was|were|been)\b[^.?!]*\bmerged|which branch|what changed)\b/i
 const COMPLEX = /\b(research|analy[sz]\w*|plan\w*|slices?|task[- ]lists?|design\w*|architect\w*|review\w*|spec|strateg\w*|roadmap|trade-?offs?)\b/i
 const MODERATE = /\b(build|update\w*|skills?|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|doc(ument)?s?)\b/i
-const TRIVIAL = /\b(summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was)|email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
+const TRIVIAL = /\b(hello|hi|hey|summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was)|email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
 
 /** The word-based guess used when the quick check fails; moderate when in doubt. */
 export function guessLevel(text: string): AutoModelLevel {

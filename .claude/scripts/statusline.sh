@@ -40,8 +40,13 @@ if [[ "${session_id}" =~ ^[A-Za-z0-9_-]+$ ]]; then
     tier=$(cat "${TMPDIR:-/tmp}/claude-auto-model/${session_id}" 2>/dev/null)
 fi
 
-# e.g. "Opus 5.5 medium · explanatory (complex)"
-model_display="${model_name}${effort_level:+ ${effort_level}}${style_label:+ · ${style_label}}${tier:+ (${tier})}"
+# e.g. "Auto · concise" before the first prompt is routed, then
+# "Opus 5.5 medium · explanatory (complex)"
+if [[ "${tier}" == "auto" ]]; then
+    model_display="Auto${style_label:+ · ${style_label}}"
+else
+    model_display="${model_name}${effort_level:+ ${effort_level}}${style_label:+ · ${style_label}}${tier:+ (${tier})}"
+fi
 
 # Get current directory basename
 dir_name=$(basename "$current_dir")
