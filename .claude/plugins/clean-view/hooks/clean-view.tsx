@@ -47,7 +47,7 @@ const HAS_QUESTION = 'Claude has a question for you'
 const WAITING = 'Claude is waiting for your reply'
 const ASKED = 'Claude asked you a question above'
 // Phases where a plan was left part way; its active step draws as Paused.
-const PAUSED = new Set(['needsYou', 'stopped', 'waiting', 'ended'])
+const PAUSED = new Set(['needsYou', 'stuck', 'stopped', 'waiting', 'ended'])
 // An agent in one of these is still at work and will report back on its own.
 const AGENT_AT_WORK = new Set(['pending', 'running', 'waiting'])
 const SAID_NO = 'you said no to a step, so Claude paused'
@@ -328,6 +328,7 @@ export function registerCleanView(on: On) {
             finishedAt: null,
             isCollapsed: false,
             needsYouReason: null,
+            stuckReason: null,
             waitingOn: undefined,
           }
         })

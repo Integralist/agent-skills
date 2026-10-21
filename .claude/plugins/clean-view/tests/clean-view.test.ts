@@ -46,6 +46,7 @@ type World = {
   ran: string[]
   clock: MockClock
   verdict: 'allow' | 'ask'
+  failText?: string
   agents: Agent[]
   opened: Opened[]
   aborted: string[]
@@ -92,6 +93,7 @@ function world(on: On): World {
   on('tool.check', () => ({ decision: w.verdict }))
   on('tool.call', ($, e) => {
     w.ran.push(String(e.tool))
+    if (w.failText !== undefined) return { result: w.failText, isError: true, text: w.failText }
     return { result: 'ok' }
   })
   return w
@@ -536,6 +538,29 @@ describe('after the turn', () => {
         expect(texts).not.toMatch(/Stopped|Ended|Needs you|Understand your request/)
       })
     }
+
+    test('a typed prompt after rejecting AskUserQuestion carries on with the same plan instead of wiping finished steps', async ($, on) => {
+      const w = world(on)
+      await start($)
+      await prompt($, 'Build my landing page')
+      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it', 'Publish it'] })
+      await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
+      w.failText = "The user doesn't want to proceed with this tool use. The tool use was rejected."
+      await $.tool.call({ tool: 'AskUserQuestion', questions: [] })
+      w.failText = undefined
+      await $.turn.complete({ answer: '', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+
+      const paused = (await rows($, 'terminal')).join('\n')
+      expect(paused).toContain('⚠ Stuck: you said no to a step, so Claude paused')
+      expect(paused).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
+
+      await $.turn.start({ text: 'sorry I pressed ESC by accident, can you give me those options again', turnId: 'turn-2' })
+      const resumed = (await rows($, 'terminal')).join('\n')
+      expect(resumed).toMatch(/✓ Build the page/)
+      expect(resumed).toMatch(/▶ Check it/)
+      expect(resumed).not.toContain('Stuck')
+      expect(resumed).not.toContain('Thinking...')
+    })
   })
 
   describe('with background agents', () => {
