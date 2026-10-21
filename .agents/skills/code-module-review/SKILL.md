@@ -50,6 +50,10 @@ for every diagram.
      module could own behind a smaller interface;
    - whether logic sits with the concept it changes or leaks into a caller,
      shared utility, or unrelated package;
+   - whether a likely change to a format, policy, or default needs edits in
+     several modules, or callers must know an implementation detail;
+   - whether callers must handle an ordinary case or configuration choice that
+     the owning module could handle once;
    - whether dependencies cross the seam in the right direction, and whether
      a proposed seam has a second adapter to justify it;
    - whether moving the logic would gain locality or leverage without pushing

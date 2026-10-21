@@ -87,7 +87,8 @@ concentrate in one place, so a fix lands once.
   current design, and pick the smallest coherent change rather than a rewrite
   by default. Plan the whole change and deliver it in increments. Keep existing
   behaviour except where the requirement changes it. Carry the design through
-  every type, caller, test, doc, and example.
+  every type, caller, test, doc, and example. Prefer a coherent abstraction
+  over another feature-specific exception.
 
 ## Going deeper
 
