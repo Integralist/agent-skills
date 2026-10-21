@@ -88,6 +88,8 @@ function world(on: On): World {
   on('classic.UserPromptSubmit', () => ({}))
   on('classic.PermissionDenied', () => ({}))
   on('turn.step', async function* ($, e) {
+    yield { kind: 'thinking' as const, index: 0, text: 'Checking ' }
+    yield { kind: 'thinking' as const, index: 0, text: 'the branch.' }
     return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null, usage: null }
   })
   on('tool.check', () => ({ decision: w.verdict }))
@@ -680,13 +682,30 @@ describe('replanning', () => {
     await $.turn.start({ text: 'Use blue', turnId: 'turn-2' })
     expect((await rows($, 'terminal')).join('\n')).toContain('Build my landing page · 4s')
 
-    // Advance to the final step and finish the turn without an extra report_progress(100): auto-completes to All done
+    // Advance to the final step; if it reported < 100% and stopped to confirm, it pauses instead of auto-completing
     await $.tool.call({ tool: PROGRESS, task: 'Build the pricing section', percent: 100 })
+    await $.tool.call({ tool: PROGRESS, task: 'Check the page', percent: 50 })
+    await $.turn.complete({ answer: 'Confirm to publish.', durationMs: 1000, isAborted: false, turnId: 'turn-2', reason: 'answer' })
+    const midFinal = (await rows($, 'terminal')).join('\n')
+    expect(midFinal).toContain('■ Ended · Build my landing page · 2 of 3 steps done')
+    expect(midFinal).toMatch(/‖ Check the page\s+█{5}░{5}\s+Paused/)
+
+    // Resuming carries on with the same 3-step plan, and finishing completes it
+    await $.turn.start({ text: 'publish', turnId: 'turn-3' })
+    await step($)
+    await $.tool.call({ tool: PROGRESS, task: 'Check the page', percent: 100 })
     await w.clock.advance(3000)
-    await $.turn.complete({ answer: 'All done.', durationMs: 3000, isAborted: false, turnId: 'turn-2', reason: 'answer' })
+    await $.turn.complete({ answer: 'All done.', durationMs: 3000, isAborted: false, turnId: 'turn-3', reason: 'answer' })
     const finalTexts = (await rows($, 'terminal')).join('\n')
     expect(finalTexts).toContain('✓ All done · Build my landing page · took 7s')
     expect(finalTexts).toMatch(/✓ Check the page\s+█{10}\s+Done/)
+
+    const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
+    await pane.press({ key: 'clean-view-details-next' })
+    await pane.press({ key: 'clean-view-details-next' })
+    const logText = (await pane.findAll({ type: 'Text' })).map(one => one.text).join('\n')
+    expect(logText).toContain('💭 Checking the branch.')
+    await pane.unmount()
   })
 
   test('does not block tool calls after a plan exists and does not enforce the plan gate when toggled on mid-run', async ($, on) => {

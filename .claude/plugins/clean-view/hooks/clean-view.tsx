@@ -5,6 +5,7 @@ import type { CleanViewActivity, CleanViewChecklist, CleanViewLogEntry, CleanVie
 import {
   EMPTY,
   METER_CELLS,
+  PLACEHOLDER_PREFIX,
   addTask,
   appendLog,
   asksPerson,
@@ -135,11 +136,15 @@ async function recordActivity($: $, summary: string, inProgress: boolean, at?: n
   await edit($, list => ({ ...list, activity: { summary, at: timestamp, inProgress } }))
 }
 
-async function recordTaskLog($: $, kind: CleanViewLogEntry['kind'], text: string) {
+async function recordTaskLog($: $, kind: CleanViewLogEntry['kind'], text: string, streamKey?: string) {
   const stepId = (await read($, checklist)).tasks.find(one => one.status === 'active')?.id
   if (!stepId) return
-  const key = `${kind}-${++logSeq}`
-  await update($, taskLogs, logs => ({ ...(logs ?? {}), [stepId]: appendLog(logs?.[stepId] ?? [], kind, key, text) }))
+  const key = streamKey ?? `${kind}-${++logSeq}`
+  await update($, taskLogs, logs => {
+    const current = logs?.[stepId] ?? []
+    const piece = streamKey !== undefined && current.at(-1)?.key !== key ? `💭 ${text}` : text
+    return { ...(logs ?? {}), [stepId]: appendLog(current, kind, key, piece) }
+  })
 }
 
 async function openDetails($: $, taskId: string) {
@@ -450,7 +455,14 @@ export function registerCleanView(on: On) {
   // skips the classic hooks that carry the mode and the classifier's refusal.
   on('turn.step', async function* ($, e, next) {
     if (e.agentId === undefined) await edit($, backToWork)
-    return yield* next(e)
+    const stream = next(e)
+    for await (const chunk of stream) {
+      if (e.agentId === undefined && chunk.kind === 'thinking' && chunk.text !== '') {
+        await recordTaskLog($, 'thinking', chunk.text, `thinking-${e.turnId}-${e.index}-${chunk.index}`)
+      }
+      yield chunk
+    }
+    return await stream.result
   })
 
   on('tool.call', { tool: PLAN_TOOL }, async ($, e) => {
@@ -461,8 +473,17 @@ export function registerCleanView(on: On) {
     await edit($, list => ({ ...planSteps(list, names, at), activity: { summary: 'Plan updated', at, inProgress: false } }))
     await update($, selectedTaskId, () => null)
     const updated = await read($, checklist)
-    const doneCount = updated.tasks.filter(one => one.status === 'done').length
     const activeTask = updated.tasks.find(one => one.status === 'active')
+    const placeholderKey = `${PLACEHOLDER_PREFIX}thinking`
+    if (activeTask) {
+      await update($, taskLogs, logs => {
+        const pre = logs?.[placeholderKey]
+        if (!pre || pre.length === 0) return logs ?? {}
+        const { [placeholderKey]: _, ...rest } = logs ?? {}
+        return { ...rest, [activeTask.id]: [...pre, ...(rest[activeTask.id] ?? [])] }
+      })
+    }
+    const doneCount = updated.tasks.filter(one => one.status === 'done').length
     const result =
       doneCount > 0 && activeTask
         ? `Planned ${updated.tasks.length} steps (${doneCount} already done). Active step: "${activeTask.name}" — do not re-report finished steps.`
@@ -513,7 +534,8 @@ export function registerCleanView(on: On) {
         if (list.tasks.some(one => one.status !== 'done')) {
           if (endsWithQuestion(e.answer)) return { ...list, phase: 'needsYou', needsYouReason: ASKED }
           if (atWork > 0) return { ...list, phase: 'waiting', needsYouReason: null, waitingOn: atWork }
-          if (!list.tasks.some(one => one.status === 'upcoming')) {
+          const active = list.tasks.find(one => one.status === 'active')
+          if (!list.tasks.some(one => one.status === 'upcoming') && !(active?.hasReported && active.percent < 100)) {
             const finishedAt = list.finishedAt ?? 0
             return {
               ...list,
