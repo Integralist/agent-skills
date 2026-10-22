@@ -45,6 +45,12 @@
   checks after relevant changes. Mark failed, unavailable, or unrun checks
   as verification gaps, not success.
 - **Citations:** Cite source (`path/to/file.go:42` or URL). If uncited, label as "unverified assumption" and explain how to verify.
+- **Chat Links:** Use short, descriptive Markdown links with absolute
+  `https://` destinations for web sources and absolute `file:///`
+  destinations for local files. URL-encode spaces in destinations.
+  Put local line numbers in the visible label, not GitHub-style
+  fragments. Relative links remain appropriate inside repository
+  documents, not terminal chat.
 - **Markdown Formatting:** Never run formatters that normalize ordered lists to `1.` (e.g. bare `mdformat`) on Skill files (`SKILL.md`), AI prompts (`**/prompts/**`), or instruction files. Always use `mdformat --number` (or exclude AI-facing paths) so sequential numbers are preserved.
 
 # Model Configuration
