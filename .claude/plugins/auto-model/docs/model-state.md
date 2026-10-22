@@ -48,7 +48,6 @@ selection commands above. Each terminal state ends this routing decision.
 stateDiagram-v2
     state "Inspect input" as Input
     state "Classify task" as Classify
-    state "Guess from keywords" as Guess
     state "Task tier known" as Tier
     state "Try offered lines in order" as Candidate
     state "Keep current model" as Keep
@@ -60,8 +59,7 @@ stateDiagram-v2
     Input --> Classify: Skill without declared or cached tier
     Input --> Tier: Skill declares or caches a valid tier
     Classify --> Tier: Answer contains a recognized tier
-    Classify --> Guess: Error, timeout, or no recognized tier
-    Guess --> Tier: First keyword match, else moderate
+    Classify --> Keep: Error, timeout, or no recognized tier
     Tier --> Candidate: Build candidate order
     Candidate --> Keep: Same line or warm block
     Candidate --> Keep: All candidates denied
@@ -76,7 +74,7 @@ stateDiagram-v2
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Typed composer prompt                                | Classify only while Auto is on, outside an active turn, and after the exclusions below.                                                                                                           |
 | User or plugin skill slash command                   | Use valid `metadata.model-tier` from the project's skill file first, then the home skill file. If the first readable file has no valid tier, classify the command's name and description instead. |
-| Skill without a declared tier                        | Reuse its cached tier, keyed by command name and description, or classify and cache it. Slash arguments do not affect the tier.                                                                   |
+| Skill without a declared tier                        | Reuse its cached tier, keyed by command name and description, or classify and cache successful results. Slash arguments do not affect the tier.                                                                   |
 | Acknowledgment or empty text                         | Keep the current model, including before the first turn.                                                                                                                                          |
 | Other reply with fewer than four words               | Keep the current model after a main turn has completed. A short first prompt can still be classified.                                                                                             |
 | Built-in, MCP, unknown, or `/automodel` command      | No automatic tier selection. Skill commands use the separate skill path.                                                                                                                          |
@@ -91,20 +89,22 @@ path is not treated as a slash command.
 
 | Tier       | Model line | Typical task                                                                      |
 | ---------- | ---------- | --------------------------------------------------------------------------------- |
-| `trivial`  | `haiku`    | Mechanical work, short writing, factual answers, repo-state checks.               |
-| `moderate` | `sonnet`   | Hands-on code changes, debugging, tests, audits, long documents, multi-file work. |
-| `complex`  | `opus`     | Specs, plans, research, architecture, code or security review.                    |
+| `trivial`  | `haiku`    | Mechanical work, wording-only instruction edits, short writing, factual answers. |
+| `moderate` | `sonnet`   | Code changes, debugging, tests, audits, targeted lookups, bounded troubleshooting. |
+| `complex`  | `opus`     | Specs, plans, open-ended research, architecture, code or security review.          |
 | `frontier` | `fable`    | Whole-system redesign, a very large migration, extended deep research.            |
 
 These are aliases offered by the installed `/config` model row, not fixed
 version identifiers. The classifier uses the smallest offered line, `low`
 effort, up to 12,000 input characters, 8 output tokens, and a 4-second timeout.
 It classifies the immediate action rather than the broader project context.
+Targeted documentation lookups and bounded troubleshooting remain moderate
+when the fix becomes a reusable instruction; open-ended research and
+substantial architectural decisions are complex.
 
-If it fails or gives no recognized tier, the keyword fallback checks in this
-order: frontier, repo-state lookup (`trivial`), complex, moderate, trivial.
-The first matching category wins; no match means `moderate`. This is a
-best-effort guess, not a second model request.
+If classification fails or gives no recognized tier, keep the current model
+and existing tier label. There is no keyword fallback or second model request.
+Failed skill classifications are not cached, so a later invocation can retry.
 
 ### Candidate order and warm-cache protection
 
@@ -137,5 +137,5 @@ step-down leaves the existing label alone.
 ## Sources and behavioral checks
 
 - [Routing, lifecycle, model overrides, and effort cap](../hooks/register.tsx).
-- [Tier parsing, keywords, short replies, candidate order, and cache timing](../hooks/logic.ts).
+- [Tier parsing, short replies, candidate order, and cache timing](../hooks/logic.ts).
 - [Behavioral tests](../tests/auto-model.test.ts).

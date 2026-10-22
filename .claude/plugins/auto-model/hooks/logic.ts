@@ -10,10 +10,11 @@ export const CLASSIFIER_SYSTEM = [
   'Sort the request into exactly one tier. Answer with the one word only.',
   'Classify the immediate action requested in this turn, not broader project goals mentioned as background.',
   'Words that only name a command, file or tool are not the task: "update the skill\'s review subcommand" is moderate.',
-  'trivial: quick, mechanical jobs and short writing. Commit, branch, summarize, sort, extract, rename, translate, reformat, a short factual answer, a repo-state check (is a commit, branch or slice merged, what changed, who touched a file), an email, a post, a PR body, a ticket, a small edit.',
-  'moderate: the default for hands-on work. Building or changing software, debugging, fixing tests, audits of code quality or behaviour, long documents, anything touching several files.',
-  'complex: project planning and big-picture thinking. Specs, plans, slices, task lists, research, architecture, design decisions, code or security review (including updating a spec, plan, slice, or task list to cover how a feature will be implemented or tested).',
+  'trivial: quick, mechanical jobs and short writing. Commit, branch, summarize, sort, extract, rename, translate, reformat, small wording-only instruction edits, a short factual answer, a repo-state check (is a commit, branch or slice merged, what changed, who touched a file), an email, a post, a PR body, a ticket, a small edit.',
+  'moderate: the default for hands-on work. Building or changing software, debugging, fixing tests, audits of code quality or behaviour, long documents, anything touching several files; also targeted documentation lookups and bounded troubleshooting before codifying a fix as a reusable instruction.',
+  'complex: project planning and big-picture thinking. Specs, plans, slices, task lists, open-ended research, architecture, substantial architectural decisions, code or security review (including updating a spec, plan, slice, or task list to cover how a feature will be implemented or tested).',
   'frontier: only the very hardest thinking. Redesigning a whole codebase or system, planning a very large migration, deep research that runs for hours.',
+  'Examples: "Pi shows unclickable links; how can we codify a fix?" -> moderate; "design a new terminal rendering architecture" -> complex; "apply this exact wording to AGENTS.md and commit" -> trivial.',
   'When unsure between moderate and complex, say moderate.',
 ].join('\n')
 
@@ -63,24 +64,6 @@ const QUOTED = /^>.*$/gm
 export function requestText(text: string): string {
   const own = text.replace(FENCED, ' ').replace(INLINE_CODE, ' ').replace(QUOTED, ' ').replace(/\s+/g, ' ').trim()
   return own === '' ? text : own
-}
-
-const FRONTIER = /\b(migrat\w*|deep research|for hours|entire (codebase|repo\w*|system)|whole (codebase|repo\w*)|large[- ]scale|re-?architect\w*|ground[- ]up|from scratch)\b/i
-// A repo-state lookup ("has it been merged", "which branch"): checked before
-// COMPLEX and MODERATE, whose `slice`, `pr`, `repo` and `files` would otherwise claim it.
-const REPO_STATE = /\b(?:(?:has|have|had|is|was|were|been)\b[^.?!]*\bmerged|which branch|what changed)\b/i
-const COMPLEX = /\b(research|analy[sz]\w*|plan\w*|slices?|task[- ]lists?|design\w*|architect\w*|review\w*|spec|strateg\w*|roadmap|trade-?offs?)\b/i
-const MODERATE = /\b(build|update\w*|skills?|implement\w*|refactor\w*|debug\w*|fix\w*|bug|code|test\w*|investigat\w*|deploy\w*|feature|function|module|files|repo\w*|pr|diff|doc(ument)?s?)\b/i
-const TRIVIAL = /\b(hello|hi|hey|summari[sz]e|tl;?dr|sort|extract|rename|translate|reformat|format|convert|list|spell\w*|define|what is|who is|when (is|was)|email|e-mail|post|tweet|slack|message|draft|letter|reply|edit|tweak|chart|graph|explain|what does|how do)\b/i
-
-/** The word-based guess used when the quick check fails; moderate when in doubt. */
-export function guessLevel(text: string): AutoModelLevel {
-  if (FRONTIER.test(text)) return 'frontier'
-  if (REPO_STATE.test(text)) return 'trivial'
-  if (COMPLEX.test(text)) return 'complex'
-  if (MODERATE.test(text)) return 'moderate'
-  if (TRIVIAL.test(text)) return 'trivial'
-  return 'moderate'
 }
 
 // How long the prompt cache keeps a conversation after its last request. A

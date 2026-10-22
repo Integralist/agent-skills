@@ -9,7 +9,6 @@ import {
   clampEffort,
   clampEffortArgs,
   displayName,
-  guessLevel,
   isShortReply,
   isSlashCommand,
   isWarm,
@@ -49,10 +48,10 @@ async function modelRow($: $) {
 }
 
 /**
- * The classifier's tier, else the word-based guess. Each outcome goes to the
- * debug log, so a wrong pick shows which path made it.
+ * The classifier's tier, or no decision when classification fails. Each
+ * outcome goes to the debug log; failure leaves the current model alone.
  */
-async function classify($: $, text: string, smallest: string): Promise<AutoModelLevel> {
+async function classify($: $, text: string, smallest: string): Promise<AutoModelLevel | undefined> {
   let why: string
   try {
     const reply = await $.model.complete({
@@ -72,9 +71,8 @@ async function classify($: $, text: string, smallest: string): Promise<AutoModel
   } catch (err) {
     why = String(err)
   }
-  const guess = guessLevel(text)
-  $.ui.log(`auto-model: classifier gave no tier (${why}); keyword guess ${guess}`, { to: 'debug' })
-  return guess
+  $.ui.log(`auto-model: classifier gave no tier (${why}); keeping current model`, { to: 'debug' })
+  return undefined
 }
 
 /** The `model-tier` the skill's own SKILL.md declares, project copy first. */
@@ -104,7 +102,7 @@ async function commandLevel($: $, command: string, smallest: string): Promise<Au
   const kept = await $.store.get(key)
   if (typeof kept === 'string' && parseLevel(kept) !== undefined) return parseLevel(kept)
   const level = await classify($, `/${info.name}: ${info.description}`, smallest)
-  await $.store.set(key, level)
+  if (level !== undefined) await $.store.set(key, level)
   return level
 }
 
@@ -236,11 +234,13 @@ export const register: Register = on => {
         const lines = availableLines(row?.options)
         if (lines.length > 0) {
           const level = await classify($, requestText(e.text), lines[0] ?? 'haiku')
-          // A prompt while the cache is warm is likely the same task, so only a
-          // bigger tier is worth re-sending the history uncached. A skill (below)
-          // gets the same check.
-          const warm = isWarm(lastTurn, await $.clock.now())
-          await switchTo($, level, await $.session.model(), lines, warm)
+          if (level !== undefined) {
+            // A prompt while the cache is warm is likely the same task, so only a
+            // bigger tier is worth re-sending the history uncached. A skill (below)
+            // gets the same check.
+            const warm = isWarm(lastTurn, await $.clock.now())
+            await switchTo($, level, await $.session.model(), lines, warm)
+          }
         }
       }
     } catch (err) {

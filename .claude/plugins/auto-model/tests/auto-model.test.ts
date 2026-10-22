@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { CommandInfo, ConfigRow, On } from 'claude-code'
 
-import { candidatesFor, clampEffort, clampEffortArgs, guessLevel, isShortReply, isSlashCommand, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
+import { candidatesFor, clampEffort, clampEffortArgs, isShortReply, isSlashCommand, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
 
 const OPTIONS = ['default', 'sonnet', 'opus', 'haiku', 'fable', 'best', 'opusplan']
 const IDS: Record<string, string> = {
@@ -58,24 +58,6 @@ describe('logic', () => {
     expect(isShortReply('Refactor the auth module to use the new token client')).toBe(false)
   })
 
-  test('falls back on the words, moderate when in doubt', () => {
-    expect(guessLevel('Summarize this paragraph for me please')).toBe('trivial')
-    expect(guessLevel('Draft an email to the team about Friday')).toBe('trivial')
-    expect(guessLevel('Implement retries in the HTTP client and add tests')).toBe('moderate')
-    expect(guessLevel('Update the hunk skill, that sort of thing')).toBe('moderate')
-    expect(guessLevel('Plan the rollout for the new token service')).toBe('complex')
-    expect(guessLevel('Update Slice 3 and the task list to cover how local tracing will be tested')).toBe('complex')
-    expect(guessLevel('Migrate the entire codebase from Python 2 to Python 3')).toBe('frontier')
-    expect(guessLevel('Thoughts on the weather tomorrow afternoon')).toBe('moderate')
-  })
-
-  test('reads a repo-state check as trivial, not as hands-on work', () => {
-    expect(guessLevel('can you check projects/x/ and see if slice 3.1 has been merged into main')).toBe('trivial')
-    expect(guessLevel('Is the PR merged yet?')).toBe('trivial')
-    expect(guessLevel('Which branch has that commit?')).toBe('trivial')
-    expect(guessLevel('Fix the merge conflict in the build script')).toBe('moderate')
-  })
-
   test('keeps only what the user wrote, not quoted text or code', () => {
     expect(requestText('Fix the `review` step\n```\nreview the plan\n```\nthanks')).toBe('Fix the step thanks')
     expect(requestText('Tidy this\n````md\n```bash\nplan\n```\n````\n')).toBe('Tidy this')
@@ -84,8 +66,9 @@ describe('logic', () => {
   })
 
   test('does not read a quoted command name as the task', () => {
-    expect(guessLevel(requestText(FIRST_PROMPT))).toBe('moderate')
-    expect(guessLevel(requestText('Please review this PR for security issues'))).toBe('complex')
+    expect(requestText(FIRST_PROMPT)).toContain('can you update the hunk skill')
+    expect(requestText(FIRST_PROMPT)).not.toContain('review')
+    expect(requestText('Please review this PR for security issues')).toBe('Please review this PR for security issues')
   })
 
   test('steps down to the next line that exists', () => {
@@ -130,6 +113,7 @@ type World = {
   sets: string[]
   toasts: string[]
   level: string
+  failure?: 'timeout' | 'error'
   refuse: string[]
   asked: number
   prompts: string[]
@@ -176,13 +160,14 @@ function world(on: On, start: string, level = 'complex', refuse: string[] = []):
     if (text === undefined) throw new Error(`ENOENT: ${e.path}`)
     return { value: text }
   })
-  on('model.complete', ($, e) => ({
-    value: {
-      isAnswered: true as const,
-      text: (w.asked++, w.prompts.push(e.prompt), w.level),
-      usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
-    },
-  }))
+  on('model.complete', ($, e) => {
+    w.asked++
+    w.prompts.push(e.prompt)
+    const usage = { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 }
+    if (w.failure === 'error') throw new Error('classifier unavailable')
+    if (w.failure === 'timeout') return { value: { isAnswered: false as const, reason: 'aborted' as const, usage } }
+    return { value: { isAnswered: true as const, text: w.level, usage } }
+  })
   on('ui.toast', ($, e) => {
     w.toasts.push(e.text)
     return { value: undefined }
@@ -228,6 +213,42 @@ async function type($: Engine, text: string, turnId?: string) {
 }
 
 describe('switching', () => {
+  for (const failure of ['invalid', 'timeout', 'error'] as const) {
+    test(`a classifier ${failure} keeps the model and tier with a cold cache`, async ($, on) => {
+      const w = world(on, 'opus', 'complex')
+      await start($)
+      await automodel($, 'on')
+      await type($, 'Plan the rollout for the new token service')
+      await finishTurn($)
+      await w.clock.advance(61 * MINUTE)
+      w.level = 'medium'
+      if (failure !== 'invalid') w.failure = failure
+      await type($, 'Fix a bug in the migration helper')
+      expect(w.sets).toEqual([])
+      expect(w.model).toBe('opus')
+      expect(w.written[TIER_FILE]).toBe('complex')
+      expect(w.logs.some(line => line.includes('keeping current model'))).toBe(true)
+    })
+
+    test(`a skill classifier ${failure} is not cached and can recover`, async ($, on) => {
+      const w = world(on, 'opus', 'medium')
+      if (failure !== 'invalid') w.failure = failure
+      await start($)
+      await automodel($, 'on')
+      await run($, 'git-commit')
+      await run($, 'git-commit')
+      expect(w.asked).toBe(2)
+      expect(w.sets).toEqual([])
+      expect(w.written[TIER_FILE]).toBe('auto')
+      w.failure = undefined
+      w.level = 'trivial'
+      await run($, 'git-commit')
+      await run($, 'git-commit')
+      expect(w.asked).toBe(3)
+      expect(w.sets).toEqual(['haiku'])
+    })
+  }
+
   test('asks the classifier about the user\'s own words only', async ($, on) => {
     const w = world(on, 'haiku', 'moderate')
     await start($)
@@ -244,13 +265,13 @@ describe('switching', () => {
     expect(w.logs).toContain('auto-model: classifier said complex')
   })
 
-  test('logs why it fell back on the words, and what they gave', async ($, on) => {
+  test('logs why it kept the current model when classification gave no tier', async ($, on) => {
     const w = world(on, 'haiku', 'medium')
     await start($)
     await automodel($, 'on')
     await type($, 'Plan the rollout for the new token service')
-    expect(w.logs).toContain('auto-model: classifier gave no tier (unreadable answer "medium"); keyword guess complex')
-    expect(w.sets).toEqual(['opus'])
+    expect(w.logs).toContain('auto-model: classifier gave no tier (unreadable answer "medium"); keeping current model')
+    expect(w.sets).toEqual([])
   })
 
   test('switches on a new prompt and shows a toast', async ($, on) => {

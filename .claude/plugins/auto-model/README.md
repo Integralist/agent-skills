@@ -38,9 +38,9 @@ For selection, routing, and fallback rules, see the
   | `complex`  | `opus`     |
   | `frontier` | `fable`    |
 
-  A skill without a tier, or a plugin's skill, is sorted once by its
-  description, and that tier is kept until the description changes. For how to
-  pick a tier, see
+  A skill without a tier, or a plugin's skill, is sorted by its description.
+  Successful classifications are kept until the description changes; failed
+  attempts are retried on the next invocation. For how to pick a tier, see
   [model tier](../../../.agents/skills/writing-for-agents/SKILL-MECHANICS.md#model-tier).
 
 - **When it leaves the model alone:** short replies (fewer than four words, or
@@ -54,8 +54,8 @@ For selection, routing, and fallback rules, see the
   handed the whole context. Once the cache has gone cold, a switch costs
   nothing extra and either goes by its tier.
 
-- **Fallbacks:** if the quick check fails, a keyword guess is used, with
-  `moderate` when in doubt. If the plan refuses a model, it steps down a line.
+- **Fallbacks:** if classification fails, keep the current model and tier
+  label. If the plan refuses a successfully classified model, step down a line.
 
 - **Turning it off:** restores the model you used before. Picking a model by
   hand (`/model` or `/config`) also turns it off, and keeps the model you
