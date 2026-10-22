@@ -114,8 +114,8 @@ SELECT * FROM users WHERE country = 'UK';
 **PARTIAL: index gap.** The query uses the leftmost columns but skips one in
 the middle, so MySQL seeks up to the gap and scans the rest. Predicate order
 in `WHERE` doesn't matter, since the optimizer reorders them; only which
-leading columns are present does. Fix by adding the skipped column to the
-query or an index matching the query's columns.
+leading columns are present does. Fix with an index matching the query's
+columns; add a skipped predicate only when the contract already requires it.
 
 ```sql
 -- Index (last_name, country, state): seeks last_name only, then scans
@@ -143,7 +143,7 @@ SELECT * FROM users WHERE country = 'UK' AND created_at >= '2026-01-01';
 
 | Killer           | Slow                            | Fix                                          |
 | ---------------- | ------------------------------- | -------------------------------------------- |
-| Leading wildcard | `LIKE '%smith'`                 | `LIKE 'smith%'`                              |
+| Leading wildcard | `LIKE '%smith'`                 | preserve suffix matching; assess index options |
 | Function wrap    | `WHERE YEAR(d) = 2026`          | `WHERE d >= '2026-01-01' AND d < '2027-...'` |
 | Function wrap    | `WHERE LOWER(name) = 'pikachu'` | functional index, or generated column        |
 | Type mismatch    | `WHERE varchar_id = 123`        | quote it: `WHERE varchar_id = '123'`         |
@@ -233,7 +233,9 @@ SELECT * FROM sales
 
 Group findings by severity. For each, give the index with its ordered columns
 and `file:line`, the query and its `file:line`, the classification, one line
-on why it matters, and a concrete fix.
+on why it matters, and a concrete fix. Before reporting, check query rewrites
+preserve filtering, row sets, ordering, limits, and deduplication. Flag unproven
+equivalence; behaviour changes need approval, not an optimization label.
 
 ````markdown
 ## MySQL Index Audit
@@ -248,7 +250,7 @@ on why it matters, and a concrete fix.
   (`db/schema.sql:42`)
   - Query `WHERE country = 'UK'` (`internal/users/repo.go:88`) skips the
     leftmost column `last_name`, so the table is scanned.
-  - **Fix:** add an index leading with `country`, or include `last_name`.
+  - **Fix:** add an index leading with `country`.
 
 ### Medium: killers, range ordering, missing indexes
 

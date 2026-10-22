@@ -40,6 +40,10 @@
 
 - **Tools:** Use Makefile targets over direct calls (e.g., `make test`). Use Edit tool for changes, Grep for exact searches, `rg` for regex, and Mermaid diagrams for complex systems.
 - **Verification:** Verify via source read/grep, authoritative docs, or adjacent repos before asserting. Never rely on general knowledge for specifics (headers, pricing, APIs).
+- **Completion:** Compare the final result with the request, any plan, and
+  applicable conventions. Reuse evidence that still applies; repeat affected
+  checks after relevant changes. Mark failed, unavailable, or unrun checks
+  as verification gaps, not success.
 - **Citations:** Cite source (`path/to/file.go:42` or URL). If uncited, label as "unverified assumption" and explain how to verify.
 - **Markdown Formatting:** Never run formatters that normalize ordered lists to `1.` (e.g. bare `mdformat`) on Skill files (`SKILL.md`), AI prompts (`**/prompts/**`), or instruction files. Always use `mdformat --number` (or exclude AI-facing paths) so sequential numbers are preserved.
 

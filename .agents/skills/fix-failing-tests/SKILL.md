@@ -48,8 +48,11 @@ redirect or stop any fix before work piles up.
 4. **Fix in the main thread.** Show the root causes and fixes, then apply
    them, flagging any you're unsure of so the user can redirect, skip, or
    stop. Never weaken an assertion to make a test pass. Update the docs a
-   fix affects. Run `make test` after applying; if a fix doesn't hold,
-   re-diagnose rather than guess. After 3 runs that still fail, stop editing,
-   name the assumption you haven't verified, and ask one diagnostic question.
-   Leave committing to the user. Done when `make test` passes or you've
-   stopped after 3 runs.
+   fix affects. Rerun the original failing cases with their required flags and
+   environment, and run `make test` for regressions. Integration failures need
+   `make test-integration` against a running stack. Reuse a passing run that
+   covers both. If a fix doesn't hold, re-diagnose rather than guess. After
+   3 runs that still fail, stop editing, name the assumption you haven't
+   verified, and ask one diagnostic question. Leave committing to the user.
+   Done when the original failing cases and regression checks pass, or you've
+   stopped and reported what failed or couldn't be verified.

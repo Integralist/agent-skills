@@ -35,10 +35,12 @@ write `$TMPDIR/summary-<branch>-<format>.md`.
      user wants formatting.
 
    Done when all three are chosen.
-2. **Load the source.** For a plan, also run
-   `git diff origin/<main>...HEAD --stat` and flag, above the summary, any
-   drift between what the plan promised and what shipped. Done when you know
-   what actually changed.
+2. **Load the source.** A proposed-plan summary describes intent, not
+   delivered work. For implementation claims or plan-drift checks, read the
+   relevant full diff and enough surrounding code to support material claims;
+   `--stat` alone can't establish behaviour. Distinguish planned, implemented,
+   tested, and deployed work. Done when claims are supported or explicitly
+   unverified.
 3. **Write it** in the [voice-product](../voice-product/SKILL.md) voice,
    omitting needless words per [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md),
    in the template for the chosen shape, and cite the plan path and PR or

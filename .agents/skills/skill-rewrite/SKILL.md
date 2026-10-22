@@ -30,5 +30,9 @@ owning it. Repoint every file that linked to the old home.
 **Draft.** Write the rewrite following writing-for-agents, show it in full in
 chat, and wait for approval.
 
-Done when the user approves the draft, it's written, and no file still points
-at a rule the rewrite removed.
+**Verify.** Compare the written skill and any relocated rules with the settled
+keep/drop/move decisions. Each retained behaviour must have a reachable home;
+each removal must match an agreed decision.
+
+Done when the user approves the draft, it's written, the decisions hold, and
+no file still points at a rule the rewrite removed.
