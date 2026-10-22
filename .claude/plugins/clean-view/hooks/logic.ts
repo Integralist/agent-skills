@@ -73,7 +73,7 @@ export function newJob(startedAt: number, title: string): CleanViewChecklist {
 }
 
 /** Lays out the plan: steps already done stay done, and the first unfinished one starts now. */
-export function planSteps(list: CleanViewChecklist, steps: readonly string[], at = list.startedAt): CleanViewChecklist {
+export function planSteps(list: CleanViewChecklist, steps: readonly string[], at = list.startedAt, title?: string): CleanViewChecklist {
   const kept = new Map(list.tasks.map(one => [one.name.toLowerCase(), one]))
   const names = steps.map(cleanName).slice(0, 8)
   let tasks = (names.length > 0 ? names : [FALLBACK_NAME]).map((name, i): CleanViewTask => {
@@ -94,7 +94,8 @@ export function planSteps(list: CleanViewChecklist, steps: readonly string[], at
   if (first !== -1) {
     tasks = tasks.map((one, i) => (i === first ? { ...one, status: 'active', startedAt: one.startedAt ?? at } : one))
   }
-  return { ...list, tasks }
+  const nextTitle = title?.trim() ? cleanName(title) : list.title
+  return { ...list, title: nextTitle, tasks }
 }
 
 function same(a: string, b: string): boolean {

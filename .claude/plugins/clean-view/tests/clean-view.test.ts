@@ -50,11 +50,12 @@ type World = {
   agents: Agent[]
   opened: Opened[]
   aborted: string[]
+  asked: number
 }
 
-/** The engine beneath the mod: store, clock, a Haiku that names jobs, tools that succeed, panes that open. */
+/** The engine beneath the mod: store, clock, tools that succeed, panes that open, and a counter for unexpected model requests. */
 function world(on: On): World {
-  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [], opened: [], aborted: [] }
+  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [], opened: [], aborted: [], asked: 0 }
   on('ui.open', ($, e) => {
     w.opened.push(e)
     return { value: { isPlaced: true as const } }
@@ -76,7 +77,7 @@ function world(on: On): World {
   on('model.complete', () => ({
     value: {
       isAnswered: true as const,
-      text: 'Build my landing page',
+      text: (w.asked++, 'Build my landing page'),
       usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
     },
   }))
@@ -168,6 +169,43 @@ describe('raw log', () => {
 })
 
 describe('checklist', () => {
+  test('shows activity and time before a plan instead of inventing a title', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, "btw the links aren't clickable, so I approve the change")
+    await w.clock.advance(9000)
+    for (const surface of SURFACES) {
+      const texts = (await rows($, surface)).join('\n')
+      expect(texts).toContain('Thinking... · 9s')
+      expect(texts).not.toContain('Build my landing page')
+      expect(texts).not.toContain('Btw')
+    }
+  })
+
+  test('starting a job makes no separate naming request', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, 'Check the link targets')
+    expect(w.asked).toBe(0)
+  })
+
+  test('the plan supplies the title and replanning retains or replaces it', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Check the links')
+    await $.tool.call({ tool: PLAN, title: 'Fix local links', steps: ['Check the targets', 'Verify opening'] })
+    expect((await rows($, 'terminal')).join('\n')).toContain('Fix local links · ')
+    await $.tool.call({ tool: PROGRESS, task: 'Check the targets', percent: 100 })
+    for (const title of [undefined, '', '   ']) {
+      await $.tool.call({ tool: PLAN, title, steps: ['Check the targets', 'Verify opening'] })
+      const texts = (await rows($, 'terminal')).join('\n')
+      expect(texts).toContain('Fix local links · ')
+      expect(texts).toMatch(/✓ Check the targets/)
+    }
+    await $.tool.call({ tool: PLAN, title: 'Verify web links', steps: ['Check the targets', 'Verify opening'] })
+    expect((await rows($, 'terminal')).join('\n')).toContain('Verify web links · ')
+  })
+
   test('the details pane shows a step\'s raw tool calls and results, newest first', async ($, on) => {
     world(on)
     await start($)
@@ -414,7 +452,7 @@ describe('checklist', () => {
     const w = world(on)
     await start($)
     await prompt($, 'Build my landing page')
-    await $.tool.call({ tool: PLAN, steps: ['Build the page'] })
+    await $.tool.call({ tool: PLAN, title: 'Build my landing page', steps: ['Build the page'] })
     await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
     await $.turn.complete({ answer: 'Done.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
     const before = (await rows($, 'terminal')).join('\n')
@@ -430,7 +468,7 @@ describe('checklist', () => {
 describe('after the turn', () => {
   async function stopMidPlan($: Engine) {
     await prompt($, 'Build my landing page')
-    await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+    await $.tool.call({ tool: PLAN, title: 'Build my landing page', steps: ['Build the page', 'Check it'] })
     await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
     await $.turn.complete({ answer: 'Which colour?', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
   }
@@ -479,7 +517,7 @@ describe('after the turn', () => {
     world(on)
     await start($)
     await prompt($, 'Build my landing page')
-    await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it', 'Publish it'] })
+    await $.tool.call({ tool: PLAN, title: 'Build my landing page', steps: ['Build the page', 'Check it', 'Publish it'] })
     await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
     await $.turn.complete({ answer: 'Built the page.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
     const texts = (await rows($, 'terminal')).join('\n')
@@ -491,7 +529,7 @@ describe('after the turn', () => {
   describe('after Esc or a pause', () => {
     async function halfDone($: Engine, end: { answer: string; reason: 'answer' | 'aborted' }) {
       await prompt($, 'Build my landing page')
-      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it', 'Publish it'] })
+      await $.tool.call({ tool: PLAN, title: 'Build my landing page', steps: ['Build the page', 'Check it', 'Publish it'] })
       await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
       await $.turn.complete({ answer: end.answer, durationMs: 1000, isAborted: end.reason === 'aborted', turnId: 'turn-1', reason: end.reason })
     }
@@ -571,7 +609,7 @@ describe('after the turn', () => {
 
     async function endTurn($: Engine, answer: string) {
       await prompt($, 'Build my landing page')
-      await $.tool.call({ tool: PLAN, steps: ['Build the page', 'Check it'] })
+      await $.tool.call({ tool: PLAN, title: 'Build my landing page', steps: ['Build the page', 'Check it'] })
       await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
       await $.turn.complete({ answer, durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
     }
@@ -663,7 +701,7 @@ describe('replanning', () => {
 
     // Parallel tool calls in one assistant turn: plan_steps + Read
     const [planned, firstRead] = await Promise.all([
-      $.tool.call({ tool: PLAN, steps: ['Read your brand notes', 'Build the pricing section', 'Check the page'] }),
+      $.tool.call({ tool: PLAN, title: 'Build my landing page', steps: ['Read your brand notes', 'Build the pricing section', 'Check the page'] }),
       $.tool.call({ tool: 'Read', file_path: 'notes.md' }),
     ])
     expect(planned.result).toBe('Planned 3 steps. The first one has started.')

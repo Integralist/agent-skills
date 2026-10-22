@@ -66,7 +66,7 @@ const SECTION = `# Clean View checklist
 
 The person sees a plain checklist of your plan instead of your tool calls.
 
-- For every request, even a quick question, call \`${PLAN_TOOL}\` first with every step of the job, 1 to 8 short names in order. Only include steps that perform actual work; never add a filler final step like "Prepare next action" or "Summarize findings". Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
+- For every request, even a quick question, call \`${PLAN_TOOL}\` first with a short job title and every step of the job, 1 to 8 short names in order. Only include steps that perform actual work; never add a filler final step like "Prepare next action" or "Summarize findings". Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
 - Never spend a turn calling \`${PROGRESS_TOOL}\` or \`${PLAN_TOOL}\` alone. Always call them in the same response as your next real tool call.
 - Call \`${PROGRESS_TOOL}\` with 100 when a step finishes (bundled with the first tool call of the next step), or alongside a tool call when a step has taken several tool calls. Only pass 100 after you have read a step's tool output and confirmed the step is done; when the final step is ready to answer, reply directly and Clean View completes it automatically.
 - Keep internal reasoning before tool calls brief (1 to 2 sentences) so the checklist never sits idle on a long thinking pause.
@@ -185,24 +185,7 @@ async function setEnabled($: $, value: boolean) {
   $.ui.toast(value ? 'Clean View on: showing the plan, hiding the technical details' : 'Clean View off: showing everything')
 }
 
-/** Asks Haiku for a short name for the job; drops the answer if a newer job started. */
-async function nameJob($: $, text: string, startedAt: number) {
-  const reply = await $.model.complete({
-    model: 'haiku',
-    effort: 'low',
-    maxTokens: 20,
-    timeoutMs: 8000,
-    system: 'You name jobs for a non-technical person. Reply with the name only: 2 to 6 plain words, starting with a verb. No code, file names or punctuation.',
-    prompt: text.slice(0, 2000),
-  })
-  if (!reply.isAnswered) return
-  const words = reply.text.replace(/["'.`*]/g, '').trim().split(/\s+/).slice(0, 6).join(' ')
-  if (words === '') return
-  const title = words[0].toUpperCase() + words.slice(1)
-  await edit($, list => (list.startedAt === startedAt ? { ...list, title } : list))
-}
-
-async function startJob($: $, text: string) {
+async function startJob($: $) {
   const startedAt = await $.clock.now()
   failures = 0
   await update($, selectedTaskId, () => null)
@@ -210,12 +193,11 @@ async function startJob($: $, text: string) {
   await update($, logScroll, () => 0)
   await edit($, () => newJob(startedAt, PLACEHOLDER_TITLE))
   startTicker($)
-  if (text !== '') void nameJob($, text, startedAt).catch(() => undefined)
 }
 
 /** Starts a job for a plan that arrives while none runs (a skill, a slash command). */
 async function ensureJob($: $) {
-  if (!isRunning(await read($, checklist))) await startJob($, '')
+  if (!isRunning(await read($, checklist))) await startJob($)
 }
 
 function needsYou(reason: string) {
@@ -262,7 +244,10 @@ export function registerCleanView(on: On) {
         'Lay out every step of the job up front so the person sees the plan: 1 to 8 short plain-English step names in order, each under 40 characters and starting with a verb. The first step starts right away. If the job grows past the plan, call it again with the full updated list and keep finished step names unchanged.',
       inputSchema: {
         type: 'object',
-        properties: { steps: { type: 'array', items: { type: 'string' }, minItems: 1, maxItems: 8 } },
+        properties: {
+          title: { type: 'string', description: 'Short 2 to 6 word plain-English job title starting with a verb, without code, file names or paths.' },
+          steps: { type: 'array', items: { type: 'string' }, minItems: 1, maxItems: 8 },
+        },
         required: ['steps'],
       },
       isDeferred: false,
@@ -339,7 +324,7 @@ export function registerCleanView(on: On) {
         })
         startTicker($)
       } else if (!isCommand && e.text.trim() !== '') {
-        await startJob($, e.text)
+        await startJob($)
       }
     }
     return next(e)
@@ -466,11 +451,12 @@ export function registerCleanView(on: On) {
   })
 
   on('tool.call', { tool: PLAN_TOOL }, async ($, e) => {
-    const steps = (e as { steps?: unknown }).steps
-    const names = Array.isArray(steps) ? steps.filter((s): s is string => typeof s === 'string') : []
+    const input = e as { steps?: unknown; title?: unknown }
+    const names = Array.isArray(input.steps) ? input.steps.filter((s): s is string => typeof s === 'string') : []
+    const title = typeof input.title === 'string' ? input.title : undefined
     await ensureJob($)
     const at = await $.clock.now()
-    await edit($, list => ({ ...planSteps(list, names, at), activity: { summary: 'Plan updated', at, inProgress: false } }))
+    await edit($, list => ({ ...planSteps(list, names, at, title), activity: { summary: 'Plan updated', at, inProgress: false } }))
     await update($, selectedTaskId, () => null)
     const updated = await read($, checklist)
     const activeTask = updated.tasks.find(one => one.status === 'active')
@@ -761,7 +747,7 @@ function headerOf(list: CleanViewChecklist, took: string, Text: TextElement) {
     default:
       return (
         <Text>
-          <Text bold>{list.title}</Text> · {took}
+          <Text bold>{list.title === PLACEHOLDER_TITLE ? list.activity?.summary ?? 'Thinking...' : list.title}</Text> · {took}
         </Text>
       )
   }
