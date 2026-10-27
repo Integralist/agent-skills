@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
-import { LOG_ENTRIES, LOG_ENTRY_CHARS, appendLog, cleanName, meter } from '../hooks/logic'
+import { LOG_ENTRIES, LOG_ENTRY_CHARS, appendLog, cleanName, extractThinkingHeading, meter } from '../hooks/logic'
 
 const PLUGIN = 'clean-view'
 const PLAN = 'mcp__clean-view__plan_steps'
@@ -51,11 +51,12 @@ type World = {
   opened: Opened[]
   aborted: string[]
   asked: number
+  thinkingChunks: string[]
 }
 
 /** The engine beneath the mod: store, clock, tools that succeed, panes that open, and a counter for unexpected model requests. */
 function world(on: On): World {
-  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [], opened: [], aborted: [], asked: 0 }
+  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [], opened: [], aborted: [], asked: 0, thinkingChunks: ['Checking ', 'the branch.'] }
   on('ui.open', ($, e) => {
     w.opened.push(e)
     return { value: { isPlaced: true as const } }
@@ -89,8 +90,7 @@ function world(on: On): World {
   on('classic.UserPromptSubmit', () => ({}))
   on('classic.PermissionDenied', () => ({}))
   on('turn.step', async function* ($, e) {
-    yield { kind: 'thinking' as const, index: 0, text: 'Checking ' }
-    yield { kind: 'thinking' as const, index: 0, text: 'the branch.' }
+    for (const text of w.thinkingChunks) yield { kind: 'thinking' as const, index: 0, text }
     return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null, usage: null }
   })
   on('tool.check', () => ({ decision: w.verdict }))
@@ -244,6 +244,7 @@ describe('checklist', () => {
     })
     const text = composed.sections.map(one => one.text).join('\n')
     expect(text).toContain('Never spend a turn calling `mcp__clean-view__report_progress` or `mcp__clean-view__plan_steps` alone')
+    expect(text).toContain('including the final step')
     expect(text).toContain("read a step's tool output and confirmed the step is done")
   })
 
@@ -264,6 +265,43 @@ describe('checklist', () => {
     await $.tool.call({ tool: PROGRESS, task: 'Read the files', percent: 100 })
     await $.tool.call({ tool: 'Read', file_path: 'd.ts' })
     expect(await activity()).toContain('Read 1 file in this step')
+  })
+
+  test('counts bash commands in the active step, shows step elapsed time, model stall notice, and thinking headings', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, 'Verify skill configuration')
+    await $.tool.call({ tool: PLAN, title: 'Check Pi settings', steps: ['Inspect settings file', 'Verify skill configuration'] })
+    await $.tool.call({ tool: 'Bash', command: 'ls' })
+    expect((await rows($, 'terminal', 120)).join('\n')).toContain('Ran 1 command in this step')
+    await $.tool.call({ tool: 'Bash', command: 'git status' })
+    expect((await rows($, 'terminal', 120)).join('\n')).toContain('Ran 2 commands in this step')
+
+    // Advancing to step 2 resets the command counter for the new step
+    await w.clock.advance(4000)
+    await $.tool.call({ tool: PROGRESS, task: 'Inspect settings file', percent: 100 })
+    await $.tool.call({ tool: 'Bash', command: 'git diff' })
+    expect((await rows($, 'terminal', 120)).join('\n')).toContain('Ran 1 command in this step')
+
+    // Once the active step runs >= 15s (18s on step 2), show step elapsed time
+    await w.clock.advance(18000)
+    const longRender = (await rows($, 'terminal', 120)).join('\n')
+    expect(longRender).toMatch(/▶ Verify skill configuration\s+[█░]{10}\s+Working · 18s/)
+
+    // If no model output arrives for >= 30s after the last tool result (or thinking delta), show stall notice
+    await w.clock.advance(13000)
+    const stalledRender = (await rows($, 'terminal', 140)).join('\n')
+    expect(stalledRender).toContain('No model output for 31s (Esc to stop)')
+
+    // Active thinking deltas refresh the activity timestamp, clear the stall notice, and extract **Heading** titles
+    expect(extractThinkingHeading('**First Heading** body **Investigating Stall Cause** more')).toBe('Investigating Stall Cause')
+    expect(extractThinkingHeading('Plain thinking without markdown bold')).toBeUndefined()
+
+    w.thinkingChunks = ['**Investigating Stall', ' Cause**\n\nProbing the stall...']
+    await step($)
+    const refreshedRender = (await rows($, 'terminal', 160)).join('\n')
+    expect(refreshedRender).not.toContain('No model output')
+    expect(refreshedRender).toContain('Thinking: Investigating Stall Cause')
   })
 
   test('a to-do list and a 60% report draw done, active, next and up-next rows', async ($, on) => {
@@ -720,18 +758,18 @@ describe('replanning', () => {
     await $.turn.start({ text: 'Use blue', turnId: 'turn-2' })
     expect((await rows($, 'terminal')).join('\n')).toContain('Build my landing page · 4s')
 
-    // Advance to the final step; if it reported < 100% and stopped to confirm, it pauses instead of auto-completing
+    // Advance to the final step; if it reported < 100% and stopped with a question, it pauses with Needs you
     await $.tool.call({ tool: PROGRESS, task: 'Build the pricing section', percent: 100 })
     await $.tool.call({ tool: PROGRESS, task: 'Check the page', percent: 50 })
-    await $.turn.complete({ answer: 'Confirm to publish.', durationMs: 1000, isAborted: false, turnId: 'turn-2', reason: 'answer' })
+    await $.turn.complete({ answer: 'Confirm to publish?', durationMs: 1000, isAborted: false, turnId: 'turn-2', reason: 'answer' })
     const midFinal = (await rows($, 'terminal')).join('\n')
-    expect(midFinal).toContain('■ Ended · Build my landing page · 2 of 3 steps done')
+    expect(midFinal).toContain('Needs you')
     expect(midFinal).toMatch(/‖ Check the page\s+█{5}░{5}\s+Paused/)
 
-    // Resuming carries on with the same 3-step plan, and finishing completes it
+    // Resuming carries on with the same 3-step plan, and finishing after a normal reply auto-completes even at < 100%
     await $.turn.start({ text: 'publish', turnId: 'turn-3' })
     await step($)
-    await $.tool.call({ tool: PROGRESS, task: 'Check the page', percent: 100 })
+    await $.tool.call({ tool: PROGRESS, task: 'Check the page', percent: 80 })
     await w.clock.advance(3000)
     await $.turn.complete({ answer: 'All done.', durationMs: 3000, isAborted: false, turnId: 'turn-3', reason: 'answer' })
     const finalTexts = (await rows($, 'terminal')).join('\n')

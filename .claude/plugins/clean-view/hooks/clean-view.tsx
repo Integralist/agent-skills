@@ -5,6 +5,7 @@ import type { CleanViewActivity, CleanViewChecklist, CleanViewLogEntry, CleanVie
 import {
   EMPTY,
   METER_CELLS,
+  PAUSED_PHASES,
   PLACEHOLDER_PREFIX,
   addTask,
   appendLog,
@@ -13,9 +14,11 @@ import {
   duration,
   endsWithQuestion,
   errorSentence,
+  extractThinkingHeading,
   fit,
   fromTodos,
   hasPlan,
+  isModelStalled,
   isRunning,
   isUserRejection,
   label,
@@ -47,8 +50,6 @@ const NEEDS_OK = 'Claude needs your OK to continue'
 const HAS_QUESTION = 'Claude has a question for you'
 const WAITING = 'Claude is waiting for your reply'
 const ASKED = 'Claude asked you a question above'
-// Phases where a plan was left part way; its active step draws as Paused.
-const PAUSED = new Set(['needsYou', 'stuck', 'stopped', 'waiting', 'ended'])
 // An agent in one of these is still at work and will report back on its own.
 const AGENT_AT_WORK = new Set(['pending', 'running', 'waiting'])
 const SAID_NO = 'you said no to a step, so Claude paused'
@@ -68,7 +69,7 @@ The person sees a plain checklist of your plan instead of your tool calls.
 
 - For every request, even a quick question, call \`${PLAN_TOOL}\` first with a short job title and every step of the job, 1 to 8 short names in order. Only include steps that perform actual work; never add a filler final step like "Prepare next action" or "Summarize findings". Load it with ToolSearch if it is deferred. If this session has TodoWrite or TaskCreate, you may use your to-do list as the plan instead.
 - Never spend a turn calling \`${PROGRESS_TOOL}\` or \`${PLAN_TOOL}\` alone. Always call them in the same response as your next real tool call.
-- Call \`${PROGRESS_TOOL}\` with 100 when a step finishes (bundled with the first tool call of the next step), or alongside a tool call when a step has taken several tool calls. Only pass 100 after you have read a step's tool output and confirmed the step is done; when the final step is ready to answer, reply directly and Clean View completes it automatically.
+- Call \`${PROGRESS_TOOL}\` with 100 when a step finishes (bundled with the first tool call of the next step), or alongside a tool call when a step has taken several tool calls. Report an intermediate percent (such as 25, 50, or 75) every few tool calls during any multi-tool step, including the final step. Only pass 100 after you have read a step's tool output and confirmed the step is done; when the final step is ready to answer, reply directly and Clean View completes it automatically.
 - Keep internal reasoning before tool calls brief (1 to 2 sentences) so the checklist never sits idle on a long thinking pause.
 - If the job grows past your plan (extra checks, cleanup, undoing changes, a new kind of work), call \`${PLAN_TOOL}\` again with the full updated list before you do it. Keep finished step names the same so they stay checked off.
 - Write every step name in plain English a non-technical person understands, under 40 characters, starting with a verb, like "Build the pricing section".
@@ -88,9 +89,11 @@ let permissionMode: string | undefined
 let mainTurnId: string | undefined
 // The pane button holding the focus ring; the per-frame redraw would otherwise reset it to Prev.
 let focusedButton: string | undefined
-// Files read during the active step, so the activity shows real progress the model hasn't reported.
+// Files read and commands run during the active step, so the activity shows real progress the model hasn't reported.
 let readsInStep = 0
 let readsStepId: string | null = null
+let commandsInStep = 0
+let commandsStepId: string | null = null
 let logSeq = 0
 let maxLogScroll = 0
 let pendingPlanUpdate: Promise<unknown> = Promise.resolve()
@@ -109,6 +112,16 @@ function countRead(list: CleanViewChecklist): string {
   }
   readsInStep++
   return `Read ${readsInStep} file${readsInStep === 1 ? '' : 's'} in this step`
+}
+
+function countCommand(list: CleanViewChecklist): string {
+  const stepId = list.tasks.find(one => one.status === 'active')?.id ?? null
+  if (stepId !== commandsStepId) {
+    commandsStepId = stepId
+    commandsInStep = 0
+  }
+  commandsInStep++
+  return `Ran ${commandsInStep} command${commandsInStep === 1 ? '' : 's'} in this step`
 }
 
 function startTicker($: $) {
@@ -299,7 +312,7 @@ export function registerCleanView(on: On) {
       const list = await read($, checklist)
       // A plan left part way (Esc, a pause, a question, background work) carries on:
       // a typed prompt is usually a re-steer, and a report is the work coming back.
-      const isPaused = PAUSED.has(list.phase) && hasPlan(list)
+      const isPaused = PAUSED_PHASES.has(list.phase) && hasPlan(list)
       const resumes = isReport ? list.phase === 'waiting' : !isCommand && e.text.trim() !== '' && isPaused
       if (resumes) {
         const resumedAt = await $.clock.now()
@@ -377,11 +390,15 @@ export function registerCleanView(on: On) {
     }
     if (tool === 'AskUserQuestion' && ran.deny === undefined) await recordActivity($, 'Answer received', false)
     if (!PLAN_UPDATERS.has(tool) && tool !== 'AskUserQuestion') {
+      const lowerTool = tool.toLowerCase()
+      const current = await read($, checklist)
       const summary = ran.isError === true
         ? 'A tool call failed'
-        : tool.toLowerCase() === 'read'
-          ? countRead(await read($, checklist))
-          : toolActivity(tool, true)
+        : lowerTool === 'read'
+          ? countRead(current)
+          : lowerTool === 'bash'
+            ? countCommand(current)
+            : toolActivity(tool, true)
       await recordActivity($, summary, false)
     }
     if (e.tool === 'TaskCreate' && ran.deny === undefined && ran.isError !== true) {
@@ -440,10 +457,26 @@ export function registerCleanView(on: On) {
   // skips the classic hooks that carry the mode and the classifier's refusal.
   on('turn.step', async function* ($, e, next) {
     if (e.agentId === undefined) await edit($, backToWork)
+    let thinkingBuffer = ''
+    let thinkingIndex: number | undefined
     const stream = next(e)
     for await (const chunk of stream) {
       if (e.agentId === undefined && chunk.kind === 'thinking' && chunk.text !== '') {
+        if (chunk.index !== thinkingIndex) {
+          thinkingIndex = chunk.index
+          thinkingBuffer = ''
+        }
+        thinkingBuffer += chunk.text
+        const heading = extractThinkingHeading(thinkingBuffer)
+        if (isRunning(await read($, checklist))) {
+          await recordActivity($, heading ? `Thinking: ${heading}` : 'Thinking', true)
+        }
         await recordTaskLog($, 'thinking', chunk.text, `thinking-${e.turnId}-${e.index}-${chunk.index}`)
+      }
+      if (e.agentId === undefined && chunk.kind === 'text' && chunk.text !== '') {
+        if (isRunning(await read($, checklist))) {
+          await recordActivity($, 'Writing the reply', true)
+        }
       }
       yield chunk
     }
@@ -520,8 +553,7 @@ export function registerCleanView(on: On) {
         if (list.tasks.some(one => one.status !== 'done')) {
           if (endsWithQuestion(e.answer)) return { ...list, phase: 'needsYou', needsYouReason: ASKED }
           if (atWork > 0) return { ...list, phase: 'waiting', needsYouReason: null, waitingOn: atWork }
-          const active = list.tasks.find(one => one.status === 'active')
-          if (!list.tasks.some(one => one.status === 'upcoming') && !(active?.hasReported && active.percent < 100)) {
+          if (!list.tasks.some(one => one.status === 'upcoming')) {
             const finishedAt = list.finishedAt ?? 0
             return {
               ...list,
@@ -587,7 +619,8 @@ export function registerCleanView(on: On) {
     const frame = isLive ? await read($, tick) : 0
     const now = isLive ? await $.clock.now() : (list.finishedAt ?? list.startedAt)
     const took = duration(now - list.startedAt)
-    const header = headerOf(list, took, Text)
+    const isPaused = PAUSED_PHASES.has(list.phase)
+    const header = headerOf(list, took, now, Text)
     const firstUpcoming = list.tasks.findIndex(one => one.status === 'upcoming')
 
     // A blank line above the band keeps it clear of the spinner line.
@@ -600,8 +633,12 @@ export function registerCleanView(on: On) {
       )
     }
 
-    // icon + space, name, space, 10-cell meter, two spaces, 7-cell label, a gap, the Details button
-    const nameWidth = Math.max(8, e.props.bodyColumns - (2 + 1 + METER_CELLS + 2 + 7 + 1 + DETAILS_BUTTON_CELLS))
+    const maxTagWidth = Math.max(
+      7,
+      ...list.tasks.map((one, i) => label(one, i === firstUpcoming, isPaused, now).length),
+    )
+    // icon + space, name, space, 10-cell meter, two spaces, tag label, a gap, the Details button
+    const nameWidth = Math.max(8, e.props.bodyColumns - (2 + 1 + METER_CELLS + 2 + maxTagWidth + 1 + DETAILS_BUTTON_CELLS))
     return (
       <Box key="clean-view-band" marginTop={1} flexDirection="column">
         <Box key="clean-view-header" flexDirection="row" justifyContent="space-between" marginBottom={1}>
@@ -610,7 +647,7 @@ export function registerCleanView(on: On) {
         </Box>
         {list.tasks.map((one, i) => (
           <Box key={`clean-view-task-row-${one.id}`} flexDirection="row" justifyContent="space-between">
-            {row(one, i === firstUpcoming, PAUSED.has(list.phase), frame, nameWidth, Text)}
+            {row(one, i === firstUpcoming, isPaused, frame, nameWidth, now, Text)}
             <Button key={`clean-view-task-inspect-${one.id}`} label="Details" onPress={() => void openDetails($, one.id)} />
           </Box>
         ))}
@@ -653,9 +690,9 @@ export function registerCleanView(on: On) {
     const isLive = isRunning(list)
     if (isLive) await read($, tick)
     const now = isLive ? await $.clock.now() : (list.finishedAt ?? list.startedAt)
-    const isPaused = PAUSED.has(list.phase)
+    const isPaused = PAUSED_PHASES.has(list.phase)
     const tone = task.status === 'done' ? 'green' : task.status === 'upcoming' ? 'gray' : isPaused ? 'yellow' : 'cyan'
-    const status = label(task, index === list.tasks.findIndex(one => one.status === 'upcoming'), isPaused)
+    const status = label(task, index === list.tasks.findIndex(one => one.status === 'upcoming'), isPaused, now)
     const progress = task.status === 'done' ? 'Complete' : task.hasReported ? `${task.percent}% reported` : 'No percentage reported yet'
     const activity = list.activity
       ? `${list.activity.summary} · ${list.activity.inProgress ? `for ${duration(now - list.activity.at)}` : `${duration(now - list.activity.at)} ago`}`
@@ -711,7 +748,7 @@ export function registerCleanView(on: On) {
 
 type TextElement = ReturnType<EngineInterface['ui']['resolve']>['Text']
 
-function headerOf(list: CleanViewChecklist, took: string, Text: TextElement) {
+function headerOf(list: CleanViewChecklist, took: string, now: number, Text: TextElement) {
   switch (list.phase) {
     case 'needsYou':
       return (
@@ -744,19 +781,33 @@ function headerOf(list: CleanViewChecklist, took: string, Text: TextElement) {
           <Text color="green">✓ All done</Text> · {list.title} · took {took}
         </Text>
       )
-    default:
+    default: {
+      const stalled =
+        isModelStalled(list, now) && list.activity
+          ? `No model output for ${duration(now - list.activity.at)} (Esc to stop)`
+          : undefined
+      const doing = stalled ?? list.activity?.summary
+      if (list.title === PLACEHOLDER_TITLE) {
+        return (
+          <Text>
+            <Text bold>{doing ?? 'Thinking...'}</Text> · {took}
+          </Text>
+        )
+      }
       return (
         <Text>
-          <Text bold>{list.title === PLACEHOLDER_TITLE ? list.activity?.summary ?? 'Thinking...' : list.title}</Text> · {took}
+          <Text bold>{list.title}</Text> · {took}
+          {doing ? <Text dimColor>{` · ${doing}`}</Text> : null}
         </Text>
       )
+    }
   }
 }
 
-function row(one: CleanViewTask, isFirstUpcoming: boolean, isPaused: boolean, frame: number, width: number, Text: TextElement) {
+function row(one: CleanViewTask, isFirstUpcoming: boolean, isPaused: boolean, frame: number, width: number, now: number, Text: TextElement) {
   const name = fit(one.name, width)
   const bar = meter(one, frame)
-  const tag = label(one, isFirstUpcoming, isPaused)
+  const tag = label(one, isFirstUpcoming, isPaused, now)
   if (one.status === 'done') {
     return (
       <Text key={one.id}>
