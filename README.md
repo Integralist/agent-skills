@@ -7,6 +7,7 @@ Shared skills, agents, rules, and configuration for AI coding assistants
 
 | Skill                                                                                      | Description                                                                                              |
 | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| [**acp**](.agents/skills/acp/SKILL.md)                                                     | Approve the current change, commit it to `main`, and push to `origin`.                                   |
 | [**agents-md**](.agents/skills/agents-md/SKILL.md)                                         | Make `AGENTS.md` canonical and point `CLAUDE.md` and `GEMINI.md` to it.                                  |
 | [**architect**](.agents/skills/architect/SKILL.md)                                         | Turn an idea into research, a specification, and an implementation plan.                                 |
 | [**bcp**](.agents/skills/bcp/SKILL.md)                                                     | Create a branch, commit changes, and open a PR or submit its stack.                                      |
