@@ -23,10 +23,18 @@
     {
       "source": "git:github.com/fastly/agent-skills-internal",
       "skills": [
+        "plugins/api-guild/skills/plan-api-endpoint/**",
+        "plugins/apple-containers/skills/**",
         "plugins/ciam/skills/**",
+        "plugins/coding/skills/**",
         "plugins/elevation/skills/**",
+        "plugins/google-workspace/skills/**",
+        "plugins/is-it-safe-to-run/skills/**",
         "plugins/observability/skills/**",
-        "plugins/portal/skills/**"
+        "plugins/portal/skills/**",
+        "plugins/python-forge-pypi-pipeline/skills/**",
+        "plugins/speaking/skills/**",
+        "plugins/terraform-review/skills/**"
       ]
     }
   ],
