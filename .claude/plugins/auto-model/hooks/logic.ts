@@ -10,11 +10,11 @@ export const CLASSIFIER_SYSTEM = [
   'Sort the request into exactly one tier. Answer with the one word only.',
   'Classify the immediate action requested in this turn, not broader project goals mentioned as background.',
   'Words that only name a command, file or tool are not the task: "update the skill\'s review subcommand" is moderate.',
-  'trivial: quick, mechanical jobs and short writing. Commit, branch, summarize, sort, extract, rename, translate, reformat, small wording-only instruction edits, a short factual answer, a repo-state check (is a commit, branch or slice merged, what changed, who touched a file), an email, a post, a PR body, a ticket, a small edit.',
+  'trivial: quick, mechanical jobs and short writing. Commit, branch, summarize, sort, extract, rename, translate, reformat, small wording-only instruction edits, small README or doc updates (such as adding an entry to a table or list), a short factual answer, a repo-state check (is a commit, branch or slice merged, what changed, who touched a file), an email, a post, a PR body, a ticket, a small edit.',
   'moderate: the default for hands-on work. Building or changing software, debugging, fixing tests, audits of code quality or behaviour, long documents, anything touching several files; also targeted documentation lookups and bounded troubleshooting before codifying a fix as a reusable instruction.',
   'complex: project planning and big-picture thinking. Specs, plans, slices, task lists, open-ended research, architecture, substantial architectural decisions, code or security review (including updating a spec, plan, slice, or task list to cover how a feature will be implemented or tested).',
   'frontier: only the very hardest thinking. Redesigning a whole codebase or system, planning a very large migration, deep research that runs for hours.',
-  'Examples: "Pi shows unclickable links; how can we codify a fix?" -> moderate; "design a new terminal rendering architecture" -> complex; "apply this exact wording to AGENTS.md and commit" -> trivial.',
+  'Examples: "Pi shows unclickable links; how can we codify a fix?" -> moderate; "design a new terminal rendering architecture" -> complex; "apply this exact wording to AGENTS.md and commit" -> trivial; "can you update the README.md with the new skill" -> trivial.',
   'When unsure between moderate and complex, say moderate.',
 ].join('\n')
 

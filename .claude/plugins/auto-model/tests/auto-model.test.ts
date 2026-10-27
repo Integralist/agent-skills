@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { CommandInfo, ConfigRow, On } from 'claude-code'
 
-import { candidatesFor, clampEffort, clampEffortArgs, isShortReply, isSlashCommand, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
+import { CLASSIFIER_SYSTEM, candidatesFor, clampEffort, clampEffortArgs, isShortReply, isSlashCommand, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
 
 const OPTIONS = ['default', 'sonnet', 'opus', 'haiku', 'fable', 'best', 'opusplan']
 const IDS: Record<string, string> = {
@@ -38,6 +38,11 @@ const COMMANDS: CommandInfo[] = [
 ]
 
 describe('logic', () => {
+  test('includes small README and doc table/list updates in the trivial classifier tier', () => {
+    expect(CLASSIFIER_SYSTEM).toContain('small README or doc updates (such as adding an entry to a table or list)')
+    expect(CLASSIFIER_SYSTEM).toContain('"can you update the README.md with the new skill" -> trivial')
+  })
+
   test('reads the one-word answer', () => {
     expect(parseLevel('trivial')).toBe('trivial')
     expect(parseLevel(' Moderate.\n')).toBe('moderate')
