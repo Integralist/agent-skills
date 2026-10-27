@@ -1,9 +1,9 @@
 ---
 name: code-review
 description: >-
-  Review a PR or local changes with parallel read-only reviewer subagents,
-  verify each finding, and check the change against its project's spec and
-  plan. Use when reviewing a remote PR or local code, including unpushed or
+  Review a PR or local changes with risk-based read-only reviewers, verify
+  findings, and check the change against its project's spec and plan. Use when
+  reviewing a remote PR or local code, including unpushed or
   uncommitted changes. Pass --plan=<path> to name the plan or task list.
 argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan=<path>]'
 metadata:
@@ -12,9 +12,11 @@ metadata:
 
 # Code Review
 
-Review a change with four read-only reviewer subagents in parallel, one per
-profile, plus a fifth for spec and plan adherence when the change has intent
-documents. A verifier subagent then tries to refute each finding, and the main
+Review a change with a risk-based number of read-only reviewers. Use one
+generalist reviewer for narrow, low-risk changes; add specialist reviewers
+only when concrete risks warrant them. Include intent documents in the review,
+and add a separate adherence reviewer only for substantial or cross-cutting
+requirements. A verifier then tries to refute each finding, and the main
 conversation reports only what survives. Review only: never edit code, change
 state, or comment on a PR.
 
@@ -56,13 +58,24 @@ state, or comment on a PR.
    labelled with its path, and any test results. Done when `CONTEXT_PATH` is
    written.
 
-3. **Review in parallel.** Start one read-only subagent per profile below, on
-   the most capable model available: a missed defect costs more than the
-   tokens. [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md)
-   covers turn budgets and retries. If the platform caps concurrency, run the
-   adherence reviewer after the four. Give each one:
+3. **Choose review depth.** Use scope and impact, not line count alone. Start
+   one read-only generalist reviewer for a localized, low-risk change. It
+   checks behaviour and tests, then security, reliability, and maintainability
+   where relevant; include any intent documents and check adherence in that
+   pass. Add specialist reviewers only for concrete signals: trust boundaries,
+   authentication, untrusted input, or secrets (security); persistence,
+   concurrency, failures, external calls, scale, or rollout (reliability);
+   broad refactors, new public APIs, or changes across modules (maintainability).
+   Keep behaviour and tests in scope. Use a separate spec and plan reviewer
+   only when intent requirements are substantial or cross-cutting; otherwise
+   keep those checks in the primary review. A one-line authorization change
+   may need security review; a large mechanical change may not.
 
-   - its profile's question, what it owns, and what it hands off;
+   [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md) covers turn
+   budgets and retries. Use the most capable model available for review
+   judgment. Give each selected reviewer:
+
+   - its assigned questions, responsibilities, and handoffs;
    - `DIFF_PATH`, `CONTEXT_PATH`, and the changed-file list, and for a diff
      over about 3000 lines, an instruction to read it file by file;
    - the conventions skills matching the changed files: `conventions-go` for
@@ -74,9 +87,9 @@ state, or comment on a PR.
    - the findings schema below, and the rule that every changed file is either
      reviewed or skipped with a reason.
 
-   Done when every reviewer is `COMPLETE` and every changed file was reviewed
-   by at least one profile that applies; re-run or redirect reviewers to close
-   a gap.
+   Done when every selected reviewer is `COMPLETE` and every changed file was
+   reviewed by at least one reviewer whose assigned questions apply; re-run or
+   redirect reviewers to close a gap.
 
 4. **Verify.** Give each finding (or a batch, under a concurrency cap) to a
    verifier subagent on the same model, told to refute it:
@@ -154,9 +167,9 @@ or amend the spec); wording too vague to demonstrate one is an unknown.
 
 ## Profiles
 
-Each profile owns one question, and a defect belongs to the profile whose
-question it answers. A reviewer stays in its profile, mentioning another only
-to explain impact.
+These are specialist lenses, not a mandatory roster. The focused reviewer
+covers all applicable questions in one pass; specialist reviewers cover their
+assigned questions. A defect belongs to the profile whose question it answers.
 
 1. **Behaviour and tests:** *does the change do what `CONTEXT_PATH` says, and
    do the tests prove it?* Owns intended behaviour, logic errors, edge cases,
@@ -239,7 +252,7 @@ and the smallest viable correction.}
 
 ### Spec and Plan Adherence
 
-{Only when that reviewer ran.}
+{Only when intent documents were found.}
 
 - **Intent documents:** {paths}
 - **Milestones:** …
