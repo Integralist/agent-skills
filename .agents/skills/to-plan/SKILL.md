@@ -32,8 +32,10 @@ explanatory prose, not required technical detail.
    session's discussion: capture the plan worked out there rather than
    starting over. Use the spec the user or calling skill names, or `spec.md`
    in the source's project folder; plan without one when neither exists. If
-   the source names a spec you can't find, ask for its path. Done when you
-   know the source and whether there's a spec.
+   the source names a spec you can't find, ask for its path. Without a spec,
+   preserve the build request and clarifications in Notes as quotations or
+   fixed-revision document links, redacting secrets. Done when you know the
+   source and whether there's a spec.
 
 2. **Read what it touches.** Read the spec if there is one, any research the
    source links, and the code the plan will change. Load the convention skills
@@ -71,8 +73,21 @@ explanatory prose, not required technical detail.
    Status `Planning`. Write the Summary and each slice's Delivers with the
    voice-product skill, so a reader sees what is built, for whom, and why. Add
    the plan to the project README as
-   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
-   file is written and you've shared its path.
+   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes.
+
+   Before handoff, have a fresh read-only reviewer compare the preserved build
+   request and clarifications with the spec and plan. Check omissions,
+   contradictions, and unexplained exclusions. Each agreed requirement must
+   reach a verifiable milestone, linked to a spec criterion when a spec
+   exists. Keep proposed risk responses separate from agreed requirements.
+   Use [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md).
+   Correct clear omissions within existing authorization; ask about changes
+   to agreed scope or ambiguous decisions. Record the result in Notes.
+   If delegation or the original build request is unavailable, check what is
+   available and disclose the limitation. Recheck only when the brief,
+   acceptance criteria, or milestone mapping changes.
+   Done when the coverage check is complete or its limitations are recorded,
+   discrepancies are resolved, and you've shared the plan's path.
 
 ````markdown
 # {Feature} — Plan
@@ -148,5 +163,6 @@ when covered by a shared diagram or clearer without one.}
 
 ## Notes
 
+- **Coverage check:** {review result, remaining gaps, and any limitations}
 - {Risks, open questions, unverified assumptions.}
 ````

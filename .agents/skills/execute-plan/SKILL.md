@@ -83,7 +83,8 @@ work.
    review findings before acceptance. Tick the slice's milestones only when
    accepted, then return to step 2. Done when every slice is accepted.
 
-5. **Audit and report.** Compare the plan and spec with the final code,
+5. **Audit and report.** Compare the plan, spec, and preserved build request
+   and clarifications (when available) with the final code and check evidence,
    requirement by requirement. Put anything left over into
    `tasks-final-verification.md` beside the plan the same way as step 2, and
    run it through step 3, then accept that residual work as a slice using the

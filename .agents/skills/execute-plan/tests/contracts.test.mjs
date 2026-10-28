@@ -365,6 +365,20 @@ test("compiled tasks map to milestones without copying the plan checklist", () =
   assert.throws(() => assertMilestoneMapping(compiler, template.replaceAll("**Supports:**", "**Location:**")));
 });
 
+test("planning preserves the build request and checks coverage before handoff", () => {
+  const spec = flat(".agents/skills/to-spec/SKILL.md");
+  const plan = flat(planPath);
+  assert.match(spec, /Preserve the build request and requirement-changing clarifications in the generated `spec\.md` file's `## Development Brief` section \(see the template below\)/);
+  assert.match(spec, /verbatim quotations or links to full documents at fixed revisions/);
+  assert.match(spec, /Keep earlier wording and record later decisions separately; redact secrets/);
+  assert.match(spec, /newly identified risks and undecided responses in Open Questions until settled/);
+  assert.match(plan, /fresh read-only reviewer compare the preserved build request and clarifications with the spec and plan/);
+  assert.match(plan, /Each agreed requirement must reach a verifiable milestone, linked to a spec criterion when a spec exists/);
+  assert.match(plan, /disclose the limitation/);
+  assert.match(plan, /Recheck only when the brief, acceptance criteria, or milestone mapping changes/);
+  assert.match(flat(skillPath), /preserved build request and clarifications \(when available\) with the final code and check evidence/);
+});
+
 test("item completion requires observed evidence, not planned success", () => {
   const content = flat(buildItemPath);
   assert.match(content, /Criterion \| Check \| Command \| Result \| Evidence/);

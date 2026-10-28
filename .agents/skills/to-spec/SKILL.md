@@ -24,8 +24,12 @@ fill the gap with a guess.
 
 1. **Pick the source.** Use the file the user names. With none, use this
    session's discussion: capture the spec worked out there rather than
-   starting over. If neither says enough to specify, ask. Done when you know
-   what is being built, for whom, and why.
+   starting over. Preserve the build request and requirement-changing
+   clarifications in the generated `spec.md` file's `## Development Brief`
+   section (see the template below). Use verbatim quotations or links to full
+   documents at fixed revisions. Keep earlier wording and record later
+   decisions separately; redact secrets. If neither says enough to specify,
+   ask. Done when you know what to build and the build request is preserved.
 
 2. **Read current truth.** Read any research the source links, the decisions
    in `docs/adr/`, the code the feature touches, and the capability's living
@@ -37,8 +41,10 @@ fill the gap with a guess.
    describes. Choose the testing seams: the fewest points where a test
    observes the behaviour, as high as they go (a boundary over an internal
    call), reusing existing ones. If the feature changes behaviour a living spec
-   holds, write the Behavioural Delta against it. Done when every behaviour in
-   the source has a scenario and every scenario has a seam.
+   holds, write the Behavioural Delta against it. Include agreed constraints
+   and failure behaviour; keep newly identified risks and undecided responses
+   in Open Questions until settled. Done when every behaviour in the build
+   request has a scenario and every scenario has a seam.
 
 4. **Write the spec** to `spec.md` in the source's project folder, or a new
    `projects/<yyyy-mm-dd>-<slug>/`, filling the template below. Fill the
@@ -56,6 +62,13 @@ fill the gap with a guess.
 - **Author:** {git config user.name}
 - **Created:** {date +%F}
 - **Language:** {detected language, or N/A}
+
+## Development Brief
+
+These are the instructions for building this feature, kept in their original
+wording so reviewers can check that the acceptance criteria cover the request.
+
+{Quoted build request and clarifications, or revision-pinned design links.}
 
 ## Problem Statement
 
