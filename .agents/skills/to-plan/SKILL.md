@@ -21,6 +21,13 @@ slice at a time into tasks against live code. Write the plan; don't build it.
 contradictory, or looks like the wrong design, tell the user and wait. Don't
 fill the gap with a guess.
 
+**Review first.** Make outcomes skimmable; keep execution contracts complete.
+Start each slice with its delivered outcome and any useful diagram, then put
+its dependencies, exact interfaces, and milestones underneath in the same
+section. Use short sentences, clear headings, and small, focused bullet groups.
+Cut repetition, not requirements or caveats. Brevity limits apply to
+explanatory prose, not required technical detail.
+
 1. **Pick the source.** Use the file the user names. With none, use this
    session's discussion: capture the plan worked out there rather than
    starting over. Use the spec the user or calling skill names, or `spec.md`
@@ -96,13 +103,14 @@ then a fenced Mermaid block. Omit when better covered within Implementation.}
 
 ### Slice 1: {what it delivers end to end}
 
-- **Blocked by:** None
 - **Delivers:** {observable behaviour}
-- **Consumes:** None
-- **Produces:** {exact signatures later slices rely on}
 
 {Optional focused outcome diagram for Slice 1, captioned with its ID. Omit
 when covered by a shared diagram or clearer without one.}
+
+- **Blocked by:** None
+- **Consumes:** None
+- **Produces:** {exact signatures later slices rely on}
 
 ```{language}
 {key signatures}
@@ -114,13 +122,14 @@ when covered by a shared diagram or clearer without one.}
 
 ### Slice 2: {what it delivers end to end}
 
-- **Blocked by:** Slice 1 ({why})
 - **Delivers:** {observable behaviour}
-- **Consumes:** {signatures from Slice 1}
-- **Produces:** {exact signatures, or None}
 
 {Optional focused outcome diagram for Slice 2, captioned with its ID. Omit
 when covered by a shared diagram or clearer without one.}
+
+- **Blocked by:** Slice 1 ({why})
+- **Consumes:** {signatures from Slice 1}
+- **Produces:** {exact signatures, or None}
 
 #### Slice 2 Milestones
 

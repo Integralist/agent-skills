@@ -22,6 +22,13 @@ so writing the code yourself only pays for it twice.
 contradictory, or looks like the wrong design, tell the user and wait. Don't
 fill the gap with a guess.
 
+**Review first.** Make outcomes skimmable; keep execution contracts complete.
+Start each task with its delivered outcome and any useful diagram, then put
+its full execution instructions underneath in the same section. Use short
+sentences, clear headings, and small, focused bullet groups. Cut repetition,
+not requirements or caveats. Brevity limits apply to explanatory prose, not
+required technical detail such as signatures, tests, or verification commands.
+
 1. **Pick the source.** Use the file the user names, and the slice they give
    (`slice-N`) if it has slices. With no file, use this session's discussion.
    If neither says enough to build tasks, ask.
@@ -108,7 +115,7 @@ Conventions and gotchas:
 
 ### Task {n}: {what it delivers}
 
-{One or two sentences on the behaviour this task delivers.}
+**Delivers:** {One sentence on the behaviour this task delivers.}
 
 {Optional focused outcome diagram for Task {n}, captioned with its ID. Omit
 when covered by a shared diagram or clearer without one.}
