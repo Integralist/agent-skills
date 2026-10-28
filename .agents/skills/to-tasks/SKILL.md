@@ -46,6 +46,9 @@ fill the gap with a guess.
      `path:line` pattern to follow. Write it verbatim only where a capable
      agent could still get it subtly wrong, such as concurrency, security, or
      a tricky algorithm.
+   - Choose focused outcome diagrams using
+     [OUTCOME-DIAGRAMS.md](../shared/OUTCOME-DIAGRAMS.md): individual, shared,
+     mixed, or none according to what helps the reviewer understand the change.
    - Write tests as [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) describes.
    - When the source has milestones, give each task a `Supports:` line naming
      the milestones it serves. The mapping is many-to-many:
@@ -88,6 +91,9 @@ fill the gap with a guess.
 
 {Two or three reader-facing sentences.}
 
+{Optional shared outcome diagram: caption the covered task IDs, then a fenced
+Mermaid block. Omit when better covered beside the relevant tasks.}
+
 ## Context for the executor
 
 Existing code the tasks build on (verified — do not re-explore):
@@ -103,6 +109,9 @@ Conventions and gotchas:
 ### Task {n}: {what it delivers}
 
 {One or two sentences on the behaviour this task delivers.}
+
+{Optional focused outcome diagram for Task {n}, captioned with its ID. Omit
+when covered by a shared diagram or clearer without one.}
 
 - **Supports:** {milestone keys; omit when the source has none}
 - **Location:** `{path}`, `{path}`

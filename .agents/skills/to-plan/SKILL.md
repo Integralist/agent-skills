@@ -48,6 +48,9 @@ fill the gap with a guess.
      each milestone meets; without one, the milestone's own wording is the
      criterion, so make it checkable. Never renumber a key once assigned; task
      lists and execution logs refer to it.
+   - Choose focused outcome diagrams using
+     [OUTCOME-DIAGRAMS.md](../shared/OUTCOME-DIAGRAMS.md): individual, shared,
+     mixed, or none according to what helps the reviewer understand the change.
    - Choose the delivery shape as
      [PULL-REQUEST-DELIVERY.md](../shared/PULL-REQUEST-DELIVERY.md) describes,
      naming slices or milestones, not task numbers.
@@ -78,6 +81,9 @@ fill the gap with a guess.
 {Two or three reader-facing sentences: the problem, what changes for whom,
 and why it matters.}
 
+{Optional shared outcome diagram: caption the covered slice or milestone IDs,
+then a fenced Mermaid block. Omit when better covered within Implementation.}
+
 ## Prerequisites
 
 {Services, libraries, tools, or config needed first, or "None".}
@@ -95,6 +101,9 @@ and why it matters.}
 - **Consumes:** None
 - **Produces:** {exact signatures later slices rely on}
 
+{Optional focused outcome diagram for Slice 1, captioned with its ID. Omit
+when covered by a shared diagram or clearer without one.}
+
 ```{language}
 {key signatures}
 ```
@@ -109,6 +118,9 @@ and why it matters.}
 - **Delivers:** {observable behaviour}
 - **Consumes:** {signatures from Slice 1}
 - **Produces:** {exact signatures, or None}
+
+{Optional focused outcome diagram for Slice 2, captioned with its ID. Omit
+when covered by a shared diagram or clearer without one.}
 
 #### Slice 2 Milestones
 
