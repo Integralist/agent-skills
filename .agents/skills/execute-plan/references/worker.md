@@ -31,10 +31,13 @@ even if more unchecked tasks are visible.
    assumption you couldn't verify. Make no design decisions.
 4. Update the docs the task requires. Change a living spec only when the project
    spec and its Behavioural Delta authorize it.
-5. Run the task's checks. An integration or boundary task also runs the full
-   suite, normally `make test`. Separate baseline failures from new ones, and
-   check your changes for scope and regressions. Don't run later tasks to make a
-   blocked one pass.
+5. Run the task's checks and applicable project-required checks, using
+   documented commands. For lengthy or noisy non-unit checks, you may request
+   a coordinator-run check instead. Return `INCOMPLETE` with the
+   required commands when a required run is pending. Separate baseline
+   failures from new ones, and check your changes for scope and regressions.
+   If this task depends on unfinished later work, report the dependency to the
+   coordinator. Do not implement other tasks without authorization.
 
 **Leave to the coordinator:** checkboxes, staging, commits, branches, the
 parent plan, and project status. Don't commit, push, submit PRs, deploy,

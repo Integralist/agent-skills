@@ -9,8 +9,9 @@ metadata:
 # Next Slice
 
 Do every ready item in one slice of a plan or task list, then offer one commit.
-Do the work yourself in the main thread, without subagents, and stop at the
-end of the slice.
+Keep implementation and failure diagnosis in the main thread. Only test
+execution may be delegated, as [BUILD-ITEM.md](../shared/BUILD-ITEM.md)
+describes. Stop at the end of the slice.
 
 1. **Pick the file and slice.** Use the file the user names. If they name none,
    use the one from earlier in this session. If there isn't one, ask for its
@@ -22,9 +23,10 @@ end of the slice.
    aren't done; if nothing in the slice is ready, report what blocks it and
    stop. Done when every item is ticked off or blocked.
 
-3. **Accept the slice.** Run the project's full test suite. Mark the slice
-   accepted only when every milestone outcome in it is verified, not because
-   its tasks are ticked.
+3. **Accept the slice** following
+   [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md). Keep it unaccepted while any
+   required outcome lacks passing evidence. Done when acceptance or the
+   remaining verification gaps are recorded.
 
 4. **Report and offer to commit.** Say what was done and what's left.
    Commit once for the whole slice at the end, not per task: ask whether to

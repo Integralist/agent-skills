@@ -28,6 +28,7 @@ const commitsPath = ".agents/skills/execute-plan/references/task-commits.md";
 const autoPath = ".agents/skills/execute-plan/references/auto.md";
 const planPath = ".agents/skills/to-plan/SKILL.md";
 const buildItemPath = ".agents/skills/shared/BUILD-ITEM.md";
+const acceptSlicePath = ".agents/skills/shared/ACCEPT-SLICE.md";
 
 test("explicit invocation keeps the session model coordinating", () => {
   const content = read(skillPath);
@@ -364,9 +365,85 @@ test("compiled tasks map to milestones without copying the plan checklist", () =
   assert.throws(() => assertMilestoneMapping(compiler, template.replaceAll("**Supports:**", "**Location:**")));
 });
 
-test("slice acceptance checks milestone outcomes, not task checkboxes", () => {
-  assert.match(flat(skillPath), /check each milestone's outcome against the plan, not the task checkboxes/);
-  assert.match(flat(".agents/skills/next-slice/SKILL.md"), /milestone outcome/);
+test("item completion requires observed evidence, not planned success", () => {
+  const content = flat(buildItemPath);
+  assert.match(content, /Criterion \| Check \| Command \| Result \| Evidence/);
+  assert.match(content, /observed results, not planned expectations/);
+  assert.match(content, /Failed, skipped, pending, unavailable, or missing required checks keep the item open/);
+  assert.match(content, /Verify the whole slice against its milestones and acceptance criteria/);
+  assert.match(content, /even when every task's checks pass/);
+});
+
+test("verification scope and setup let tasks finish before later milestones", () => {
+  const item = flat(buildItemPath);
+  assert.match(item, /Verify only this item's promised outcomes and applicable project-required checks/);
+  assert.match(item, /A task may complete while its supporting milestones remain open/);
+  assert.match(item, /Add missing checks or minimal harnesses for agreed behaviour within existing authorization/);
+  assert.match(item, /Project rules requiring a clean suite still apply/);
+  const compiler = flat(compilerPath);
+  assert.match(compiler, /harness setup before the checks that need them/);
+  assert.match(compiler, /Scope each task's Verify to its delivered outcome/);
+  assert.match(compiler, /\.\.\/shared\/ACCEPT-SLICE\.md/);
+  assert.match(flat(skillPath), /Handle pending check requests by running or delegating the checks, not repeating implementation/);
+});
+
+test("test-only delegation preserves evidence and main-thread ownership", () => {
+  const content = flat(buildItemPath);
+  for (const rule of [
+    "Only the main conversation launches test subagents",
+    "without source edits",
+    "executed/skipped counts",
+    "inspects the actual logs",
+    "Reuse evidence for unchanged code and test setup",
+    "evidence is missing or inconclusive",
+  ]) assert.ok(content.includes(rule), `missing test-runner rule: ${rule}`);
+  for (const name of ["next-task", "next-slice"])
+    assert.match(flat(`.agents/skills/${name}/SKILL.md`), /Only test execution may be delegated/);
+  assert.match(flat(skillPath), /verify the check evidence using/);
+  assert.match(flat(executorPath), /Don't spawn further subagents/);
+  assert.match(flat(executorPath), /Return `INCOMPLETE` with the required commands when a required run is pending/);
+});
+
+test("workers report later dependencies instead of expanding their task", () => {
+  const content = flat(executorPath);
+  assert.match(content, /If this task depends on unfinished later work, report the dependency to the coordinator/);
+  assert.match(content, /Do not implement other tasks without authorization/);
+});
+
+test("external mocks support scoped completion without claiming live verification", () => {
+  const content = flat(acceptSlicePath);
+  for (const rule of [
+    "do not substitute a mock for the behaviour being verified",
+    "External services may be mocked where the agreed verification scope allows it",
+    "Record the testing boundary and any live-service checks not performed",
+    "Those checks block completion only when required by the current scope or project policy",
+    "Base external test doubles on authoritative contracts or independently checked fixtures",
+  ]) assert.ok(content.includes(rule), `missing mock-boundary rule: ${rule}`);
+  const compiler = flat(compilerPath);
+  assert.match(compiler, /Name the testing boundary and any mocked external dependencies/);
+  assert.match(compiler, /state which live-service interactions the checks do not verify/);
+});
+
+test("both slice workflows use the same outcome and boundary gate", () => {
+  for (const path of [skillPath, ".agents/skills/next-slice/SKILL.md"])
+    assert.match(flat(path), /\.\.\/shared\/ACCEPT-SLICE\.md/);
+  const content = flat(acceptSlicePath);
+  for (const rule of [
+    "every milestone and acceptance criterion assigned to this slice",
+    "planned later-stage checks with their owning milestones",
+    "Current obligations cannot be deferred merely because their checks fail or are unavailable",
+    "Run project-required checks and regression checks applicable to the change",
+    "test the implementation being delivered",
+    "Run acceptance scenarios assigned to this slice",
+    "even when no compiled boundary task exists",
+    "a complete product-wide end-to-end suite is not a prerequisite",
+    "For non-code work",
+    "all required checks pass",
+    "Task checkboxes alone are not evidence",
+    "leave the slice unaccepted",
+  ]) assert.ok(content.includes(rule), `missing acceptance rule: ${rule}`);
+  assert.match(flat(skillPath), /accept that residual work as a slice/);
+  assert.match(flat(executorPath), /Run the task's checks and applicable project-required checks/);
 });
 
 function stripFences(content) {
@@ -393,7 +470,7 @@ test("reference checking ignores nested examples but keeps real instruction link
 });
 
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, buildItemPath]) {
+  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, buildItemPath, acceptSlicePath]) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {

@@ -49,6 +49,12 @@ required technical detail such as signatures, tests, or verification commands.
      failing test (red) with its command and why it fails, the implementation
      (green), and a runnable Verify. A task with no code, such as adding a
      dependency, still gets a runnable Verify.
+   - Make verification runnable at this stage. Include required fixtures,
+     service launchers, or harness setup before the checks that need them.
+     Scope each task's Verify to its delivered outcome and project-required
+     checks; later-stage verification stays with its owning milestones. Name
+     the testing boundary and any mocked external dependencies; state which
+     live-service interactions the checks do not verify.
    - Describe the implementation: the behaviour, the approach, and an existing
      `path:line` pattern to follow. Write it verbatim only where a capable
      agent could still get it subtly wrong, such as concurrency, security, or
@@ -64,10 +70,11 @@ required technical detail such as signatures, tests, or verification commands.
    - Cite existing code as `path:line`. Before finishing, check every cited
      symbol still resolves and every new name is spelled the same in every
      task.
-   - End with an **Integration / Boundary Verification Task** that exercises
-     the whole slice without mocks. When the spec has Gherkin acceptance
-     criteria, this task runs the slice's scenarios under the language's
-     runner (godog for Go, as the go-testing skill describes).
+   - End with an **Integration / Boundary Verification Task** following
+     [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md). When the spec has Gherkin
+     acceptance criteria, this task runs the scenarios assigned to this slice
+     under the language's runner (godog for Go, as the go-testing skill
+     describes).
 
 4. **Write the file** in the plan's project folder, or a new
    `projects/<yyyy-mm-dd>-<slug>/` when there's no plan:

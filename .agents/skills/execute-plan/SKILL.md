@@ -65,25 +65,29 @@ work.
       task-list path, the one task to do, allowed files, conventions, and, in
       `auto`, the decision IDs that apply. It follows the
       [worker procedure](references/worker.md).
-   2. Check its work yourself: read the actual diff, run the task's checks, and
-      compare both with the task. A worker's report is a claim. Retry an
-      incomplete, budget-limited run once with a higher budget, per
+   2. Check its work yourself: read the actual diff, compare it with the task,
+      and verify the check evidence using
+      [BUILD-ITEM.md](../shared/BUILD-ITEM.md). A worker's report is a claim.
+      Handle pending check requests by running or delegating the checks, not
+      repeating implementation. Retry an incomplete, budget-limited run once
+      with a higher budget, per
       [completion and retry](../shared/SUBAGENT-STEERABILITY.md#completion-and-retry).
    3. If something is wrong, diagnose it here and send the worker the smallest
       fix. After three failed fixes for the same problem, stop.
    4. Commit the task per [task-commits.md](references/task-commits.md) before
       launching the next one.
 
-4. **Accept the slice.** Run the full suite and check each milestone's outcome
-   against the plan, not the task checkboxes. For a risky slice (security, a
-   public API or contract, schema, or concurrency), get one read-only review of
-   the slice's diff first. Tick the slice's milestones in the plan, then return
-   to step 2. Done when every slice is accepted.
+4. **Accept the slice.** For a risky slice (security, a public API or contract,
+   schema, or concurrency), get one read-only review of the slice's diff first.
+   Follow [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md). Resolve blocking
+   review findings before acceptance. Tick the slice's milestones only when
+   accepted, then return to step 2. Done when every slice is accepted.
 
 5. **Audit and report.** Compare the plan and spec with the final code,
    requirement by requirement. Put anything left over into
    `tasks-final-verification.md` beside the plan the same way as step 2, and
-   run it through step 3. Then report:
+   run it through step 3, then accept that residual work as a slice using the
+   same acceptance procedure before reporting the plan complete. Then report:
 
    - plan status: done, incomplete, or partly verified;
    - commits for review, listed per

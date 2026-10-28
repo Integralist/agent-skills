@@ -9,7 +9,9 @@ metadata:
 # Next Task
 
 Do the next ready item from a plan or task list, then tick it off. Do one item
-per run, and do the work yourself in the main thread, without subagents.
+per run. Keep implementation and failure diagnosis in the main thread. Only
+test execution may be delegated, as [BUILD-ITEM.md](../shared/BUILD-ITEM.md)
+describes.
 
 1. **Pick the file.** Use the file the user names. If they name none, use the
    one from earlier in this session. If there isn't one, ask for its path.
