@@ -26,7 +26,9 @@ even if more unchecked tasks are visible.
    [BUILD-ITEM.md](../../shared/BUILD-ITEM.md) describes, except that the
    coordinator owns ticking boxes. Prove the test fails on its assertion, not on
    a compile error, then make it pass. For a task with no code, use its runnable
-   check. The test is the contract: fix the implementation, never the test.
+   check. If a supplied test contradicts the agreed requirements, report the
+   discrepancy to the coordinator. Do not silently change the test or implement
+   behaviour that contradicts those requirements.
 3. Stop after three failed fixes for the same criterion and report the
    assumption you couldn't verify. Make no design decisions.
 4. Update the docs the task requires. Change a living spec only when the project

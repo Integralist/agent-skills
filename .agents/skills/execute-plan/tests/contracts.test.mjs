@@ -418,6 +418,13 @@ test("test-only delegation preserves evidence and main-thread ownership", () => 
   assert.match(flat(executorPath), /Return `INCOMPLETE` with the required commands when a required run is pending/);
 });
 
+test("workers report tests that contradict agreed requirements", () => {
+  const content = flat(executorPath);
+  assert.match(content, /If a supplied test contradicts the agreed requirements, report the discrepancy to the coordinator/);
+  assert.match(content, /Do not silently change the test or implement behaviour that contradicts those requirements/);
+  assert.doesNotMatch(content, /The test is the contract/);
+});
+
 test("workers report later dependencies instead of expanding their task", () => {
   const content = flat(executorPath);
   assert.match(content, /If this task depends on unfinished later work, report the dependency to the coordinator/);
