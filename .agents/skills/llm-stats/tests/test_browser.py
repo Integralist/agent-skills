@@ -1,6 +1,7 @@
 """Real browser tests on file:// with networking disabled."""
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -612,3 +613,463 @@ def test_clipboard_fallback_and_mobile_layout(page, report_file):
     page.locator("#models-toggle").click()
     expect(page.get_by_label("Search models", exact=True)).to_be_visible()
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+
+@pytest.fixture
+def pareto_report() -> Iterator[Path]:
+    """Include trade-offs, dominance ties, duplicates, zeroes, and missing data."""
+    records = [
+        ("dominated", 45, 3),
+        ("middle-twin", 50, 2),
+        ("zero", 0, 0),
+        ("tied-score", 40, 2),
+        ("premium", 80, 4),
+        ("missing-score", None, 0),
+        ("tied-cost", 30, 1),
+        ("middle", 50, 2),
+        ("cheap", 40, 1),
+        ("missing-metric", 100, None),
+    ]
+    models = normalize(
+        [
+            {
+                "slug": slug,
+                "name": slug.replace("-", " ").title(),
+                "provider": (
+                    "anthropic"
+                    if slug in {"middle", "tied-score"}
+                    else ["anthropic", "openai", "google"][index % 3]
+                ),
+                "series": (
+                    "Mixed family" if slug in {"middle", "tied-score"} else slug
+                ),
+                "scores": (
+                    {"intelligence": score, "deepswe": 100 - score}
+                    if score is not None
+                    else {}
+                ),
+                "cost_per_task": {"intelligence": metric, "deepswe": metric},
+                "output_tokens_per_task": {"intelligence": metric},
+                "time_per_task": {"intelligence": metric},
+                "pricing": {"blended": metric},
+                "output_speed": 4 - metric if metric is not None else None,
+            }
+            for index, (slug, score, metric) in enumerate(records)
+        ]
+    )
+    config = load_config(BASE / "defaults.json")
+    config.update(
+        benchmark="intelligence", x="cost", models=[slug for slug, _, _ in records]
+    )
+    path = generate(models, config, source="Synthetic Pareto test fixture", demo=True)
+    yield path
+    path.unlink(missing_ok=True)
+
+
+def expect_frontier(page: Page, slugs: list[str]) -> None:
+    """Compare rendered line vertices with the expected plotted model locations."""
+    actual = page.locator(".pareto-line").evaluate(
+        """path => [...path.getAttribute('d').matchAll(/[ML]([^ML]+)/g)]
+          .map(match => match[1].trim().split(',').map(Number))"""
+    )
+    expected = [
+        node(page, slug)
+        .locator(".dot")
+        .evaluate(
+            "circle => ['cx', 'cy'].map(name => Number(circle.getAttribute(name)))"
+        )
+        for slug in slugs
+    ]
+    assert actual == expected
+
+
+@pytest.mark.parametrize("metric", ["cost", "tokens", "time", "price", "speed"])
+def test_pareto_line_uses_nondominated_points(
+    page: Page, pareto_report: Path, metric: str
+) -> None:
+    """The frontier respects metric direction, ties, duplicates, zeroes, and gaps."""
+    page.goto(pareto_report.as_uri())
+    checkbox = page.get_by_role("checkbox", name="Pareto line", exact=True)
+    expect(checkbox).not_to_be_checked()
+    expect(page.locator(".pareto-line")).to_have_count(0)
+    expect(page.locator("#pareto-note")).to_be_hidden()
+    page.locator("#x-metric").select_option(metric)
+    checkbox.check()
+    expect(page.locator(".pareto-line")).to_have_count(1)
+    expect_frontier(page, ["premium", "middle", "cheap", "zero"])
+    expect(page.locator(".node")).to_have_count(8)
+    expect(page.locator("#warnings")).to_contain_text("Missing Score")
+    expect(page.locator("#warnings")).to_contain_text("Missing Metric")
+    expect(page.locator("#pareto-note")).to_be_visible()
+    style = page.locator(".pareto-line").evaluate(
+        """line => {
+          const style = getComputedStyle(line);
+          return {dash: style.strokeDasharray, fill: style.fill,
+            events: style.pointerEvents};
+        }"""
+    )
+    assert style["dash"] != "none"
+    assert style["fill"] == "none"
+    assert style["events"] == "none"
+
+
+def test_pareto_recomputes_for_model_and_benchmark_changes(
+    page: Page, pareto_report: Path
+) -> None:
+    """Removing frontier models promotes alternatives; a new benchmark recalculates."""
+    page.goto(pareto_report.as_uri() + "?pareto=1")
+    expect_frontier(page, ["premium", "middle", "cheap", "zero"])
+    page.locator("#models-toggle").click()
+    page.get_by_role("checkbox", name="Middle", exact=True).uncheck()
+    page.get_by_role("checkbox", name="Middle Twin", exact=True).uncheck()
+    expect_frontier(page, ["premium", "dominated", "cheap", "zero"])
+    page.get_by_role("checkbox", name="Premium", exact=True).uncheck()
+    expect_frontier(page, ["dominated", "cheap", "zero"])
+    page.get_by_label("Search models", exact=True).press("Escape")
+    page.locator("#benchmark").select_option("deepswe")
+    expect(page.locator(".pareto-line")).to_have_count(0)
+    expect(page.get_by_role("checkbox", name="Pareto line")).to_be_checked()
+    page.locator("#benchmark").select_option("intelligence")
+    expect_frontier(page, ["dominated", "cheap", "zero"])
+    cost_line = page.locator(".pareto-line").get_attribute("d")
+    page.locator("#x-metric").select_option("speed")
+    expect_frontier(page, ["dominated", "cheap", "zero"])
+    assert page.locator(".pareto-line").get_attribute("d") != cost_line
+
+
+@pytest.mark.parametrize(
+    "selection",
+    ["", "zero", "middle,middle-twin", "missing-score,missing-metric"],
+)
+def test_pareto_does_not_invent_lines_with_fewer_than_two_locations(
+    page: Page, pareto_report: Path, selection: str
+) -> None:
+    """Empty, missing, singleton, and coincident selections have no fake segment."""
+    page.goto(pareto_report.as_uri() + f"?models={selection}&pareto=1")
+    expect(page.get_by_role("checkbox", name="Pareto line")).to_be_checked()
+    expect(page.locator(".pareto-line")).to_have_count(0)
+    assert "NaN" not in page.locator("#chart").inner_html()
+    assert "Infinity" not in page.locator("#chart").inner_html()
+
+
+def test_pareto_keyboard_toggle_preserves_family_lines_and_pins(
+    page: Page, report_file: Path
+) -> None:
+    """The overlay never changes family curves or intercepts node interactions."""
+    page.goto(report_file.as_uri())
+    family_lines = page.locator(".series path").evaluate_all(
+        "paths => paths.map(path => path.getAttribute('d'))"
+    )
+    checkbox = page.get_by_role("checkbox", name="Pareto line")
+    checkbox.focus()
+    checkbox.press("Space")
+    expect(page.locator(".pareto-line")).to_have_count(1)
+    frontier = page.locator(".pareto-line").get_attribute("d")
+    node(page, "demo-gpt-high").click()
+    expect(page.locator("#pin-status")).to_contain_text("GPT")
+    expect(page.locator(".pareto-line")).to_have_attribute("d", frontier)
+    checkbox.focus()
+    checkbox.press("Space")
+    expect(page.locator(".pareto-line")).to_have_count(0)
+    expect(page.locator("#pin-status")).to_contain_text("GPT")
+    assert (
+        page.locator(".series path").evaluate_all(
+            "paths => paths.map(path => path.getAttribute('d'))"
+        )
+        == family_lines
+    )
+    assert "pareto=0" in page.url
+
+
+def test_pareto_url_state_survives_reload_and_history(
+    page: Page, pareto_report: Path
+) -> None:
+    """Bookmarks and same-page history restore both the checkbox and overlay."""
+    page.goto(pareto_report.as_uri() + "?pareto=1&unrelated=keep")
+    checkbox = page.get_by_role("checkbox", name="Pareto line")
+    expect(checkbox).to_be_checked()
+    expect_frontier(page, ["premium", "middle", "cheap", "zero"])
+    checkbox.uncheck()
+    assert "pareto=0" in page.url
+    assert "unrelated=keep" in page.url
+    page.reload()
+    expect(checkbox).not_to_be_checked()
+    expect(page.locator(".pareto-line")).to_have_count(0)
+    page.evaluate(
+        """() => {
+          const url = new URL(location.href);
+          url.searchParams.set('pareto', '1');
+          history.pushState(null, '', url);
+          dispatchEvent(new PopStateEvent('popstate'));
+        }"""
+    )
+    expect(checkbox).to_be_checked()
+    expect_frontier(page, ["premium", "middle", "cheap", "zero"])
+    page.go_back()
+    expect(checkbox).not_to_be_checked()
+    expect(page.locator(".pareto-line")).to_have_count(0)
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_pareto_saved_html_and_url_override(
+    page: Page, pareto_report: Path, tmp_path: Path, enabled: bool
+) -> None:
+    """Saved HTML/JSON retain the option; an explicit URL overrides saved state."""
+    page.goto(pareto_report.as_uri() + f"?pareto={int(enabled)}")
+    with page.expect_download() as download:
+        page.locator("#save-html").click()
+    saved = tmp_path / "pareto-shared.html"
+    download.value.save_as(saved)
+    page.goto(saved.as_uri())
+    checkbox = page.get_by_role("checkbox", name="Pareto line")
+    expect(checkbox).to_be_checked(checked=enabled)
+    expect(page.locator(".pareto-line")).to_have_count(int(enabled))
+    with page.expect_download() as download:
+        page.locator("#export-json").click()
+    exported = tmp_path / "pareto.json"
+    download.value.save_as(exported)
+    payload = json.loads(exported.read_text(encoding="utf-8"))
+    assert payload["savedState"]["pareto"] is enabled
+    page.goto(saved.as_uri() + f"?pareto={int(not enabled)}")
+    expect(checkbox).to_be_checked(checked=not enabled)
+    expect(page.locator(".pareto-line")).to_have_count(int(not enabled))
+
+
+def effective_opacities(page: Page, selector: str) -> list[float]:
+    """Include ancestor opacity so a bright node inside a faded family fails."""
+    return page.locator(selector).evaluate_all(
+        """elements => elements.map(element => {
+          let opacity = 1;
+          for (let ancestor = element; ancestor; ancestor = ancestor.parentElement) {
+            opacity *= Number(getComputedStyle(ancestor).opacity);
+          }
+          return opacity;
+        })"""
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "opacity"),
+    [
+        ("zero", 1),
+        ("cheap", 1),
+        ("middle", 1),
+        ("middle-twin", 1),
+        ("premium", 1),
+        ("dominated", 0.25),
+        ("tied-cost", 0.25),
+        ("tied-score", 0.25),
+    ],
+)
+def test_pareto_focus_dims_only_nonfrontier_nodes_and_labels(
+    page: Page, pareto_report: Path, slug: str, opacity: float
+) -> None:
+    """Frontier nodes, including exact ties and mixed families, stay fully vivid."""
+    page.goto(pareto_report.as_uri() + "?pareto=1")
+    selector = f'.node[data-slug="{slug}"]'
+    assert effective_opacities(page, selector) == [opacity]
+    assert effective_opacities(page, selector + " .effort-label") == [opacity]
+
+
+def test_pareto_line_stands_out_from_context(page: Page, pareto_report: Path) -> None:
+    """A thick yellow line with a dark outline outranks faded family context."""
+    page.goto(pareto_report.as_uri() + "?pareto=1")
+    assert effective_opacities(page, ".series path") == [0.2]
+    expect(page.locator(".family-label").filter(has_text="Mixed family")).to_have_css(
+        "opacity", "1"
+    )
+    expect(page.locator(".family-label").filter(has_text="dominated")).to_have_css(
+        "opacity", "0.25"
+    )
+    style = page.locator(".pareto-line").evaluate(
+        """line => {
+          const rgb = color => color.match(/[0-9.]+/g).slice(0, 3).map(Number);
+          const luminance = channels => channels.map(value => {
+            const c = value / 255;
+            return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+          }).reduce((sum, value, i) => sum + value * [0.2126, 0.7152, 0.0722][i], 0);
+          const style = getComputedStyle(line);
+          const foreground = luminance(rgb(style.stroke));
+          const background = luminance(rgb(
+            getComputedStyle(document.querySelector('.chart-card')).backgroundColor));
+          return {color: rgb(style.stroke), width: Number.parseFloat(style.strokeWidth),
+            contrast: (Math.max(foreground, background) + 0.05)
+              / (Math.min(foreground, background) + 0.05)};
+        }"""
+    )
+    assert style["color"][0] >= 240
+    assert style["color"][1] >= 200
+    assert style["color"][2] <= 100
+    assert style["contrast"] >= 7
+    assert style["width"] >= 4
+    outline = page.locator(".pareto-outline")
+    expect(outline).to_have_count(1)
+    expect(outline).to_have_attribute(
+        "d", page.locator(".pareto-line").get_attribute("d")
+    )
+    assert (
+        outline.evaluate(
+            "path => Number.parseFloat(getComputedStyle(path).strokeWidth)"
+        )
+        > style["width"]
+    )
+    assert outline.evaluate("path => getComputedStyle(path).pointerEvents") == "none"
+
+
+def test_pareto_keeps_keyboard_access_and_restores_normal_view(
+    page: Page, pareto_report: Path
+) -> None:
+    """Keyboard focus, pin, clear, and toggle-off preserve deliberate exploration."""
+    page.goto(pareto_report.as_uri() + "?pareto=1")
+    dominated = '.node[data-slug="dominated"]'
+    mixed = '.node[data-slug="tied-score"]'
+    node(page, "dominated").focus()
+    expect(page.locator("#tooltip")).to_contain_text("Dominated")
+    assert effective_opacities(page, dominated) == [1]
+    assert effective_opacities(page, '.node[data-slug="middle"]') == [1]
+    page.get_by_role("checkbox", name="Pareto line").focus()
+    assert effective_opacities(page, dominated) == [0.25]
+    node(page, "tied-score").focus()
+    node(page, "tied-score").press("Space")
+    page.get_by_role("checkbox", name="Pareto line").focus()
+    expect(page.locator("#pin-status")).to_contain_text("Mixed family")
+    assert effective_opacities(page, mixed) == [1]
+    assert effective_opacities(page, '.node[data-slug="cheap"]') == [1]
+    assert effective_opacities(page, ".series path") == [1]
+    page.locator("#clear-highlight").click()
+    assert effective_opacities(page, mixed) == [0.25]
+    assert effective_opacities(page, ".series path") == [0.2]
+    page.get_by_role("checkbox", name="Pareto line").uncheck()
+    expect(page.locator(".pareto-line, .pareto-outline")).to_have_count(0)
+    assert effective_opacities(page, ".node") == [1] * 8
+    assert effective_opacities(page, ".series path") == [1]
+    assert all(value == 1 for value in effective_opacities(page, ".family-label"))
+
+
+def test_pareto_focus_marks_all_coincident_frontier_nodes_without_a_line(
+    page: Page, pareto_report: Path
+) -> None:
+    """A lone frontier location still distinguishes tied models from dominated ones."""
+    page.goto(pareto_report.as_uri() + "?pareto=1&models=middle,middle-twin,tied-score")
+    expect(page.locator(".pareto-line, .pareto-outline")).to_have_count(0)
+    assert effective_opacities(page, '.node[data-slug="middle"]') == [1]
+    assert effective_opacities(page, '.node[data-slug="middle-twin"]') == [1]
+    assert effective_opacities(page, '.node[data-slug="tied-score"]') == [0.25]
+
+
+@pytest.fixture
+def pointer_report() -> Iterator[Path]:
+    """Place a later-painted dominated node over two nearby frontier hit areas."""
+    records = [
+        ("front-a", "Frontier A (High Effort)", "high", 1, 80),
+        ("front-b", "Frontier B (Low Effort)", "low", 0.99, 79.5),
+        ("blocked", "Dominated (Medium Effort)", "medium", 1.005, 79.8),
+    ]
+    models = normalize(
+        [
+            {
+                "slug": slug,
+                "name": name,
+                "provider": "anthropic",
+                "series": slug,
+                "effort": effort,
+                "scores": {"intelligence": score},
+                "cost_per_task": {"intelligence": cost},
+            }
+            for slug, name, effort, cost, score in records
+        ]
+    )
+    config = load_config(BASE / "defaults.json")
+    config.update(
+        benchmark="intelligence", x="cost", models=[slug for slug, *_ in records]
+    )
+    path = generate(models, config, source="Synthetic pointer test fixture", demo=True)
+    yield path
+    path.unlink(missing_ok=True)
+
+
+def node_center(page: Page, slug: str) -> dict[str, float]:
+    """Locate the visible dot in viewport coordinates, not its larger group box."""
+    dot = node(page, slug).locator(".dot")
+    return dot.evaluate(
+        """dot => {
+          const point = new DOMPoint(Number(dot.getAttribute('cx')),
+            Number(dot.getAttribute('cy'))).matrixTransform(dot.getScreenCTM());
+          return {x: point.x, y: point.y};
+        }"""
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "name", "effort"),
+    [
+        ("front-a", "Frontier A (High Effort)", "HIGH"),
+        ("front-b", "Frontier B (Low Effort)", "LOW"),
+    ],
+)
+def test_pareto_mouse_targets_the_visible_frontier_dot(
+    page: Page, pointer_report: Path, slug: str, name: str, effort: str
+) -> None:
+    """Neither an overlapping faded node nor a nearby yellow node steals input."""
+    page.goto(pointer_report.as_uri() + "?pareto=1")
+    position = node_center(page, slug)
+    page.mouse.move(**position)
+    expect(page.locator("#tooltip strong")).to_have_text(name)
+    expect(page.locator("#tooltip .muted")).to_contain_text(effort)
+    page.mouse.click(**position)
+    expect(node(page, slug)).to_have_attribute("aria-pressed", "true")
+    expect(node(page, "blocked")).to_have_attribute("aria-pressed", "false")
+
+
+def test_pareto_mouse_targets_restore_when_unchecked(
+    page: Page, pointer_report: Path
+) -> None:
+    """Normal hit areas and faded-model mouse access return after toggling off."""
+    page.goto(pointer_report.as_uri())
+    position = node_center(page, "front-a")
+    page.mouse.move(**position)
+    expect(page.locator("#tooltip strong")).to_have_text("Dominated (Medium Effort)")
+    checkbox = page.get_by_role("checkbox", name="Pareto line")
+    checkbox.check()
+    page.mouse.move(**node_center(page, "front-a"))
+    expect(page.locator("#tooltip strong")).to_have_text("Frontier A (High Effort)")
+    checkbox.uncheck()
+    page.mouse.move(**node_center(page, "front-a"))
+    expect(page.locator("#tooltip strong")).to_have_text("Dominated (Medium Effort)")
+    page.mouse.click(**node_center(page, "front-a"))
+    expect(node(page, "blocked")).to_have_attribute("aria-pressed", "true")
+
+
+def test_pareto_ignores_distant_padding_and_effort_labels(
+    page: Page, pointer_report: Path
+) -> None:
+    """Only the area near a yellow dot, not its label or old padding, triggers it."""
+    page.goto(pointer_report.as_uri() + "?pareto=1")
+    position = node_center(page, "front-a")
+    scale = page.locator("#chart").evaluate("svg => svg.getScreenCTM().a")
+    page.mouse.move(position["x"] - 14 * scale, position["y"])
+    expect(page.locator("#tooltip")).to_be_hidden()
+    label = node(page, "front-a").locator(".effort-label").bounding_box()
+    assert label is not None
+    page.mouse.move(label["x"] + label["width"] / 2, label["y"] + label["height"] / 2)
+    expect(page.locator("#tooltip")).to_be_hidden()
+
+
+def test_pareto_nonfrontier_nodes_stay_mouse_inert_when_their_family_is_revealed(
+    page: Page, pareto_report: Path
+) -> None:
+    """Keyboard inspection can reveal a family without re-enabling its mouse traps."""
+    page.goto(pareto_report.as_uri() + "?pareto=1")
+    node(page, "middle").focus()
+    node(page, "middle").press("Enter")
+    expect(node(page, "middle")).to_have_attribute("aria-pressed", "true")
+    assert effective_opacities(page, '.node[data-slug="tied-score"]') == [1]
+    page.mouse.move(**node_center(page, "tied-score"))
+    page.mouse.click(**node_center(page, "tied-score"))
+    expect(node(page, "middle")).to_have_attribute("aria-pressed", "true")
+    expect(node(page, "tied-score")).to_have_attribute("aria-pressed", "false")
+    expect(page.locator("#tooltip strong")).to_have_text("Middle")
+    page.locator("#clear-highlight").click()
+    node(page, "tied-score").focus()
+    node(page, "tied-score").press("Space")
+    expect(node(page, "tied-score")).to_have_attribute("aria-pressed", "true")

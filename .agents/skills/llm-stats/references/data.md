@@ -211,6 +211,31 @@ models, even if they are missing the plotted metric; its empty cells represent
 missing values. Spreadsheet formula-like text cells are escaped with a leading
 apostrophe. **Export all JSON** retains the entire model catalog.
 
+## Pareto line
+
+The **Pareto line** checkbox starts off. Enable it to draw a dashed line
+through the best score/metric trade-offs among selected models with data for
+both axes. A model is excluded from the line if another selected, plotted
+model is at least as good on both axes and strictly better on one. Lower
+cost, token count, generation time, and token price are better; higher
+output speed and benchmark score are better.
+
+Every non-dominated location is included. Identical coordinates share one
+line vertex, and every tied frontier model stays vivid. All model nodes
+remain present, and family curves keep their original geometry. Fewer than
+two distinct frontier locations produce no line. Connecting segments are
+visual guides, not measured intermediate results.
+
+When enabled, the thicker yellow dashed line has a dark outline. Frontier
+nodes stay vivid; other nodes and their labels fade to 25% opacity, and
+family curves fade into the background. Only frontier nodes respond to
+mouse hover and clicks, with tighter hit areas around their dots. Faded
+nodes, family curves, and effort labels cannot intercept the mouse.
+Keyboard focus and Enter/Space still let you inspect and pin any model.
+A revealed family does not re-enable its non-frontier mouse targets or dim
+other frontier nodes. Switching the checkbox off restores normal styling
+and mouse access to every model.
+
 ## URL state and sharing
 
 The primary query parameters are below. For the corrected default view, open
@@ -227,6 +252,8 @@ with `x=cost` rather than expecting the new default to override URL state.
 - `benchmark`: score key.
 - `x`: cost, tokens, time, price, or speed.
 - `highlight`: pinned node's slug; it must be selected and have plotted data.
+- `pareto`: `1` enables the Pareto line; `0` disables it. Without a URL value,
+  use the saved HTML setting, or off for a newly generated report.
 
 Explicit `benchmark`/`x` values take precedence over Artificial Analysis's
 aliases. Without `x`, alias precedence is cost, token usage, speed:
@@ -288,7 +315,7 @@ make -C <skill-base-dir> check test
 
 Browser tests use Google Chrome through Playwright's `chrome` channel, with
 networking disabled. They cover hover/pin/toggle, fuzzy selection, empty and
-unknown URL selections, metric changes, presets, saved HTML, exports, and
-hostile model names. Generator tests use mocked API responses; a passing suite
-does not prove a real API key's access or the coverage of the current upstream
-catalog.
+unknown URL selections, metric changes, presets, saved HTML, exports,
+Pareto dominance and state persistence, and hostile model names. Generator
+tests use mocked API responses; a passing suite does not prove a real API
+key's access or the coverage of the current upstream catalog.

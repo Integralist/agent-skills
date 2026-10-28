@@ -44,9 +44,10 @@
   <section class="chart-card" aria-labelledby="chart-title">
     <div class="chart-heading">
       <div><p class="eyebrow" id="chart-kicker">MODEL TRADE-OFFS</p><h2 id="chart-title">Model comparison</h2></div>
-      <div class="chart-actions"><button id="clear-highlight">Clear highlight</button><span id="point-count" class="muted small"></span></div>
+      <div class="chart-actions"><label class="pareto-toggle"><input id="pareto-toggle" type="checkbox" aria-describedby="pareto-note">Pareto line</label><button id="clear-highlight">Clear highlight</button><span id="point-count" class="muted small"></span></div>
     </div>
     <p id="metric-note" class="metric-note"></p>
+    <p id="pareto-note" class="metric-note" hidden>The yellow dashed line connects the best score/metric trade-offs among selected models. Only yellow nodes respond to the mouse; faded models remain accessible with Tab and Enter/Space. Segments are visual guides, not measured intermediate results.</p>
     <div id="warnings" class="warning" role="status" hidden></div>
     <div class="chart-scroll">
       <svg id="chart" viewBox="0 0 1280 660" aria-label="Model comparison chart"></svg>

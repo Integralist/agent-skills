@@ -67,23 +67,31 @@ limits, units, import formats, URL parameters, and the 1Password setup.
 Keep API keys out of this file. URL parameters override a saved view, which
 overrides these defaults.
 
-**Sharing.** **Save HTML view** embeds the current selection and pinned node,
-since URL state doesn't travel with an emailed file. Each run rewrites the
-same `$HOME/llm-stats.html`, so a bookmark with query parameters keeps
-working; keep those parameters when updating one. An old bookmark with
+**Sharing.** **Save HTML view** embeds the current selection, pinned node,
+and Pareto checkbox state, since URL state doesn't travel with an emailed
+file. Each run rewrites the same `$HOME/llm-stats.html`, so a bookmark with
+query parameters keeps working; keep those parameters when updating one.
+An old bookmark with
 `x=price` still shows token prices; `x=cost` gives benchmark cost. The page
 can also export all JSON or the chart's CSV.
 
 **Page behaviour,** which the tests protect:
 
-- Hovering or focusing an effort node highlights its family and dims the
-  rest; clicking or Enter/Space pins it, clicking another replaces the pin,
-  and clicking it again, Escape, or **Clear highlight** releases it.
+- Hovering or focusing an effort node highlights its family. The normal
+  view dims other families; Pareto mode keeps frontier nodes vivid.
+  Clicking or Enter/Space pins it, clicking another replaces the pin, and
+  clicking it again, Escape, or **Clear highlight** releases it.
 - The model dropdown has fuzzy search, checkboxes, Clear, Select matches,
   and Reset defaults, with arrow keys to move and Escape to close.
 - Models missing the chosen score or metric are left out with a visible
   warning naming each one and what it lacks, updated as selections change.
   Zero is a value, not a gap.
+- **Pareto line**, off by default, overlays the non-dominated trade-offs
+  among selected, plotted models with a bright yellow line. It dims other
+  nodes and family curves. Only frontier nodes respond to the mouse, with
+  tighter hit areas; keyboard focus and pin remain available for every model.
+  It updates with selection and metric changes, and survives bookmarks and
+  saved HTML.
 - Reports and exports keep the API's index version, and cost tooltips keep
   four decimal places.
 

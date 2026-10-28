@@ -119,7 +119,8 @@
       ? params.get("models").split(",").map(slug => slug.trim()).filter(Boolean)
       : saved.models || defaults(report.config);
     const pinned = params.has("highlight") ? params.get("highlight") : saved.pinned || null;
-    state = { selected: new Set(selected), benchmark, x, pinned, hovered: null };
+    const pareto = params.has("pareto") ? params.get("pareto") === "1" : saved.pareto === true;
+    state = { selected: new Set(selected), benchmark, x, pinned, pareto, hovered: null };
     if (!state.selected.has(pinned) || !bySlug.has(pinned)) state.pinned = null;
   };
   const syncURL = () => {
@@ -127,6 +128,7 @@
     url.searchParams.set("models", [...state.selected].sort().join(","));
     url.searchParams.set("benchmark", state.benchmark);
     url.searchParams.set("x", state.x);
+    url.searchParams.set("pareto", state.pareto ? "1" : "0");
     if (state.pinned) url.searchParams.set("highlight", state.pinned);
     else url.searchParams.delete("highlight");
     if (state.x === "cost") url.searchParams.set("eval-cost",
@@ -142,6 +144,7 @@
   };
   const savedState = () => ({
     models: [...state.selected], benchmark: state.benchmark, x: state.x, pinned: state.pinned,
+    pareto: state.pareto,
   });
   const svgElement = (tag, attributes, parent, content) => {
     const element = document.createElementNS(svgNS, tag);
@@ -236,18 +239,28 @@
     const slug = state.pinned || state.hovered;
     const point = points.get(slug);
     const key = point ? seriesKey(point.model) : null;
+    const emphasized = new Set([...points.values()].filter(point => point.frontier)
+      .map(point => seriesKey(point.model)));
+    if (key) emphasized.add(key);
+    const dimFamily = family => state.pareto
+      ? !emphasized.has(family) : Boolean(key && key !== family);
     for (const [groupKey, group] of groups) {
-      group.classList.toggle("is-dim", Boolean(key && key !== groupKey));
+      // Parent opacity would also hide frontier nodes in a mixed family.
+      group.classList.toggle("is-dim", Boolean(!state.pareto && key && key !== groupKey));
       group.classList.toggle("is-active", key === groupKey);
     }
     for (const label of $("chart").querySelectorAll(".family-label")) {
-      label.classList.toggle("is-dim", Boolean(key && key !== label.dataset.series));
+      label.classList.toggle("is-dim", dimFamily(label.dataset.series));
     }
     for (const element of $("chart").querySelectorAll(".node")) {
+      const candidate = points.get(element.dataset.slug);
+      element.classList.toggle("is-frontier", Boolean(candidate.frontier));
+      element.classList.toggle("is-muted", Boolean(state.pareto && !candidate.frontier
+        && seriesKey(candidate.model) !== key));
       element.setAttribute("aria-pressed", String(element.dataset.slug === state.pinned));
     }
     for (const button of $("legend").querySelectorAll("button")) {
-      button.classList.toggle("is-dim", Boolean(key && key !== button.dataset.series));
+      button.classList.toggle("is-dim", dimFamily(button.dataset.series));
       button.setAttribute("aria-pressed", String(Boolean(state.pinned && key === button.dataset.series)));
     }
     guides?.replaceChildren();
@@ -265,7 +278,10 @@
     $("clear-highlight").disabled = !slug;
   };
   const renderChart = () => {
+    $("pareto-toggle").checked = state.pareto;
+    $("pareto-note").hidden = !state.pareto;
     const chart = $("chart");
+    chart.classList.toggle("is-pareto", state.pareto);
     chart.replaceChildren();
     $("legend").replaceChildren();
     points = new Map();
@@ -379,7 +395,8 @@
           "aria-label": model.name + ", " + formatY(point.y) + ", " + formatX(point.x),
           "aria-pressed": "false",
         }, group);
-        svgElement("circle", { cx: point.sx, cy: point.sy, r: 15, fill: "transparent" }, element);
+        svgElement("circle", { cx: point.sx, cy: point.sy,
+          r: state.pareto ? 8 : 15, fill: "transparent" }, element);
         svgElement("circle", { class: "dot", cx: point.sx, cy: point.sy, r: 5.5, fill: color }, element);
         svgElement("text", { x: point.sx, y: point.sy + 20, fill: color,
           "text-anchor": "middle", class: "effort-label" }, element, model.effort.toUpperCase());
@@ -424,6 +441,29 @@
       legend.append(swatch, label);
       legend.addEventListener("click", () => pin(anchor.model.slug));
       $("legend").append(legend);
+    }
+    if (state.pareto) {
+      // Best metric first; at equal metric, keep only the highest score.
+      const ordered = [...points.values()].sort((a, b) =>
+        (xInfo[state.x].lower ? a.x - b.x : b.x - a.x) || b.y - a.y);
+      let bestScore = -Infinity;
+      let bestMetric;
+      const frontier = ordered.filter(point => {
+        // Coincident frontier models stay vivid but share one line vertex.
+        point.frontier = point.y > bestScore || (point.y === bestScore && point.x === bestMetric);
+        if (point.y <= bestScore) return false;
+        bestScore = point.y;
+        bestMetric = point.x;
+        return true;
+      }).reverse();
+      if (frontier.length > 1) {
+        const d = frontier.map((point, index) =>
+          (index ? "L" : "M") + point.sx + "," + point.sy).join(" ");
+        svgElement("path", { class: "pareto-outline", d, "aria-hidden": "true" }, chart);
+        svgElement("path", {
+          class: "pareto-line", role: "img", "aria-label": "Pareto line for selected models", d,
+        }, chart);
+      }
     }
     const labelLayer = svgElement("g", { class: "family-label-layer" }, chart);
     for (const label of familyLabels) {
@@ -571,6 +611,11 @@
     state.x = $("x-metric").value;
     state.hovered = null;
     urlWarnings = [];
+    renderChart();
+    syncURL();
+  });
+  $("pareto-toggle").addEventListener("change", () => {
+    state.pareto = $("pareto-toggle").checked;
     renderChart();
     syncURL();
   });
