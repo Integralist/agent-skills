@@ -28,6 +28,8 @@ plan directly or from a compiled task list. Use the same gate in both cases.
    For non-code work, run the assertions and repository checks that verify its
    promised outcomes. Use [BUILD-ITEM.md](BUILD-ITEM.md) for running checks,
    reusing evidence, and handling baseline failures.
+   If checks depend on local source changes excluded from delivery, rerun
+   them without those changes before accepting the slice.
    Done when required checks have run and their results are recorded,
    or unavailable checks are explicitly reported.
 

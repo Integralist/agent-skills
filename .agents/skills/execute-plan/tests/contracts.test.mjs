@@ -445,6 +445,10 @@ test("external mocks support scoped completion without claiming live verificatio
   assert.match(compiler, /state which live-service interactions the checks do not verify/);
 });
 
+test("slice acceptance excludes dependencies on undelivered changes", () => {
+  assert.match(flat(acceptSlicePath), /If checks depend on local source changes excluded from delivery, rerun them without those changes before accepting the slice\./);
+});
+
 test("both slice workflows use the same outcome and boundary gate", () => {
   for (const path of [skillPath, ".agents/skills/next-slice/SKILL.md"])
     assert.match(flat(path), /\.\.\/shared\/ACCEPT-SLICE\.md/);
