@@ -10,7 +10,8 @@ written by hand and versioned with the skill it tests.
 | `id`                   | yes      | Stable kebab-case identifier. Runs compare by `id`, so a rename drops its history |
 | `prompt`               | yes      | What the user would type — realistic phrasing, not a statement of expected output |
 | `setup`                | no       | Shell commands building the starting state, run in order inside the sandbox       |
-| `checks`               | yes      | Plain-English assertions, graded by reading the transcript                        |
+| `checks`               | yes      | Plain-English assertions, graded from transcripts and verification output          |
+| `verify`               | no       | Parent-run shell commands against the final sandbox; each must exit zero             |
 | `keep_sandbox_on_fail` | no       | `true` keeps the sandbox when a check fails. Default `false`                      |
 
 ## Example
@@ -49,6 +50,15 @@ written by hand and versioned with the skill it tests.
   by the executor if cold isolation ever slips.
 - Five to eight cases is a working suite. Depth comes from cases earned by real
   failures, not from enumerating variations up front.
+
+## Independent verification
+
+Use `verify` for small, deterministic checks of the actual result. Keep the
+expected values in these commands, rather than trusting tests the executor
+can edit. Commands may create disposable check files inside the sandbox but
+must leave the delivered files unchanged. They run only after the executor
+finishes and are withheld from its prompt. No external services or secrets.
+Existing cases without `verify` retain transcript-only grading.
 
 ## Fabricating state
 
