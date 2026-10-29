@@ -1,8 +1,8 @@
 # Acceptance Tests
 
-Turn a spec's Gherkin acceptance criteria into tests that run end to end under
-[godog](https://github.com/cucumber/godog) via `go test`, so they execute as
-part of `make test` with no separate runner.
+Run the canonical living specs in `docs/specs/<capability>.feature` end to
+end under [godog](https://github.com/cucumber/godog) via `go test`, so they
+execute as part of `make test` with no separate runner.
 
 **Two altitudes, one source of truth each.** Behaviour at a system boundary
 (API, CLI, HTTP handler) becomes a `.feature` file that runs as an acceptance
@@ -11,9 +11,19 @@ test: `fields` are the Given, the call is the When, `want` is the Then.
 Wrapping a unit in a `.feature` file adds a second artifact that drifts from
 the test.
 
-**Layout.** `.feature` files live in a `features/` directory next to the
-package test that wires them. Unimplemented steps return `godog.ErrPending`,
-so the suite reports them as pending rather than passing silently.
+**Layout.** Keep runners, step implementations, and fixtures beside the
+package under test. Point `godog.Options.Paths` directly at the owning living
+`.feature` files, resolving paths from the test package. Name features for
+capabilities, not delivery slices. Do not copy scenarios into package-local
+`features/` files; project specs retain proposal and historical snapshots only.
+See [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) for placement and migration.
+
+**Fail closed.** Select the suite's owned features explicitly, not every
+feature in a multi-service repository. Fail when selection yields no runnable
+scenarios. Set `Strict: true` so undefined or pending steps fail the suite;
+unimplemented steps return `godog.ErrPending`, not success. The runner parses
+the actual living files; structural spec checks alone do not prove syntax or
+behaviour.
 
 **Wiring.** Write the step code so a newcomer can read it:
 
@@ -41,9 +51,11 @@ so the suite reports them as pending rather than passing silently.
   functions or scenario-world methods; put those helpers below the initializer
   so it remains a readable map of the scenarios.
 
-The example below illustrates wiring and step grouping. In a real acceptance
-suite, replace the inline withdrawal arithmetic with a call through the
-application boundary under test.
+The example feature belongs in `docs/specs/withdraw-funds.feature`; the Go
+runner belongs in `go/internal/myapp/acceptance_test.go`, which determines the
+relative path below. The example illustrates wiring and step grouping; in a
+real acceptance suite, replace the inline withdrawal arithmetic with a call
+through the application boundary under test.
 
 ```gherkin
 Feature: Withdraw funds
@@ -75,7 +87,7 @@ import (
 // is passed to later steps, so balance changes stay within that scenario.
 type balanceKey struct{}
 
-// TestFeatures runs features/ as go subtests. Godog reads each Gherkin line
+// TestFeatures runs the living contract as Go subtests. Godog reads its steps
 // and calls the matching Go function registered by InitializeScenario.
 func TestFeatures(t *testing.T) {
 	suite := godog.TestSuite{
@@ -86,11 +98,22 @@ func TestFeatures(t *testing.T) {
 		Options: &godog.Options{
 			// Format controls console output; "pretty" shows readable steps.
 			Format: "pretty",
-			// Paths selects feature files relative to this test package.
-			Paths: []string{"features"},
+			// Paths loads the canonical contract relative to this test package.
+			Paths: []string{"../../../docs/specs/withdraw-funds.feature"},
+			// Strict makes undefined and pending steps fail instead of passing.
+			Strict: true,
 			// TestingT reports scenarios through go test / make test.
 			TestingT: t,
 		},
+	}
+	// RetrieveFeatures parses the same files without running their steps.
+	features, err := suite.RetrieveFeatures()
+	if err != nil {
+		t.Fatalf("load living feature: %v", err)
+	}
+	// Pickles are runnable scenarios, including each Scenario Outline row.
+	if len(features) != 1 || len(features[0].Pickles) == 0 {
+		t.Fatal("expected one living feature with runnable scenarios")
 	}
 	// Run returns a status code; non-zero makes the Go test fail too.
 	if suite.Run() != 0 {
