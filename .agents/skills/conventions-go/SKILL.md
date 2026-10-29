@@ -177,6 +177,10 @@ or several real backends, not to wrap a single concrete type. Define it on the
 consumer side, in `interface.go` when several packages share it, and add a
 compile-time check: `var _ redis.Client = (*MockRedisClient)(nil)`.
 
+**Embedded fields.** When accessing a field or method from an embedded value,
+name the embedded field explicitly—for example, `s.Logger.Info(...)` rather
+than `s.Info(...)`. This makes it clear which dependency owns the behavior.
+
 ## Comments
 
 **Writing.** Comment every declaration: functions, methods, types, struct

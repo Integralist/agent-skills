@@ -57,6 +57,10 @@ which doesn't count as red. So:
 
 ## Patterns
 
+**Testify mocks.** When a test double embeds `mock.Mock`, call its methods
+through the embedded field—for example, `m.Mock.Called(...)` rather than
+`m.Called(...)`. The explicit receiver makes the mock dependency visible.
+
 **Table-driven:**
 
 ```go
