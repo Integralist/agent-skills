@@ -171,6 +171,10 @@ or several real backends, not to wrap a single concrete type. Define it on the
 consumer side, in `interface.go` when several packages share it, and add a
 compile-time check: `var _ redis.Client = (*MockRedisClient)(nil)`.
 
+**Embedded fields.** When accessing a field or method from an embedded value,
+name the embedded field explicitly—for example, `s.Logger.Info(...)` rather
+than `s.Info(...)`. This makes it clear which dependency owns the behavior.
+
 ## Comments
 
 **Writing.** Comment every declaration: functions, methods, types, struct
@@ -319,7 +323,10 @@ id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
 
 Before writing or reviewing any `*_test.go` file, helper, mock, fuzz test, or
 benchmark, load the [go-testing](../skills/go-testing/SKILL.md) skill for test
-structure. These rules bind whatever you write:
+structure. For acceptance suites and step definitions, also load
+[conventions-acceptance-tests](../skills/conventions-acceptance-tests/SKILL.md) so
+code follows the feature's scenario structure. These rules bind whatever you
+write:
 
 - Unit-test logic, branches, and error cases in `*_test.go` with no build
   tags. Integration-test cross-package and handler/database boundaries with

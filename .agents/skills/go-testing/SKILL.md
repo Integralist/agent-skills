@@ -15,7 +15,9 @@ package's public API. Load the conventions-go skill too: it sets the style and
 linter rules for test code (`testCases`/`tc`, `rr`, `noctx`, `scopeguard`,
 comments, `testify/mock`), and wins where the two overlap. Before writing or
 changing tests, read [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) for what
-an assertion must protect.
+an assertion must protect. For acceptance suites, also load
+[conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md): it
+owns scenario-to-code structure for Go/Godog and Make/Bash workflows.
 
 **Style.** When asked for unit tests, ask whether the user wants table-driven
 tests (the default) or f-tests, a local helper `f` called from named subtests.
@@ -155,8 +157,8 @@ go test -cover ./...                         # coverage
 For specialised work, read:
 
 - [INTEGRATION.md](INTEGRATION.md): e2e tests under the `e2e` build tag.
-- [ACCEPTANCE.md](ACCEPTANCE.md): running a spec's Gherkin criteria with
-  godog, and when a behaviour gets a `.feature` file.
+- [ACCEPTANCE.md](ACCEPTANCE.md): a runnable Godog wiring example for the
+  canonical living features.
 - [FUZZ-AND-BENCHMARKS.md](FUZZ-AND-BENCHMARKS.md): `testing.F` fuzzing and
   `b.Loop()` benchmarks.
 - [COVERAGE-PRUNING.md](COVERAGE-PRUNING.md): finding and pruning overlapping

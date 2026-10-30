@@ -329,7 +329,10 @@ id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
 
 Before writing or reviewing any `*_test.go` file, helper, mock, fuzz test, or
 benchmark, load the [go-testing](../go-testing/SKILL.md) skill for test
-structure. These rules bind whatever you write:
+structure. For acceptance suites and step definitions, also load
+[conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md) so
+code follows the feature's scenario structure. These rules bind whatever you
+write:
 
 - Unit-test logic, branches, and error cases in `*_test.go` with no build
   tags. Integration-test cross-package and handler/database boundaries with
