@@ -52,9 +52,11 @@ suite as passing or expanding this task to fix unrelated failures. Project
 rules requiring a clean suite still apply.
 
 **Accepting a slice.** Verify the whole slice against its milestones and
-acceptance criteria, even when every task's checks pass.
+acceptance criteria, even when every task's checks pass. Follow
+[ACCEPT-SLICE.md](ACCEPT-SLICE.md) before marking the slice accepted.
 
 **Tick it off** only when its own outcome has passing evidence: a milestone
-when its whole outcome is met, not after one task towards it, and a parent only
-after all its children. If the project's status changed, update its README as
+when its whole outcome is met, not after one task towards it, and a parent
+slice or project only after its acceptance gate passes and all its children
+are complete. If the project's status changed, update its README as
 [PROJECTS-README.md](PROJECTS-README.md) describes.

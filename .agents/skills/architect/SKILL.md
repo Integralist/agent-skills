@@ -40,7 +40,9 @@ sense, tell the user and wait. Don't fill the gap with a guess.
    the plan; when it writes no ADR, note why in the plan's Notes. Unless the
    project started from a PDD Design, offer the to-prd skill for stakeholder
    framing, and run it only if the user wants it.
-   Done when the plan is written and the ADRs and PRD are settled.
+   Done when each slice has the acceptance verification contract required by
+   to-plan, and the ADRs and PRD are settled. This finishes planning, not
+   implementation or passing acceptance tests.
 
 6. **Hand off.** Ask the user to choose one next step, and start only that one:
 

@@ -92,13 +92,18 @@ belong in a follow-on project rather than rewriting a completed project.
 - **Planning** — scope or implementation slices are still being defined.
 - **Ready** — the task list is compiled and can be executed.
 - **In progress** — execution has started and some tasks are complete.
-- **Complete** — all tasks in the project are verified and the project can move
-  to `projects/completed/`.
+- **Complete** — every slice is accepted, all required final checks have
+  passing evidence, and the project can move to `projects/completed/`.
 
-To complete a project, set its `Status` to `Complete` and move its directory to
-`projects/completed/<yyyy-mm-dd>-<slug>/` in the same commit. A project counts
-as complete once its implementation tasks are done; unchecked post-deploy items
-don't block it. Ask if unsure.
+Accept each slice using `ACCEPT-SLICE.md` before reporting its plan or project
+complete. Required checks that are failed, missing, skipped, pending, or
+unavailable block completion. Future checks, including post-deploy checks,
+may remain open only when explicitly outside the agreed completion scope;
+record their owner and follow-up. Current obligations cannot become future
+work merely because they are blocked. Ask if the scope is unclear.
+
+Once these gates pass, set the project's `Status` to `Complete` and move its
+directory to `projects/completed/<yyyy-mm-dd>-<slug>/` in the same commit.
 
 Keep planning documents scoped to the project they describe. Put durable
 repository usage instructions in the relevant README or `docs/` document instead

@@ -9,7 +9,11 @@ plan directly or from a compiled task list. Use the same gate in both cases.
    planned later-stage checks with their owning milestones, rather than
    making them current prerequisites. Current obligations cannot be deferred
    merely because their checks fail or are unavailable.
-   Record the evidence using [BUILD-ITEM.md](BUILD-ITEM.md)'s format.
+   Map criteria to the owning living features and required scenarios before
+   running checks. Fill missing mappings from the agreed scope; missing
+   coverage is work to complete, not an exemption. When no feature applies,
+   record why and identify equivalent executable assertions. Record evidence
+   using [BUILD-ITEM.md](BUILD-ITEM.md)'s format.
    Done when the slice's required outcomes and their checks are identified.
 
 2. **Exercise the slice.** Run project-required checks and regression checks
@@ -22,19 +26,31 @@ plan directly or from a compiled task list. Use the same gate in both cases.
    on authoritative contracts or independently checked fixtures, not assumptions
    copied from the implementation.
    Run acceptance scenarios assigned to this slice, even when no
-   compiled boundary task exists. Build the minimum required harness as part
-   of the slice; a complete product-wide end-to-end suite is not a prerequisite
-   unless this slice's contract or project policy requires it.
-   For non-code work, run the assertions and repository checks that verify its
-   promised outcomes. Use [BUILD-ITEM.md](BUILD-ITEM.md) for running checks,
-   reusing evidence, and handling baseline failures.
+   compiled boundary task exists. Load the canonical living feature files
+   directly. Build the minimum required harness as part of the slice; a
+   complete product-wide end-to-end suite is not a prerequisite unless this
+   slice's contract or project policy requires it. Follow the
+   [acceptance-test conventions](../conventions-acceptance-tests/SKILL.md)
+   when adding or changing the harness and steps.
+   Reconcile expected scenario identities and counts, including every
+   Scenario Outline example row, with the scenarios actually executed and
+   passed. A zero exit code, unit tests, structural checks, or matching totals
+   alone do not prove acceptance coverage. Record feature paths, scenario
+   names, example rows, observed counts, and log references with the criterion
+   evidence; include Rule context where titles repeat.
+   For non-code work without applicable features, run the executable
+   assertions and repository checks mapped in step 1. Use
+   [BUILD-ITEM.md](BUILD-ITEM.md) for running checks, reusing evidence, and
+   handling baseline failures.
    If checks depend on local source changes excluded from delivery, rerun
    them without those changes before accepting the slice.
    Done when required checks have run and their results are recorded,
    or unavailable checks are explicitly reported.
 
 3. **Decide.** Accept only when every item is complete, every required outcome
-   has passing evidence, and all required checks pass. Task checkboxes alone
-   are not evidence. Otherwise leave the slice unaccepted and report it as
-   incomplete or partly verified, naming failed or missing evidence.
+   has passing evidence, and all required checks pass. Failed, missing,
+   skipped, pending, undefined, or unavailable required scenarios keep the
+   slice unaccepted. Task checkboxes alone are not evidence. Otherwise leave
+   the slice unaccepted and report it as incomplete or partly verified, naming
+   failed or missing evidence.
    Done when acceptance or the remaining verification gaps are recorded.

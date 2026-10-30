@@ -57,9 +57,15 @@ explanatory prose, not required technical detail.
      each milestone meets; without one, the milestone's own wording is the
      criterion, so make it checkable. Never renumber a key once assigned; task
      lists and execution logs refer to it.
-   - Include each living `.feature` update in the slice that implements its
-     behaviour. Acceptance runners load those same files, rather than copying
-     scenarios into slice-local test features.
+   - Give each slice an acceptance verification contract: criterion or
+     milestone, owning living feature and scenario names (including outline
+     rows), testing boundary, and verification command. Include each living
+     `.feature` update and any missing steps or runner in the slice that
+     implements its behaviour. Follow
+     [conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md).
+     Where no feature applies, explain why no living feature applies and name
+     equivalent executable assertions. An absent required feature or harness
+     is work to plan, not an exemption.
    - Choose focused outcome diagrams using
      [OUTCOME-DIAGRAMS.md](../shared/OUTCOME-DIAGRAMS.md): individual, shared,
      mixed, or none according to what helps the reviewer understand the change.
@@ -67,8 +73,9 @@ explanatory prose, not required technical detail.
      [PULL-REQUEST-DELIVERY.md](../shared/PULL-REQUEST-DELIVERY.md) describes,
      naming slices or milestones, not task numbers.
 
-   Done when every requirement in the spec, or in the source without one, maps
-   to a milestone, and every name is spelled the same in every slice.
+   Done when every requirement maps to a milestone and acceptance check, and
+   every shared name is consistent. Planning records how acceptance will be
+   proved; execution supplies passing evidence.
 
 4. **Write the plan** to `plan.md` in the spec's project folder, or a new
    `projects/<yyyy-mm-dd>-<slug>/` when there's no spec, filling the template
@@ -139,6 +146,12 @@ when covered by a shared diagram or clearer without one.}
 - [ ] **M1.1**: {checkable outcome}
   {— [criterion](./spec.md#anchor), when there's a spec}
 
+#### Acceptance Verification
+
+| Criterion | Feature scenarios / assertions | Boundary | Command |
+| --- | --- | --- | --- |
+| {M1.1 + criterion} | {feature + names + rows} | {boundary} | `{command}` |
+
 ### Slice 2: {what it delivers end to end}
 
 - **Delivers:** {observable behaviour}
@@ -154,6 +167,12 @@ when covered by a shared diagram or clearer without one.}
 
 - [ ] **M2.1**: {checkable outcome}
   {— [criterion](./spec.md#anchor), when there's a spec}
+
+#### Acceptance Verification
+
+| Criterion | Feature scenarios / assertions | Boundary | Command |
+| --- | --- | --- | --- |
+| {M2.1 + criterion} | {feature + names + rows} | {boundary} | `{command}` |
 
 ### Documentation
 

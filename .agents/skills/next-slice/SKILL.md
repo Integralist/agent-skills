@@ -16,7 +16,9 @@ describes. Stop at the end of the slice.
 1. **Pick the file and slice.** Use the file the user names. If they name none,
    use the one from earlier in this session. If there isn't one, ask for its
    path. Use the slice number the user gives; if none, take the first slice
-   with unticked items. A file without slices counts as one slice.
+   with unticked items or missing acceptance. A file without slices counts as
+   one slice. If its items are already complete, continue at step 3. If all
+   slices are accepted, report that no slice remains and stop.
 
 2. **Work each item** in document order, following
    [BUILD-ITEM.md](../shared/BUILD-ITEM.md). Skip items whose blocked-by items

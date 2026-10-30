@@ -29,6 +29,9 @@ const autoPath = ".agents/skills/execute-plan/references/auto.md";
 const planPath = ".agents/skills/to-plan/SKILL.md";
 const buildItemPath = ".agents/skills/shared/BUILD-ITEM.md";
 const acceptSlicePath = ".agents/skills/shared/ACCEPT-SLICE.md";
+const architectPath = ".agents/skills/architect/SKILL.md";
+const nextTaskPath = ".agents/skills/next-task/SKILL.md";
+const projectsReadmePath = ".agents/skills/shared/PROJECTS-README.md";
 
 test("explicit invocation keeps the session model coordinating", () => {
   const content = read(skillPath);
@@ -471,6 +474,98 @@ test("both slice workflows use the same outcome and boundary gate", () => {
   assert.match(flat(executorPath), /Run the task's checks and applicable project-required checks/);
 });
 
+test("plans assign runnable acceptance coverage before implementation", () => {
+  const plan = flat(planPath);
+  for (const rule of [
+    "Give each slice an acceptance verification contract",
+    "criterion or milestone, owning living feature and scenario names",
+    "testing boundary, and verification command",
+    "Planning records how acceptance will be proved; execution supplies passing evidence",
+    "explain why no living feature applies and name equivalent executable assertions",
+  ]) assert.ok(plan.includes(rule), `missing plan acceptance rule: ${rule}`);
+  const scaffold = read(planPath).split("````markdown\n")[1]?.split("````")[0];
+  assert.equal((scaffold.match(/#### Acceptance Verification/g) ?? []).length, 2);
+  assert.match(scaffold, /Criterion \| Feature scenarios \/ assertions \| Boundary \| Command/);
+  const architect = flat(architectPath);
+  assert.match(architect, /each slice has the acceptance verification contract required by to-plan/);
+  assert.match(architect, /not implementation or passing acceptance tests/);
+});
+
+test("task compilation includes acceptance implementation and direct feature execution", () => {
+  const content = flat(compilerPath);
+  for (const rule of [
+    "Include tasks to implement missing acceptance steps, fixtures, and the minimum runner",
+    "canonical living features assigned to this slice",
+    "conventions-acceptance-tests",
+    "including Make/Bash workflows",
+    "expected scenarios and example rows",
+  ]) assert.ok(content.includes(rule), `missing compiler acceptance rule: ${rule}`);
+  assert.doesNotMatch(content, /under the language's runner/);
+  assert.match(content, /Integration \/ Boundary Verification Task/);
+  assert.match(content, /ACCEPT-SLICE\.md/);
+});
+
+test("slice acceptance reconciles actual scenarios rather than trusting exit zero", () => {
+  const rules = [
+    "Load the canonical living feature files directly",
+    "expected scenario identities and counts, including every Scenario Outline example row",
+    "with the scenarios actually executed and passed",
+    "A zero exit code, unit tests, structural checks, or matching totals alone",
+    "do not prove acceptance coverage",
+    "Record feature paths, scenario names, example rows, observed counts, and log references",
+    "Failed, missing, skipped, pending, undefined, or unavailable required scenarios keep the slice unaccepted",
+  ];
+  function assertScenarioProof(content) {
+    for (const rule of rules)
+      assert.ok(content.includes(rule), `missing scenario execution rule: ${rule}`);
+  }
+  const content = flat(acceptSlicePath);
+  assertScenarioProof(content);
+  for (const rule of rules)
+    assert.throws(() => assertScenarioProof(content.replace(rule, "")));
+  assert.match(content, /Build the minimum required harness as part of the slice/);
+});
+
+test("next-task closes the owning slice and can resume acceptance without another item", () => {
+  const content = flat(nextTaskPath);
+  for (const rule of [
+    "When no items remain but slice acceptance is missing, continue at step 4",
+    "4. **Accept a finished slice.**",
+    "ACCEPT-SLICE.md",
+    "A file without slices counts as one slice",
+    "when all items in the owning slice are complete",
+    "Done when acceptance or the remaining verification gaps are recorded",
+  ]) assert.ok(content.includes(rule), `missing next-task acceptance rule: ${rule}`);
+  assert.match(content, /Do one item per run/);
+  assert.match(flat(buildItemPath), /A task may complete while its supporting milestones remain open/);
+  assert.match(flat(buildItemPath), /ACCEPT-SLICE\.md/);
+  for (const path of [skillPath, nextTaskPath, ".agents/skills/next-slice/SKILL.md"])
+    assert.match(flat(path), /\.\.\/shared\/ACCEPT-SLICE\.md/);
+});
+
+test("next-slice can resume acceptance after its item checkboxes are complete", () => {
+  const content = flat(".agents/skills/next-slice/SKILL.md");
+  assert.match(content, /first slice with unticked items or missing acceptance/);
+  assert.match(content, /If its items are already complete, continue at step 3/);
+  assert.match(content, /ACCEPT-SLICE\.md/);
+});
+
+test("project completion requires accepted slices and scoped final checks", () => {
+  function assertProjectCompletion(content) {
+    assert.match(content, /every slice is accepted/);
+    assert.match(content, /all required final checks have passing evidence/);
+    assert.match(content, /Required checks that are failed, missing, skipped, pending, or unavailable block completion/);
+    assert.match(content, /explicitly outside the agreed completion scope/);
+    assert.doesNotMatch(content, /counts as complete once its implementation tasks are done/);
+    assert.doesNotMatch(content, /unchecked post-deploy items don't block it/);
+  }
+  const content = flat(projectsReadmePath);
+  assertProjectCompletion(content);
+  assert.throws(() => assertProjectCompletion(content.replace("every slice is accepted", "every task is ticked")));
+  assert.throws(() => assertProjectCompletion(content.replace("all required final checks have passing evidence", "final checks may be skipped")));
+  assert.match(flat(buildItemPath), /parent slice or project only after its acceptance gate passes/);
+});
+
 function stripFences(content) {
   const kept = [];
   let fence;
@@ -495,7 +590,7 @@ test("reference checking ignores nested examples but keeps real instruction link
 });
 
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, buildItemPath, acceptSlicePath]) {
+  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath]) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {

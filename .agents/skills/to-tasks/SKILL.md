@@ -70,11 +70,16 @@ required technical detail such as signatures, tests, or verification commands.
    - Cite existing code as `path:line`. Before finishing, check every cited
      symbol still resolves and every new name is spelled the same in every
      task.
+   - Include tasks to implement missing acceptance steps, fixtures, and the
+     minimum runner before the checks that need them, following
+     [conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md),
+     including Make/Bash workflows. Carry forward the plan's acceptance
+     mapping; if absent, derive it from this slice's criteria before handoff.
    - End with an **Integration / Boundary Verification Task** following
-     [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md). When the spec has Gherkin
-     acceptance criteria, this task runs the scenarios assigned to this slice
-     under the language's runner (godog for Go, as the go-testing skill
-     describes).
+     [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md). Run the canonical living
+     features assigned to this slice directly. Name expected scenarios and
+     example rows so the executor can verify coverage, not only exit zero. When
+     no feature applies, name the equivalent executable assertions and why.
 
 4. **Write the file** in the plan's project folder, or a new
    `projects/<yyyy-mm-dd>-<slug>/` when there's no plan:
