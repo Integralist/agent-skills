@@ -27,7 +27,10 @@ smallest reversible change, and what the code and tests show. Keep explicit
 requirements, acceptance criteria, exact interfaces, security constraints, and
 approved design decisions. A conflict with those is a blocker, not permission
 to rewrite the spec. Workers return ambiguity to you; you record your choice
-and refresh their packet before work continues.
+and refresh their packet before work continues. The
+[review completion gate](../../shared/REVIEW-CHANGE.md) still applies: `auto`
+authorizes corrections, not waiving findings or material review gaps. Record
+an unresolved gate as blocked rather than inventing user acceptance.
 
 Keep a `## Decisions` section in `execution.md`. Add an entry, with an ID like
 `D001`, before acting on any non-trivial judgment about unclear or incomplete

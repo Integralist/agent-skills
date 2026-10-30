@@ -32,6 +32,10 @@ const acceptSlicePath = ".agents/skills/shared/ACCEPT-SLICE.md";
 const architectPath = ".agents/skills/architect/SKILL.md";
 const nextTaskPath = ".agents/skills/next-task/SKILL.md";
 const projectsReadmePath = ".agents/skills/shared/PROJECTS-README.md";
+const reviewChangePath = ".agents/skills/shared/REVIEW-CHANGE.md";
+const nextSlicePath = ".agents/skills/next-slice/SKILL.md";
+const reviewSkillPath = ".agents/skills/code-review/SKILL.md";
+const reviewModesPath = ".agents/skills/code-review/MODES.md";
 
 test("explicit invocation keeps the session model coordinating", () => {
   const content = read(skillPath);
@@ -404,7 +408,7 @@ test("verification scope and setup let tasks finish before later milestones", ()
   assert.match(flat(skillPath), /Handle pending check requests by running or delegating the checks, not repeating implementation/);
 });
 
-test("test-only delegation preserves evidence and main-thread ownership", () => {
+test("test and review delegation preserve evidence and main-thread ownership", () => {
   const content = flat(buildItemPath);
   for (const rule of [
     "Only the main conversation launches test subagents",
@@ -415,7 +419,7 @@ test("test-only delegation preserves evidence and main-thread ownership", () => 
     "evidence is missing or inconclusive",
   ]) assert.ok(content.includes(rule), `missing test-runner rule: ${rule}`);
   for (const name of ["next-task", "next-slice"])
-    assert.match(flat(`.agents/skills/${name}/SKILL.md`), /Only test execution may be delegated/);
+    assert.match(flat(`.agents/skills/${name}/SKILL.md`), /Read-only review may also be delegated through code-review/);
   assert.match(flat(skillPath), /verify the check evidence using/);
   assert.match(flat(executorPath), /Don't spawn further subagents/);
   assert.match(flat(executorPath), /Return `INCOMPLETE` with the required commands when a required run is pending/);
@@ -566,6 +570,151 @@ test("project completion requires accepted slices and scoped final checks", () =
   assert.match(flat(buildItemPath), /parent slice or project only after its acceptance gate passes/);
 });
 
+test("review gates preserve the actual execution baseline and delivery scope", () => {
+  const content = flat(reviewChangePath);
+  for (const rule of [
+    "before the first implementation edit",
+    "baseline commit, initial index and working-tree state",
+    "committed, staged, unstaged, and new files",
+    "Exclude inherited user changes and unrelated commits",
+    "If ownership cannot be separated safely, stop",
+    "Reconstruct and verify a missing baseline from reliable history",
+    "do not substitute the current HEAD or default-branch merge base",
+    "--baseline=<commit>",
+  ]) assert.ok(content.includes(rule), `missing review scope rule: ${rule}`);
+  assert.match(flat(reviewSkillPath), /--baseline=<commit>/);
+  assert.match(flat(reviewModesPath), /recorded baseline, not a merge base/);
+  assert.match(flat(reviewModesPath), /delivery manifest/);
+  assert.match(flat(reviewModesPath), /git diff "\$BASE" -- "\${OWNED_PATHS\[@\]}"/);
+});
+
+test("review findings and material gaps block completion without silent waivers", () => {
+  const rules = [
+    "Run the code-review skill",
+    "every verified actionable finding",
+    "explicit user acceptance or an applicable documented exception",
+    "Material review gaps block completion",
+    "An automatic decision is not user acceptance",
+    "Reviewers remain read-only",
+  ];
+  function assertReviewGate(content) {
+    for (const rule of rules)
+      assert.ok(content.includes(rule), `missing review gate rule: ${rule}`);
+  }
+  const content = flat(reviewChangePath);
+  assertReviewGate(content);
+  for (const rule of rules)
+    assert.throws(() => assertReviewGate(content.replace(rule, "")));
+  assert.match(content, /approval, scope, and commit rules/);
+});
+
+test("review evidence stays current without repeating unchanged reviews", () => {
+  const rules = [
+    "reviewed HEAD and content fingerprints",
+    "report path, coverage, finding dispositions, and unresolved questions",
+    "After corrections, rerun affected tests and review the corrections",
+    "Reuse a prior review only when its scope, content, and applicable requirements still match",
+    "no code or test edits during the review",
+  ];
+  const content = flat(reviewChangePath);
+  for (const rule of rules)
+    assert.ok(content.includes(rule), `missing review evidence rule: ${rule}`);
+  assert.match(content, /Bookkeeping-only status and log updates/);
+});
+
+test("standalone slice and task completion run review without delegating implementation", () => {
+  for (const path of [nextSlicePath, nextTaskPath]) {
+    const content = flat(path);
+    assert.match(content, /Record or resume the review baseline/);
+    assert.match(content, /REVIEW-CHANGE\.md/);
+    assert.match(content, /Keep implementation and failure diagnosis in the main thread/);
+    assert.doesNotMatch(content, /Only test execution may be delegated/);
+    assert.match(content, /Read-only review may also be delegated/);
+  }
+  const acceptance = flat(acceptSlicePath);
+  assert.match(acceptance, /Standalone acceptance requires the review gate/);
+  assert.match(acceptance, /explicitly identifies the active coordinator/);
+  assert.match(acceptance, /A historical execution log is not delegation/);
+  assert.match(acceptance, /required review evidence is current and resolved/);
+});
+
+test("execute-plan owns risk reviews and an unconditional final review", () => {
+  const content = flat(skillPath);
+  assert.match(content, /Record or resume the review baseline/);
+  assert.match(content, /Own review scheduling/);
+  assert.match(content, /For a risky slice/);
+  assert.match(content, /REVIEW-CHANGE\.md/);
+  assert.match(content, /Pass coordinator review ownership explicitly/);
+  assert.match(content, /final code-review of the complete delivered change/);
+  assert.match(content, /including residual work and corrections/);
+  assert.match(content, /Done when acceptance, final audit, and the final review gate all pass/);
+  assert.match(flat(projectsReadmePath), /final review gate/);
+});
+
+test("review source commands include owned committed and dirty files without unrelated work", () => {
+  const scratch = mkdtempSync(join(tmpdir(), "review-scope-contract-"));
+  function git(...args) {
+    const result = spawnSync("git", args, {
+      cwd: scratch, encoding: "utf8",
+      env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null" },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout.trim();
+  }
+  try {
+    git("init", "--quiet", "-b", "main");
+    git("config", "user.name", "Fixture");
+    git("config", "user.email", "fixture@example.invalid");
+    git("config", "commit.gpgsign", "false");
+    git("config", "core.hooksPath", "/dev/null");
+    const owned = ["committed.txt", "staged.txt", "unstaged.txt"];
+    for (const path of [...owned, "personal.txt"]) writeFileSync(join(scratch, path), "baseline\n");
+    git("add", ...owned, "personal.txt");
+    git("commit", "--quiet", "-m", "baseline");
+    const baseline = git("rev-parse", "HEAD");
+    writeFileSync(join(scratch, "personal.txt"), "inherited user patch\n");
+    writeFileSync(join(scratch, "committed.txt"), "delivered commit\n");
+    git("add", "committed.txt");
+    git("commit", "--quiet", "-m", "implementation");
+    writeFileSync(join(scratch, "staged.txt"), "delivered staged patch\n");
+    git("add", "staged.txt");
+    writeFileSync(join(scratch, "unstaged.txt"), "delivered unstaged patch\n");
+    writeFileSync(join(scratch, "new.txt"), "delivered new file\n");
+    writeFileSync(join(scratch, "personal-new.txt"), "inherited untracked work\n");
+    const source = read(reviewModesPath);
+    const command = source.match(/^git diff "\$BASE" -- "\$\{OWNED_PATHS\[@\]\}"$/m)?.[0];
+    const newFilesCommand = source.match(/^git ls-files --others --exclude-standard -- "\$\{OWNED_PATHS\[@\]\}"$/m)?.[0];
+    assert.ok(command, "documented baseline command is missing");
+    assert.ok(newFilesCommand, "documented new-file collection is missing");
+    const selection = [...owned, "new.txt"];
+    const before = git("status", "--porcelain");
+    const snapshot = owned.map(path => [path, readFileSync(join(scratch, path), "utf8")]);
+    const diff = spawnSync("bash", ["-c", `BASE="$1"; shift; OWNED_PATHS=("$@"); ${command}`,
+      "review-scope", baseline, ...selection], { cwd: scratch, encoding: "utf8" });
+    assert.equal(diff.status, 0, diff.stderr);
+    for (const text of ["delivered commit", "delivered staged patch", "delivered unstaged patch"])
+      assert.ok(diff.stdout.includes(text), `missing delivered state: ${text}`);
+    assert.doesNotMatch(diff.stdout, /personal|inherited/);
+    const newFiles = spawnSync("bash", ["-c", `OWNED_PATHS=("$@"); ${newFilesCommand}`,
+      "review-scope", ...selection], { cwd: scratch, encoding: "utf8" });
+    assert.equal(newFiles.status, 0, newFiles.stderr);
+    const untracked = newFiles.stdout.trim();
+    assert.equal(untracked, "new.txt");
+    assert.doesNotMatch(newFiles.stdout, /personal-new/);
+    assert.equal(readFileSync(join(scratch, untracked), "utf8"), "delivered new file\n");
+    assert.equal(git("status", "--porcelain"), before);
+    assert.deepEqual(owned.map(path => [path, readFileSync(join(scratch, path), "utf8")]), snapshot);
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
+});
+
+test("the project index review link resolves from its generated destination", () => {
+  const target = read(projectsReadmePath).match(/\[REVIEW-CHANGE\.md\]\(([^)]+)\)/)?.[1];
+  assert.ok(target, "project index must link the review gate");
+  assert.equal(resolve(repo, "projects", target), resolve(repo, reviewChangePath));
+});
+
 function stripFences(content) {
   const kept = [];
   let fence;
@@ -590,7 +739,7 @@ test("reference checking ignores nested examples but keeps real instruction link
 });
 
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath]) {
+  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, executorPath, agentPath, commitsPath, autoPath, planPath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath]) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {

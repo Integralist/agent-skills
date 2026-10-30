@@ -62,6 +62,38 @@ git status --porcelain | sed -n 's/^?? //p'
 Combines branch commits, staged, and unstaged changes; include untracked files'
 contents. Read files from the working tree.
 
+## Recorded execution (`--baseline=<commit>`)
+
+Use the recorded baseline, not a merge base with the default branch. Require
+an execution delivery manifest and the initial state from
+[REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). It identifies owned paths and
+hunks, inherited changes to exclude, and the delivered state to review. A
+commit alone cannot distinguish work that was already dirty before execution.
+
+For wholly owned paths that were clean at the baseline, the caller supplies
+`BASELINE` and the `OWNED_PATHS` Bash array from that manifest:
+
+```bash
+BASE=$(git rev-parse --verify "${BASELINE}^{commit}")
+git diff "$BASE" -- "${OWNED_PATHS[@]}"
+git diff --name-only "$BASE" -- "${OWNED_PATHS[@]}"
+git ls-files --others --exclude-standard -- "${OWNED_PATHS[@]}"
+```
+
+Require a nonempty `OWNED_PATHS` selection before these commands; an empty
+array would select the whole repository. Write the diff to `DIFF_PATH` and
+include selected new files' contents. This captures committed, staged, and
+unstaged changes together; retain deletions and inspect both sides of renames.
+For mixed-ownership files, use the manifest's isolated before/after content to
+produce the owned patch rather than these whole-file commands. Verify the
+manifest covers all delivered work, not only the latest task or commit.
+
+Read code and intent from the exact delivered snapshot, using temporary
+snapshots when the live checkout includes excluded changes. Record HEAD,
+content fingerprints, and exclusions in `CONTEXT_PATH`; keep the source stable
+and confirm it stayed unchanged. If scope or snapshots are missing or
+ambiguous, report the gap rather than falling back to another source mode.
+
 ## Explicit paths
 
 Expand each path or glob and read its contents. For tracked paths, write

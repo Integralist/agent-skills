@@ -95,12 +95,14 @@ belong in a follow-on project rather than rewriting a completed project.
 - **Complete** — every slice is accepted, all required final checks have
   passing evidence, and the project can move to `projects/completed/`.
 
-Accept each slice using `ACCEPT-SLICE.md` before reporting its plan or project
-complete. Required checks that are failed, missing, skipped, pending, or
-unavailable block completion. Future checks, including post-deploy checks,
-may remain open only when explicitly outside the agreed completion scope;
-record their owner and follow-up. Current obligations cannot become future
-work merely because they are blocked. Ask if the scope is unclear.
+Accept each slice using `ACCEPT-SLICE.md` and satisfy its final review gate
+using [REVIEW-CHANGE.md](../.agents/skills/shared/REVIEW-CHANGE.md) before
+reporting the plan or project complete. Required checks that are failed,
+missing, skipped, pending, or unavailable block completion. Future checks,
+including post-deploy checks, may remain open only when explicitly outside the
+agreed completion scope; record their owner and follow-up. Current obligations
+cannot become future work merely because they are blocked. Ask if the scope is
+unclear.
 
 Once these gates pass, set the project's `Status` to `Complete` and move its
 directory to `projects/completed/<yyyy-mm-dd>-<slug>/` in the same commit.

@@ -5,7 +5,7 @@ description: >-
   findings, and check the change against its project's spec and plan. Use when
   reviewing a remote PR or local code, including unpushed or
   uncommitted changes. Pass --plan=<path> to name the plan or task list.
-argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | path] [--plan=<path>]'
+argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | --baseline=<commit> | path] [--plan=<path>]'
 metadata:
   model-tier: complex
 ---
@@ -27,11 +27,14 @@ state, or comment on a PR.
    | `--diff` or none              | Local branch vs. default branch |
    | `--uncommitted`               | Working-tree changes            |
    | `--all-local`                 | Local branch plus working tree  |
+   | `--baseline=<commit>`         | Recorded execution and manifest |
    | File path or glob             | Explicit paths                  |
 
    Run that source's commands from [MODES.md](MODES.md), writing the whole
    diff once to a temp file, `DIFF_PATH`; reviewers read it from there rather
-   than re-fetching it. Never mix remote and local revisions silently. If the
+   than re-fetching it. For `--baseline`, require the caller's delivery
+   manifest and baseline snapshots; the execution source takes precedence
+   over default-branch diff selection. Never mix revisions silently. If the
    diff is empty and no files match, report "No changes to review" and stop
    before starting any reviewer. Done when `DIFF_PATH` and the changed-file
    list exist.
@@ -272,9 +275,11 @@ giving the original and retry limits and whether the retry completed.
 ## {PR #<number> Review Summary: "<title>" | Code Review: <branch, "uncommitted", or path>}
 
 - **Date:** {YYYY-MM-DD HH:MM}
-- **Mode:** {remote PR | branch-diff | uncommitted | all-local | paths}
-- **Base:** {merge-base ref, for branch-diff and all-local}
+- **Mode:** {remote PR | branch-diff | uncommitted | all-local | execution | paths}
+- **Base:** {merge-base or recorded execution baseline, when applicable}
 - **Files reviewed:** {count}
+- **Snapshot:** {reviewed HEAD and dirty/new content fingerprints}
+- **Delivery scope:** {manifest, for execution reviews}
 
 **Overall assessment:** {one or two sentences}
 

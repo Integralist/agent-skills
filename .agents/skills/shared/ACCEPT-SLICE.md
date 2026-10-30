@@ -47,10 +47,20 @@ plan directly or from a compiled task list. Use the same gate in both cases.
    Done when required checks have run and their results are recorded,
    or unavailable checks are explicitly reported.
 
-3. **Decide.** Accept only when every item is complete, every required outcome
-   has passing evidence, and all required checks pass. Failed, missing,
-   skipped, pending, undefined, or unavailable required scenarios keep the
-   slice unaccepted. Task checkboxes alone are not evidence. Otherwise leave
-   the slice unaccepted and report it as incomplete or partly verified, naming
-   failed or missing evidence.
+3. **Review the delivery.** Standalone acceptance requires the review gate
+   in [REVIEW-CHANGE.md](REVIEW-CHANGE.md). A coordinator may own review
+   scheduling only when the caller explicitly identifies the active
+   coordinator, slice scope, and due review gates. A historical execution log
+   is not delegation. With execute-plan ownership, run its due risky-slice
+   review here and leave whole-plan review for its final gate; acceptance
+   checks still run for each slice. Record whether review is satisfied or
+   scheduled under the coordinator. Done when all currently due review gates
+   pass or their gaps are recorded.
+
+4. **Decide.** Accept only when every item is complete, every required outcome
+   has passing evidence, all required checks pass, and required review evidence
+   is current and resolved. Failed, missing, skipped, pending, undefined, or
+   unavailable required scenarios keep the slice unaccepted. Task checkboxes
+   alone are not evidence. Otherwise leave the slice unaccepted and report it
+   as incomplete or partly verified, naming failed or missing evidence.
    Done when acceptance or the remaining verification gaps are recorded.

@@ -41,7 +41,9 @@ work.
 
 1. **Set up.** Read the plan, its spec, and the docs it links. Note the branch,
    HEAD, and existing changes; those are the user's and stay out of your
-   commits. Run the baseline checks. Read the adapter for this harness,
+   commits. Record or resume the review baseline and delivery manifest per
+   [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). Run the baseline checks.
+   Read the adapter for this harness,
    [Claude Code](references/claude-code.md) or [Pi](references/pi-subagents.md),
    and verify the worker model per
    [EXECUTION-MODELS.md](../shared/EXECUTION-MODELS.md). Create or resume the
@@ -57,7 +59,8 @@ work.
    [EXECUTION-MODELS.md](../shared/EXECUTION-MODELS.md). Review the list:
    every unchecked milestone is covered by some task's `Supports`, paths and
    signatures are real, and each test fails on an assertion. Send gaps back to
-   the subagent. Done when the list is ready to run.
+   the subagent. Preserve each slice's starting snapshot for scoped reviews.
+   Done when the list and its review baseline are ready.
 
 3. **Run each task** in order, one editing worker at a time:
 
@@ -77,27 +80,38 @@ work.
    4. Commit the task per [task-commits.md](references/task-commits.md) before
       launching the next one.
 
-4. **Accept the slice.** For a risky slice (security, a public API or contract,
-   schema, or concurrency), get one read-only review of the slice's diff first.
-   Follow [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md). Resolve blocking
-   review findings before acceptance. Tick the slice's milestones only when
-   accepted, then return to step 2. Done when every slice is accepted.
+4. **Accept the slice.** Own review scheduling. For a risky slice (security,
+   a public API or contract, schema, or concurrency), run code-review over its
+   delivered diff using REVIEW-CHANGE.md before acceptance. Other slices need
+   no repeated full review here; the final review still covers the whole plan.
+   Pass coordinator review ownership explicitly when invoking
+   [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md) or a standalone slice command.
+   Resolve due review findings through the normal task/correction loop before
+   acceptance. Tick the slice's milestones only when accepted, then return to
+   step 2. Done when every slice is accepted.
 
 5. **Audit and report.** Compare the plan, spec, and preserved build request
    and clarifications (when available) with the final code and check evidence,
    requirement by requirement. Put anything left over into
    `tasks-final-verification.md` beside the plan the same way as step 2, and
    run it through step 3, then accept that residual work as a slice using the
-   same acceptance procedure before reporting the plan complete. Then report:
+   same acceptance procedure. Run a final code-review of the complete delivered
+   change, including residual work and corrections, using REVIEW-CHANGE.md;
+   earlier slice reviews do not replace this whole-plan gate. Route required
+   fixes through the same residual task loop, rerun affected checks and audit,
+   and review corrections before completion. Done when acceptance, final audit,
+   and the final review gate all pass; otherwise report incomplete or partly
+   verified with the remaining gaps. Then report:
 
    - plan status: done, incomplete, or partly verified;
    - commits for review, listed per
      [task-commits.md](references/task-commits.md#final-review-list);
-   - checks run and their results;
+   - checks run, review reports, finding dispositions, and remaining gaps;
    - in `auto`, the decision index from auto.md;
    - anything left, and one next action.
 
 **Log.** Keep `execution.md` beside the plan: mode, branch and baseline,
 requested and observed worker models, each task's status and commit, check
-results, decisions (in `auto`), and the next action. On resume, read it and the
-Git log first, and never redo a committed task.
+results, review ownership and evidence references, decisions (in `auto`),
+and the next action. On resume, read it and the Git log first, and never redo
+a committed task. Revalidate recorded review evidence before reusing it.
