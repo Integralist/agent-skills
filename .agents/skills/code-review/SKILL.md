@@ -12,12 +12,11 @@ metadata:
 
 # Code Review
 
-Review a change with a risk-based number of read-only reviewers. Use one
-generalist reviewer for narrow, low-risk changes; add specialist reviewers
-only when concrete risks warrant them. Include intent documents in the review,
-and add a separate adherence reviewer only for substantial or cross-cutting
-requirements. A verifier then tries to refute each finding, and the main
-conversation reports only what survives. Review only: never edit code, change
+Review a change with read-only reviewers: a primary review, a dedicated
+conventions audit when rules apply, and other specialists when concrete risks
+warrant them. Include intent documents and add a separate adherence reviewer
+for substantial or cross-cutting requirements. A verifier tries to refute each
+finding; report only what survives. Review only: never edit code, change
 state, or comment on a PR.
 
 1. **Gather the source.** Pick the source from the argument:
@@ -71,6 +70,11 @@ state, or comment on a PR.
    keep those checks in the primary review. A one-line authorization change
    may need security review; a large mechanical change may not.
 
+   Start a separate read-only conventions reviewer whenever applicable
+   conventions exist, including small, low-risk changes, in addition to the
+   generalist or other specialists. Select and load its guidance following
+   [CONVENTIONS.md](CONVENTIONS.md).
+
    [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md) covers turn
    budgets and retries. Use the most capable model available for review
    judgment. Give each selected reviewer:
@@ -78,18 +82,18 @@ state, or comment on a PR.
    - its assigned questions, responsibilities, and handoffs;
    - `DIFF_PATH`, `CONTEXT_PATH`, and the changed-file list, and for a diff
      over about 3000 lines, an instruction to read it file by file;
-   - the conventions skills matching the changed files: `conventions-go` for
-     `*.go`, `conventions-python` for `*.py`, `conventions-sql` for `*.sql`,
-     `conventions-markdown` for `*.md`, and `conventions-mermaid` for Mermaid
-     files or fences;
+   - the resolved convention paths and file/purpose scope from the selection
+     map, requiring the reviewer to read the guidance applicable to its work;
    - the rule to judge the change against `CONTEXT_PATH`, and to report an
      unknown, not a defect, when intent is unclear;
    - the findings schema below, and the rule that every changed file is either
      reviewed or skipped with a reason.
 
-   Done when every selected reviewer is `COMPLETE` and every changed file was
-   reviewed by at least one reviewer whose assigned questions apply; re-run or
-   redirect reviewers to close a gap.
+   Done when every selected reviewer is `COMPLETE`, every changed file has
+   applicable reviewer coverage, and every applicable convention has reviewer
+   coverage or an explicit unresolved gap. Compare the conventions reviewer's
+   loaded guidance with the selection map; re-run or redirect to close omissions.
+   Unavailable guidance is not a clean conventions pass.
 
 4. **Verify.** Give each finding (or a batch, under a concurrency cap) to a
    verifier subagent on the same model, told to refute it:
@@ -100,8 +104,12 @@ state, or comment on a PR.
      match, or it misreads the language or library.
    - "Intended" refutes it only when a `CONTEXT_PATH` source states that
      intent and no other source contradicts it.
-   - For a consistency finding, open each cited peer and refute it unless at
-     least two show the pattern.
+   - For an unwritten precedent finding, open each cited peer and refute it
+     unless at least two show the pattern.
+   - For a documented convention finding, read its rule citation and verify
+     scope, exceptions, and instruction precedence. Refute an inapplicable,
+     misquoted, or overridden rule. Two peer examples are not required for an
+     explicit rule.
    - Leave the working tree untouched: run Python as `python3 -B`, keep scratch
      files in a temp directory, and check `git status` is unchanged after.
    - Default to refuted unless the finding is demonstrably real. A High
@@ -136,7 +144,12 @@ state, or comment on a PR.
 {
   "status": "COMPLETE | INCOMPLETE",
   "files_reviewed": ["path/to/file"],
-  "files_skipped": [{ "file": "path/to/file", "reason": "why this profile doesn't apply" }],
+  "files_skipped": [
+    { "file": "path/to/file", "reason": "why this profile doesn't apply" }
+  ],
+  "conventions_loaded": [
+    { "path": "resolved/rule/path", "applies_to": ["changed file or purpose"] }
+  ],
   "findings": [
     {
       "severity": "High | Medium | Low",
@@ -144,18 +157,31 @@ state, or comment on a PR.
       "line": "approximate line or range",
       "snippet": "short relevant excerpt",
       "why": "why it matters",
-      "suggestion": "smallest viable correction"
+      "suggestion": "smallest viable correction",
+      "rule": {
+        "source": "path/to/convention",
+        "line": "line or range",
+        "requirement": "the explicit rule violated"
+      }
     }
   ],
-  "unknowns": [{ "question": "what couldn't be established", "why": "why it matters here" }]
+  "unknowns": [
+    { "question": "what couldn't be established", "why": "why it matters here" }
+  ]
 }
 ```
+
+A rule is required for a documented convention finding; omit `rule` for
+other findings. List skills and relevant references actually read in
+`conventions_loaded`, or use an empty array when none apply to the assigned
+review. Required but unread guidance belongs in unknowns and coverage gaps.
 
 **Severity** reflects impact and likelihood, not the reviewer's confidence.
 High means a likely security compromise, data loss, outage, or broken core
 contract. Medium means a demonstrated defect under plausible conditions. Low
-means a contained cost with no user-visible impact: a minor defect, or a real
-maintainability or testability cost, never a style preference. Each
+means a contained cost with no user-visible impact: a minor defect or a real
+maintainability or testability cost. Low also covers a verified explicit
+convention violation; personal style preferences remain excluded. Each
 suggestion is the smallest viable correction; add an alternative only when it
 exposes a real trade-off.
 
@@ -167,9 +193,10 @@ or amend the spec); wording too vague to demonstrate one is an unknown.
 
 ## Profiles
 
-These are specialist lenses, not a mandatory roster. The focused reviewer
-covers all applicable questions in one pass; specialist reviewers cover their
-assigned questions. A defect belongs to the profile whose question it answers.
+The primary reviewer covers applicable questions; specialists own their
+assigned lenses. Conventions gets a dedicated reviewer whenever rules apply;
+other specialists follow step 3's risk signals. A defect belongs to the profile
+whose question it answers.
 
 1. **Behaviour and tests:** *does the change do what `CONTEXT_PATH` says, and
    do the tests prove it?* Owns intended behaviour, logic errors, edge cases,
@@ -197,16 +224,24 @@ assigned questions. A defect belongs to the profile whose question it answers.
    paths; and migrations that lock, rewrite, or can't be undone, changes that
    break while old and new versions run side by side, and changes with no
    rollback path. Load `conventions-sql` first when SQL changed. Hands off
-   error-handling style (maintainability).
-4. **Maintainability and conventions:** *what does this cost the next person
-   who changes it?* Owns consistency with project precedent, readability, API
-   ergonomics, naming, error-handling style, observability conventions, idioms,
-   and docs or comments the change left stale. Load the matching conventions
-   skills first and judge against project rules over generic ones. For a
-   consistency finding, use the precedent skill and cite at least two peer
-   `file:line` locations; one peer is a coincidence. Hands off whether errors
-   are handled at all (reliability).
-5. **Spec and plan adherence** (only when step 2 found intent documents):
+   documented error-handling style (conventions) and unwritten precedent
+   (maintainability).
+4. **Maintainability:** *what does this cost the next person who changes it?*
+   Owns readability, API ergonomics, stale docs or comments, and unwritten
+   project precedent. For an unwritten consistency finding, use the precedent
+   skill and cite at least two peer `file:line` locations; one peer is a
+   coincidence. Hands off documented requirements to conventions and whether
+   errors are handled at all to reliability.
+5. **Conventions:** *does the code follow the explicit applicable rules?*
+   Owns documented naming, structure, idioms, error-handling style, comments,
+   and test-layout requirements, including mandatory formatting. Read the
+   selection map's skills and applicable references before auditing. Each
+   finding needs a rule citation as well as code evidence. Check scope,
+   instruction precedence, and documented exceptions rather than imposing
+   personal preferences. Hands off unwritten precedent to maintainability;
+   hand functional or security defects to their owning profiles and merge
+   duplicates in the report.
+6. **Spec and plan adherence** (only when step 2 found intent documents):
    *does the change deliver what its spec and plan promise, and do they
    agree?* Include the intent documents in its prompt. It checks:
    - **Milestones:** each milestone the change claims or ticks is met.
@@ -245,10 +280,16 @@ giving the original and retry limits and whether the retry completed.
 
 **Subagent pass:** {complete, or incomplete with what remains}
 
+### Conventions Coverage
+
+{List loaded rule paths, their file/purpose scope, and skipped or missing
+guidance. Say when no conventions apply; unresolved gaps are not a clean pass.}
+
 ### Actionable Items
 
 {Confirmed findings, High to Medium to Low: file and line, snippet, impact,
-and the smallest viable correction.}
+and the smallest viable correction. Include the written rule citation for
+convention findings.}
 
 ### Spec and Plan Adherence
 

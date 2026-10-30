@@ -198,6 +198,10 @@ update-google-workspace-mcp:
 	@$(STEP) --section "Google Workspace MCP"
 	@bash scripts/workspace-mcp.sh update $(ARGS)
 
+.PHONY: check-code-review
+check-code-review:
+	@node --test .agents/skills/code-review/tests/contracts.test.mjs
+
 .PHONY: check-execute-plan
 check-execute-plan:
 	@node --test .agents/skills/execute-plan/tests/contracts.test.mjs

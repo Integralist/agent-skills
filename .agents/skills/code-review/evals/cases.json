@@ -170,5 +170,119 @@
       "Reports that there are no changes to review",
       "Stops before spawning any reviewer subagents"
     ]
+  },
+  {
+    "id": "conventions-small-go",
+    "prompt": "Review my branch. This is a tiny readability change.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "printf 'module example.com/counter\\n\\ngo 1.24.0\\n' > go.mod",
+      "cat > counter.go <<'EOF'\n// Package counter demonstrates a small convention-only change.\npackage counter\n\n// next returns the number after value.\nfunc next(value int) int {\n\treturn value + 1\n}\nEOF",
+      "cat > counter_test.go <<'EOF'\npackage counter\n\nimport \"testing\"\n\n// TestNext verifies the increment boundary.\nfunc TestNext(t *testing.T) {\n\tif got := next(1); got != 2 {\n\t\tt.Fatalf(\"next(1) = %d, want 2\", got)\n\t}\n}\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b name-intermediate",
+      "cat > counter.go <<'EOF'\n// Package counter demonstrates a small convention-only change.\npackage counter\n\n// next returns the number after value.\nfunc next(value int) int {\n\tresult := value + 1\n\treturn result\n}\nEOF",
+      "git commit -q -am 'name the intermediate result'"
+    ],
+    "checks": [
+      "Starts a separate read-only conventions reviewer even though the diff is small and low-risk",
+      "Gives that subagent the resolved conventions-go path and requires reading it before auditing",
+      "Reports the undocumented result variable against the explicit rule requiring variable comments, citing counter.go and the rule source with line references",
+      "Keeps a verified convention-only violation as Low without demanding two peer examples or a functional defect",
+      "Lists conventions-go and the reviewed Go files in Conventions Coverage",
+      "Leaves the working tree unchanged"
+    ]
+  },
+  {
+    "id": "conventions-go-acceptance",
+    "prompt": "Review the new Godog steps for our acceptance scenario.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "mkdir -p docs/specs acceptance",
+      "cat > docs/specs/configuration.feature <<'EOF'\nFeature: Render configuration\n  Scenario: Render local configuration\n    Given a valid configuration\n    When the developer renders it\n    Then the output is local\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b configuration-steps",
+      "cat > acceptance/steps_test.go <<'EOF'\npackage acceptance_test\n\nimport \"github.com/cucumber/godog\"\n\n// initializeScenario maps configuration steps to the test harness.\nfunc initializeScenario(sc *godog.ScenarioContext) {\n\tsc.Step(`^the output is local$`, func() error { return nil })\n\tsc.Step(`^a valid configuration$`, func() error { return nil })\n\tsc.Step(`^the developer renders it$`, func() error { return nil })\n}\nEOF",
+      "git add . && git commit -q -m 'register configuration steps'"
+    ],
+    "checks": [
+      "The read-only conventions reviewer reads both conventions-go and conventions-acceptance-tests",
+      "Loads applicable linked guidance rather than relying on the skill names alone",
+      "Reports registration order and missing step keyword labels against the explicit rule that code mirrors the feature",
+      "Reports successful no-op steps that neither establish state nor exercise or assert the contract, merging duplicate findings from behavior and conventions",
+      "Each conventions finding cites the changed code and the actual written requirement",
+      "Records any missing runner or dependency evidence as an unknown instead of claiming acceptance tests passed"
+    ]
+  },
+  {
+    "id": "conventions-shell-acceptance",
+    "prompt": "Review the new Make/shell acceptance checks.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "mkdir -p docs/specs scripts",
+      "cat > Makefile <<'EOF'\n.PHONY: render-config\nrender-config:\n\t@mkdir -p \"$(OUTPUT_DIR)\"\n\t@printf '%s\\n' '{\"mode\":\"local\"}' >\"$(OUTPUT_DIR)/config.json\"\nEOF",
+      "cat > docs/specs/configuration.feature <<'EOF'\nFeature: Render configuration\n  Scenario: Render local configuration\n    Given an empty output directory\n    When the developer runs make render-config\n    Then the output is local\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b shell-acceptance",
+      "cat > scripts/acceptance.sh <<'EOF'\n#!/usr/bin/env bash\nset -euo pipefail\n# Render local configuration: this is intended to prove the feature scenario.\ngrep -q 'render-config:' Makefile\nprintf 'PASS: Render local configuration\\n'\nEOF",
+      "git add . && git commit -q -m 'add shell acceptance checks'"
+    ],
+    "checks": [
+      "Selects conventions-acceptance-tests by purpose even though the changed file is Bash and no Go file changed",
+      "The read-only conventions reviewer reads the applicable SHELL.md guidance",
+      "Reports that inspecting Makefile text does not exercise the promised workflow, citing the explicit rule and scripts/acceptance.sh",
+      "Flags a custom shell acceptance framework against the Godog-first guidance without treating all shell helpers as forbidden",
+      "Reports no missing conventions-bash defect merely because no such skill exists"
+    ]
+  },
+  {
+    "id": "conventions-project-exception",
+    "prompt": "Review the updated generated fixture.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "mkdir -p fixtures",
+      "cat > AGENTS.md <<'EOF'\n# Fixture rules\n\nFiles under fixtures/ are generated examples. Local variable comments are intentionally omitted there; do not require them. This project-specific exception overrides the general Go variable-comment rule for these files only.\nEOF",
+      "cat > fixtures/example.go <<'EOF'\n// Package fixtures contains generated examples.\npackage fixtures\n\n// Sample returns the generated demonstration value.\nfunc Sample() int {\n\tvalue := 1\n\treturn value\n}\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b generated-value",
+      "cat > fixtures/example.go <<'EOF'\n// Package fixtures contains generated examples.\npackage fixtures\n\n// Sample returns the generated demonstration value.\nfunc Sample() int {\n\tvalue := 2\n\treturn value\n}\nEOF",
+      "git commit -q -am 'update generated demonstration value'"
+    ],
+    "checks": [
+      "The conventions reviewer loads conventions-go and the repository instruction exception",
+      "Does not keep a variable-comment finding for the generated fixture because the documented project exception overrides that explicit rule",
+      "If a candidate comment finding reaches verification, the verifier cites AGENTS.md when refuting it instead of requiring two peer examples",
+      "Preserves other applicable rules and reports the scoped exception in Conventions Coverage"
+    ]
+  },
+  {
+    "id": "conventions-unavailable-guidance",
+    "prompt": "Review the changed billing contract.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "cat > AGENTS.md <<'EOF'\n# Billing review rules\n\nBilling changes require conventions-billing. Its only configured source is /nonexistent/review-guidance/conventions-billing/SKILL.md. Do not invent its contents if unavailable.\nEOF",
+      "cat > billing.py <<'EOF'\n\"\"\"Billing contract calculations.\"\"\"\n\n\ndef total(amount: int) -> int:\n    \"\"\"Return the billed total.\"\"\"\n    return amount\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b billing-adjustment",
+      "cat > billing.py <<'EOF'\n\"\"\"Billing contract calculations.\"\"\"\n\n\ndef total(amount: int) -> int:\n    \"\"\"Return the billed total.\"\"\"\n    return amount + 1\nEOF",
+      "git commit -q -am 'adjust billed total'"
+    ],
+    "checks": [
+      "Starts the read-only conventions reviewer with the available conventions-python guidance",
+      "Reports the unavailable required conventions-billing source as an unknown and conventions coverage gap",
+      "Does not invent a billing convention violation or list the unread source in conventions_loaded",
+      "Does not claim a clean conventions pass while required guidance remains unavailable",
+      "Continues reviewing applicable available rules and records the reviewed source paths"
+    ]
   }
 ]
