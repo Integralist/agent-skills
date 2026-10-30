@@ -37,10 +37,10 @@ explanatory prose, not required technical detail.
    fixed-revision document links, redacting secrets. Done when you know the
    source and whether there's a spec.
 
-2. **Read what it touches.** Read the spec if there is one, any research the
-   source links, and the code the plan will change. Load the convention skills
-   for each language the signatures use. Done when you know the existing
-   interfaces the slices build on.
+2. **Read what it touches.** Read the spec if there is one, the living features
+   it names, any research the source links, and the code the plan will change.
+   Load the convention skills for each language the signatures use. Done when
+   you know the existing interfaces the slices build on.
 
 3. **Slice the work.** Cut vertical slices: each a tracer bullet through every
    layer it touches, demoable on its own, and small enough for one session.
@@ -57,6 +57,9 @@ explanatory prose, not required technical detail.
      each milestone meets; without one, the milestone's own wording is the
      criterion, so make it checkable. Never renumber a key once assigned; task
      lists and execution logs refer to it.
+   - Include each living `.feature` update in the slice that implements its
+     behaviour. Acceptance runners load those same files, rather than copying
+     scenarios into slice-local test features.
    - Choose focused outcome diagrams using
      [OUTCOME-DIAGRAMS.md](../shared/OUTCOME-DIAGRAMS.md): individual, shared,
      mixed, or none according to what helps the reviewer understand the change.
@@ -133,7 +136,8 @@ when covered by a shared diagram or clearer without one.}
 
 #### Slice 1 Milestones
 
-- [ ] **M1.1**: {checkable outcome}{ — [criterion](./spec.md#anchor), when there's a spec}
+- [ ] **M1.1**: {checkable outcome}
+  {— [criterion](./spec.md#anchor), when there's a spec}
 
 ### Slice 2: {what it delivers end to end}
 
@@ -148,11 +152,12 @@ when covered by a shared diagram or clearer without one.}
 
 #### Slice 2 Milestones
 
-- [ ] **M2.1**: {checkable outcome}{ — [criterion](./spec.md#anchor), when there's a spec}
+- [ ] **M2.1**: {checkable outcome}
+  {— [criterion](./spec.md#anchor), when there's a spec}
 
 ### Documentation
 
-- [ ] {Living spec `docs/specs/<capability>.md` to seed or update}
+- [ ] {Living spec `docs/specs/<capability>.feature` to seed or update}
 - [ ] {README or `docs/` page whose behaviour or usage changes}
 
 ## File Changes

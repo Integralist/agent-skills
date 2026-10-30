@@ -15,8 +15,10 @@ metadata:
 Turn a source (a file or this session's discussion) into `spec.md`: what to
 build, for whom, and the Gherkin scenarios that define done. A spec is the
 stable *what*. It names interfaces, contracts, schema, and API shape, but no
-file paths or code; those go stale and belong in the plan. Write the spec;
-don't plan or build it.
+implementation file paths or code; those go stale and belong in the plan.
+Write the project spec; don't plan or build it. Current behaviour belongs in
+`docs/specs/<capability>.feature`, updated with the implementation rather than
+during specification drafting.
 
 **Stop and ask.** Follow the source as given, but when something is missing,
 contradictory, or looks like the wrong design, tell the user and wait. Don't
@@ -33,25 +35,62 @@ fill the gap with a guess.
 
 2. **Read current truth.** Read any research the source links, the decisions
    in `docs/adr/`, the code the feature touches, and the capability's living
-   spec in `docs/specs/` if one exists. A living spec is current truth; without
-   one, the code is. Done when you know the behaviour that exists today and the
-   decisions the spec must not contradict.
+   spec in `docs/specs/<capability>.feature` if one exists. Read legacy
+   Markdown living specs as baselines for migration, not as the new output
+   format. A living spec is current truth; without one, the code is. Done when
+   you know today's behaviour and the decisions the spec must not contradict.
 
 3. **Write the scenarios** as [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md)
-   describes. Choose the testing seams: the fewest points where a test
+   describes. Describe observable behaviour and required contracts for human
+   or software consumers. Include technical details when they define an
+   interface, security guarantee, or explicit operational constraint. Keep
+   replaceable implementation mechanics in Implementation Decisions or the
+   plan. A component name or call restriction belongs in a scenario only when
+   changing it would violate the requirement, not merely change the
+   implementation. Use Gherkin's optional
+   `Rule` to group scenarios that illustrate one business rule when that adds
+   clarity. Add a tag only when an established project convention or explicit
+   requirement calls for one; choose its value from that context (for example,
+   `@billing` for a billing scenario). Omit tags when they add no meaning.
+   Use `Background` only for preconditions shared by every scenario; keep
+   scenario-specific conditions in their scenario. For example:
+
+   ```gherkin
+   Feature: Local assistant mock replies
+
+     Background:
+       Given replies are local test output, not AI-generated or live data
+       And service and statistics replies use sample information
+
+     Scenario: An ordinary question gets guidance without sign-in
+       Given the User is not signed in
+       When the User asks an ordinary question in Slack
+       Then the reply explains that this local test cannot generate AI answers
+
+     Scenario: A user asks for sample services
+       When the User asks for mock services in Slack
+       Then the reply shows sample service information
+   ```
+
+   Assign durable scenarios to their owning living `.feature` files in Living
+   Specifications. Acceptance runners will load those files directly, not
+   separate test-local copies. Choose the fewest testing seams where a test
    observes the behaviour, as high as they go (a boundary over an internal
-   call), reusing existing ones. If the feature changes behaviour a living spec
-   holds, write the Behavioural Delta against it. Include agreed constraints
-   and failure behaviour; keep newly identified risks and undecided responses
-   in Open Questions until settled. Done when every behaviour in the build
-   request has a scenario and every scenario has a seam.
+   call), reusing existing ones. Seams explain how behaviour can be verified,
+   not what the feature must do. If the feature changes behaviour a living
+   spec holds, write the Behavioural Delta
+   against it. Include agreed constraints and failure behaviour; keep newly
+   identified risks and undecided responses in Open Questions until settled.
+   Done when every requested behaviour has a scenario and a testing seam, and
+   each durable scenario has a target living feature.
 
 4. **Write the spec** to `spec.md` in the source's project folder, or a new
    `projects/<yyyy-mm-dd>-<slug>/`, filling the template below. Fill the
    header from `date +%F` and `git config user.name`, with Status `Draft`.
-   Write the Problem Statement, Solution, and User Stories with the
-   voice-product skill. Drop the Behavioural Delta section when no existing
-   behaviour changes. Add the spec to the project README as
+   Use the voice-product skill for all authored spec text, including
+   acceptance criteria and Gherkin; keep source quotations verbatim. Drop the
+   Behavioural Delta section when no existing behaviour changes. Add the spec
+   to the project README as
    [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
    file is written and you've shared its path.
 
@@ -87,10 +126,10 @@ wording so reviewers can check that the acceptance criteria cover the request.
 ```gherkin
 Feature: {capability}
 
-  Scenario: {one concrete behaviour}
-    Given {a starting state}
-    When {an action occurs}
-    Then {an observable outcome holds}
+  Scenario: {one required behaviour}
+    Given {a relevant starting state}
+    When {an actor takes an action}
+    Then {an observable outcome or required guarantee holds}
 ```
 
 ## Behavioural Delta
@@ -111,7 +150,8 @@ Feature: {capability}
 
 ## Living Specifications
 
-- {[`docs/specs/<capability>.md`](...) — the behaviour it owns, or
+- {[`docs/specs/<capability>.feature`](...) — the behaviour it owns. Use inline
+  code for a file that implementation will create, or
   "None — no durable behaviour changes"}
 
 ## Research

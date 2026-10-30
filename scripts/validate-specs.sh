@@ -17,37 +17,64 @@ pass() {
 validate_gherkin() {
   local file=$1
   local in_block=0
+  local raw=0
+  local raw_header=0
+  local doc_string=""
+  local file_errors=0
   local features=0
   local scenarios=0
-  local givens=0
-  local whens=0
   local thens=0
   local line
+  local trimmed
 
+  if [[ "$file" == *.feature ]]; then
+    raw=1
+    in_block=1
+  fi
+
+  # These are structural checks, not a substitute for the runner's parser.
   while IFS= read -r line || [[ -n "$line" ]]; do
-    if [[ "$line" == *'```gherkin'* ]]; then
-      in_block=1
-      continue
-    fi
-    if (( in_block )) && [[ "$line" == '```'* ]]; then
-      in_block=0
-      continue
+    if (( ! raw )); then
+      if (( ! in_block )) && [[ "$line" == *'```gherkin'* ]]; then
+        in_block=1
+        continue
+      fi
+      if (( in_block )) && [[ "$line" == '```'* ]]; then
+        in_block=0
+        continue
+      fi
+    elif (( ! raw_header )) && [[ ! "$line" =~ ^[[:space:]]*($|#|@) ]]; then
+      raw_header=1
+      if [[ ! "$line" =~ ^[[:space:]]*Feature: ]]; then
+        error "$file: use raw Gherkin without Markdown fences or headings"
+        file_errors=$((file_errors + 1))
+      fi
     fi
     (( in_block )) || continue
 
+    # Keywords inside Doc Strings are data, not feature declarations or steps.
+    trimmed=${line#"${line%%[![:space:]]*}"}
+    if [[ -n "$doc_string" ]]; then
+      [[ "$trimmed" == "$doc_string"* ]] && doc_string=""
+      continue
+    fi
+    if [[ "$trimmed" == '"""'* || "$trimmed" == '```'* ]]; then
+      doc_string=${trimmed:0:3}
+      continue
+    fi
+
     [[ "$line" =~ ^[[:space:]]*Feature: ]] && features=$((features + 1))
-    [[ "$line" =~ ^[[:space:]]*Scenario([[:space:]]Outline)?: ]] && scenarios=$((scenarios + 1))
-    [[ "$line" =~ ^[[:space:]]*Given[[:space:]] ]] && givens=$((givens + 1))
-    [[ "$line" =~ ^[[:space:]]*When[[:space:]] ]] && whens=$((whens + 1))
+    [[ "$line" =~ ^[[:space:]]*(Scenario([[:space:]](Outline|Template))?|Example): ]] && scenarios=$((scenarios + 1))
     [[ "$line" =~ ^[[:space:]]*Then[[:space:]] ]] && thens=$((thens + 1))
   done <"$file"
 
-  local file_errors=0
-  (( features > 0 )) || { error "$file: gherkin block is missing a Feature"; file_errors=$((file_errors + 1)); }
-  (( scenarios > 0 )) || { error "$file: gherkin block is missing a Scenario"; file_errors=$((file_errors + 1)); }
-  (( givens > 0 )) || { error "$file: gherkin block is missing a Given step"; file_errors=$((file_errors + 1)); }
-  (( whens > 0 )) || { error "$file: gherkin block is missing a When step"; file_errors=$((file_errors + 1)); }
-  (( thens > 0 )) || { error "$file: gherkin block is missing a Then step"; file_errors=$((file_errors + 1)); }
+  if (( raw )); then
+    (( features == 1 )) || { error "$file: living spec must contain exactly one Feature"; file_errors=$((file_errors + 1)); }
+  else
+    (( features > 0 )) || { error "$file: gherkin block is missing a Feature"; file_errors=$((file_errors + 1)); }
+  fi
+  (( scenarios > 0 )) || { error "$file: Gherkin is missing a Scenario"; file_errors=$((file_errors + 1)); }
+  (( thens > 0 )) || { error "$file: Gherkin is missing a Then step"; file_errors=$((file_errors + 1)); }
 
   return "$file_errors"
 }
@@ -141,16 +168,18 @@ done
 
 # Validate living specs in docs/specs/ if the directory exists.
 if [[ -d "docs/specs" ]]; then
-  SPECS=(docs/specs/*.md)
+  SPECS=(docs/specs/*.feature docs/specs/*.md)
   for spec in "${SPECS[@]}"; do
     [[ -f "$spec" ]] || continue
-    [[ "$(basename "$spec")" == "TEMPLATE.md" ]] && continue
+    case "$(basename "$spec")" in
+      README.md | TEMPLATE.md) continue ;;
+    esac
     CHECKED=$((CHECKED + 1))
-    file_errors=0
-    grep -q '^# ' "$spec" || { error "$spec: missing document title (# )"; file_errors=$((file_errors + 1)); }
-    grep -q '^## ' "$spec" || { error "$spec: missing a second-level section (## )"; file_errors=$((file_errors + 1)); }
-    if ! validate_gherkin "$spec"; then file_errors=$((file_errors + 1)); fi
-    if (( file_errors == 0 )); then
+    if [[ "$spec" == *.md ]]; then
+      error "$spec: living specs must use .feature; migrate this Markdown contract"
+      continue
+    fi
+    if validate_gherkin "$spec"; then
       pass "$spec passed structural checks"
     fi
   done

@@ -53,9 +53,17 @@ complete that slice without re-designing it during execution.
 
 ## Living specifications
 
-Project documents record the history of a change. Current behaviour belongs in
-`docs/specs/<capability>.md`, which is the living source of truth after the
-project is complete.
+Project documents record proposed changes and their history. Current behaviour
+belongs in `docs/specs/<capability>.feature`: raw Gherkin with one `Feature`
+per capability file. Update it with the slice that implements the behaviour,
+not during planning or only after the whole project is complete.
+
+Acceptance runners load these same files directly; step implementations and
+fixtures stay with the test code. Project acceptance criteria and deltas are
+snapshots, not a second current contract or a separate acceptance-test input.
+Keep concise purpose and domain context in feature descriptions. Lasting
+operational instructions belong in READMEs or runbooks, and durable
+architectural rationale in ADRs.
 
 Each project `spec.md` should use a `## Living Specifications` section to name
 its relevant living specs and describe what each one owns. If the project does

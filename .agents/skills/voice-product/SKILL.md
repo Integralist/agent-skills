@@ -19,14 +19,16 @@ accurate. Pick the mode from [VOICE-MODES.md](../shared/VOICE-MODES.md):
 one-off (the default), persistent (`--all`), which applies these rules to
 every reply, or off (`--off`).
 
-**Where it applies.** Use it for the explanatory prose in technical
-documents: a PR's Problem, Solution, and Notes; an ADR's Context and
-Consequences; a spec's Problem Statement, Solution, and User Stories; a
-plan's Summary and slice outcomes; and a doc's introductions, explanations,
-and user-visible behaviour. Leave exact wording where precision is the point:
-ADR decisions and alternatives, acceptance criteria and Gherkin, interfaces,
-tasks, dependencies, schemas, signatures, and implementation steps. Never
-simplify away API behaviour, permissions, assumptions, or uncertainty.
+**Where it applies.** Use it for explanatory prose in technical documents:
+a PR's Problem, Solution, and Notes; an ADR's Context and Consequences;
+a spec's prose and the natural-language wording of its acceptance criteria
+and Gherkin; a plan's Summary and slice outcomes; and a doc's introductions,
+explanations, and user-visible behaviour. Improve clarity without changing
+the requirements. Preserve exact Gherkin syntax, identifiers, protocol values,
+permissions, and constraints. Leave exact wording where precision is the
+point: ADR decisions and alternatives, interfaces, tasks, dependencies,
+schemas, signatures, implementation steps, and source quotations. Never
+simplify away API behaviour, assumptions, or uncertainty.
 
 **Voice.**
 
