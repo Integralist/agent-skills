@@ -1,45 +1,45 @@
 # Skill mechanics
 
-Frontmatter choices that only apply when the document is a skill.
+Frontmatter controls skill discovery and harness configuration. Behaviour the
+agent must follow belongs in the body or an explicitly required reference;
+metadata is not a substitute for instructions.
 
 ## Invocation
 
-Default to user-invoked: set `disable-model-invocation: true` and write a
-one-line, human-facing `description`. It costs no context, but only the user
-can start it.
+Default to user-invoked: set `disable-model-invocation: true` and write a short,
+human-facing `description`. Where supported, the flag keeps the skill out of
+the model's discovery context; the user starts it explicitly.
 
-Make a skill model-invoked (omit the flag) only when the agent must start it on
-its own or another skill must reach it. Its description then stays loaded every
-turn, so write it as a trigger (see "Be concrete" in [SKILL.md](SKILL.md)).
-Split part of a skill into its own model-invoked skill only when that part needs
-its own trigger.
+Allow model invocation by omitting the flag when the agent must start the
+skill itself or another skill must reach it. Its description appears in the
+model's skill listing, so name what it does and when to use it, with concrete
+artifacts and verbs. Put the workflow in the body, not the description.
+Split out a model-invoked skill only for a distinct trigger.
+
+## Arguments
+
+`argument-hint` is an autocomplete hint, not a parser or validation schema.
+State meaningful defaults, mode selection, missing-input handling, and any
+flag that changes behaviour in the body or a required reference. Explain what
+syntax leaves unspecified rather than repeating the hint.
 
 ## Model tier
 
-Every skill declares `metadata.model-tier`, so a model-picking harness switches
-to the right model and effort when the skill runs:
+Every skill declares `metadata.model-tier` for model-picking harnesses. Pick
+from the hardest work the skill does, not its length:
 
-```yaml
-metadata:
-  model-tier: complex
-```
-
-Pick the tier from the hardest work the skill does, not its length:
-
-- `trivial` — mechanical jobs and short writing: commit, branch, recap,
-  reformat, a PR body, a ticket.
-- `moderate` — building or changing software, debugging, multi-file work.
-- `complex` — project planning and big-picture thinking: specs, plans,
-  research, architecture, design decisions, domain modelling, code or security review,
-  and interviews driven by short replies, such as grilling.
-- `frontier` — thinking `complex` would fall short on: redesigning a whole
-  codebase or system, or planning a very large migration.
+| Tier | Work |
+| --- | --- |
+| `trivial` | Mechanical tasks and short prose, such as commits and recaps. |
+| `moderate` | Code changes, debugging, and multi-file work. |
+| `complex` | Planning, design, reviews, domain modelling, and interviews. |
+| `frontier` | System-wide redesigns or migrations beyond `complex`. |
 
 When unsure, choose `moderate`.
 
 ## Allowed tools
 
-`allowed-tools` pre-approves commands the skill runs routinely, so the user
-isn't prompted for each one. Claude Code honours it; other harnesses may not,
-so the skill must work without it. List narrow, low-risk commands such as
-`Bash(git status:*)`, and leave anything risky to the normal permission prompt.
+`allowed-tools` pre-approves routine commands in harnesses that honour it,
+such as Claude Code. Keep entries narrow and low-risk, such as
+`Bash(git status:*)`; leave risky actions to the normal permission prompt.
+The skill must also work in harnesses that ignore this field.
