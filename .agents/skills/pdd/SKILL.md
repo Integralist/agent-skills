@@ -24,6 +24,11 @@ they hold no code, specs, plans, or task lists.
 approves it. Set a stage `Awaiting approval` when it's ready, and record
 `Approved` only after the user explicitly says so.
 
+**Alignment before approval.** Before setting a stage to `Awaiting approval`,
+use the grill-with-docs skill on that stage. Continue until the user confirms
+shared understanding, then incorporate agreed changes. This confirmation is
+not stage approval.
+
 **Stop and ask.** Follow the source as given, but when something is missing,
 contradictory, or looks like the wrong design, tell the user and wait. Don't
 fill the gap with a guess.
@@ -70,7 +75,7 @@ several milestones are known from the start, use qualified names throughout.
    When revising, keep approved content and record the requested changes
    rather than rewriting the history. If the work turns up a code, tooling, or
    `docs/specs/` change, stop: that needs its own engineering project. Done
-   when the document is `Awaiting approval`.
+   when grilling is complete and the document is `Awaiting approval`.
 
 4. **Update the README** as [PROJECTS-README.md](../shared/PROJECTS-README.md)
    describes: the artifact rows, the PDD approval table, and the next action.

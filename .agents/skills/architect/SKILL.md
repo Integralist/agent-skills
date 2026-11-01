@@ -32,9 +32,11 @@ sense, tell the user and wait. Don't fill the gap with a guess.
 3. **Spec.** Use the to-spec skill with the idea and the research. Done when
    `spec.md` is written.
 
-4. **Grill.** Use the grill-with-docs skill to stress-test the spec. If
-   grilling changes a decision, testing seam, or acceptance criterion, update
-   `spec.md` to match. Done when grilling ends and the spec reflects it.
+4. **Grill.** Use the grill-with-docs skill to stress-test the spec. Continue
+   until the user confirms shared understanding. If grilling changes a
+   decision, testing seam, or acceptance criterion, update `spec.md` to match.
+   Do not start planning or implementation before alignment is confirmed.
+   Done when the user confirms alignment and the spec reflects it.
 
 5. **Plan.** Use the to-plan skill with the spec. Then use the to-adr skill on
    the plan; when it writes no ADR, note why in the plan's Notes. Unless the
