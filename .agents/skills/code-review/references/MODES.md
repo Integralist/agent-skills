@@ -66,7 +66,7 @@ contents. Read files from the working tree.
 
 Use the recorded baseline, not a merge base with the default branch. Require
 an execution delivery manifest and the initial state from
-[REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). It identifies owned paths and
+[REVIEW-CHANGE.md](../../shared/REVIEW-CHANGE.md). It identifies owned paths and
 hunks, inherited changes to exclude, and the delivered state to review. A
 commit alone cannot distinguish work that was already dirty before execution.
 

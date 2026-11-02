@@ -76,8 +76,8 @@ An existing `ARTIFICIAL_ANALYSIS_API_KEY` or `AA_API_KEY` overrides 1Password.
 Each read specifies `--account my.1password.com`. The
 [1Password account-selection rules](https://www.1password.dev/cli/use-multiple-accounts)
 give this flag precedence over `OP_ACCOUNT` and the most recently signed-in
-account, so `~/.zshrc` can keep signing into a work account unchanged. The generator
-never runs `op signin` or `op signout` automatically.
+account, so `~/.zshrc` can keep signing into a work account unchanged. The
+generator never runs `op signin` or `op signout` automatically.
 
 If the read fails, sign in to the personal account in your terminal, then retry:
 
@@ -149,9 +149,9 @@ recognized fallback scenarios.
 
 Lines connect effort variants in the order none, default, minimal, low,
 medium, high, xhigh, max—not arbitrary different models. Unknown effort labels
-are retained. A one-variant model is a single point. Deselecting a middle variant
-joins the remaining selected variants directly; connecting lines are visual
-guides, not interpolated measurements.
+are retained. A one-variant model is a single point. Deselecting a middle
+variant joins the remaining selected variants directly; connecting lines are
+visual guides, not interpolated measurements.
 
 ## Units
 
@@ -228,13 +228,7 @@ visual guides, not measured intermediate results.
 
 When enabled, the thicker yellow dashed line has a dark outline. Frontier
 nodes stay vivid; other nodes and their labels fade to 25% opacity, and
-family curves fade into the background. Only frontier nodes respond to
-mouse hover and clicks, with tighter hit areas around their dots. Faded
-nodes, family curves, and effort labels cannot intercept the mouse.
-Keyboard focus and Enter/Space still let you inspect and pin any model.
-A revealed family does not re-enable its non-frontier mouse targets or dim
-other frontier nodes. Switching the checkbox off restores normal styling
-and mouse access to every model.
+family curves fade into the background.
 
 ## URL state and sharing
 
@@ -248,7 +242,8 @@ with `x=cost` rather than expecting the new default to override URL state.
 ```
 
 - `models`: comma-separated slugs, across any providers. An empty value selects
-  nothing. Unknown slugs produce a warning instead of silently choosing defaults.
+  nothing. Unknown slugs produce a warning instead of silently choosing
+  defaults.
 - `benchmark`: score key.
 - `x`: cost, tokens, time, price, or speed.
 - `highlight`: pinned node's slug; it must be selected and have plotted data.
@@ -278,8 +273,8 @@ when they specify them.
 The generator atomically replaces `$HOME/llm-stats.html` after successful
 rendering. Failed fetches or rendering leave the previous HTML intact; tests
 use isolated output paths so they cannot overwrite a bookmarked report.
-Bookmark the generated page with its current query parameters. Its home-directory
-path survives system temporary-file cleanup.
+Bookmark the generated page with its current query parameters. Its
+home-directory path survives system temporary-file cleanup.
 
 Local query updates and reloads work in Chrome. A browser that blocks
 `history.replaceState` on `file://` shows a message; **Save HTML view** still

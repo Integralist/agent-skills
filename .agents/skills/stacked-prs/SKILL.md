@@ -8,47 +8,48 @@ metadata:
   model-tier: moderate
 ---
 
-# Stacked PRs
+Manage dependent PRs with `gh stack`. The caller supplies branches in order;
+ask if the user names none. Run only requested steps (for example, step 2
+alone to prepare a layer). Before switching, adding, syncing, rebasing, or
+submitting layers, commit pending work with the commit skill so it cannot land
+in the wrong layer.
 
-Manage a stack of dependent pull requests with `gh stack`. The layers (which
-branches, in what order) come from whoever called this skill; if the user
-called it with none named, ask. Run only the steps the caller needs, such as
-step 2 alone to get a layer's branch ready. Before any command that switches,
-adds, syncs, rebases, or submits layers, commit pending work with the commit
-skill, so changes never land in the wrong layer.
+## Set up the stack
 
-1. **Check the extension.** Run `gh stack --help`. If it's missing, ask before
-   running `gh extension install github/gh-stack`.
-
-2. **Set up the stack.**
-
-   - New stack: `gh stack init --base <trunk> <bottom-branch>`, then
-     `gh stack add <branch>` for each higher layer once work reaches it.
+1. **Check the extension.** Run `gh stack --help`. If missing, ask before
+   `gh extension install github/gh-stack`.
+2. **Set up the requested stack:**
+   - New stack: `gh stack init --base <trunk> <bottom-branch>`, then run
+     `gh stack add <branch>` for each higher layer as work reaches it.
    - Existing branches: `gh stack init --base <trunk> <bottom> … <top>`.
    - Existing stack: `gh stack checkout <stack-number-or-branch>`.
 
-   Done when `gh stack view --short` lists the layers bottom to top.
+   Setup is complete when `gh stack view --short` lists layers bottom to top.
 
-3. **Write each layer's PR** following
-   [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md), against the layer's base:
-   the trunk for the bottom layer, the layer below for the rest. Show each
-   title and body and wait for the user's approval. Done when every layer has
-   an approved title and body.
+## Prepare and submit PRs
 
-4. **Submit.** Run `gh stack submit --auto --open` to push and open the PRs
-   ready for review; `--auto` alone opens drafts. Then write each body to a
-   temp file and run
-   `gh pr edit <branch> --title "<title>" --body-file <file>`. Done when every
-   PR on GitHub shows its approved title and body.
+3. **Write each layer's PR description** using
+   [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md). Target the layer's base:
+   trunk for the bottom layer and the layer below for each higher layer. Show
+   every title and body, then wait for the user's approval.
+4. **Submit** with `gh stack submit --auto --open` to push and open PRs ready
+   for review; `--auto` alone opens drafts. Then write each approved body to
+   a temporary file and run
+   `gh pr edit <branch> --title "<title>" --body-file <file>`.
+   Complete when GitHub shows each approved title and body.
 
-5. **Keep it current.** Run `gh stack sync` after the trunk or a lower layer
-   changes, `gh stack rebase` to resolve conflicts, and `gh stack modify` to
-   fold, reorder, insert, or rename layers.
+## Maintain and merge
 
-6. **Merge**, bottom to top only, once every layer being merged has passing
-   `gh pr checks <PR>` and approved reviews. If a check fails, fix it on that
-   layer and resubmit. Run `gh stack merge --yes --<squash|rebase|merge>` with
-   the repo's merge style; pass a PR number to merge only up to that layer.
-   Then run `gh stack sync --prune`. If branch protection blocks the merge,
-   merge each PR by hand from the bottom up, then run `gh stack sync --prune`.
-   Done when the merged layers are in the trunk.
+5. **Keep the stack current.** Run `gh stack sync` after trunk or a lower
+   layer changes. Use `gh stack rebase` to resolve conflicts and
+   `gh stack modify` to fold, reorder, insert, or rename layers.
+6. **Merge bottom to top only.** Merge only when every layer being merged has
+   passing `gh pr checks <PR>` and approved reviews. If a check fails, fix it
+   on that layer and resubmit. Run
+   `gh stack merge --yes --<squash|rebase|merge>` using the repository's merge
+   style; pass a PR number to merge only through that layer. Then run
+   `gh stack sync --prune`.
+
+   If branch protection blocks the merge, merge each PR manually from the
+   bottom up, then run `gh stack sync --prune`. Merging is complete when the
+   merged layers are in trunk.

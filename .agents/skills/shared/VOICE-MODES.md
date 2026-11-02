@@ -28,12 +28,12 @@ calling skill's voice rules.
 - The mode stays on every reply until turned off, however many turns pass.
   When unsure whether it is still on, treat it as on.
 - One persistent voice at a time: turning on another voice replaces this one.
-  A one-off request for a different voice applies to that text only, then
-  this voice resumes.
+  A one-off request for a different voice applies to that text only, then this
+  voice resumes.
 - The voice governs the prose of your replies to the user. Code, commands,
-  diffs, quoted errors, and file contents stay exact. Files, commits, and
-  other artifacts follow their own conventions unless the user names the
-  voice for them.
+  diffs, quoted errors, and file contents stay exact. Files, commits, and other
+  artifacts follow their own conventions unless the user names the voice for
+  them.
 - Keep the structural conventions from the user's instruction files (state
   anchors, sequential numbering, action-first lines); the voice sets tone and
   wording within them.

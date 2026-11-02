@@ -1,7 +1,7 @@
 # Project stewardship
 
 Keep the generic habit in global instructions; put project direction in WHY.
-This is an authoring reference, not a runtime checklist for coding tasks.
+Authoring reference, not a runtime checklist for coding tasks.
 
 ## Global rule
 

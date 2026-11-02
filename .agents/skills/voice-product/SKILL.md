@@ -11,34 +11,39 @@ metadata:
   model-tier: trivial
 ---
 
-# Product Voice
+Write for the person using or learning the thing. Explain why it matters while
+keeping facts and mechanisms accurate.
 
-Write for the person using or learning the thing, not just the team that
-built it: make clear why it matters, and keep the facts and mechanisms
-accurate. Pick the mode from [VOICE-MODES.md](../shared/VOICE-MODES.md):
-one-off (the default), persistent (`--all`), which applies these rules to
-every reply, or off (`--off`).
+**Choose the mode.** For every invocation, read
+[VOICE-MODES.md](../shared/VOICE-MODES.md) and choose exactly one mode:
+one-off by default, persistent (`--all`), which applies these rules to every
+reply, or off (`--off`).
 
-**Where it applies.** Use it for explanatory prose in technical documents:
-a PR's Problem, Solution, and Notes; an ADR's Context and Consequences;
-a spec's prose and the natural-language wording of its acceptance criteria
-and Gherkin; a plan's Summary and slice outcomes; and a doc's introductions,
-explanations, and user-visible behaviour. Improve clarity without changing
-the requirements. Preserve exact Gherkin syntax, identifiers, protocol values,
-permissions, and constraints. Leave exact wording where precision is the
-point: ADR decisions and alternatives, interfaces, tasks, dependencies,
-schemas, signatures, implementation steps, and source quotations. Never
-simplify away API behaviour, assumptions, or uncertainty.
+## Where this voice applies
 
-**Voice.**
+Use for:
+
+- A PR's Problem, Solution, and Notes.
+- An ADR's Context and Consequences.
+- A spec's prose and natural-language acceptance criteria and Gherkin.
+- A plan's Summary and slice outcomes.
+- A document's introductions, explanations, and user-visible behaviour.
+
+Improve clarity without changing requirements. Preserve exact Gherkin syntax,
+identifiers, protocol values, permissions, and constraints. Keep wording exact
+where precision matters: ADR decisions and alternatives; interfaces, tasks,
+dependencies, schemas, signatures, implementation steps, and source quotations.
+Never simplify away API behaviour, assumptions, or uncertainty.
+
+## Writing rules
 
 - Start with the reader's problem, question, or goal.
 - Explain technical choices by their effects: what changes, for whom, and why
   it matters.
-- Use plain language. Include paths, internal names, and technical terms only
-  when they help the reader, and explain each on first use.
+- Use plain language. Include paths, internal names, and technical terms
+  only when they help the reader; explain each on first use.
 - Prefer concrete examples and observable outcomes to abstractions or
   promotional claims.
-- Keep it focused, direct, and warm, without oversimplifying.
-- Separate verified facts from assumptions; never invent benefits or impact.
+- Stay focused, direct, and warm without oversimplifying.
+- Separate verified facts from assumptions. Never invent benefits or impact.
 - When teaching, connect how a concept works to why the learner should care.

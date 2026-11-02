@@ -9,45 +9,46 @@ metadata:
   model-tier: trivial
 ---
 
-# Changelog
-
 Add a [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) entry to
-the repo's root `CHANGELOG.md`, then show the diff without committing.
+the repository-root `CHANGELOG.md`. Show the resulting diff; do not commit.
 
-1. **Pick the source.** Run `git status --short`. With uncommitted changes,
-   staged or not, use `git diff HEAD`. Otherwise diff the branch against
-   `main`, or `master` if there's no main:
-   `git diff $(git merge-base HEAD <base>)...HEAD`, reading
-   `git log <merge-base>..HEAD` for hints. If both are empty, tell the user
-   there's nothing to record and stop. Done when you've read the full diff,
-   not just the stat, since categorising needs the hunks.
-2. **Open the changelog.** If `CHANGELOG.md` exists, note its style: heading
-   depth, version scheme, per-package subheadings, and the dash between
-   version and date. If not, create it from the template, starting at
-   `0.0.1` unless the user, tags, or a manifest such as `package.json` or
-   `Cargo.toml` suggests otherwise. Done when you know the style to match.
-3. **Pick the version** by bumping the latest heading per SemVer: patch for
-   `Fixed` only, minor for `Added` or non-breaking `Changed`, major for a
-   breaking `Changed` or `Removed`. Before 1.0 (`0.x.y`), bump the patch for
-   everything unless the user says otherwise. Ask if unsure. Done when the
-   version is settled.
-4. **Write the entry** with today's date (`date +%Y-%m-%d`), directly below
-   the preamble and above the previous version. Use the sections `Added`,
-   `Changed`, `Deprecated`, `Removed`, `Fixed`, and `Security`, in that order,
-   leaving out empty ones. Done when the block is inserted.
-5. **Show the diff** of `CHANGELOG.md`. Done when the user has seen it.
+1. **Choose the source.** Run `git status --short`. If there are uncommitted
+   changes, staged or not, use `git diff HEAD`. Otherwise compare the branch
+   with `main`, or `master` if `main` does not exist:
+   `git diff $(git merge-base HEAD <base>)...HEAD`. Read
+   `git log <merge-base>..HEAD` for context. If both sources are empty, tell
+   the user there is nothing to record and stop. Read the full diff, not only
+   its stat, before categorizing.
+2. **Match the changelog.** If `CHANGELOG.md` exists, note its heading depth,
+   version scheme, per-package subheadings, and separator between version and
+   date. If absent, create it from the template below, starting at `0.0.1`
+   unless the user, tags, or a manifest such as `package.json` or
+   `Cargo.toml` suggests another version.
+3. **Choose a version.** Bump the latest heading by SemVer: patch for `Fixed`
+   only; minor for `Added` or non-breaking `Changed`; major for breaking
+   `Changed` or `Removed`. Before 1.0 (`0.x.y`), bump the patch for everything
+   unless the user says otherwise. Ask if unsure.
+4. **Write the entry.** Use today's date from `date +%Y-%m-%d`. Insert it
+   directly below the preamble and above the previous version. Use sections
+   `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, and `Security`, in
+   that order, omitting empty sections.
+5. **Show the diff** of `CHANGELOG.md`.
 
-**Entries.** One bullet per logical change, not per file, leading with the
-affected package, module, or file when the changelog is organised that way.
-State what changed and, where it isn't obvious, why, omitting needless words
-per [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md). Wrap at about 80
-characters with continuation lines indented two spaces, and put identifiers,
-paths, env vars, and flags in backticks.
+## Entry style
 
-**Match the existing changelog.** Copy its punctuation exactly, such as `—`
-or `-` between version and date. Add commit hashes, PR numbers, author names,
-refactors with no observable effect, or an `[Unreleased]` section only when
-it already has them.
+Write one bullet per logical change, not per file. If the changelog is
+organized by package, module, or file, lead with that name. State what changed
+and why when it is not obvious; omit needless words according to
+[CONCISE-PROSE.md](../shared/CONCISE-PROSE.md). Wrap at about 80 characters,
+indent continuation lines by two spaces, and put identifiers, paths, env vars,
+and flags in backticks.
+
+Match existing punctuation exactly, including the separator between version
+and date. Include commit hashes, PR numbers, author names, refactors with no
+observable effect, or an `[Unreleased]` section only when the existing
+changelog already uses them.
+
+Use this template when creating a changelog:
 
 ````md
 # Changelog

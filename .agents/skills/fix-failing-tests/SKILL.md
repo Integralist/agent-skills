@@ -7,8 +7,6 @@ metadata:
   model-tier: moderate
 ---
 
-# Fix Failing Tests
-
 Find the failures in a test-output file, have a read-only subagent diagnose
 their root causes, then apply the fixes in the main thread, where the user can
 redirect or stop any fix before work piles up.

@@ -8,23 +8,22 @@ metadata:
   model-tier: trivial
 ---
 
-# Open PR
+Open a ready-for-review PR for the current branch.
 
-Open a ready-for-review pull request for the current branch.
+1. **Check the branch.** On the default branch, ask whether to create a
+   branch with the branch skill or stop. If an open PR exists, ask whether to
+   update its description. Continue only on a feature branch with no open PR,
+   or after the user chooses.
+2. **Draft the PR.** Read and follow
+   [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md), using the default branch
+   as the base.
+3. **Get approval.** Show the title and body, then wait for approval. Do not
+   open the PR before approval.
+4. **Open it.** If there's no upstream, run `git push -u origin <branch>`.
+   Save the approved body to a temporary file, then run:
 
-1. **Check the branch.** On the default branch, ask whether to create a branch
-   with the branch skill or stop. If this branch already has an open PR, ask
-   whether to update its description instead. Done when you're on a feature
-   branch with no open PR, or the user has chosen.
+   ```bash
+   gh pr create --base <default-branch> --title "<title>" --body-file <file>
+   ```
 
-2. **Write the title and body** following
-   [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md), against the default
-   branch.
-
-3. **Get approval.** Show the title and body, then wait for the user to
-   approve. Done when they approve.
-
-4. **Open it.** If the branch has no upstream, run `git push -u origin
-   <branch>`. Write the body to a temp file, then run
-   `gh pr create --base <default-branch> --title "<title>" --body-file <file>`.
-   Done when `gh` prints the PR URL and you've shared it.
+   Share the PR URL from `gh`.

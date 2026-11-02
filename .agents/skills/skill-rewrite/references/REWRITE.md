@@ -22,12 +22,24 @@ Preserve agreed behaviour while changing its wording and location.
    has not already decided against owning it. Repoint callers and section
    links to the new home. Local references need explicit loading conditions
    in `SKILL.md`; keep decisions and approval gates visible in the main file.
+   Before seeking approval, compare combined UTF-8 byte totals for `SKILL.md`
+   and every Markdown file under the skill's `references/`, counting moved
+   files once. Include any destination text file receiving transferred rules.
+   Report line counts as context only; bytes are the size metric. Default to a
+   net reduction. If the rewrite must grow to preserve behavior, explain the
+   reason and get explicit user approval. Remove operative wording from the old
+   location when relocating a rule; keep only the pointer needed to load it.
    Apply only after the user approves the proposal.
 
 4. **Verify.** Compare the written skill and relocated rules with every
    agreed disposition. Check that retained behaviour is loaded before the
    action it governs, conditional reads have clear triggers, and caller paths
-   and section anchors still resolve. Exercise representative modes, missing
-   inputs, approval gates, and conditional reads, comparing the old and new
-   behaviour where relevant. Mark unrun checks as verification gaps; a short
-   entry point or an existing reference file does not prove preservation.
+   and section anchors still resolve. Confirm a human can understand the
+   purpose, scope, core workflow, handoffs, decisions/gates, and deliverable
+   from one pass through `SKILL.md`; move specialized procedures, schemas, and
+   templates to concise references. For each cross-skill handoff, verify its
+   trigger, completed prerequisites, exact resume step, and direct-invocation
+   default. Exercise representative modes, missing inputs, approval gates, and
+   conditional reads, comparing behaviour where relevant. Mark unrun checks
+   as verification gaps; a short entry point or an existing reference file
+   does not prove preservation.

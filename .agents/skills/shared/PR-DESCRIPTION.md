@@ -4,11 +4,15 @@ How to write a pull request's title and description. Write both with the
 voice-product skill, after reading every commit and the full diff against the
 PR's base, not just the list of changed files.
 
-**Title.** Write it as the commit skill writes a subject:
+## Title
+
+Write it as the commit skill writes a subject:
 `type(scope): <why it matters>`. If the repo lints PR titles (a workflow in
 `.github/workflows/` or a commitlint config), its rules win.
 
-**Body.** Use this template, even when the repo ships its own:
+## Body
+
+Use this template, even when the repo ships its own:
 
 ````md
 ## Problem
@@ -42,9 +46,15 @@ key change; note trade-offs.>
 - Wrap a Markdown code block in 4 backticks so inner 3-backtick blocks don't
   break it.
 
-**Diagram.** When the change alters how parts call each other, branch, or move
-through states, add one Mermaid diagram of the type that fits:
-`sequenceDiagram` for calls between parts, `flowchart` for branching,
-`stateDiagram-v2` for lifecycles. Keep it high-level: only the slice that
-changed, a dozen nodes or fewer, with ` (new)` or ` (changed)` on the steps the
-diff touches. Check it with the conventions-mermaid skill.
+## Diagram
+
+When the change alters how parts call each other, branch, or move through
+states, add one Mermaid diagram of the type that fits:
+
+- `sequenceDiagram` for calls between parts
+- `flowchart` for branching
+- `stateDiagram-v2` for lifecycles
+
+Keep it high-level: only the slice that changed, a dozen nodes or fewer, with
+` (new)` or ` (changed)` on the steps the diff touches. Check it with the
+conventions-mermaid skill.

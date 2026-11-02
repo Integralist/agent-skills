@@ -3,64 +3,58 @@ name: perspectives
 description: >-
   Quick multi-viewpoint "what are we missing?" pass on a problem, proposal,
   or design. Use when evaluating ideas, proposals, or trade-offs.
-user-invocable: true
 argument-hint: '[topic or proposal] [optional: perspective]'
 metadata:
   model-tier: complex
 ---
 
-# Perspectives
+Explore a problem, proposal, or design through six distinct perspectives,
+based on Edward de Bono's Six Thinking Hats, then surface what matters. This
+is for breadth, not a durable recommendation: use decide for a consequential
+choice and code-review to find defects in existing code.
 
-Look at a problem, proposal, or design through six isolated perspectives,
-based on Edward de Bono's Six Thinking Hats, then pull out what matters.
-It's for breadth: for a consequential choice that needs a durable
-recommendation, use the decide skill, and to find defects in existing code,
-use code-review.
+**Input.** Take a topic or proposal and, optionally, one perspective. If the
+topic is too vague to frame as one focused question, ask one clarifying
+question; otherwise begin. Use practical names, and accept these aliases:
 
-**Input.** Take a topic or proposal and an optional perspective. If the topic
-is too vague to frame as one focused question, ask one clarifying question;
-otherwise start. Name each perspective by its practical name, not its colour,
-and accept these aliases:
+| Perspective | Aliases |
+| --- | --- |
+| Evidence | white, facts, data, unknowns |
+| Sentiment | red, feelings, gut, reactions |
+| Risks | black, caution, failure |
+| Benefits | yellow, optimism, upside |
+| Alternatives | green, creative, options |
+| Process | blue, meta, next steps |
 
-| Perspective  | Aliases                       |
-| ------------ | ----------------------------- |
-| Evidence     | white, facts, data, unknowns  |
-| Sentiment    | red, feelings, gut, reactions |
-| Risks        | black, caution, failure       |
-| Benefits     | yellow, optimism, upside      |
-| Alternatives | green, creative, options      |
-| Process      | blue, meta, next steps        |
-
-**One perspective.** When the user names one, cover only it, in depth: a
-short framing sentence and 5–10 concise points, with no synthesis.
+**One perspective only.** If the user names one, cover only that perspective
+in depth: one short framing sentence and 5–10 concise points. Do not add a
+synthesis.
 
 ## Full analysis
 
-1. **Restate** the topic as one focused question. Done when it fits in a
-   sentence.
-2. **Work each perspective in order,** keeping each to its own mode;
-   combining them is the synthesis's job. Done when all six are written.
-   - **Evidence:** separate verified facts, user-supplied claims,
-     assumptions, and unknowns; cite what evidence exists, label
-     unsupported claims, and name the unknowns most likely to change the
-     conclusion.
-   - **Sentiment:** the user's stated intuition and stakeholders' feelings.
-     With none supplied, describe plausible reactions as hypotheses, not
-     facts or your own feelings. Keep it short: feelings are signals, not
-     proof.
-   - **Risks:** failure modes, downsides, constraints, and second-order
-     effects, critically, telling demonstrated risks from speculation.
-   - **Benefits:** benefits, leverage, opportunities, and best cases, each
-     with what must be true for it to happen.
-   - **Alternatives:** options that avoid or change the central trade-off,
-     including doing nothing, staging, smaller experiments, and
-     combinations; unconventional ideas are welcome, labelled if
-     impractical.
-   - **Process:** whether the question is framed well and more analysis
-     would help, the owner or decision-maker if known, and any evidence
-     needed before acting.
-3. **Synthesise:** the one or two insights most likely to change the
-   outcome, any sentiment worth acknowledging, the strongest unresolved
-   unknown, and a concrete next step. Leave an exploratory question open
-   rather than forcing a decision; recommend decide for a consequential
-   choice that emerges. Done when the next step is named.
+Restate the topic as one focused question, then cover the perspectives in
+this order. Keep each perspective in its own mode; synthesis is where they
+come together.
+
+1. **Evidence:** Separate verified facts, user-supplied claims, assumptions,
+   and unknowns. Cite available evidence, label unsupported claims, and name
+   the unknowns most likely to change the conclusion.
+2. **Sentiment:** Include the user's stated intuition and stakeholders'
+   feelings. If none are supplied, describe plausible reactions as
+   hypotheses, not facts or your own feelings. Keep it short: feelings are
+   signals, not proof.
+3. **Risks:** Identify ways it could fail, downsides, constraints, and
+   second-order effects. Distinguish demonstrated risks from speculation.
+4. **Benefits:** Identify benefits, leverage, opportunities, and best cases;
+   state what must be true for each to happen.
+5. **Alternatives:** Include options that avoid or change the central
+   trade-off, such as doing nothing, staging, smaller experiments, or
+   combinations. Unconventional ideas are welcome; label impractical ones.
+6. **Process:** Say whether the question is well-framed and further analysis
+   would help. Name the owner or decision-maker when known and any evidence
+   needed before acting.
+
+**Synthesis.** Name the one or two insights most likely to change the
+outcome, any sentiment worth acknowledging, the strongest unresolved unknown,
+and a concrete next step. Leave exploratory questions open rather than
+forcing a decision. If a consequential choice emerges, recommend decide.

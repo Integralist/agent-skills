@@ -8,19 +8,17 @@ metadata:
   model-tier: trivial
 ---
 
-# Clarify
-
-Pin down what the user wants before acting, in one structured interaction,
-keeping the questions few, per
+Before acting, use one structured interaction to pin down what the user wants.
+Keep the questions few and follow
 [EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md).
 
-1. **Ask** for whichever of these the conversation hasn't already answered:
-   - **Audience:** who is this for?
-   - **Goal:** what do they need?
-   - **Context:** what should you know?
-   - **Constraints:** what are the boundaries?
-   - **Format:** what should the output look like?
+1. **Ask only for missing information:**
+   - **Audience:** Who is this for?
+   - **Goal:** What do they need?
+   - **Context:** What should you know?
+   - **Constraints:** What are the boundaries?
+   - **Format:** What should the output look like?
 
-   Done when all five have an answer.
-2. **Restate** the five back to the user, then carry on with the task. Done
-   when the task is under way.
+   Continue when all five have answers, including answers already given in the
+   conversation.
+2. **Restate** the five answers to the user, then continue with the task.

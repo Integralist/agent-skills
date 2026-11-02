@@ -1,9 +1,8 @@
 # {Project name}
 
-This README is the index for the project workspace. Keep it current as
-artifacts are created, approved, run, or superseded. The artifacts
-contain the source material; this file contains the navigation and current
-state.
+This README indexes the project workspace. Keep it current as artifacts are
+created, approved, run, or superseded. The artifacts contain the source
+material; this file provides navigation and current status.
 
 - **Status:** {Planning | Ready | In progress | Complete}
 - **Owner:** {owner}
@@ -16,8 +15,8 @@ state.
 
 ## Workflow status
 
-{For a PDD project, use the approval table below. For an engineering-led
-project, describe the current spec, plan, or implementation state instead.}
+For a PDD project, use the approval table below. For an engineering-led project,
+describe the current spec, plan, or implementation state instead.
 
 ### PDD approval status (PDD projects only)
 
@@ -44,7 +43,7 @@ individual task state.
 | [{artifact filename}](./{artifact filename}) | {purpose} | {status} |
 
 Replace the placeholder row with one row for each actual artifact. Remove rows
-for artifacts that do not apply; never leave a placeholder or link to a file
+for artifacts that do not apply. Never leave a placeholder or link to a file
 that does not exist. Use the actual filename for each workflow:
 
 - Single-slice tasks: `tasks.md`
@@ -52,7 +51,7 @@ that does not exist. Use the actual filename for each workflow:
 - Single-milestone PDD: `discovery.md` and `design.md`
 - Qualified PDD milestones: `discovery-mN.md` and `design-mN.md`
 
-These rows track document lifecycle only; do not copy task descriptions,
+These rows track document lifecycle only. Do not copy task descriptions,
 checkboxes, or slice-level progress into this README. The task file remains the
 source of truth for task state.
 

@@ -1,9 +1,9 @@
 # Agent Teams — Enablement
 
-If your harness supports named, parallel agent teams, use them to
-run independent work concurrently rather than sequentially.
+When the harness supports named, parallel agent teams, use them to run
+independent work concurrently instead of sequentially.
 
-On Claude Code, enable agent teams by adding the following to
+On Claude Code, enable agent teams by adding this to
 `.claude/settings.json`:
 
 ```json

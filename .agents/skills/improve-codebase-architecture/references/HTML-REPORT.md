@@ -3,7 +3,7 @@
 Render the architecture review as one self-contained HTML file, with Tailwind
 and Mermaid from CDNs as its only scripts and nothing interactive beyond
 Mermaid's rendering. The diagrams carry the weight; prose is sparse and uses
-the [code-module-design](../code-module-design/SKILL.md) glossary exactly,
+the [code-module-design](../../code-module-design/SKILL.md) glossary exactly,
 reaching for one of its terms before inventing another.
 
 ```html

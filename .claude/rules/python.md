@@ -4,19 +4,18 @@ paths:
 ---
 
 > [!NOTE]
-> If you were invoked directly (e.g. `/conventions-python`) with no specific
-> task, just read this skill so its conventions are loaded into context, then
-> stop — there is nothing to do yet. They're now ready to apply when I
-> ask you to design, write, or edit Python code.
+> If invoked directly with no specific task, load these conventions and stop.
+> They are ready to apply when asked to design, write, or edit Python code.
 
-# Python Conventions
+Write Python that follows these conventions and run the required tools after
+every edit. In an established project, match its patterns.
 
-Write Python that follows these conventions, and run the tools below after
-every edit. When editing an established project, match its existing patterns.
-
-**Python version.** Target Python 3.12+, unless `pyproject.toml` or
-`.python-version` pins an older runtime; then use only what that version
+**Version.** Target Python 3.12+, unless `pyproject.toml` or
+`.python-version` pins an older runtime; use only features that version
 supports.
+
+Apply the full conventions below when designing, writing, editing, or
+reviewing Python code. Run the required tools after every edit.
 
 ## Tooling
 

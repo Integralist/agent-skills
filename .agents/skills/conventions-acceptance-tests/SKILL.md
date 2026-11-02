@@ -8,75 +8,76 @@ metadata:
   model-tier: moderate
 ---
 
-# Acceptance Test Conventions
+Write acceptance tests that read like the feature they prove. This skill sets
+scenario structure, not general Go or shell style; apply the language's
+conventions too.
 
-Write acceptance tests that read like the feature they prove. A reader should
-find a scenario, its steps, and the code behind each step without reconstructing
-the test harness. Apply the language's conventions too; this skill sets the
-acceptance-test structure, not general Go or shell style.
-
-**One contract.** Prefer Godog for feature-driven acceptance tests, including
+**Default.** Prefer Godog for feature-driven acceptance tests, including
 Make/Bash workflows. Keep an established alternative Gherkin runner unless
-migration is requested. Load the canonical `docs/specs/<capability>.feature`
-files directly; keep step implementations and fixtures by the test code.
-Select the suite's owned features and fail on empty selections, undefined
-steps, or pending steps. Keep single-function behaviour in ordinary unit
-tests. Read [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) for placement and
-migration, and [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) for assertions.
+migration is requested. Load canonical `docs/specs/<capability>.feature` files
+directly, keep step implementations and fixtures by the test code, and select
+the suite's owned features. Empty selections, undefined steps, and pending
+steps must fail. Test single-function behaviour with ordinary unit tests.
 
-**Mirror the feature.** Put shared `Background` registrations first, then
-organize scenario groups in feature-file order, using the exact `Rule` and
+**Before writing.** Read [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) for feature
+placement and migration, and [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md)
+for assertions. For Go/Godog wiring, also read
+[ACCEPTANCE.md](../go-testing/references/ACCEPTANCE.md). For Make/Bash workflow tests,
+read [SHELL.md](references/SHELL.md) before implementing command steps.
+
+**Make the code follow the feature.** Register shared `Background` steps
+first. Then group scenarios in feature-file order, with exact `Rule` and
 `Scenario` titles as comments. Keep step wording recognizable in patterns and
-helper names; preserve Given/When/Then order inside each group. Register shared
-steps once at their first use and note reuse in later groups, so readers can
-follow each scenario without duplicate or overlapping patterns. Keep Scenario
-Outlines parameterized rather than copying the same code for each row.
+helper names, preserve Given/When/Then order, register shared steps once at
+first use, and note later reuse. Keep Scenario Outlines parameterized.
 
-**Visible steps.** Keep short setup, actions, and assertions inline beside
-their patterns. Bind substantial work to named helpers or scenario-world
-methods below the initializer, grouped in the same order where practical.
-Extract transport, process, and fixture mechanics, not the whole scenario
-behind a generic helper. Reuse serves the scenario's readability, not the other
-way around.
+**Keep each step visible.** Put short setup, actions, and assertions beside
+their patterns. Put substantial work in named helpers or scenario-world
+methods below the initializer, grouped in scenario order where practical.
+Extract transport, process, and fixture mechanics—not entire scenarios behind
+generic helpers. Reuse should make the scenario easier to read.
 
-**Prove each step.** A Given establishes or verifies its stated condition, a
-When exercises the real boundary, and a Then checks the promised result or
-guarantee. If shared setup already supplies a condition, verify that fact
-rather than register a successful no-op. Unimplemented steps stay pending and
-fail the suite. Stub external dependencies, not the behaviour being accepted;
-observe real dependency calls only when the contract requires them. For
-absence claims, verify the request or command reached the subject before
-asserting that nothing happened.
+**Prove the stated contract.** A Given establishes or verifies its condition,
+a When exercises the real boundary, and a Then checks the promised result or
+guarantee. If shared setup already establishes a condition, verify it rather
+than register a successful no-op. Leave unfinished steps pending so the suite
+fails. Stub external dependencies, not accepted behaviour; observe real
+calls only when the contract requires them. Before asserting that no call
+occurred, prove the intended request or command reached the subject.
 
-**Fresh scenarios.** Create or reset scenario state before each scenario or
-in its Background, not by relying on a previous scenario. Give each scenario
-its own workspace, dependency observations, and resources; clean them up
-after each run, including when an assertion fails. Bound requests, commands,
-and readiness waits. Use observable readiness signals rather than fixed
-sleeps, and enable parallelism only when the resources and observations are
-isolated.
+**Isolate scenarios.** Create or reset state for each scenario or in its
+Background. Give each scenario its own workspace, dependency observations,
+and resources; clean them up even after assertion failures. Bound requests,
+commands, and readiness waits. Use observable readiness, not fixed sleeps.
+Enable parallelism only when resources and observations are isolated.
 
-**Go/Godog.** Keep each initializer scoped to a feature or cohesive capability.
-Registration declares step mappings; Gherkin, not registration order, controls
-which steps run. Set `Strict: true` and return `godog.ErrPending` for unfinished
-steps so they cannot silently pass. Put `/* Given */`, `/* When  */`,
-`/* Then  */`, `/* And   */`, or `/* But   */` immediately inside each `.Step(`
-call, before the pattern, with aligned closing markers. Label reused steps by
-their first feature-file use; the keyword is not part of the regex. Explain
-Godog concepts once at first use: step matching and captures, optional context
-arguments and returned state, return values, suite options, and scenario setup
-and cleanup. Read [ACCEPTANCE.md](../go-testing/ACCEPTANCE.md) for a runnable
-wiring example.
+## Go/Godog
 
-**Make/Bash.** Go/Godog steps invoke real targets or scripts and verify their
-effects, keeping setup, action, and assertions visible under each scenario
-name. Use temporary workspaces and control external dependencies through
-their normal interfaces. Keep shell helpers for fixtures and command
-mechanics, not as a separate acceptance framework. Read [SHELL.md](SHELL.md)
-for the command-step example, outcome checks, and process cleanup.
+Scope each initializer to a feature or cohesive capability. Registration maps
+steps; Gherkin controls execution order. Set `Strict: true` and return
+`godog.ErrPending` for unfinished steps. Put `/* Given */`, `/* When  */`,
+`/* Then  */`, `/* And   */`, or `/* But   */` immediately inside every
+`.Step(` call, before its pattern, with closing markers aligned. Mark a reused
+step at its first feature-file use; the keyword is not part of its regex.
 
-**Verify.** Run the project's Make test target and confirm every selected
-scenario has implemented steps. Demonstrate that a deliberately violated
-contract fails its assertion, not compilation or setup; restore the change
-and rerun. Check missing and unimplemented scenarios fail when wiring a new
-runner. Report anything not exercised as a verification gap.
+Explain Godog concepts once at first use: matching and captures, optional
+context arguments and returned state, return values, suite options, and
+scenario setup and cleanup. The runnable wiring example is in
+[ACCEPTANCE.md](../go-testing/references/ACCEPTANCE.md).
+
+## Make/Bash
+
+Go/Godog steps run real Make targets or scripts and verify their effects.
+Keep setup, action, and assertion visible under each scenario name. Use
+isolated temporary workspaces and control external dependencies through their
+normal interfaces. Helpers are for fixtures and command mechanics, not a
+separate acceptance framework. See [SHELL.md](references/SHELL.md) for command steps,
+outcome checks, and process cleanup.
+
+## Verify
+
+Run the project's Make test target. Confirm every selected scenario has
+implemented steps. Deliberately violate a contract and show that its assertion
+fails—not compilation or setup—then restore the change and rerun. When wiring
+a runner, check that missing features and unimplemented steps fail. Report
+anything not exercised as a verification gap.

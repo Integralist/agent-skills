@@ -8,48 +8,42 @@ metadata:
   model-tier: moderate
 ---
 
-# Mutation Testing
+Check whether tests catch deliberate behaviour changes. Aim to find real gaps
+in their assertions, not to chase a score. For Go, read the go-testing skill
+for test style, contracts, and commands. Use the mutation tool and syntax from
+the project's configured runner or documentation.
 
-Make small, deliberate changes to production code and check whether the tests
-notice, to find real gaps in what the tests assert rather than to chase a
-score. For Go, use the go-testing skill for test style, contracts, and
-commands, and take the mutation tool and its syntax from the project's
-configured runner or docs.
-
-1. **Pick a narrow scope:** one package, function, or behaviour. Read its
-   contract and existing tests. Done when each mutant will have a clear owner.
-2. **Prove the baseline** with the repo's documented test command for that
-   scope. Results mean nothing until the unmodified tests pass, so diagnose a
-   failure first. Done when the baseline passes.
-3. **Choose the method.** Use a mutation runner the project already
-   configures, following its docs and keeping its target and test command
-   scoped, without inventing flags or trusting every generated mutant. With
-   no runner, ask before installing one; for a small investigation, make a
-   few temporary behaviour-changing edits by hand. Done when the mutants are
-   run.
-4. **Check each result.** Confirm the test command actually ran. A mutant is
-   caught when a relevant test fails because an observable contract changed,
-   and survives when the tests pass. Build errors, runner errors, and
-   timeouts are inconclusive, not caught. Done when every mutant is caught,
-   survived, or inconclusive.
-5. **Classify survivors.** Exclude, with a reason, mutants that preserve
-   behaviour (equivalent) or fall outside the supported contract, and rerun
-   flaky or infrastructure-dependent ones before deciding. Done when each
-   survivor is a real gap or an excluded one.
-6. **Close real gaps.** For a reachable, behaviour-changing survivor, add or
-   improve a test through the public contract that asserts the missing
-   behaviour, and prove it fails against the mutant and passes against the
-   original. Keep distinct contract checks, and never weaken tests or change
-   production behaviour just to raise the score. Done when each real gap has
-   a test that kills its mutant.
+1. **Choose a narrow scope.** Pick one package, function, or behaviour. Read
+   its contract and tests so every mutant has a clear owner.
+2. **Prove the baseline.** Run the repository's documented test command for
+   that scope. Diagnose any test error before mutating; results are meaningful
+   only when the unmodified tests pass.
+3. **Choose a mutation method.** Use an existing configured runner, following
+   its documentation. Keep its target and test command scoped; don't invent
+   flags or trust every generated mutant. If there is no runner, ask before
+   installing one. For a small investigation, make a few temporary,
+   behaviour-changing edits by hand.
+4. **Classify each result.** Confirm the test command actually ran. A mutant
+   is caught only when a relevant test fails because an observable contract
+   changed. Passing tests mean it survived. Build errors, runner errors, and
+   timeouts are inconclusive. Mark each mutant caught, survived, or
+   inconclusive.
+5. **Review survivors.** Exclude a mutant only with a reason: it preserves
+   behaviour (equivalent) or falls outside the supported contract. Rerun
+   flaky or infrastructure-dependent mutants before deciding. Each remaining
+   survivor is a real test gap.
+6. **Close real gaps.** For each reachable, behaviour-changing survivor, add
+   or improve a test through the public contract. Prove it fails against the
+   mutant and passes against the original. Keep distinct contract checks;
+   never weaken tests or change production behaviour solely to raise the
+   score.
 7. **Restore and verify.** Let the runner restore its changes, or revert only
-   your temporary edits, keeping every pre-existing working-tree change.
-   Inspect the diff and rerun the baseline. Done when the tree holds only
-   intended changes and the baseline passes.
+   your temporary edits. Preserve all pre-existing working-tree changes.
+   Inspect the diff and rerun the baseline.
 
-**Report** the scope and commands, then counts of caught, survived, excluded,
-and inconclusive mutants. Give the score as caught ÷ (caught + survived),
-stating that denominator and the exclusion rule, labelled as your calculation
-if the runner uses another formula, or N/A when the denominator is zero. Name
-the meaningful survivors and the behaviour each exposed, and end with the
-baseline result and whether every temporary mutation was restored.
+**Report.** Give the scope and commands, then counts of caught, survived,
+excluded, and inconclusive mutants. Calculate the score as caught ÷ (caught +
+survived), state that denominator and the exclusion rule, and label it as your
+calculation if the runner uses another formula. Use N/A when the denominator
+is zero. Name meaningful survivors and the behaviour each exposed. End with
+the baseline result and whether every temporary mutation was restored.

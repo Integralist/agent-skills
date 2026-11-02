@@ -25,4 +25,4 @@ context; conditional ones can shorten both.
 
 **Before drafting.** Read and follow the [writing guide](references/WRITING.md).
 Before changing skill frontmatter, also read
-[skill mechanics](SKILL-MECHANICS.md).
+[skill mechanics](references/SKILL-MECHANICS.md).

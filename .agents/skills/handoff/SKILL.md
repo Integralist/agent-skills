@@ -7,19 +7,24 @@ metadata:
   model-tier: trivial
 ---
 
-Write a handoff document summarising the current conversation so a fresh agent can continue the work. Save to the temporary directory of the user's OS - not the current workspace.
+## What to include
 
-Include a "suggested skills" section in the document, which suggests skills that the agent should invoke.
+- Summarise the conversation and the next useful action.
+- Include a **Suggested skills** section naming skills the next agent should
+  invoke.
+- If the user passed arguments, treat them as the next session's focus and
+  tailor the handoff to that work.
+- Do not duplicate information already captured in PRDs, plans, ADRs, issues,
+  commits, or diffs; refer to those artifacts by path or URL.
+- Redact sensitive information, including API keys, passwords, and personally
+  identifiable information.
+- Omit needless words; follow
+  [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
 
-Do not duplicate content already captured in other artifacts (PRDs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead.
+## Save and report
 
-Redact any sensitive information, such as API keys, passwords, or personally identifiable information.
-
-If the user passed arguments, treat them as a description of what the next session will focus on and tailor the doc accordingly.
-
-After saving the document, print its full absolute path in a `txt` code
-block in the final reply. Include every directory segment and expand `~`
-and environment variables. A filename or Markdown link alone is not
-sufficient: the user must be able to copy the path without opening the file.
-
-Omit needless words — see [`../shared/CONCISE-PROSE.md`](../shared/CONCISE-PROSE.md).
+Save the handoff in the temporary directory for the user's operating system,
+not in the current workspace. After saving, print its full absolute path in a
+`txt` code block in the final reply. Expand `~` and environment variables and
+include every directory segment; a filename or Markdown link alone is not
+enough.

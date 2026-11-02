@@ -7,16 +7,14 @@ metadata:
   model-tier: moderate
 ---
 
-# Code Review Feedback
+Treat review feedback as a suggestion to verify, not an order. Understand every
+item, check it against the codebase, then fix it or push back with technical
+reasoning. Technical correctness takes priority over social comfort.
 
-Treat review feedback as suggestions to verify, not orders to follow:
-understand every item, check it against the codebase, then fix it or push back
-with technical reasoning. Technical correctness beats social comfort.
-
-1. **Understand every item.** Read all the feedback, then restate each item in
+1. **Understand all feedback before acting.** Read every item and restate it in
    your own words. If any item is unclear, ask about it before implementing
-   anything; items may be related, and a partial reading produces wrong fixes.
-   Done when every item is understood.
+   anything; feedback items may be related, and partial reading can produce
+   wrong fixes. For example:
 
    ```txt
    BAD:  Implement 1, 2, 3, and 6 now; ask about 4 and 5 later.
@@ -24,41 +22,41 @@ with technical reasoning. Technical correctness beats social comfort.
          before I start."
    ```
 
-2. **Verify each item.** Feedback from the user is trusted; implement it once
-   you understand it. Check other reviewers' feedback with skepticism:
-   - Is it correct for this codebase, on every platform and version it
-     supports?
-   - Does it break existing behaviour or undo a deliberate choice, such as a
-     legacy or compatibility reason?
+2. **Verify each item.** Feedback from the user is trusted: once understood,
+   implement it. Check other reviewers' feedback skeptically:
+   - Is it correct on every platform and version the codebase supports?
+   - Could it break existing behavior or undo a deliberate legacy or
+     compatibility choice?
    - Does the reviewer have the full context?
-   - If it asks you to "implement properly", is the feature used? Grep for
+   - If the request says "implement properly," is the feature used? Grep for
      callers; if there are none, propose removing it instead (YAGNI).
 
-   Done when each item is marked accept, push back, or can't verify.
+   Mark each item **accept**, **push back**, or **can't verify**.
+3. **Respond.** For an item you cannot verify, say what evidence is missing
+   and ask whether to investigate, ask, or proceed. Raise conflicts with an
+   earlier user decision, or architectural feedback, with the user before
+   acting. Push back using technical reasoning, specific questions, and
+   references to working tests or code—not defensiveness. If you are
+   uncomfortable pushing back, tell the user what you found. Every item not
+   accepted needs a reply.
+4. **Implement accepted items one at a time.** Fix blocking issues (breakage,
+   security) first, then simple fixes (typos, imports), then complex ones
+   (refactors, logic). Test each fix on its own and check for regressions.
+   Finish when every accepted item is fixed and tests pass.
 
-3. **Respond.** For an item you can't verify, say what you'd need: "I can't
-   verify this without X. Should I investigate, ask, or proceed?" If an item
-   conflicts with an earlier decision of the user's, or is architectural,
-   raise it with the user before acting; you and the reviewer both answer to
-   them. Push back with technical reasoning, specific questions, and
-   references to working tests or code, not defensiveness. If you're
-   uncomfortable pushing back, tell the user what you've seen. Done when every
-   item you didn't accept has a reply.
+## Tone
 
-4. **Implement one at a time.** Fix blocking issues (breakage, security)
-   first, then simple fixes (typos, imports), then complex ones (refactors,
-   logic). Test each fix on its own, then check for regressions. Done when
-   every accepted item is fixed and the tests pass.
+Acknowledge a correct item by stating the fix: "Fixed: [what changed],"
+"Good catch — [issue]. Fixed in [location]," or simply show the code. Do not
+write performative agreement or gratitude ("You're absolutely right!",
+"Great point!", "Thanks for catching that"): it breaks the user's instruction
+files and adds no information. Delete it and state the fix. Do not promise to
+implement before verifying. If your pushback was wrong, say so in one line:
+"You were right — I checked X and it does Y. Fixing now." Skip the apology and
+defence.
 
-**Tone.** Acknowledge a correct item by stating the fix: "Fixed: [what
-changed]", "Good catch — [issue]. Fixed in [location].", or just show it in
-the code. Never write performative agreement or gratitude ("You're absolutely
-right!", "Great point!", "Thanks for catching that"): the first breaks the
-user's instruction files, and none of them carry information. Delete it and
-state the fix. Don't say "Let me implement that now" before you've verified.
-If your pushback was wrong, say so in one line and move on: "You were right —
-I checked X and it does Y. Fixing now." Skip the apology and the defence.
+## GitHub threads
 
-**GitHub threads.** Reply to an inline review comment in its own thread
-(`gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`), not as a
+Reply to an inline review comment in its own thread with
+`gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`, not as a
 top-level PR comment.

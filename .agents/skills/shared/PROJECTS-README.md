@@ -1,13 +1,14 @@
 # Project Planning Workspace
 
-This directory contains planning artifacts for repository changes that need more
+This directory holds planning artifacts for repository changes that need more
 than a single implementation step. These documents are working material, not
 product or user-facing documentation.
 
-Each active project directory also has a `README.md` index. Create it from
-[`../.agents/skills/shared/PROJECT-README.md`](../.agents/skills/shared/PROJECT-README.md)
-when a skill first creates `projects/<project>/`. The project README owns
-navigation and current status; the linked artifacts own their content.
+Each active project directory also has a `README.md` index. When a skill first
+creates `projects/<project>/`, create the index from
+[PROJECT-README.md](../.agents/skills/shared/PROJECT-README.md).
+The project README owns navigation and current status; the linked artifacts
+own their content.
 
 ## Structure
 
@@ -47,9 +48,9 @@ For a Product-Engineering initiative, use the PDD approval flow first:
 For an engineering-led project, start at `spec.md` and follow steps 5 through
 8. A project README records which workflow applies and the current next action.
 
-The task list is the executor's contract. It names the files, commands, expected
-failures, implementation boundaries, and verification checks required to
-complete that slice without re-designing it during execution.
+The task list is the executor's contract. It names the files, commands,
+expected failures, implementation boundaries, and verification checks needed
+to complete that slice without re-designing it during execution.
 
 ## Living specifications
 
@@ -83,9 +84,10 @@ and commit, then use generic operation headings as needed:
 
 Keep behavior snapshots in fenced `gherkin` blocks. For `MODIFIED`, show the
 baseline and updated behavior. For `REMOVED`, record the reason and migration.
-For a new capability with no baseline, state that explicitly and use `ADDED` for
-the new behavior. Keep the historical acceptance criteria intact; later changes
-belong in a follow-on project rather than rewriting a completed project.
+For a new capability with no baseline, state that explicitly and use `ADDED`
+for the new behavior. Keep the historical acceptance criteria intact; later
+changes belong in a follow-on project rather than rewriting a completed
+project.
 
 ## Status
 
@@ -108,5 +110,5 @@ Once these gates pass, set the project's `Status` to `Complete` and move its
 directory to `projects/completed/<yyyy-mm-dd>-<slug>/` in the same commit.
 
 Keep planning documents scoped to the project they describe. Put durable
-repository usage instructions in the relevant README or `docs/` document instead
-of leaving them only in a project plan.
+repository usage instructions in the relevant README or `docs/` document
+instead of leaving them only in a project plan.

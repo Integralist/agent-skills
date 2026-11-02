@@ -4,22 +4,19 @@ paths:
 ---
 
 > [!NOTE]
-> If you were invoked directly (e.g. `/conventions-sql`) with no specific task,
-> just read this skill so its conventions are loaded into context, then stop —
-> there is nothing to do yet. They're now ready to apply when I ask you to
-> design, write, or edit SQL.
+> If invoked directly with no specific task, load these conventions and stop.
+> They are ready to apply when asked to design, write, or edit SQL.
 
-# SQL Conventions
+Write migrations as literal statements a DBA can read top to bottom and apply.
+Most rules below concern migrations; formatting applies to all SQL. Examples
+use MySQL 8.0. The principles apply to any engine; syntax notes may not.
 
-Write migrations a DBA can read top to bottom and apply. Most of this skill
-covers migration files; Formatting applies to all SQL. Examples are MySQL 8.0:
-the principles hold on any engine, the syntax notes don't.
+## Migration statements
 
-**Simple DDL.** Write each migration as a short sequence of literal
-statements, each exactly what the database will run. DBAs apply migrations by
-hand, feed them to online-schema-change tools, and diff them in review, and
-all three need the real statement written in the file. Everything below
-follows from this.
+**Keep DDL simple.** Write a short sequence of literal statements, each exactly
+what the database will run. DBAs may apply them by hand, feed them to online
+schema-change tools, or diff them in review; all need the real statement in
+the file.
 
 ```sql
 ALTER TABLE users
@@ -31,50 +28,26 @@ ALTER TABLE users
     ADD INDEX idx_account_email_reversed (`account_id`, `email_reversed`);
 ```
 
-**No control flow.** A migration holds only DDL and comments. Keep out
-anything that hides the statement that runs: `PREPARE`/`EXECUTE` and the
-`SET @var` that feeds them, `IF()` or `CASE` choosing a statement, string
-concatenation or `GROUP_CONCAT` building DDL, `information_schema` lookups
-gating a change, and loops or `BEGIN` blocks. Dynamic SQL can't be diffed or
-dry-run, and gh-ost and pt-online-schema-change take a single `ALTER`, not a
-`PREPARE` block. Those constructs belong in application code or a runbook.
+**Do not use control flow.** Migrations contain DDL and comments only. Do not
+hide statements with `PREPARE`/`EXECUTE`, feeding `SET @var`, `IF()` or `CASE`,
+string concatenation, `GROUP_CONCAT`, `information_schema` gates, loops, or
+`BEGIN` blocks. Dynamic SQL cannot be diffed or dry-run; gh-ost and
+pt-online-schema-change take a single `ALTER`, not a `PREPARE` block. Put such
+logic in application code or a runbook.
 
-```sql
--- Bad: an existence check building the statement.
-SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'
-    AND COLUMN_NAME = 'email_reversed');
-SET @add_col = IF(@col_exists = 0,
-    'ALTER TABLE users ADD COLUMN `email_reversed` ...',
-    'SELECT "Column already exists" AS status');
-PREPARE stmt FROM @add_col;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
+**Let the runner handle idempotency and verification.** The runner records
+applied versions and runs each migration once, so write against the schema
+left by earlier migrations. Use inline `IF EXISTS` or `IF NOT EXISTS` only
+where the engine supports it and the guard matters. MySQL supports these for
+`DROP TABLE`, `DROP INDEX`, and `CREATE TABLE`, not `ALTER TABLE … ADD COLUMN`
+or `DROP COLUMN`; use the bare statement rather than an emulated guard. End
+the file after the last DDL statement. A failed statement aborts the
+migration and shows the error; do not add `SELECT`s that re-check
+`information_schema`.
 
--- Good: the statement itself.
-ALTER TABLE users
-    ADD COLUMN `email_reversed` VARCHAR(255)
-    AS (SUBSTRING(REVERSE(`email`), 1, 255)) VIRTUAL
-    AFTER `email`;
-```
-
-**Idempotency is the runner's job.** The runner records applied versions and
-runs each file once, so write the change against the schema the previous
-migrations left. Use an inline `IF EXISTS` or `IF NOT EXISTS` where the engine
-supports it and the guard matters (`DROP TABLE IF EXISTS job_shards;`). MySQL
-supports it on `DROP TABLE`, `DROP INDEX`, and `CREATE TABLE`, not on
-`ALTER TABLE … ADD COLUMN` or `DROP COLUMN`; there, write the bare statement
-rather than emulate a guard with `information_schema`.
-
-**Verification is the runner's job too.** End the file after the last DDL
-statement. A failed statement aborts the migration and shows the error. Don't
-add trailing `SELECT`s that re-check `information_schema`; runners and CI then
-have to interpret their result sets.
-
-**One ALTER per table.** Batch every change to a table into one `ALTER`, so
-the table is rebuilt once, not once per clause. Order separate statements by
-dependency: drop a table nothing references first, and add a column before
-the index that uses it.
+**Batch changes.** Use one `ALTER` per table so the table is rebuilt once.
+Order separate statements by dependency: drop unreferenced tables first and
+add a column before an index that uses it.
 
 ```sql
 ALTER TABLE jobs
@@ -82,12 +55,12 @@ ALTER TABLE jobs
     DROP COLUMN shard_number;
 ```
 
-**Comments.** Open with a header: what the migration does, the ticket, and any
-risk the DBA needs before choosing how to apply it, such as a table rewrite
-versus an instant metadata change, lock behaviour, row-count sensitivity, or
-online-schema-change compatibility. Comment inline only where a statement's
-intent isn't clear from the DDL. If a comment would describe a simpler
-alternative to the statement below it, write the simpler statement.
+**Document risk.** Start with a header stating what the migration does, its
+ticket, and any DBA-relevant risk when choosing how to apply it: table rewrite
+versus instant metadata change, locks, row-count sensitivity, or
+online-schema-change compatibility. Comment inline only when the DDL's intent
+isn't clear. If a comment would describe a simpler alternative, use that
+simpler statement instead.
 
 ```sql
 -- Migration: add email_reversed generated column and index
@@ -98,23 +71,20 @@ alternative to the statement below it, write the simpler statement.
 -- index build is the only expensive part.
 ```
 
-**Data changes.** Migrations change schema. Run backfills, rewrites, and
-cleanups as batched application code or a documented procedure that can be
-throttled, resumed, and monitored; a loop in a migration has none of that and
-holds the migration lock while it runs.
-
-**When simple DDL isn't enough,** split the change into ordered migrations, or
-give the DBA a sequence of steps to run with their chosen tooling. A change
-that resists plain statements is a reason to talk to the DBA, not to write
-procedural SQL.
+**Keep data work out.** Migrations change schema. Run backfills, rewrites, and
+cleanups as batched application code or documented procedures that can be
+throttled, resumed, and monitored. A migration loop has none of that and holds
+the migration lock while it runs. If plain DDL is insufficient, split the
+change into ordered migrations or give the DBA steps for their chosen tooling.
+Talk to the DBA rather than writing procedural SQL.
 
 ## Formatting
 
 - One statement per intent, each ending in `;`.
 - Uppercase keywords and `snake_case` identifiers.
-- Once a statement passes one line, put each clause on its own indented line.
-- Quote identifiers the way the surrounding schema does, such as MySQL
-  backticks, consistently within a file.
-- Follow the repo's existing migration numbering, naming, and rollback scheme.
-- Name every index and constraint explicitly, matching the schema's existing
-  prefixes (commonly `idx_` for secondary and `uq_` for unique).
+- When a statement exceeds one line, put each clause on its own indented line.
+- Quote identifiers consistently as the surrounding schema does (for example,
+  MySQL backticks).
+- Follow the repo's migration numbering, naming, and rollback scheme.
+- Name every index and constraint explicitly, using existing prefixes
+  (commonly `idx_` for secondary indexes and `uq_` for unique indexes).

@@ -10,313 +10,50 @@ metadata:
   model-tier: complex
 ---
 
-# Code Review
+Review a PR or local changes for defects, convention violations, and gaps
+against project intent. Use read-only reviewers. **Never edit code, change
+state, or comment on a PR.**
 
-Review a change with read-only reviewers: a primary review, a dedicated
-conventions audit when rules apply, and other specialists when concrete risks
-warrant them. Include intent documents and add a separate adherence reviewer
-for substantial or cross-cutting requirements. A verifier tries to refute each
-finding; report only what survives. Review only: never edit code, change
-state, or comment on a PR.
+Before reviewing, read [REVIEW-PROTOCOL.md](references/REVIEW-PROTOCOL.md) for
+intent collection, reviewer roles, finding/verification rules, and the report
+template. Use [MODES.md](references/MODES.md) to resolve source commands. When
+conventions apply, read [CONVENTIONS.md](references/CONVENTIONS.md) to select
+and load their guidance.
 
-1. **Gather the source.** Pick the source from the argument:
+## Choose the source
 
-   | Argument                      | Source                          |
-   | ----------------------------- | ------------------------------- |
-   | PR URL or `owner/repo#number` | Remote PR                       |
-   | `--diff` or none              | Local branch vs. default branch |
-   | `--uncommitted`               | Working-tree changes            |
-   | `--all-local`                 | Local branch plus working tree  |
-   | `--baseline=<commit>`         | Recorded execution and manifest |
-   | File path or glob             | Explicit paths                  |
+| Argument | Source |
+| --- | --- |
+| PR URL or `owner/repo#number` | Remote PR |
+| `--diff` or none | Local branch vs. default branch |
+| `--uncommitted` | Working-tree changes |
+| `--all-local` | Local branch plus working tree |
+| `--baseline=<commit>` | Recorded execution and manifest |
+| File path or glob | Explicit paths |
 
-   Run that source's commands from [MODES.md](MODES.md), writing the whole
-   diff once to a temp file, `DIFF_PATH`; reviewers read it from there rather
-   than re-fetching it. For `--baseline`, require the caller's delivery
-   manifest and baseline snapshots; the execution source takes precedence
-   over default-branch diff selection. Never mix revisions silently. If the
-   diff is empty and no files match, report "No changes to review" and stop
-   before starting any reviewer. Done when `DIFF_PATH` and the changed-file
-   list exist.
+Use `--plan=<path>` to name a plan or task list for intent review.
 
-2. **Find the intent.** Collect every intent document, in this order:
+## Coordinate the review
 
-   1. the `--plan=<path>` file;
-   2. project files in the diff, including under `projects/completed/`: a
-      project the diff adds or moves is this change's contract, not history;
-   3. the plan named by an `Execution-Plan:` trailer in the reviewed commits;
-   4. a `projects/` link in the PR body.
+1. **Snapshot.** Use the source commands in [MODES.md](references/MODES.md) to
+   resolve the source. Write the whole diff once to `DIFF_PATH` and create the
+   changed-file list. For `--baseline`, require the
+   delivery manifest and baseline snapshots; never silently mix revisions. If
+   the diff is empty and no files match, report “No changes to review” and stop.
+2. **Gather intent.** Use the linked protocol to collect intent at the reviewed
+   revision and write `CONTEXT_PATH`.
+3. **Choose reviewers.** Start one read-only generalist reviewer. Add specialists
+   for concrete risks, and a separate conventions reviewer whenever applicable
+   conventions exist—even for small, low-risk changes. Use the protocol's roles,
+   prompts, and completion checks. For substantial or cross-cutting intent, add
+   a separate spec-and-plan reviewer; otherwise keep those checks with the
+   generalist. Unavailable guidance is not a clean pass.
+4. **Verify findings.** Have a verifier refute each finding using the protocol.
+   Report only verified real findings; keep unresolved questions separate.
+5. **Report.** Use the protocol's report template. Account for every changed
+   file, merge duplicate findings, sort by severity, and offer to address
+   actionable findings.
 
-   For each plan or task list found, also load its project's `spec.md`, and
-   the plan a task list came from. Then add each living spec a found project
-   spec names under Living Specifications, every `docs/specs/` file the diff
-   changes, and any `docs/specs/` file whose contract covers the changed
-   behaviour; when it's unclear whether one applies, record an unknown. A
-   completed project outside the diff is history, and its living spec
-   supersedes it. Read every document at the reviewed revision.
-
-   Write a second temp file, `CONTEXT_PATH`, with the change's stated purpose,
-   PR title and body, the repository's instructions, each intent document
-   labelled with its path, and any test results. Done when `CONTEXT_PATH` is
-   written.
-
-3. **Choose review depth.** Use scope and impact, not line count alone. Start
-   one read-only generalist reviewer for a localized, low-risk change. It
-   checks behaviour and tests, then security, reliability, and maintainability
-   where relevant; include any intent documents and check adherence in that
-   pass. Add specialist reviewers only for concrete signals: trust boundaries,
-   authentication, untrusted input, or secrets (security); persistence,
-   concurrency, failures, external calls, scale, or rollout (reliability);
-   broad refactors, new public APIs, or changes across modules (maintainability).
-   Keep behaviour and tests in scope. Use a separate spec and plan reviewer
-   only when intent requirements are substantial or cross-cutting; otherwise
-   keep those checks in the primary review. A one-line authorization change
-   may need security review; a large mechanical change may not.
-
-   Start a separate read-only conventions reviewer whenever applicable
-   conventions exist, including small, low-risk changes, in addition to the
-   generalist or other specialists. Select and load its guidance following
-   [CONVENTIONS.md](CONVENTIONS.md).
-
-   [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md) covers turn
-   budgets and retries. Use the most capable model available for review
-   judgment. Give each selected reviewer:
-
-   - its assigned questions, responsibilities, and handoffs;
-   - `DIFF_PATH`, `CONTEXT_PATH`, and the changed-file list, and for a diff
-     over about 3000 lines, an instruction to read it file by file;
-   - the resolved convention paths and file/purpose scope from the selection
-     map, requiring the reviewer to read the guidance applicable to its work;
-   - the rule to judge the change against `CONTEXT_PATH`, and to report an
-     unknown, not a defect, when intent is unclear;
-   - the findings schema below, and the rule that every changed file is either
-     reviewed or skipped with a reason.
-
-   Done when every selected reviewer is `COMPLETE`, every changed file has
-   applicable reviewer coverage, and every applicable convention has reviewer
-   coverage or an explicit unresolved gap. Compare the conventions reviewer's
-   loaded guidance with the selection map; re-run or redirect to close omissions.
-   Unavailable guidance is not a clean conventions pass.
-
-4. **Verify.** Give each finding (or a batch, under a concurrency cap) to a
-   verifier subagent on the same model, told to refute it:
-
-   - Read the cited lines and their context at the reviewed revision.
-   - Refute it when the code is neither changed nor bound by a contract the
-     diff changes, a guard or caller already prevents it, the line doesn't
-     match, or it misreads the language or library.
-   - "Intended" refutes it only when a `CONTEXT_PATH` source states that
-     intent and no other source contradicts it.
-   - For an unwritten precedent finding, open each cited peer and refute it
-     unless at least two show the pattern.
-   - For a documented convention finding, read its rule citation and verify
-     scope, exceptions, and instruction precedence. Refute an inapplicable,
-     misquoted, or overridden rule. Two peer examples are not required for an
-     explicit rule.
-   - Leave the working tree untouched: run Python as `python3 -B`, keep scratch
-     files in a temp directory, and check `git status` is unchanged after.
-   - Default to refuted unless the finding is demonstrably real. A High
-     security finding it can neither confirm nor refute is unresolved: move it
-     to the open questions with the evidence that would settle it.
-
-   Each verifier returns:
-
-   ```json
-   {
-     "status": "COMPLETE | INCOMPLETE",
-     "isReal": true,
-     "unresolved": false,
-     "confidence": "high | medium | low",
-     "reason": "what confirms or refutes it",
-     "correctedSeverity": "High | Medium | Low (omit if unchanged)"
-   }
-   ```
-
-   Done when every finding has a verdict.
-
-5. **Report** with the template below. Keep findings with `isReal: true`,
-   applying any corrected severity; merge duplicates across profiles; sort
-   High, Medium, then Low; list each dropped finding with the verifier's
-   reason. When actionable findings exist, offer to address them. Done when
-   every changed file is accounted for, every kept finding is verified, and
-   every unknown is kept apart from the defects.
-
-**Findings schema.** Every reviewer returns:
-
-```json
-{
-  "status": "COMPLETE | INCOMPLETE",
-  "files_reviewed": ["path/to/file"],
-  "files_skipped": [
-    { "file": "path/to/file", "reason": "why this profile doesn't apply" }
-  ],
-  "conventions_loaded": [
-    { "path": "resolved/rule/path", "applies_to": ["changed file or purpose"] }
-  ],
-  "findings": [
-    {
-      "severity": "High | Medium | Low",
-      "file": "path/to/file",
-      "line": "approximate line or range",
-      "snippet": "short relevant excerpt",
-      "why": "why it matters",
-      "suggestion": "smallest viable correction",
-      "rule": {
-        "source": "path/to/convention",
-        "line": "line or range",
-        "requirement": "the explicit rule violated"
-      }
-    }
-  ],
-  "unknowns": [
-    { "question": "what couldn't be established", "why": "why it matters here" }
-  ]
-}
-```
-
-A rule is required for a documented convention finding; omit `rule` for
-other findings. List skills and relevant references actually read in
-`conventions_loaded`, or use an empty array when none apply to the assigned
-review. Required but unread guidance belongs in unknowns and coverage gaps.
-
-**Severity** reflects impact and likelihood, not the reviewer's confidence.
-High means a likely security compromise, data loss, outage, or broken core
-contract. Medium means a demonstrated defect under plausible conditions. Low
-means a contained cost with no user-visible impact: a minor defect or a real
-maintainability or testability cost. Low also covers a verified explicit
-convention violation; personal style preferences remain excluded. Each
-suggestion is the smallest viable correction; add an alternative only when it
-exposes a real trade-off.
-
-**When sources disagree.** The PR body, project spec, living spec, docs, and
-code each state intent. When two disagree, report the contradiction citing
-both; trusting one hides the question the author must answer. A demonstrated
-contradiction is a finding whose correction names both fixes (change the code,
-or amend the spec); wording too vague to demonstrate one is an unknown.
-
-## Profiles
-
-The primary reviewer covers applicable questions; specialists own their
-assigned lenses. Conventions gets a dedicated reviewer whenever rules apply;
-other specialists follow step 3's risk signals. A defect belongs to the profile
-whose question it answers.
-
-1. **Behaviour and tests:** *does the change do what `CONTEXT_PATH` says, and
-   do the tests prove it?* Owns intended behaviour, logic errors, edge cases,
-   regressions, and the contracts callers rely on. For every changed exported
-   symbol, signature, or behaviour, find its callers and confirm each still
-   holds: a caller the change breaks is a finding, even in an unchanged file.
-   The same goes for an unchanged file bound by a spec, doc, or policy the
-   diff changes. Flags new public functions or error branches without unit
-   tests, new endpoints or slices without integration tests, and assertions
-   that can't catch a contract violation; include
-   [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) in its prompt. Hands off
-   failure, concurrency, load, and rollout (reliability) and attacker-driven
-   misuse (security).
-2. **Security:** *can an attacker or untrusted input make this code do
-   something it shouldn't?* Owns trust boundaries, authentication and
-   authorization, injection, information leaks, unsafe dependencies,
-   fail-open behaviour, and resource use an attacker can inflate. Hands off
-   cost under ordinary load (reliability).
-3. **Reliability, performance, and rollout:** *does it keep working under
-   failure, concurrency, load, and deployment?* Owns state transitions,
-   concurrency, context propagation, retries, partial failure, atomicity,
-   resource lifecycle, and unhandled error paths; a query or remote call per
-   loop item (N+1), work growing faster than its input, hot-path allocation,
-   missing pagination or indexes, and blocking calls on latency-sensitive
-   paths; and migrations that lock, rewrite, or can't be undone, changes that
-   break while old and new versions run side by side, and changes with no
-   rollback path. Load `conventions-sql` first when SQL changed. Hands off
-   documented error-handling style (conventions) and unwritten precedent
-   (maintainability).
-4. **Maintainability:** *what does this cost the next person who changes it?*
-   Owns readability, API ergonomics, stale docs or comments, and unwritten
-   project precedent. For an unwritten consistency finding, use the precedent
-   skill and cite at least two peer `file:line` locations; one peer is a
-   coincidence. Hands off documented requirements to conventions and whether
-   errors are handled at all to reliability.
-5. **Conventions:** *does the code follow the explicit applicable rules?*
-   Owns documented naming, structure, idioms, error-handling style, comments,
-   and test-layout requirements, including mandatory formatting. Read the
-   selection map's skills and applicable references before auditing. Each
-   finding needs a rule citation as well as code evidence. Check scope,
-   instruction precedence, and documented exceptions rather than imposing
-   personal preferences. Hands off unwritten precedent to maintainability;
-   hand functional or security defects to their owning profiles and merge
-   duplicates in the report.
-6. **Spec and plan adherence** (only when step 2 found intent documents):
-   *does the change deliver what its spec and plan promise, and do they
-   agree?* Include the intent documents in its prompt. It checks:
-   - **Milestones:** each milestone the change claims or ticks is met.
-   - **Interfaces:** the code matches the plan's `Consumes` and `Produces`
-     signatures.
-   - **Unplanned files:** changed files absent from the plan's File Changes
-     table or the task list.
-   - **Task drift:** for a task list, the code departs from its verbatim tests
-     or implementation.
-   - **Scope excess:** work beyond the stated goal, reported without judging
-     it.
-   - **Spec conflict:** the project spec, living spec, docs, PR body, and code
-     disagree, including unchanged code bound by a contract the diff changes.
-   - **Delta sync:** every Behavioural Delta scenario appears in the living
-     spec it names, and every behavioural edit to `docs/specs/` appears in a
-     delta, as [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) describes.
-
-   If `--plan` was passed but nothing was found, skip it and say so once.
-
-## Report template
-
-Spec conflicts and delta-sync gaps rank with the other actionable items. The
-other adherence checks go under Informational unless the user asked for strict
-scope. If a reviewer hit its turn limit, add a `⚠️` line after "Subagent pass"
-giving the original and retry limits and whether the retry completed.
-
-````markdown
-## {PR #<number> Review Summary: "<title>" | Code Review: <branch, "uncommitted", or path>}
-
-- **Date:** {YYYY-MM-DD HH:MM}
-- **Mode:** {remote PR | branch-diff | uncommitted | all-local | execution | paths}
-- **Base:** {merge-base or recorded execution baseline, when applicable}
-- **Files reviewed:** {count}
-- **Snapshot:** {reviewed HEAD and dirty/new content fingerprints}
-- **Delivery scope:** {manifest, for execution reviews}
-
-**Overall assessment:** {one or two sentences}
-
-**Subagent pass:** {complete, or incomplete with what remains}
-
-### Conventions Coverage
-
-{List loaded rule paths, their file/purpose scope, and skipped or missing
-guidance. Say when no conventions apply; unresolved gaps are not a clean pass.}
-
-### Actionable Items
-
-{Confirmed findings, High to Medium to Low: file and line, snippet, impact,
-and the smallest viable correction. Include the written rule citation for
-convention findings.}
-
-### Spec and Plan Adherence
-
-{Only when intent documents were found.}
-
-- **Intent documents:** {paths}
-- **Milestones:** …
-- **Interfaces:** …
-- **Unplanned files:** …
-- **Task drift:** …
-- **Scope excess:** …
-
-### Informational / No Action Needed
-
-{Brief observations needing no change.}
-
-### Open Questions
-
-{Unknowns that limited the review, and the evidence that would answer each.}
-
-### Dropped by Verification
-
-{One line per dropped finding: `file:line` — claim — why it was refuted, or
-"None".}
-````
+Every selected reviewer must finish `COMPLETE`; every changed file needs
+reviewer coverage or a reason for skipping. Close convention-loading omissions
+before reporting. Keep unknowns separate from defects.

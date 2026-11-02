@@ -6,15 +6,15 @@ apply even when a file has no language-specific suffix.
 
 **Select.** Inspect available conventions-* skills and their scope. Start with:
 
-- Go: [conventions-go](../conventions-go/SKILL.md).
-- Python: [conventions-python](../conventions-python/SKILL.md).
-- SQL: [conventions-sql](../conventions-sql/SKILL.md).
-- Markdown: [conventions-markdown](../conventions-markdown/SKILL.md), plus
-  [conventions-mermaid](../conventions-mermaid/SKILL.md) for Mermaid files or
+- Go: [conventions-go](../../conventions-go/SKILL.md).
+- Python: [conventions-python](../../conventions-python/SKILL.md).
+- SQL: [conventions-sql](../../conventions-sql/SKILL.md).
+- Markdown: [conventions-markdown](../../conventions-markdown/SKILL.md), plus
+  [conventions-mermaid](../../conventions-mermaid/SKILL.md) for Mermaid files or
   diagram blocks.
 - Acceptance suites, steps, runners, and Makefile and shell acceptance
   workflows: load
-  [conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md)
+  [conventions-acceptance-tests](../../conventions-acceptance-tests/SKILL.md)
   alongside any language conventions.
 
 Include other available conventions-* skills only when their scope applies;

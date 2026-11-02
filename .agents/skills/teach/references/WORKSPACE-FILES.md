@@ -4,6 +4,11 @@ Formats for the teaching workspace's state files. Keep each short and revise
 it in place as the user's understanding or goals change, so nothing stale
 steers the next session.
 
+## Lessons and reference sheets
+
+Write each lesson to `lessons/NNNN-slug.html` and each reusable reference
+sheet to `reference/*.html`. Make reference sheets print well.
+
 ## MISSION.md
 
 The reason the user is learning this topic. One mission per workspace: two
@@ -44,12 +49,14 @@ mediocre ones. Note it here if the user has opted out of communities.
 ## Knowledge
 
 - [Book: _The Science and Practice of Strength Training_, Zatsiorsky & Kraemer](https://example.com)
-  Foundational text on programming and adaptation. Use for: periodisation, recovery, intensity zones.
+  Foundational text on programming and adaptation. Use for: periodisation,
+  recovery, intensity zones.
 
 ## Wisdom (Communities)
 
 - [r/weightroom](https://reddit.com/r/weightroom)
-  Moderated against bro-science. Use for: programme critique, plateau troubleshooting.
+  Moderated against bro-science. Use for: programme critique, plateau
+  troubleshooting.
 ````
 
 ## GLOSSARY.md
@@ -74,7 +81,8 @@ only once the user can use it correctly, not when they first meet it.
 ## Terms
 
 **Progressive overload**:
-Systematically increasing the demand on a muscle over time, via load, volume, or intensity.
+Systematically increasing the demand on a muscle over time, via load,
+volume, or intensity.
 _Avoid_: Pushing harder, levelling up
 ````
 

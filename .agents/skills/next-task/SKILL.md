@@ -6,42 +6,35 @@ metadata:
   model-tier: moderate
 ---
 
-# Next Task
+Complete one ready item from a plan or task list, then tick it off. Do one
+item per run. Keep implementation and troubleshooting in the main thread.
+Delegate test runs as [BUILD-ITEM.md](../shared/BUILD-ITEM.md) describes;
+read-only review may also be delegated through code-review.
 
-Do the next ready item from a plan or task list, then tick it off. Do one item
-per run. Keep implementation and failure diagnosis in the main thread.
-Delegate test execution as [BUILD-ITEM.md](../shared/BUILD-ITEM.md) describes.
-Read-only review may also be delegated through code-review.
+1. **Select the file.** Use the file named by the user, or the one already in
+   use this session. If neither exists, ask for its path.
+2. **Select the item or closing slice.** In a multi-slice file, first route
+   any completed slice with missing acceptance or current required review to
+   step 4. Otherwise, choose the first unticked item in document order whose
+   blocked-by items are done. Name the item and owning slice. If no items
+   remain but acceptance is missing, continue at step 4. Also take step 4
+   when a required review is missing or stale. If work, acceptance, and due
+   review are complete, report that no item is left and stop. If all
+   remaining items are blocked, report the blockers and stop.
 
-1. **Pick the file.** Use the file the user names. If they name none, use the
-   one from earlier in this session. If there isn't one, ask for its path.
-
-2. **Pick the item.** Before selecting another item in a multi-slice file,
-   route any completed slice with missing acceptance or current required
-   review to step 4. Otherwise take the first unticked item, in document
-   order, whose blocked-by items are done. Name the item and owning slice you
-   picked. When no items remain but
-   slice acceptance is missing, continue at step 4. Also take step 4 when its
-   required review is missing or stale. If nothing is ready because items are
-   blocked, report the blockers and stop. If no work, acceptance, or due review
-   remains, report that no item remains and stop.
-   Record or resume the review baseline for the whole owning slice per
-   [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md) before its first edit; retain
-   it across task invocations. Done when the item or closing slice is selected
-   with its review baseline and owner.
-
-3. **Build it** following [BUILD-ITEM.md](../shared/BUILD-ITEM.md). Done when
-   it's verified and ticked off.
-
-4. **Accept a finished slice.** Follow
-   [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md) when all items in the owning
-   slice are complete, including on resume without a new implementation item.
-   A file without slices counts as one slice. This includes code-review when
-   closing a standalone slice; an active execute-plan coordinator may
-   explicitly own review scheduling instead. Otherwise leave slice acceptance
-   pending; a verified task can still be complete. Done when acceptance or the
-   remaining verification gaps are recorded.
-
+   Before the owning slice's first edit, record or resume its review baseline
+   following [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). Retain that
+   baseline across task invocations. The item or closing slice is selected
+   only when its review baseline and owner are identified.
+3. **Build the item.** Follow [BUILD-ITEM.md](../shared/BUILD-ITEM.md).
+   Verify it and tick it off only when its own outcome has passing evidence.
+4. **Accept a finished slice.** When every item in the owning slice is
+   complete, follow [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md), including
+   on resume when there is no new implementation item. A file without
+   slices is one slice. Closure when run standalone includes code-review; an
+   active execute-plan coordinator may explicitly own review scheduling.
+   Otherwise leave slice acceptance pending. Record acceptance or the
+   verification gaps still open.
 5. **Report and offer to commit.** Distinguish item completion from slice
-   acceptance and report any required review status. Say what was done and
-   what's left, then ask whether to commit. If yes, use the commit skill.
+   acceptance. State required review status and what is left, then ask
+   whether to commit. If the user agrees, use the commit skill.

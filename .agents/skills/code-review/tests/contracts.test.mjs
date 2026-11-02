@@ -8,7 +8,8 @@ import test from "node:test";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const skillPath = ".agents/skills/code-review/SKILL.md";
-const conventionsPath = ".agents/skills/code-review/CONVENTIONS.md";
+const protocolPath = ".agents/skills/code-review/references/REVIEW-PROTOCOL.md";
+const conventionsPath = ".agents/skills/code-review/references/CONVENTIONS.md";
 const casesPath = ".agents/skills/code-review/evals/cases.json";
 
 function read(path) {
@@ -27,12 +28,19 @@ function section(content, start, end) {
   return content.slice(beginning, finish);
 }
 
-test("applicable conventions get a separate reviewer even on small diffs", () => {
+test("the entry point loads the protocol and preserves review gates", () => {
   const skill = flat(skillPath);
-  assert.match(skill, /separate read-only conventions reviewer whenever applicable conventions exist/);
-  assert.match(skill, /including small, low-risk changes/);
-  assert.match(skill, /in addition to the generalist or other specialists/);
-  assert.match(skill, /every applicable convention has reviewer coverage/);
+  assert.ok(skill.includes("[REVIEW-PROTOCOL.md](references/REVIEW-PROTOCOL.md)"));
+  assert.match(skill, /a separate conventions reviewer whenever applicable conventions exist/);
+  assert.match(skill, /even for small, low-risk changes/);
+  assert.match(skill, /Every selected reviewer must finish `COMPLETE`/);
+  assert.match(skill, /Never edit code, change state, or comment on a PR/);
+  const protocol = flat(protocolPath);
+  assert.match(protocol, /intent documents/);
+  assert.match(protocol, /reviewer profiles/i);
+  assert.match(protocol, /finding schema/);
+  assert.match(protocol, /verifier subagent/);
+  assert.match(protocol, /report format/i);
 });
 
 test("selection considers purpose as well as file type", () => {
@@ -61,45 +69,46 @@ test("the conventions prompt supplies actual guidance and checks what was loaded
 });
 
 test("documented rules and unwritten precedent have different evidence requirements", () => {
-  const skill = flat(skillPath);
-  const maintainability = section(skill, "4. **Maintainability:**", "5. **Conventions:**");
-  const conventions = section(skill, "5. **Conventions:**", "6. **Spec and plan adherence**");
-  assert.match(maintainability, /unwritten project precedent/);
+  const protocol = flat(protocolPath);
+  const maintainability = section(protocol, "4. **Maintainability:**", "5. **Conventions:**");
+  const conventions = section(protocol, "5. **Conventions:**", "6. **Spec and plan adherence:");
+  assert.match(maintainability, /unwritten precedent/);
   assert.match(maintainability, /at least two peer/);
   assert.match(maintainability, /documented requirements to conventions/);
   assert.match(conventions, /explicit applicable rules/);
-  assert.match(conventions, /rule citation/);
-  assert.match(conventions, /MANDATORY|mandatory/);
+  assert.match(conventions, /rule and code evidence/);
+  assert.match(conventions, /Recommendations are not mandates/);
   assert.doesNotMatch(maintainability, /Maintainability and conventions/);
-  const reliability = section(skill, "3. **Reliability,", "4. **Maintainability:**");
-  assert.match(reliability, /Hands off documented error-handling style \(conventions\)/);
+  const reliability = section(protocol, "3. **Reliability,", "4. **Maintainability:**");
+  assert.match(reliability, /Hand off documented error-handling style to conventions/);
 
-  const verification = section(skill, "4. **Verify.**", "5. **Report**");
-  assert.match(verification, /unwritten precedent finding/);
-  assert.match(verification, /documented convention finding/);
-  assert.match(verification, /scope, exceptions, and instruction precedence/);
-  assert.match(verification, /Two peer examples are not required for an explicit rule/);
+  const verification = section(protocol, "## Verify findings", "## Report format");
+  assert.match(verification, /unwritten precedent/);
+  assert.match(verification, /documented conventions/);
+  assert.match(verification, /scope, exceptions, and precedence/);
+  assert.match(verification, /explicit rules need no peer examples/);
 });
 
 test("findings and reports carry rule citations and convention coverage", () => {
-  const skill = read(skillPath);
-  const schema = JSON.parse(section(skill, "**Findings schema.**", "**Severity**")
+  const protocol = read(protocolPath);
+  const schema = JSON.parse(section(protocol, "## Finding schema and severity", "**Severity**")
     .match(/```json\n([\s\S]*?)\n```/)[1]);
   assert.ok(Array.isArray(schema.conventions_loaded));
   assert.deepEqual(Object.keys(schema.findings[0].rule).sort(),
     ["line", "requirement", "source"]);
-  assert.match(flat(skillPath), /rule is required for a documented convention finding/);
-  assert.match(flat(skillPath), /Low also covers a verified explicit convention violation/);
-  assert.match(skill, /### Conventions Coverage/);
-  assert.match(skill, /loaded rule paths, their file\/purpose scope/);
-  assert.match(flat(skillPath), /Unavailable guidance is not a clean conventions pass/);
+  assert.match(flat(protocolPath), /A documented-convention finding requires `rule`/);
+  assert.match(flat(protocolPath), /verified explicit convention violation/);
+  assert.match(protocol, /### Conventions Coverage/);
+  assert.match(protocol, /file(?:\/| or )purpose scope/);
+  assert.match(flat(protocolPath), /unresolved gap/);
 });
 
 test("review-only boundaries and duplicate merging still apply", () => {
   const skill = flat(skillPath);
-  assert.match(skill, /never edit code, change state, or comment on a PR/);
-  assert.match(skill, /merge duplicates across profiles/);
-  assert.match(skill, /Leave the working tree untouched/);
+  const protocol = flat(protocolPath);
+  assert.match(skill, /Never edit code, change state, or comment on a PR/);
+  assert.match(protocol, /merge duplicates across profiles/);
+  assert.match(protocol, /Keep the worktree untouched/);
   assert.match(flat(conventionsPath), /read-only/);
 });
 
@@ -153,7 +162,7 @@ test("new evaluation fixtures produce branch changes without touching the parent
 });
 
 test("new guidance links resolve", () => {
-  for (const path of [skillPath, conventionsPath]) {
+  for (const path of [skillPath, protocolPath, conventionsPath]) {
     const content = read(path);
     for (const match of content.matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g)) {
       if (match[1].includes("://")) continue;

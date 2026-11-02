@@ -25,7 +25,7 @@ high-level reimplementation strategy.}
 
 {The current implementation: key files, data flow, and where the problems
 are, with a Mermaid diagram if the system is complex (see
-[`conventions-mermaid`](../conventions-mermaid/SKILL.md)).}
+[`conventions-mermaid`](../../conventions-mermaid/SKILL.md)).}
 
 ## Findings
 

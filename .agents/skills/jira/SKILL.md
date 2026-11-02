@@ -9,8 +9,6 @@ metadata:
   model-tier: trivial
 ---
 
-# Jira
-
 Manage Jira issues through the Atlassian MCP server. Change an issue only in
 the way the user asked, and report a change as done only after reading it
 back.
@@ -78,9 +76,10 @@ defaults to `Task`. Strip trailing slashes. The bare hostname is the
    `assignee`. Done when the read-back matches and you've reported the key,
    browse URL, assignee, and status.
 
-**Summary.** State the consequence or benefit, not the mechanics, which go
-under Approach: someone glancing at the board should see what improves
-without opening the issue.
+## Issue content
+
+**Summary.** State the consequence or benefit, not the mechanics (those go
+under Approach), so the board shows what improves without opening the issue.
 
 ```txt
 BAD:  Add caching layer

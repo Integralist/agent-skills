@@ -7,17 +7,18 @@ metadata:
   model-tier: trivial
 ---
 
-Summarise the current session in chat. Do not write a file — for a
-durable handoff document, that's `handoff`.
+Summarise the current session in chat; do not write a file. For a durable
+handoff document, use `handoff`. If an argument names a specific task or
+thread, recap only that.
 
-Structure the recap under three headings, each a short bullet list:
+Before writing, read [EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md)
+to keep state visible and reduce working-memory burden.
+
+Use three headings, each with a short bullet list:
 
 - **Done** — what's finished and verified, in concrete terms.
 - **In progress** — what's underway and where it stands.
 - **Next** — the immediate next action, scoped to a file or command.
 
-Lead with state, not narration. Keep the whole thing to ~10 lines;
-omit a heading that has nothing under it. If arguments name a specific
-task or thread, recap only that. Keep state visible without working memory
-burden — see
-[`../shared/EXECUTIVE-SCAFFOLDING.md`](../shared/EXECUTIVE-SCAFFOLDING.md).
+Lead with state, not narration. Keep the whole recap to about 10 lines. Omit
+any heading with nothing under it.

@@ -10,66 +10,66 @@ metadata:
 ---
 
 > [!NOTE]
-> If you were invoked directly (e.g. `/conventions-go`) with no specific task,
-> just read this skill so its conventions are loaded into context, then stop —
-> there is nothing to do yet. They're now ready to apply when I ask you to
-> design, write, or edit Go code.
+> If invoked directly with no specific task, load these conventions and stop.
+> They are ready to apply when asked to design, write, or edit Go code.
 
-# Go Conventions
+Write Go that follows these rules and run the required tools after every edit.
+They apply to all Go, including CLIs and libraries. In an established repo,
+follow its existing architecture where it differs. The handler → service →
+repository guidance applies only to HTTP/API services of that shape.
 
-Write Go that follows these conventions, and run the tools below after every
-edit. Everything here applies to all Go, including CLIs and libraries. An
-HTTP/API service built as handlers → service → repository also follows
-[SERVICE-ARCHITECTURE.md](../conventions-go/references/SERVICE-ARCHITECTURE.md);
-don't add that layering to other kinds of program. In a repo that already has
-a different architecture, follow it rather than this one.
+## Before editing
 
-**Go version.** If `go.mod` exists, match its `go` directive before using
-versioned language or standard-library APIs, unless the task includes an
-upgrade.
-
-**Standard library.** In new code, prefer newer standard-library APIs over
-older ones (`net/netip` over `net` IP types) and named constants over magic
-literals (`http.MethodGet`, `http.StatusOK`). When editing code that uses an
-older API, ask before migrating it.
-[STDLIB-PREFERENCES.md](STDLIB-PREFERENCES.md) has the full tables.
+- Match the `go` directive in `go.mod`, unless the task includes an upgrade.
+- Read the full conventions below for code style, runtime behaviour, testing,
+  commands, and package rules.
+- For new code, prefer newer standard-library APIs and named constants. When
+  editing use of an older API, ask before migrating it. See
+  [STDLIB-PREFERENCES.md](references/STDLIB-PREFERENCES.md) for the full tables.
+- For an HTTP/API service built as handlers → service → repository, also read
+  [SERVICE-ARCHITECTURE.md](../conventions-go/references/SERVICE-ARCHITECTURE.md). Do not apply that
+  layering to other programs.
 
 ## Tooling
 
-**gopls.** Navigate and refactor with gopls rather than text search or `sed`,
-because it understands symbols and avoids false matches. Start a Go session
-with `go_workspace`, then `go_vulncheck`. Rename with `go_rename_symbol`, then
-run `rg <old-name>` to fix the comments, docs, and strings it leaves alone. Run
-`go_symbol_references` before deleting anything exported or changing its
-signature. Use `go_search` to find a symbol, `go_file_context` after first
-reading a file, `go_package_api` for a package's exports, and `go_diagnostics`
-after edits.
+Use gopls for navigation and refactoring rather than text search or `sed`.
+Start a Go session with `go_workspace`, then run `go_vulncheck`. Use
+`go_rename_symbol` for renames, then `rg <old-name>` for comments, docs, and
+strings it cannot update. Before deleting an exported symbol or changing its
+signature, run `go_symbol_references`. Use `go_search` to find symbols,
+`go_file_context` after first reading a file, `go_package_api` for package
+exports, and `go_diagnostics` after edits.
 
-**After editing,** run these on the changed packages:
+After editing, run these on changed packages:
 
-1. Preview modernizer rewrites with `go fix -diff ./path/to/pkg/...` and apply
-   them only after review;
-   [TOOLING.md](../conventions-go/references/TOOLING.md) covers choosing
-   fixers and `//go:fix inline`.
+1. Preview modernizer rewrites with `go fix -diff ./path/to/pkg/...`; review
+   before applying. See [TOOLING.md](../conventions-go/references/TOOLING.md) for fixer selection and
+   `//go:fix inline`.
 2. Format with `gofumpt -l -w .`, then group imports:
 
    ```bash
    goimports-reviser -company-prefixes "$(go list -m | cut -d/ -f1-2)" -project-name "$(go list -m)" ./...
    ```
+3. Run `go vet ./...`, `go-critic check ./...`, `staticcheck ./...`, and
+   `gohawk ./path/to/pkg/...`; fix every finding. Fix causes rather than
+   suppressing them. If a suppression is warranted, use the exact form in
+   [LINTER-DIRECTIVES.md](references/LINTER-DIRECTIVES.md).
 
-3. Lint with `go vet ./...`, `go-critic check ./...`, and `staticcheck ./...`,
-   and fix every finding. Fix the cause rather than suppress it; when a
-   suppression is warranted, use the exact syntax in
-   [LINTER-DIRECTIVES.md](LINTER-DIRECTIVES.md).
-
-Install a missing tool with `go install` and one of
-`mvdan.cc/gofumpt@latest`, `github.com/incu6us/goimports-reviser/v3@latest`,
+If Gohawk is not installed, get the latest with
+`go install github.com/kojah/gohawk@latest` (requires Go 1.26+). If installed
+but `command -v gohawk` finds nothing, add `$(go env GOBIN)` (or the default
+`$(go env GOPATH)/bin`) to `PATH`. Install other missing tools with `go install`
+and one of `mvdan.cc/gofumpt@latest`,
+`github.com/incu6us/goimports-reviser/v3@latest`,
 `github.com/go-critic/go-critic/cmd/go-critic@latest`, or
 `honnef.co/go/tools/cmd/staticcheck@latest`.
 
-**Look it up.** When unsure, check the Go spec, `go doc`, the release notes, or
-the module reference, and cite it rather than guess;
-[TOOLING.md](../conventions-go/references/TOOLING.md) covers `go doc`.
+See the pinned [Gohawk installation guide][gohawk-install]. When unsure,
+check the Go spec, `go doc`, release notes, or module reference;
+cite the source rather than guessing. See [TOOLING.md](../conventions-go/references/TOOLING.md)
+for API lookup guidance.
+
+[gohawk-install]: https://github.com/kojah/gohawk/blob/d5b1c83eae03553d40cbd9d12d238d3e7d346ed8/docs/installation.md#install-the-cli
 
 ## Naming
 

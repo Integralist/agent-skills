@@ -38,8 +38,8 @@ another process supervisor to the acceptance suite.
 **Example.** Store the living feature at `docs/specs/<capability>.feature`,
 named for the behaviour it owns. Place the runner and step implementations
 according to the project's existing test layout. Adapt the
-[Godog wiring example](../go-testing/ACCEPTANCE.md) to that layout, resolving
-feature and Makefile paths from the actual test package.
+[Godog wiring example](../../go-testing/references/ACCEPTANCE.md) to that
+layout, resolving feature and Makefile paths from the actual test package.
 
 The code's package name and concrete paths are illustrative, not required.
 The existing project Makefile owns `render-config`; this test does not replace

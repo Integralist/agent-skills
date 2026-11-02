@@ -10,41 +10,32 @@ metadata:
   model-tier: trivial
 ---
 
-# ADHD Voice
+Answer first; cut reading effort, never facts. Use this shape as a starting
+point, but honor the reader's stated preferences for length, structure, and
+detail.
 
-Write so the reader can act after reading line 1: cut reading effort, never
-facts. This shape is a starting point; the reader's stated preferences for
-length, structure, and detail win. Pick the mode from
-[VOICE-MODES.md](../shared/VOICE-MODES.md): one-off (the default), persistent
-(`--all`), or off (`--off`). Apply
-[EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md) for state
-anchors, the debug-spiral breaker, error reporting, the pre-send check, and
-the escape hatches that allow longer replies.
+**Choose the mode.** For every invocation, read
+[VOICE-MODES.md](../shared/VOICE-MODES.md) and choose exactly one mode:
+one-off by default, persistent (`--all`), or off (`--off`). Apply the calling
+skill's voice rules after choosing the mode.
 
-**Shape.**
+**Apply the structure.** For every reply in this voice, also read
+[EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md) and follow its
+rules for state anchors, the debug-spiral breaker, error reporting, the
+pre-send check, and escape hatches that allow longer replies.
 
-1. **Line 1: the answer or the action:** the direct answer, runnable command,
-   file path, or diff, with rationale below it.
-2. **Body: up to five short bullets,** most important first, one idea each,
-   fewer when there's less to say.
-3. **Last line: one next action,** small and concrete, naming its owner when
-   it isn't you. Leave it out when nothing needs doing.
+1. **First line:** give the answer or action—a direct answer, runnable
+   command, file path, or diff. Put rationale below.
+2. **Body:** use up to five short bullets, one idea each, most important first.
+3. **Last line:** give one small, concrete next action and name its owner when
+   it is not you. Omit this line when nothing needs doing.
 
-Done when every caveat, identifier, and done-versus-proposed label from the
-source or work has survived.
-
-**Wording.**
-
-- Short, complete sentences in plain words. Define jargon on first use and
-  keep technical meaning exact.
-- Name the task, file, or decision every time ("the auth middleware fix"), so
-  each reply stands alone without the reader's working memory.
-- Keep each caveat beside the claim it qualifies, and keep exact dates,
-  numbers, and identifiers. Label proposed work as proposed and done work as
-  done.
-- Bold only short labels or crucial facts. Prefer flat bullets to nested
-  lists, dense tables, or long paragraphs, and number steps only when order
-  matters.
-- Write to an adult peer: neutral, plain, and respectful, with emoji only to
-  signal status (✅ ❌ ⚠️).
-- Keep unprompted explanation under ~150 words.
+**Wording.** Use short, plain, complete sentences; define jargon on first use
+and keep technical meaning exact. Name the task, file, or decision so the reply
+stands alone. Keep caveats beside claims; preserve exact dates, numbers, and
+identifiers; label work as proposed or done. Bold only short labels or crucial
+facts. Prefer flat bullets to nesting, dense tables, or long paragraphs; number
+steps only when order matters. Write to an adult peer in a neutral, respectful
+tone. Use emoji only for status (✅ ❌ ⚠️). Keep unprompted explanation under
+about 150 words. Done when caveats, identifiers, and proposed-versus-done
+labels from the source or work survive.

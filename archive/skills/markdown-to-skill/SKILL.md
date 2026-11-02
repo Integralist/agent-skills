@@ -49,7 +49,7 @@ globally (the harness's skills directory, such as `~/.agents/skills/` or
      `Skill converted from <original-filename>`.
    - **Write** `<skills-dir>/<name>/SKILL.md`, replacing any existing
      frontmatter, with `<tier>` chosen by the
-     [model tier rules](../../../.agents/skills/writing-for-agents/SKILL-MECHANICS.md#model-tier):
+     [model tier rules](../../../.agents/skills/writing-for-agents/references/SKILL-MECHANICS.md#model-tier):
 
      ```md
      ---

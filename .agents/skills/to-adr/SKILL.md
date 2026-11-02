@@ -10,33 +10,27 @@ metadata:
   model-tier: complex
 ---
 
-# To ADR
+Extract ADRs from a plan, spec, or this session's discussion, one per
+qualifying decision. Follow [ADR-FORMAT.md](../shared/ADR-FORMAT.md) before
+screening, numbering, or writing; do not invent. If none qualify, write no
+ADRs and explain why.
 
-Turn a source (a plan, spec, or this session's discussion) into ADRs: one for
-each decision worth recording, in the format
-[ADR-FORMAT.md](../shared/ADR-FORMAT.md) sets. Extract; don't invent. A
-decision earns an ADR only when it passes that file's three tests, and a
-source with none produces no ADR.
+**Stop and ask.** Follow the source. If anything is missing, contradictory,
+or points to a wrong design, tell the user and wait; do not guess.
 
-**Stop and ask.** Follow the source as given, but when something is missing,
-contradictory, or looks like the wrong design, tell the user and wait. Don't
-fill the gap with a guess.
+**Workflow.**
 
-1. **Pick the source.** Use the file the user or calling skill names. With
-   none, use this session's discussion. Done when you've read the source in
-   full.
+1. **Choose the source.** Use the file named by the user or calling skill;
+   otherwise use this session's discussion. Read it in full.
+2. **Screen decisions.** List each settled fork; keep only those passing all
+   three ADR-FORMAT.md tests. Give each its own ADR with a rejected alternative
+   and why it lost. For each dropped decision, identify the failed test.
+3. **Number and place ADRs.** Follow ADR-FORMAT.md: migrate legacy files,
+   then assign next repository-wide IDs in source order and choose each folder.
+   Stop and ask if a collision or ambiguous legacy file blocks safe numbering.
+4. **Write and index ADRs.** Use the shared template. Before indexing, read
+   [PROJECTS-README.md](../shared/PROJECTS-README.md); add each ADR to
+   `docs/adr/README.md` and project ADRs to the project README as described.
 
-2. **Find the decisions.** List each fork the source settled, and keep only
-   those that pass all three tests. Give each kept decision its own ADR. Done
-   when every kept decision has a rejected alternative and a reason, and you
-   can say which test each dropped one fails.
-
-3. **Number and file them** as ADR-FORMAT.md describes: migrate legacy files
-   first, then assign the next IDs in source order and pick each ADR's folder.
-   Done when every ADR has an ID and a path.
-
-4. **Write each ADR** from the template. Add it to `docs/adr/README.md`, and a
-   project ADR to its project README as
-   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. Done when the
-   files and indexes are written and you've reported each file with a
-   one-line summary, or said why no decision warranted an ADR.
+**Done when** all ADRs and indexes are written and you report each file with a
+one-line summary, or explain why no decision warranted an ADR.

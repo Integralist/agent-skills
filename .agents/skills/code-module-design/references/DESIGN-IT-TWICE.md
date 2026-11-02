@@ -3,7 +3,7 @@
 Explore alternative interfaces for a chosen deepening candidate by having
 parallel subagents design it in radically different ways, then compare them;
 your first idea is rarely the best (Ousterhout). Uses the vocabulary in
-[SKILL.md](SKILL.md) and the dependency categories in
+[SKILL.md](../SKILL.md) and the dependency categories in
 [DEEPENING.md](DEEPENING.md).
 
 1. **Frame the problem** for the user: the constraints any new interface must
@@ -12,10 +12,10 @@ your first idea is rarely the best (Ousterhout). Uses the vocabulary in
    proposal). Show it and go straight on to step 2; the user reads while the
    subagents work. Done when the framing is shown.
 2. **Spawn three or more subagents in parallel,** following
-   [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md). Give each a
-   technical brief, separate from the user's framing: file paths, coupling,
+   [SUBAGENT-STEERABILITY.md](../../shared/SUBAGENT-STEERABILITY.md). Give each
+   a technical brief, separate from the user's framing: file paths, coupling,
    dependency category, what sits behind the seam, and the vocabulary from
-   [SKILL.md](SKILL.md) plus the project's `GLOSSARY.md`. If only a legacy
+   [SKILL.md](../SKILL.md) plus the project's `GLOSSARY.md`. If only a legacy
    `CONTEXT.md` exists, use it and warn the user with `⚠️` to rename it to
    `GLOSSARY.md`. Give each subagent a different constraint:
 

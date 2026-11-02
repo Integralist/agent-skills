@@ -20,8 +20,10 @@ what must stay before showing your own inventory. Settle what to retain,
 extract into a reference, transfer to another workflow, or delete.
 
 **Approval.** Show the proposed rewrite and wait for approval before editing.
-For a large diff, offer a summary and the choice to see the full draft or
-approve applying it.
+Show the combined UTF-8 byte totals for the skill and all references, before
+and after. Default to a net reduction; get explicit approval for any increase
+and explain why it is necessary. For a large diff, offer a summary and the
+choice to see the full draft or approve applying it.
 
 **Completion.** Verify preserved behaviour and reference loading, then report
 what changed and any unrun checks. Done when the approved rewrite is written,

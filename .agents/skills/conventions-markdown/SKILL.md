@@ -8,33 +8,37 @@ metadata:
   model-tier: trivial
 ---
 
-# Markdown Conventions
-
 Write Markdown that reads well, renders correctly on GitHub, and uses
 inclusive language.
 
-**Formatting.** Wrap prose at 80 columns by hand. Format with
-`mdformat --number`, which keeps ordered lists numbered 1, 2, 3, never with
-`--wrap`, which breaks GitHub alert blocks. Never run `mdformat` on files an
-agent reads: skills (`**/skills/**`), prompts (`**/prompts/**`), and
-`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`. It collapses the 4-backtick fences
-that protect nested code blocks and strips deliberate layout, so format those
-by hand and keep their lists numbered 1, 2, 3. Install it with
-`pipx install mdformat` and
-`pipx inject mdformat mdformat-gfm mdformat-frontmatter`.
+## Formatting
 
-**Label lines.** GitHub joins consecutive lines into one paragraph, so a stack
-of `**Label:** value` lines renders as one run-on line. Make them a bullet
-list instead of forcing breaks with a trailing `\` or spaces:
+Wrap prose at 80 columns by hand. Use `mdformat --number` where formatting is
+appropriate; ordered lists stay numbered 1, 2, 3. Do not use `--wrap`, which
+breaks GitHub alert blocks. Install with:
+
+```bash
+pipx install mdformat
+pipx inject mdformat mdformat-gfm mdformat-frontmatter
+```
+
+Never run `mdformat` on agent-facing Markdown: skills (`**/skills/**`), prompts
+(`**/prompts/**`), `AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`. It can collapse
+four-backtick fences around nested code blocks and remove deliberate layout.
+Format those files by hand.
+
+## Labels, code, and callouts
+
+GitHub joins consecutive lines into one paragraph. Use bullets for label/value
+pairs rather than trailing spaces or backslashes:
 
 ```md
 - **Date:** 2026-06-16
 - **Reporter:** Jane Doe
 ```
 
-**Code blocks.** Give every code block a language, using `txt` when there's no
-obvious one. Fence a Markdown code block with 4 backticks, so 3-backtick
-blocks inside it don't end it early:
+Give every code block a language; use `txt` when no language fits. Use four
+backticks to fence a Markdown example containing three-backtick blocks:
 
 `````md
 ````md
@@ -46,22 +50,28 @@ make test
 ````
 `````
 
-**Callouts.** Use GitHub alerts (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
-`> [!WARNING]`, `> [!CAUTION]`), not prose prefixes like `Note:`.
+Use GitHub alerts (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
+`> [!WARNING]`, `> [!CAUTION]`) instead of prose prefixes such as `Note:`.
 
-**Links.** Base links on the repository that will hold the document, not your
-working directory. Link files in the same repository with relative paths.
-Link another GitHub repository with a permalink pinned to the full commit SHA
-you inspected: `https://github.com/<owner>/<repo>/blob/<sha>/<path>#L42` for a
-file, or `/tree/<sha>/<path>` for a directory (omit the path for the root).
+## Links
+
+Base links on the repository that will hold the document, not the working
+directory. Link files in the same repository with relative paths. For another
+GitHub repository, use a permalink pinned to the full commit SHA inspected:
+
+- File: `https://github.com/<owner>/<repo>/blob/<sha>/<path>#L42`
+- Directory: `https://github.com/<owner>/<repo>/tree/<sha>/<path>`
+- Repository root: `https://github.com/<owner>/<repo>/tree/<sha>`
+
 Get the SHA with `git -C <checkout> rev-parse HEAD` and the URL from the
-canonical remote. Never publish a sibling-checkout path (`../other-repo/…`), a
-branch, a tag, or a short SHA. If the file is modified or untracked, or you
-can't verify its remote and SHA, say it can't be pinned or ask for a stable
-revision rather than presenting HEAD as a permalink. `path:line` guidance in
-other skills applies only within the document's own repository.
+canonical remote. Never publish sibling-checkout paths, branches, tags, or
+short SHAs. If the source is modified or untracked, or its remote and SHA
+cannot be verified, say it cannot be pinned or ask for a stable revision
+instead of presenting HEAD as a permalink. `path:line` references in other
+skills apply only within the document's own repository.
 
-**Linting.** Check style with
-[markdownlint](https://github.com/DavidAnson/markdownlint) and inclusive
-language with [alex](https://alexjs.com/) and
+## Linting
+
+Check style with [markdownlint](https://github.com/DavidAnson/markdownlint),
+inclusive language with [alex](https://alexjs.com/) and
 [woke](https://docs.getwoke.tech/).

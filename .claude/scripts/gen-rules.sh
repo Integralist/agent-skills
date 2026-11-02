@@ -12,7 +12,9 @@
 # Skill links like `](../shared/X.md)` resolve from .agents/skills/<skill>/, but
 # a rule lives in .claude/rules/ (or ~/.claude/rules/), where `../shared/` does
 # not exist. Both .claude/ and ~/.claude/ carry a `skills` symlink to the skills
-# tree, so rewriting `](../` to `](../skills/` makes the links resolve there.
+# tree. Parent links resolve through ../skills/; local references/ links resolve
+# through ../skills/<skill>/references/. Referenced files stay canonical, with
+# no generated copies to keep in sync.
 #
 # Run via `make rules`. `make install` runs it automatically.
 
@@ -29,13 +31,16 @@ strip_frontmatter() {
 
 # gen <skill-path> <rule-path> <paths-glob>
 gen() {
-	local skill="$1" rule="$2" glob="$3"
+	local skill="$1" rule="$2" glob="$3" skill_name
+	skill_name="$(basename "$(dirname "$skill")")"
 	{
 		printf -- '---\n'
 		printf -- 'paths:\n'
 		printf -- "  - '%s'\n" "$glob"
 		printf -- '---\n'
-		strip_frontmatter "$skill" | sed 's#](\.\./#](../skills/#g'
+		strip_frontmatter "$skill" | sed -E \
+			-e 's#]\(\.\./#](../skills/#g' \
+			-e "s#]\\((\\./)?references/#](../skills/$skill_name/references/#g"
 	} >"$rule"
 	echo "generated $rule from $skill"
 }
@@ -47,24 +52,11 @@ gen .agents/skills/conventions-python/SKILL.md   .claude/rules/python.md   '**/*
 gen .agents/skills/conventions-sql/SKILL.md      .claude/rules/sql.md      '**/*.sql'
 gen .agents/skills/spec-delta/SKILL.md           .claude/rules/spec-delta.md 'docs/specs/**'
 
-# copy_siblings <skill-dir> <rule-dir> — copy non-SKILL.md files so relative
-# links in the generated rule resolve. Each copy gets a "generated" banner so a
-# reader (or agent) editing it knows the edit belongs in the source skill —
-# go.md/markdown.md already signal derivation via their `paths:` frontmatter.
-copy_siblings() {
-	local skill_dir="$1" rule_dir="$2" src base
-	while IFS= read -r src; do
-		base="$(basename "$src")"
-		{
-			printf -- '<!-- generated from %s — edit there, run `make rules` -->\n\n' "$src"
-			cat "$src"
-		} >"$rule_dir/$base"
-		echo "generated $rule_dir/$base from $src"
-	done < <(find "$skill_dir" -maxdepth 1 -name '*.md' ! -name 'SKILL.md')
-}
-
-copy_siblings .agents/skills/conventions-go       .claude/rules
-copy_siblings .agents/skills/conventions-markdown  .claude/rules
-copy_siblings .agents/skills/conventions-mermaid   .claude/rules
-copy_siblings .agents/skills/conventions-python    .claude/rules
-copy_siblings .agents/skills/conventions-sql       .claude/rules
+# Remove the old Go reference copies only when their provenance identifies
+# them as generated. Preserve any user-owned files with the same names.
+for legacy in .claude/rules/{LINTER-DIRECTIVES,STDLIB-PREFERENCES}.md; do
+	if [[ -f "$legacy" ]] &&
+		grep -q '^<!-- generated from .agents/skills/conventions-go/' "$legacy"; then
+		rm -- "$legacy"
+	fi
+done

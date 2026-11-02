@@ -41,7 +41,7 @@ For selection, routing, and fallback rules, see the
   A skill without a tier, or a plugin's skill, is sorted by its description.
   Successful classifications are kept until the description changes; failed
   attempts are retried on the next invocation. For how to pick a tier, see
-  [model tier](../../../.agents/skills/writing-for-agents/SKILL-MECHANICS.md#model-tier).
+  [model tier](../../../.agents/skills/writing-for-agents/references/SKILL-MECHANICS.md#model-tier).
 
 - **When it leaves the model alone:** short replies (fewer than four words, or
   replies such as "yes" or "keep going"), built-in slash commands, messages

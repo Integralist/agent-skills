@@ -9,13 +9,13 @@ metadata:
   model-tier: moderate
 ---
 
-# Show Me
+Explain the current topic visually. Skip the preamble, keep prose brief, and
+place each visual beside the short text it supports. Use the smallest view—or
+few views—that makes the point; most answers need one or two forms, rarely
+all. Include only the calls, files, props, states, and boundaries the
+question or decision needs.
 
-Help the user understand the current topic visually. Skip the preamble, keep
-prose brief, and put each visual next to the short text it supports. Pick the
-smallest view, or few views, that make the point; most answers need one or
-two of the forms below, rarely all. Keep only the calls, files, props, states,
-and boundaries the current question or decision needs.
+## Choose a view
 
 **Pseudocode** for logic or an algorithm:
 
@@ -37,8 +37,8 @@ submitForm
   navigateToSession
 ```
 
-**Component tree** for UI structure, with the state and module boundaries
-that matter:
+**Component tree** for UI structure, with relevant state and module
+boundaries:
 
 ```tsx
 <SessionPage> (apps/example/src/routes/session.tsx)
@@ -69,8 +69,8 @@ sequenceDiagram
 ```
 
 **Diff** when the point is what changes and the surrounding shape already
-exists. Diff whichever of the forms above fits the topic: a component tree,
-file tree, call tree, or control flow.
+exists. Choose a component tree, file tree, call tree, or control flow to
+diff:
 
 ```diff
  submitForm
@@ -83,8 +83,8 @@ file tree, call tree, or control flow.
 +    subscribeToEvents
 ```
 
-**Whole block** when most of it is new, when leaving out context would hide
-ownership or order, or when the user needs a copyable target:
+**Whole block** when most of it is new, leaving out context would hide
+ownership or order, or the user needs a copyable target:
 
 ```ts
 function expandSkill(command: string): string {
@@ -94,7 +94,7 @@ function expandSkill(command: string): string {
 ```
 
 **HTML file** for a visual UI, layout, state comparison, or concept too dense
-for Mermaid: one focused diagram, infographic, or short slide deck. Match the
-product's colours, type, spacing, and components, use real labels and data,
-and make it work on desktop and mobile. Save it as
+for Mermaid. Make one focused diagram, infographic, or short slide deck. Match
+the product's colours, type, spacing, and components; use real labels and
+data; and support desktop and mobile. Save it as
 `show-me-{description}.html` and open it for the user with `open`.

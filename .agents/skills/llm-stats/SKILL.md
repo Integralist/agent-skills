@@ -11,13 +11,13 @@ metadata:
   model-tier: trivial
 ---
 
-# LLM stats
-
 Generate one self-contained HTML file, with its data, CSS, JavaScript, and SVG
 embedded, that charts benchmark scores against a chosen metric, one line per
 model family through its effort levels. It works offline, with no server and
 no credentials in the browser. Read [data.md](references/data.md) for API
-limits, units, import formats, URL parameters, and the 1Password setup.
+limits, units, import formats, URL parameters, and the 1Password setup. Before
+changing the generator or page, read
+[PAGE-BEHAVIOR.md](references/PAGE-BEHAVIOR.md).
 
 1. **Choose the source.**
    - `--demo --benchmark intelligence --x cost` gives a synthetic preview.
@@ -74,26 +74,6 @@ query parameters keeps working; keep those parameters when updating one.
 An old bookmark with
 `x=price` still shows token prices; `x=cost` gives benchmark cost. The page
 can also export all JSON or the chart's CSV.
-
-**Page behaviour,** which the tests protect:
-
-- Hovering or focusing an effort node highlights its family. The normal
-  view dims other families; Pareto mode keeps frontier nodes vivid.
-  Clicking or Enter/Space pins it, clicking another replaces the pin, and
-  clicking it again, Escape, or **Clear highlight** releases it.
-- The model dropdown has fuzzy search, checkboxes, Clear, Select matches,
-  and Reset defaults, with arrow keys to move and Escape to close.
-- Models missing the chosen score or metric are left out with a visible
-  warning naming each one and what it lacks, updated as selections change.
-  Zero is a value, not a gap.
-- **Pareto line**, off by default, overlays the non-dominated trade-offs
-  among selected, plotted models with a bright yellow line. It dims other
-  nodes and family curves. Only frontier nodes respond to the mouse, with
-  tighter hit areas; keyboard focus and pin remain available for every model.
-  It updates with selection and metric changes, and survives bookmarks and
-  saved HTML.
-- Reports and exports keep the API's index version, and cost tooltips keep
-  four decimal places.
 
 **Data use.** Use the
 [API documentation](https://artificialanalysis.ai/data-api/docs) and exports

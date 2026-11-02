@@ -8,22 +8,21 @@ metadata:
   model-tier: moderate
 ---
 
-# Go Testing
-
-Write Go tests test-first, where each case proves one behaviour through the
-package's public API. Load the conventions-go skill too: it sets the style and
-linter rules for test code (`testCases`/`tc`, `rr`, `noctx`, `scopeguard`,
-comments, `testify/mock`), and wins where the two overlap. Before writing or
-changing tests, read [TEST-CONTRACTS.md](../shared/TEST-CONTRACTS.md) for what
-an assertion must protect. For acceptance suites, also load
+Write Go tests test-first, with each case proving one behaviour through the
+package's public API. Load the conventions-go skill too: it sets
+style and linter rules for test code (`testCases`/`tc`, `rr`, `noctx`,
+`scopeguard`, comments, `testify/mock`), and wins where the two overlap.
+Before writing or changing tests, read
+[TEST-CONTRACTS](../shared/TEST-CONTRACTS.md) for assertion contracts. For
+acceptance suites, also load
 [conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md): it
 owns scenario-to-code structure for Go/Godog and Make/Bash workflows.
 
-**Style.** When asked for unit tests, ask whether the user wants table-driven
-tests (the default) or f-tests, a local helper `f` called from named subtests.
+**Style.** For unit tests, ask whether the user prefers table-driven (default)
+or f-tests (helper `f` in named subtests).
 
-**Test-first in Go.** A test written before its types exist fails to compile,
-which doesn't count as red. So:
+A test written before its types exist fails to compile, which doesn't count
+as red. So:
 
 1. Stub the types and signatures, returning zero values or a sentinel such as
    `errors.New("unimplemented")`.
@@ -156,11 +155,12 @@ go test -cover ./...                         # coverage
 
 For specialised work, read:
 
-- [INTEGRATION.md](INTEGRATION.md): e2e tests under the `e2e` build tag.
-- [ACCEPTANCE.md](ACCEPTANCE.md): a runnable Godog wiring example for the
-  canonical living features.
-- [FUZZ-AND-BENCHMARKS.md](FUZZ-AND-BENCHMARKS.md): `testing.F` fuzzing and
-  `b.Loop()` benchmarks.
-- [COVERAGE-PRUNING.md](COVERAGE-PRUNING.md): finding and pruning overlapping
-  tests with Tobari.
+- [INTEGRATION.md](references/INTEGRATION.md): e2e tests under the `e2e`
+  build tag.
+- [ACCEPTANCE.md](references/ACCEPTANCE.md): a runnable Godog wiring example
+  for the canonical living features.
+- [FUZZ-AND-BENCHMARKS.md](references/FUZZ-AND-BENCHMARKS.md): `testing.F`
+  fuzzing and `b.Loop()` benchmarks.
+- [COVERAGE-PRUNING.md](references/COVERAGE-PRUNING.md): finding and pruning
+  overlapping tests with Tobari.
 - The mutation-testing skill: checking whether tests catch behaviour changes.

@@ -10,19 +10,20 @@ metadata:
   model-tier: complex
 ---
 
-# Improve Codebase Architecture
+**Architecture vocabulary.** Use the module-design principles and vocabulary
+in [code-module-design](../code-module-design/SKILL.md): module, interface,
+depth, seam, adapter, leverage, locality, the deletion test, and the interface
+as the test surface. One adapter suggests a hypothetical seam; two make it
+real.
 
-Find architectural friction and propose deepening opportunities, refactors
-that turn shallow modules into deep ones, for testability and easier
-navigation. Use the vocabulary and principles in
-[code-module-design](../code-module-design/SKILL.md) (module, interface,
-depth, seam, adapter, leverage, locality; the deletion test; the interface is
-the test surface; one adapter means a hypothetical seam, two a real one) for
-the architecture, and the project's root `GLOSSARY.md` for the domain: "the
-Order intake module", not "the FooBarHandler" or "the Order service". If
-there's no `GLOSSARY.md` but a `CONTEXT.md` exists, use it in place and warn
-the user with `⚠️` to rename it, rather than creating a duplicate. ADRs in
-`docs/adr/` record decisions not to relitigate.
+**Domain language.** Use the root `GLOSSARY.md` and call a module by its
+domain name, such as "the Order intake module," not an implementation name
+such as "the FooBarHandler" or "the Order service." If there is no
+`GLOSSARY.md` but a `CONTEXT.md` exists, use it instead and warn the user with
+`⚠️` to rename it rather than creating a duplicate. Treat ADRs in `docs/adr/`
+as decisions not to relitigate.
+
+## Workflow
 
 1. **Scope before you scan.** Deepening pays off by easing future changes, so
    weight the parts of the codebase that change most. Take the user's
@@ -44,9 +45,10 @@ the user with `⚠️` to rename it, rather than creating a duplicate. ADRs in
 3. **Write the HTML report** to `<tmpdir>/architecture-review-<timestamp>.html`
    (`$TMPDIR`, falling back to `/tmp`, or `%TEMP%` on Windows), so nothing
    lands in the repo and each run gets a fresh file, following
-   [HTML-REPORT.md](HTML-REPORT.md). Give each candidate a card with its
-   files, the problem, the solution in plain English, benefits in terms of
-   locality, leverage, and tests, a before/after diagram, and a strength
+   [HTML-REPORT.md](references/HTML-REPORT.md). Give each candidate a card
+   with its files, the problem, the solution in plain English, benefits in
+   terms of locality, leverage, and tests, a before/after diagram, and a
+   strength
    badge (`Strong`, `Worth exploring`, or `Speculative`), and end with the
    top recommendation and why. Surface a candidate that contradicts an ADR
    only when the friction justifies reopening it, and mark it ("contradicts
@@ -66,6 +68,6 @@ the user with `⚠️` to rename it, rather than creating a duplicate. ADRs in
      architecture reviews don't re-suggest it?" Skip ephemeral reasons ("not
      worth it right now") and self-evident ones.
    - To explore alternative interfaces, follow
-     [DESIGN-IT-TWICE.md](../code-module-design/DESIGN-IT-TWICE.md).
+     [DESIGN-IT-TWICE.md](../code-module-design/references/DESIGN-IT-TWICE.md).
 
    Done when the user has settled the candidate's design or rejected it.

@@ -5,14 +5,18 @@ written by hand and versioned with the skill it tests.
 
 ## Fields
 
-| Field                  | Required | Purpose                                                                           |
-| ---------------------- | -------- | --------------------------------------------------------------------------------- |
-| `id`                   | yes      | Stable kebab-case identifier. Runs compare by `id`, so a rename drops its history |
-| `prompt`               | yes      | What the user would type — realistic phrasing, not a statement of expected output |
-| `setup`                | no       | Shell commands building the starting state, run in order inside the sandbox       |
-| `checks`               | yes      | Plain-English assertions, graded from transcripts and verification output          |
-| `verify`               | no       | Parent-run shell commands against the final sandbox; each must exit zero             |
-| `keep_sandbox_on_fail` | no       | `true` keeps the sandbox when a check fails. Default `false`                      |
+- **`id` (required):** Stable kebab-case identifier. Runs compare by `id`,
+  so a rename drops its history.
+- **`prompt` (required):** What the user would type, phrased realistically
+  rather than as an expected output.
+- **`setup` (optional):** Shell commands that build the starting state, run in
+  order inside the sandbox.
+- **`checks` (required):** Plain-English assertions graded from transcripts
+  and verification output.
+- **`verify` (optional):** Parent-run shell commands against the final
+  sandbox; each must exit zero.
+- **`keep_sandbox_on_fail` (optional):** `true` keeps the sandbox when a check
+  fails; the default is `false`.
 
 ## Example
 

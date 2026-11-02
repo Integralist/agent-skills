@@ -1,8 +1,8 @@
 # Executive Scaffolding — Interaction & Communication Rules
 
-Shared interaction principles for reader focus, orientation, and
-low-friction execution. Reference this from any skill that interacts with the
-user, presents multi-turn progress, or diagnoses errors in the main thread.
+Shared interaction principles for reader focus, orientation, and low-friction
+execution. Reference this from any skill that interacts with the user, presents
+multi-turn progress, or diagnoses errors in the main thread.
 
 ## Core Cognitive Constraints
 

@@ -9,85 +9,95 @@ metadata:
   model-tier: moderate
 ---
 
-# Code Module Review
+Map a scoped piece of code, then assess whether its modules and seams belong
+where they are. Back every claim with source evidence. This is review-only:
+change code only when the user asks.
 
-Map how a scoped piece of code works, then judge whether its modules and seams
-sit in the right places, with every claim backed by source. Review only: change
-code only when the user asks. Use the vocabulary and principles in
-[code-module-design](../code-module-design/SKILL.md), the project's domain terms
-from `GLOSSARY.md`, and [conventions-mermaid](../conventions-mermaid/SKILL.md)
-for every diagram.
+Use the vocabulary and principles in
+[code-module-design](../code-module-design/SKILL.md), the project's domain
+terms from `GLOSSARY.md`, and
+[conventions-mermaid](../conventions-mermaid/SKILL.md) for every diagram.
 
-1. **Scope.** Resolve the target from the user's file, diff, PR, feature, or
-   package, and ask which code to map if none is clear. For a PR or diff,
-   follow callers, dependencies, and neighbouring modules only as far as
-   ownership needs; this isn't a codebase-wide scan. Read nearby package docs,
-   `GLOSSARY.md`, and ADRs. If only `CONTEXT.md` exists, use it and note it's
-   the legacy glossary. Done when you can name the code you're tracing and its
-   neighbours.
-2. **Map the current state.** Read source, imports, call sites, and peers
-   before drawing, and keep static dependencies apart from runtime calls: an
-   import doesn't prove a call. Draw each view that adds something the others
-   don't:
-   - **Placement:** the target and the neighbouring modules that own related
-     responsibilities, with static dependencies and plausible existing homes
-     for the logic.
-   - **Interaction:** the runtime participants and the control or data flow
-     between them, as a sequence diagram for ordered exchanges or a flowchart
-     when branching or ownership reads better.
-   - **Call path:** one entry point through the functions that implement the
-     behaviour, with transformations, side effects, and error paths, using
-     real names and source locations.
+## 1. Scope
 
-   Keep each view small enough to read, splitting rather than shrinking, and
-   say in a line why a view is skipped. Cite `path:line` in the text beside
-   each diagram, not in its labels. Done when every view is validated, or
-   marked unvalidated if `mmdc` isn't available.
-3. **Assess ownership and seams.** Against the source, check:
-   - which existing module already owns this concept, found by
-     responsibility, callers, types, and imports rather than by name;
-   - whether callers coordinate several shallow modules that one deeper
-     module could own behind a smaller interface;
-   - whether logic sits with the concept it changes or leaks into a caller,
-     shared utility, or unrelated package;
-   - whether a likely change to a format, policy, or default needs edits in
-     several modules, or callers must know an implementation detail;
-   - whether callers must handle an ordinary case or configuration choice that
-     the owning module could handle once;
-   - whether dependencies cross the seam in the right direction, and whether
-     a proposed seam has a second adapter to justify it;
-   - whether moving the logic would gain locality or leverage without pushing
-     complexity onto callers.
+Resolve the target from the user's file, diff, PR, feature, or package. If
+none is clear, ask which code to map. For a PR or diff, follow callers,
+dependencies, and neighbouring modules only as far as needed to establish
+ownership; do not scan the whole codebase. Read nearby package docs,
+`GLOSSARY.md`, and ADRs. If only `CONTEXT.md` exists, use it and note it is
+the legacy glossary. Continue when you can name the code being traced and its
+neighbours.
 
-   A finding names its demonstrated cost: duplicated responsibility, leaked
-   implementation, caller coordination, coupling, or something as specific. A
-   layout that differs from a preferred pattern isn't a cost. For a claim
-   that rests on project precedent, use the precedent skill and cite at least
-   two peers. Done when each finding has evidence and a cost, or you've
-   concluded the placement is sound or the evidence inconclusive.
-4. **Report** in this shape, labelling inferences and proposals as such:
+## 2. Map the current state
 
-   ```md
-   **Scope and summary:** what was traced, and the short answer.
+Read source, imports, call sites, and peers before drawing. Keep static
+dependencies separate from runtime calls: an import alone does not prove a
+call.
 
-   **Current state:** each view, with a short explanation and `path:line`
-   citations.
+Draw only views that add information beyond the others:
 
-   **Boundary findings,** ranked by impact: the current responsibility,
-   evidence, cost, and the smallest coherent alternative. If there are none,
-   say the boundaries look sound.
+- **Placement:** the target and neighbouring modules that own related
+  responsibilities, showing static dependencies and plausible existing homes
+  for the logic.
+- **Interaction:** runtime participants and control or data flow. Use a
+  sequence diagram for ordered exchanges, or a flowchart when branching or
+  ownership reads better.
+- **Call path:** one entry point through the functions implementing the
+  behaviour, including transformations, side effects, and error paths. Use
+  real names and source locations.
 
-   **Target view,** only for a finding that warrants a structural change: the
-   proposed ownership or interaction, at the same level as its current view.
+Keep each view readable; split diagrams rather than shrinking them. For every
+skipped view, say why. Cite `path:line` in nearby text, not diagram labels.
+Validate each view, or mark it unvalidated if `mmdc` is unavailable.
 
-   **Unknowns and next step:** facts that could change the assessment, and
-   one focused follow-up.
-   ```
+## 3. Assess ownership and seams
 
-   Done when the report is delivered.
+Use source evidence to check:
 
-**Handing off.** For a broad scan for deepening opportunities, use
-[improve-codebase-architecture](../improve-codebase-architecture/SKILL.md). For
-a scoped reimplementation plan, use [redesign](../redesign/SKILL.md). To explore
-alternative interfaces for a chosen module, follow
-[DESIGN-IT-TWICE.md](../code-module-design/DESIGN-IT-TWICE.md).
+- Which existing module owns the concept, based on responsibility, callers,
+  types, and imports—not its name alone.
+- Whether callers coordinate several shallow modules that one deeper module
+  could own behind a smaller interface.
+- Whether logic sits with the concept it changes or leaks into a caller,
+  shared utility, or unrelated package.
+- Whether a likely change to a format, policy, or default requires edits in
+  several modules, or callers must know an implementation detail.
+- Whether callers handle an ordinary case or configuration choice that the
+  owning module could handle once.
+- Whether dependencies cross the seam in the right direction, and whether a
+  proposed seam has a second adapter to justify it.
+- Whether moving logic would improve locality or leverage without pushing
+  complexity onto callers.
+
+A finding must name its demonstrated cost: duplicated responsibility, leaked
+implementation, caller coordination, coupling, or another specific cost. A
+layout that differs from a preferred pattern is not a cost. If a claim relies
+on project precedent, use the precedent skill and cite at least two peers.
+Finish with evidence for every finding, or conclude that placement is sound or
+the evidence is inconclusive.
+
+## 4. Report
+
+Label inferences and proposals as such. Include:
+
+- **Scope and summary:** what was traced and the short answer.
+- **Current state:** each view, with a short explanation and `path:line`
+  citations.
+- **Boundary findings, ranked by impact:** current responsibility, evidence,
+  cost, and the smallest coherent alternative. If there are none, say the
+  boundaries look sound.
+- **Target view:** only for findings that warrant structural change; show the
+  proposed ownership or interaction at the same level as the current view.
+- **Unknowns and next step:** facts that could change the assessment and one
+  focused follow-up.
+
+Finish when the report is delivered.
+
+## Hand off when appropriate
+
+- For a broad scan for deepening opportunities, use
+  [improve-codebase-architecture](../improve-codebase-architecture/SKILL.md).
+- For a scoped reimplementation plan, use
+  [redesign](../redesign/SKILL.md).
+- To explore alternative interfaces for a chosen module, follow
+  [DESIGN-IT-TWICE.md](../code-module-design/references/DESIGN-IT-TWICE.md).

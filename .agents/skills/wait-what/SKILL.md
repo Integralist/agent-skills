@@ -6,7 +6,9 @@ metadata:
   model-tier: trivial
 ---
 
-Wait — I don't understand where you've got to here. Re-pitch that: give me a
-little bit of context, talk in ASD-STE100 Simplified Technical English, and
-use the domain terms in `GLOSSARY.md`. If only legacy `CONTEXT.md` exists,
-use it and show the user a `⚠️` warning to rename it to `GLOSSARY.md`.
+The last message did not land. Re-pitch it with a little context, in
+ASD-STE100 Simplified Technical English, using the domain terms in
+`GLOSSARY.md`.
+
+If only legacy `CONTEXT.md` exists, use it and show the user a `⚠️` warning to
+rename it to `GLOSSARY.md`.

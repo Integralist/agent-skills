@@ -5,11 +5,17 @@ metadata:
   model-tier: complex
 ---
 
-Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
+Interview the user until you reach shared understanding. Map the subject as a
+**design tree**: each decision branches into the decisions that depend on it.
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled — the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+## Ask questions in rounds
 
-Format a round like so:
+The **frontier** is the set of decisions whose prerequisites are settled—the
+questions you can ask now without guessing. Ask every question on the current
+frontier in one round. Number the questions and recommend an answer for each.
+Then wait for the user's answers before the next round.
+
+Use this format:
 
 ```txt
 ❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
@@ -23,15 +29,22 @@ Format a round like so:
 ➡️ <your recommended answer>
 ```
 
-Each round the user answers reshapes the tree — settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
+A user's answers reshape the tree. Recompute the frontier after each round:
+settled decisions may unblock new questions. Put a question in a later round
+if its answer depends on another question still open in this round.
 
-Finding _facts_ is your job, never the user's. When a frontier question needs a
-fact from the environment (filesystem, tools, etc.), dispatch a sub-agent on the
-cheapest model tier adequate to the lookup. Follow the [shared subagent
-guidance](../shared/SUBAGENT-STEERABILITY.md), including its completion and
-retry protocol. Don't ask the user for facts you can look up yourself. Don't
-block on a running exploration: wait only on questions that depend on its
-result, and ask the rest of the frontier now. The _decisions_ are the user's —
-put each to them and wait.
+## Find facts; ask for decisions
 
-The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
+Finding facts is the agent's job, not the user's. When a frontier question
+needs an environmental fact, dispatch a subagent on the cheapest adequate
+model tier. Follow the
+[shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md), including its
+completion and retry protocol. Do not block on running
+exploration: wait only for questions that depend on its result, and ask the
+rest of the frontier now. Put decisions to the user and wait for their answer.
+
+## Stop condition
+
+The session is complete when the frontier is empty: every branch of the
+design tree has been visited and nothing remains silently assumed. Do not act
+until the user confirms shared understanding.

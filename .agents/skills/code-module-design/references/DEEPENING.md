@@ -2,7 +2,7 @@
 
 Deepen a cluster of shallow modules by classifying its dependencies first:
 the category decides where the seam goes and how the deepened module is
-tested. Uses the vocabulary in [SKILL.md](SKILL.md).
+tested. Uses the vocabulary in [SKILL.md](../SKILL.md).
 
 **Dependency categories.**
 

@@ -9,41 +9,49 @@ metadata:
   model-tier: trivial
 ---
 
-# Git Metadata
+Run these commands in the working directory and return their output to the
+calling skill, which decides what to do with it. Flag files in both churn
+hotspots and bug clusters as highest risk.
 
-Run these commands in the working directory and return their output; the
-calling skill decides what to do with it. Flag every file that appears in
-both churn hotspots and bug clusters as the highest-risk code.
+## Churn hotspots
 
-**Churn hotspots:** the most-changed files in the last year.
+Most-changed files in the last year:
 
 ```bash
 git log --format=format: --name-only --since="1 year ago" \
   | sort | uniq -c | sort -nr | head -20
 ```
 
-**Bus factor:** contributors by commit count, all time and recent.
+## Bus factor
+
+Contributor commit counts, across all history and the last six months:
 
 ```bash
 git shortlog -sn --no-merges
 git shortlog -sn --no-merges --since="6 months ago"
 ```
 
-**Bug clusters:** the files most often touched by bug-fix commits.
+## Bug clusters
+
+Files most often touched by bug-fix commits:
 
 ```bash
 git log -i -E --grep="fix|bug|broken" \
   --name-only --format='' | sort | uniq -c | sort -nr | head -20
 ```
 
-**Commit velocity:** commits per month.
+## Commit velocity
+
+Commits per month:
 
 ```bash
 git log --format='%ad' --date=format:'%Y-%m' \
   | sort | uniq -c
 ```
 
-**Crisis patterns:** reverts, hotfixes, and rollbacks in the last year.
+## Crisis patterns
+
+Reverts, hotfixes, and rollbacks in the last year:
 
 ```bash
 git log --oneline --since="1 year ago" \

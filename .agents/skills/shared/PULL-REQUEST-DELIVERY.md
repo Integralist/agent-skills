@@ -1,6 +1,6 @@
 # Pull Request Delivery
 
-Use this guide when deciding whether implementation work belongs in one pull
+Use this guide to decide whether implementation work belongs in one pull
 request, a stack, or independent pull requests.
 
 ## Choose the delivery shape
@@ -21,7 +21,7 @@ coherence and dependency, not task count.
 
 ## Recommend a stack
 
-Recommend stacked PRs only when all of these hold:
+Recommend stacked PRs only when all these hold:
 
 - The work has at least two dependent review units.
 - Every layer passes its relevant tests and checks.
