@@ -5,23 +5,23 @@
 Audit structure, then freshness read-only, then lessons. Collect all proposed
 changes; request one confirmation before writing.
 
-1. **Audit structure.** Check [RECONCILE.md](RECONCILE.md#rubric-and-domain-language).
-   Flag missing/malformed WHY, WHAT, or HOW; a missing Domain Language pointer
-   when a glossary exists; length over about 200 lines; tool-specific content
-   for stubs; and accumulated `.github/copilot-instructions.md` content. Give
-   each flag a concrete fix.
-2. **Check freshness.** Read-only: confirm build, test, and lint commands in the
-   Makefile, `package.json` scripts, or equivalent; listed entry points and
-   repository structure; and each listed gotcha. Cite evidence. For a large
-   repo, delegate to review-only subagents (or one per claim type), following
-   [SUBAGENT-STEERABILITY.md](../../shared/SUBAGENT-STEERABILITY.md). Confirm or
-   flag every WHAT and HOW claim.
+1. **Audit structure.** Apply the [reconciliation rubric](RECONCILE.md#keep-only-high-value-guidance)
+   and [file-placement rules](RECONCILE.md#stubs-and-copilot) to the existing
+   files.
+2. **Check freshness.** Read-only: verify claims already in `AGENTS.md` against
+   the relevant source or docs. Don't list commands, entry points, or
+   repository structure just to add them. For each claim, check that it remains
+   accurate and is not readily discoverable elsewhere; propose a source pointer
+   or removal when it is. Cite evidence. For a large repo, delegate review-only
+   checks following
+   [SUBAGENT-STEERABILITY.md](../../shared/SUBAGENT-STEERABILITY.md).
 3. **Harvest session lessons.** Propose durable, non-obvious facts from this
-   session fitting WHY, WHAT, or HOW, such as a costly gotcha or unexpected
-   command. Exclude facts shown by code. Propose each, or explicitly say this
-   step is skipped if none qualify.
+   session that could change an agent's decision or prevent a costly mistake.
+   Exclude facts shown by code or existing docs. Include commands only when the
+   important invocation or gotcha isn't documented in the source. Propose each,
+   or explicitly say this step is skipped if none qualify.
 4. **Confirm and write.** Show the combined diff or a short summary. Write only
-   after the user confirms.
+   after the user confirms, then run the shared verification checklist below.
 
 ## `--learn`
 
@@ -30,15 +30,6 @@ gate. If `AGENTS.md` is missing, tell the user and choose a mode normally.
 
 ## Verify after any write
 
-Confirm all five conditions:
-
-1. `AGENTS.md` meets the rubric and is tool-agnostic.
-2. It opens with a Domain Language pointer when `GLOSSARY.md` or legacy
-   `CONTEXT.md` exists.
-3. `CLAUDE.md` and `GEMINI.md` each have `@AGENTS.md` on their first
-   non-empty line.
-4. `.github/copilot-instructions.md`, if present, has no import line and no
-   content missing from `AGENTS.md`.
-5. Only genuinely tool-specific content lives outside `AGENTS.md`.
+Run the [shared verification checklist](RECONCILE.md#verify-after-any-write).
 
 Finish by reporting which file is canonical, what moved, and what was created.

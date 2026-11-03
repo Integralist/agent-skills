@@ -12,7 +12,8 @@ Authoring reference, not a runtime checklist for coding tasks.
 
 ## Bootstrap and audit
 
-- Capture purpose, non-goals, priorities, and durable constraints in WHY.
+- Capture only direction not already clear from project docs that materially
+  guides agent choices.
   Read existing docs and ADRs; ask for missing direction rather than invent it.
 - Audit instructions against that direction. Flag contradictions; propose
   scoped changes behind the skill's existing approval gate.

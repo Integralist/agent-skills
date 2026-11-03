@@ -10,9 +10,16 @@ metadata:
   model-tier: moderate
 ---
 
-Make `AGENTS.md` canonical; Claude and Gemini import it. Copilot reads it
-natively; merge its legacy instructions as content, never import them.
-Inventory root `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and
+Make `AGENTS.md` canonical for shared agent instructions; Claude and Gemini
+import it. Copilot reads it natively; merge its legacy instructions as content,
+never import them.
+
+**Source of truth.** Code, configuration, and project docs are the source of
+truth for project facts. Keep `AGENTS.md` to durable agent guidance and
+important gotchas those sources don't capture; link instead of repeating facts.
+WHY/WHAT/HOW are prompts, not required sections.
+
+Inspect root `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and
 `.github/copilot-instructions.md`; a file containing only `@AGENTS.md` or
 boilerplate is a stub. Repair both stubs; keep shared guidance in `AGENTS.md`.
 Keep Claude/Gemini-specific notes in matching stubs; Copilot-only notes in its
@@ -40,7 +47,7 @@ don't drop content without agreement. When unsure, keep both versions in
   say so and choose a mode normally.
 
 Before writing, read the
-[verification checklist](references/UPDATE.md#verify-after-any-write).
+[verification checklist](references/RECONCILE.md#verify-after-any-write).
 After any write, complete the verification checklist.
 
 ## Run and finish

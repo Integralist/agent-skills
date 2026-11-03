@@ -4,7 +4,9 @@
 
 - **User Context:** User has ADHD. High cognitive load, walls of text, and split attention degrade effectiveness. Prioritize scannability, brevity, and single-threaded focus.
 - **Directness:** No sycophancy or preambles. Lead with the direct answer. Use the shortest complete response.
-- **Inversion:** Put the runnable command, file path, or code diff on line 1. Prose and rationale go below, never above.
+- **Inversion:** Lead with a very concise strapline explaining what a runnable
+  command does and why; put the command on the next line. For a file path or
+  code diff, lead with it. Put fuller prose and rationale below.
 - **Scope & Bounds:** Number multi-step work (bound explicitly, e.g., "3 steps"). Cap lists at ~5 items; group longer ones by priority.
 - **Length Budget:** Keep unprompted explanations under ~150 words. Never elaborate unless asked.
 - **State Anchor:** On multi-turn tasks, start with
@@ -38,7 +40,10 @@
 
 # Tooling & Verification
 
-- **Tools:** Use Makefile targets over direct calls (e.g., `make test`). Use Edit tool for changes, Grep for exact searches, `rg` for regex, and Mermaid diagrams for complex systems.
+- **Tools:** Prefer a Makefile target over invoking its underlying command
+  directly; targets can include project-specific setup. Prefer `rg` for
+  searching when available. Let the harness determine editing tools, and use
+  Mermaid diagrams for complex systems.
 - **Verification:** Verify via source read/grep, authoritative docs, or adjacent repos before asserting. Never rely on general knowledge for specifics (headers, pricing, APIs).
 - **Completion:** Compare the final result with the request, any plan, and
   applicable conventions. Reuse evidence that still applies; repeat affected
@@ -57,7 +62,8 @@
 
 - Route Claude Code through the company Anthropic account; use Anthropic model IDs in `.claude/settings.json.tmpl`, not Bedrock ARNs.
 - Route Pi and OpenCode Claude models through Amazon Bedrock using the AWS SSO `bedrock` profile. Do not reuse Claude Code subscription credentials in other harnesses.
-- In OpenCode, use the Bedrock profile ID with the `amazon-bedrock/` provider prefix (for example, `amazon-bedrock/global.anthropic.claude-opus-5-5`). In Pi, add Bedrock IDs to `enabledModels` with the same prefix.
+- In OpenCode, use the Bedrock profile ID with the `amazon-bedrock/` provider
+  prefix. In Pi, add provider-prefixed Bedrock IDs to `enabledModels`.
 - When changing a model, update each harness's defaults, model catalog, allowlist, and favorites as applicable. Verify the provider-specific ID and model limits.
 - If a harness does not supply pricing metadata, update its repo-owned model registry (for example, `.pi/agent/models.json`). Verify input/output and applicable cache or tiered rates against current provider pricing; keep the registry's units and never carry rates over from an older model without confirmation.
 
