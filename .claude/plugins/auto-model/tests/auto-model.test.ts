@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { CommandInfo, ConfigRow, On } from 'claude-code'
 
-import { CLASSIFIER_SYSTEM, candidatesFor, clampEffort, clampEffortArgs, isShortReply, isSlashCommand, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
+import { CLASSIFIER_SYSTEM, candidatesFor, clampEffort, clampEffortArgs, cutPrompt, isCompactCommand, isShortReply, isSlashCommand, parseLevel, requestText, skillPaths, tierFromFrontmatter, tierPath } from '../hooks/logic'
 
 const OPTIONS = ['default', 'sonnet', 'opus', 'haiku', 'fable', 'best', 'opusplan']
 const IDS: Record<string, string> = {
@@ -110,6 +110,20 @@ describe('logic', () => {
     expect(clampEffort('high')).toBe('high')
     expect(clampEffortArgs('max')).toBe('xhigh')
     expect(clampEffortArgs('MAX')).toBe('xhigh')
+  })
+
+  test('identifies /compact slash commands and truncates long prompts keeping head and tail', () => {
+    expect(isCompactCommand('/compact')).toBe(true)
+    expect(isCompactCommand('  /COMPACT focus on auth')).toBe(true)
+    expect(isCompactCommand('/commit')).toBe(false)
+    expect(cutPrompt('short', 10)).toBe('short')
+    const cut = cutPrompt('HEAD_' + 'x'.repeat(200) + '_TAIL', 80)
+    expect(cut.length).toBeLessThanOrEqual(80)
+    expect(cut.startsWith('HEAD_')).toBe(true)
+    expect(cut).toContain('characters omitted ...]')
+    expect(cut.endsWith('_TAIL')).toBe(true)
+    const tiny = cutPrompt('ABCDEFGH', 4)
+    expect(tiny).toBe('ABGH')
   })
 })
 
@@ -260,6 +274,20 @@ describe('switching', () => {
     await automodel($, 'on')
     await type($, 'Rename the helper in this file please\n```\nplan review design\n```')
     expect(w.prompts).toEqual(['Rename the helper in this file please'])
+  })
+
+  test('keeps head and tail with an omission marker when a prompt exceeds the classifier budget', async ($, on) => {
+    const w = world(on, 'haiku', 'complex')
+    await start($)
+    await automodel($, 'on')
+    const longPrompt = 'HEAD_START ' + 'a '.repeat(4000) + 'MIDDLE_OMITTED ' + 'b '.repeat(4000) + 'TAIL_QUESTION_END'
+    await type($, longPrompt)
+    expect(w.prompts).toHaveLength(1)
+    const sent = w.prompts[0]!
+    expect(sent.length).toBeLessThanOrEqual(12_000)
+    expect(sent.startsWith('HEAD_START ')).toBe(true)
+    expect(sent).toContain('characters omitted ...]')
+    expect(sent.endsWith('TAIL_QUESTION_END')).toBe(true)
   })
 
   test('logs what the classifier said', async ($, on) => {
@@ -415,6 +443,24 @@ describe('switching', () => {
     await finishTurn($)
     await w.clock.advance(61 * MINUTE)
     await run($, 'commit')
+    expect(w.sets).toEqual(['haiku'])
+  })
+
+  test('running /compact resets the warm cache so the next smaller task steps down immediately', async ($, on) => {
+    const w = world(on, 'opus', 'trivial')
+    w.files[`${HOME}/.claude/skills/commit/SKILL.md`] = TRIVIAL_SKILL
+    await start($)
+    await automodel($, 'on')
+    await finishTurn($)
+    await run($, 'compact')
+    await run($, 'commit')
+    expect(w.sets).toEqual(['haiku'])
+
+    w.sets.length = 0
+    w.model = 'opus'
+    await finishTurn($)
+    await type($, '/compact now please')
+    await type($, 'Summarize the notes from this meeting into three bullets')
     expect(w.sets).toEqual(['haiku'])
   })
 

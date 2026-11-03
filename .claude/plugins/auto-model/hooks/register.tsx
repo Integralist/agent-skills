@@ -8,7 +8,9 @@ import {
   candidatesFor,
   clampEffort,
   clampEffortArgs,
+  cutPrompt,
   displayName,
+  isCompactCommand,
   isShortReply,
   isSlashCommand,
   isWarm,
@@ -58,7 +60,7 @@ async function classify($: $, text: string, smallest: string): Promise<AutoModel
       model: smallest,
       effort: 'low',
       system: CLASSIFIER_SYSTEM,
-      prompt: text.slice(0, MAX_CLASSIFIER_CHARS),
+      prompt: cutPrompt(text, MAX_CLASSIFIER_CHARS),
       maxTokens: 8,
       timeoutMs: 4000,
     })
@@ -222,6 +224,9 @@ export const register: Register = on => {
 
   on('prompt.submit', async ($, e, next) => {
     try {
+      if (e.origin.kind === 'composer' && isCompactCommand(e.text)) {
+        await update($, lastTurnAt, () => null)
+      }
       const lastTurn = await read($, lastTurnAt)
       const skip =
         !(await read($, isOn)) ||
@@ -253,7 +258,9 @@ export const register: Register = on => {
   // the cache is warm, a skill only switches up, same as a prompt.
   on('command.run', async ($, e, next) => {
     try {
-      if (e.origin.kind === 'composer' && (await read($, isOn))) {
+      if (e.origin.kind === 'composer' && e.command === 'compact') {
+        await update($, lastTurnAt, () => null)
+      } else if (e.origin.kind === 'composer' && (await read($, isOn))) {
         const lines = availableLines((await modelRow($))?.options)
         const level = lines.length > 0 ? await commandLevel($, e.command, lines[0] ?? 'haiku') : undefined
         const warm = isWarm(await read($, lastTurnAt), await $.clock.now())

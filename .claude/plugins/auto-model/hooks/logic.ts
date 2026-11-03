@@ -43,6 +43,36 @@ export function isSlashCommand(text: string): boolean {
   return /^\/[a-zA-Z0-9:_-]+(?:\s|$)/.test(text.trimStart())
 }
 
+/** True when a typed slash command runs `/compact`, which rebuilds the conversation and invalidates the prompt cache. */
+export function isCompactCommand(text: string): boolean {
+  return /^\/compact(?:\s|$)/i.test(text.trimStart())
+}
+
+/** Keeps the first 40% and last 60% of a long classifier input around an omission marker so trailing questions survive. */
+export function cutPrompt(text: string, limit: number): string {
+  const chars = Array.from(text)
+  if (chars.length <= limit) return text
+  const render = (kept: number) => {
+    const head = Math.max(1, Math.floor(kept * 0.4))
+    const tail = kept - head
+    const omitted = chars.length - kept
+    return `${chars.slice(0, head).join('')}\n[... ${omitted} characters omitted ...]\n${tail > 0 ? chars.slice(chars.length - tail).join('') : ''}`
+  }
+  if (render(1).length > limit) {
+    const head = Math.ceil(limit * 0.4)
+    const tail = limit - head
+    return chars.slice(0, head).join('') + (tail > 0 ? chars.slice(chars.length - tail).join('') : '')
+  }
+  let low = 1
+  let high = chars.length
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2)
+    if (render(mid).length <= limit) low = mid
+    else high = mid - 1
+  }
+  return render(low)
+}
+
 /** A reply to what Claude just said: a plain go-ahead, or under four words after a turn. */
 export function isShortReply(text: string, hasPriorTurn = true): boolean {
   const plain = text.toLowerCase().replace(/[^\p{L}\p{N}\s']/gu, ' ').replace(/\s+/g, ' ').trim()
