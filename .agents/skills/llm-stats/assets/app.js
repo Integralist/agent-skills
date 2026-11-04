@@ -468,6 +468,7 @@
       svgElement("text", {
         x: label.x, y: label.y, "text-anchor": "middle", fill: label.color,
         class: "family-label", "data-series": label.key,
+        style: "--family-label-color:" + label.color,
       }, labelLayer, label.name);
     }
     paintHighlight();

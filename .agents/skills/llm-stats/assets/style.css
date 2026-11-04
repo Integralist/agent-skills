@@ -82,7 +82,7 @@ h2 { font: var(--d-heading-weight) 24px/1.2 var(--d-font-heading); letter-spacin
 .node.is-frontier .dot { stroke: var(--pareto); stroke-width: 2.5; }
 .effort-label { fill: var(--ink); font-family: var(--d-font-code); font-size: 9px; letter-spacing: .08em; }
 .family-label-layer { pointer-events: none; }
-.family-label { fill: var(--ink); font-size: 13px; font-weight: 500; paint-order: stroke; stroke: var(--card); stroke-width: 5px; stroke-linejoin: round; transition: opacity .12s ease; }
+.family-label { fill: color-mix(in srgb, var(--family-label-color) 85%, var(--d-text)); font-size: 13px; font-weight: 500; paint-order: stroke; stroke: var(--card); stroke-width: 5px; stroke-linejoin: round; transition: opacity .12s ease; }
 .family-label.is-dim { opacity: .15; }
 .is-pareto .family-label.is-dim { opacity: .25; }
 .crosshair { pointer-events: none; }

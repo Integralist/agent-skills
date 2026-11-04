@@ -117,7 +117,11 @@ def test_dark_warm_surfaces_and_readable_text(page: Page, report_file: Path) -> 
     page.goto(report_file.as_uri())
     colors = page.evaluate(
         """() => {
-          const rgb = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+          const rgb = color => {
+            const channels = color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+            return color.startsWith('color(srgb ')
+              ? channels.map(value => value * 255) : channels;
+          };
           const luminance = channels => channels.map(value => {
             const c = value / 255;
             return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
@@ -293,6 +297,44 @@ def test_family_labels_render_above_lines_and_dim_with_their_series(
 
     node(page, "demo-claude-opus-high").hover()
     expect(page.locator(".family-label.is-dim")).to_have_count(3)
+
+
+def test_family_label_colors_match_their_series(page: Page, report_file: Path) -> None:
+    """Family labels retain the series hue and readable contrast in both modes."""
+    page.goto(report_file.as_uri())
+    colors = page.locator(".family-label").evaluate_all(
+        """labels => labels.map(label => {
+          const series = [...document.querySelectorAll('.series')]
+            .find(group => group.dataset.series === label.dataset.series);
+          return [label.getAttribute('fill'),
+            series.querySelector('path').getAttribute('stroke')];
+        })"""
+    )
+    assert colors
+    assert all(label_color == line_color for label_color, line_color in colors)
+
+    for mode in ("dark", "light"):
+        page.locator("#design-mode").select_option(mode)
+        contrasts = page.locator(".family-label").evaluate_all(
+            """labels => {
+              const rgb = color => {
+                const channels = color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+                return color.startsWith('color(srgb ')
+                  ? channels.map(value => value * 255) : channels;
+              };
+              const luminance = channels => channels.map(value => {
+                const c = value / 255;
+                return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+              }).reduce((sum, value, i) => sum + value * [0.2126, 0.7152, 0.0722][i], 0);
+              const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+              const card = luminance(rgb(getComputedStyle(
+                document.querySelector('.chart-card')).backgroundColor));
+              return labels.map(label => contrast(card,
+                luminance(rgb(getComputedStyle(label).fill))));
+            }"""
+        )
+        assert contrasts
+        assert min(contrasts) >= 4.5
 
 
 def test_model_lines_are_bright_and_distinct(page: Page, report_file: Path) -> None:
