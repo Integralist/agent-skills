@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-design="/*__THEME__*/">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <title>LLM Stats · Model trade-offs</title>
 <style>/*__STYLE__*/</style>
 </head>
@@ -12,7 +12,7 @@
   <header class="page-header">
     <div><p class="eyebrow">A personal model atlas</p><h1>Intelligence, with perspective.</h1>
     <p class="intro">Compare model scores, cost, and effort. Find the trade-off that works for you.</p></div>
-    <span class="offline-badge">Self-contained · works offline</span>
+    <div class="header-tools"><span class="offline-badge">Self-contained · works offline</span><label class="design-appearance">Appearance <select id="design-mode"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label></div>
   </header>
   <div id="demo-banner" class="demo-banner" hidden>DEMO DATA — invented values for exploring the interface. Not Artificial Analysis benchmark results.</div>
   <section class="toolbar" aria-label="Chart controls">
@@ -43,7 +43,7 @@
   </section>
   <section class="chart-card" aria-labelledby="chart-title">
     <div class="chart-heading">
-      <div><p class="eyebrow" id="chart-kicker">MODEL TRADE-OFFS</p><h2 id="chart-title">Model comparison</h2></div>
+      <div><p class="eyebrow" id="chart-kicker">Model trade-offs</p><h2 id="chart-title">Model comparison</h2></div>
       <div class="chart-actions"><label class="pareto-toggle"><input id="pareto-toggle" type="checkbox" aria-describedby="pareto-note">Pareto line</label><button id="clear-highlight">Clear highlight</button><span id="point-count" class="muted small"></span></div>
     </div>
     <p id="metric-note" class="metric-note"></p>
@@ -70,6 +70,7 @@
   <noscript>Enable JavaScript to use the chart. All scripts and data are included in this file.</noscript>
 </main>
 <script id="report-data" type="application/json">/*__DATA__*/</script>
+<script>/*__MODE__*/</script>
 <script>/*__APP__*/</script>
 </body>
 </html>

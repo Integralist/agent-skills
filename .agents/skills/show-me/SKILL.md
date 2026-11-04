@@ -94,7 +94,8 @@ function expandSkill(command: string): string {
 ```
 
 **HTML file** for a visual UI, layout, state comparison, or concept too dense
-for Mermaid. Make one focused diagram, infographic, or short slide deck. Match
-the product's colours, type, spacing, and components; use real labels and
-data; and support desktop and mobile. Save it as
+for Mermaid. Make one focused diagram, infographic, or short slide deck.
+Before creating it, load [design](../design/SKILL.md) and its selected theme
+and format guidance; preserve an existing product's design system. Use real
+labels and data, and support desktop and mobile. Save it as
 `show-me-{description}.html` and open it for the user with `open`.

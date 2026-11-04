@@ -6,7 +6,7 @@ description: >-
   searchable model selection. Use when the user wants to compare LLM
   benchmark scores against cost, tokens, time, price, or speed.
 disable-model-invocation: true
-argument-hint: "[--demo | --input <CSV/JSON> | --refresh] [--benchmark <key>] [--x cost|tokens|time|price|speed]"
+argument-hint: "[--demo | --input <CSV/JSON> | --refresh] [--benchmark <key>] [--x cost|tokens|time|price|speed] [--theme anthropic|fastly]"
 metadata:
   model-tier: trivial
 ---
@@ -16,8 +16,10 @@ embedded, that charts benchmark scores against a chosen metric, one line per
 model family through its effort levels. It works offline, with no server and
 no credentials in the browser. Read [data.md](references/data.md) for API
 limits, units, import formats, URL parameters, and the 1Password setup. Before
-changing the generator or page, read
-[PAGE-BEHAVIOR.md](references/PAGE-BEHAVIOR.md).
+changing the generator or page, load [design](../design/SKILL.md) and its
+selected theme and HTML guidance, then read
+[PAGE-BEHAVIOR.md](references/PAGE-BEHAVIOR.md). The generator embeds shared
+design assets; do not maintain a separate palette in this skill.
 
 1. **Choose the source.**
    - `--demo --benchmark intelligence --x cost` gives a synthetic preview.
@@ -46,6 +48,8 @@ changing the generator or page, read
    `$HOME/llm-stats.html`, prints the path, and opens it; a failed run
    leaves the previous file intact. Read stderr for warnings. Done when it
    exits 0; a nonzero exit means nothing was updated, so report the failure.
+   Anthropic-inspired is the default; pass `--theme fastly` only when the
+   user requests it. Every report has a System / Light / Dark control.
 3. **Report** the HTML path first, then any warnings. Say plainly when it's
    demo data, and for real data, whether it came from the API, the cache, or
    an import. Done when the path is reported.

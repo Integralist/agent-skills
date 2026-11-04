@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from datetime import datetime, timezone
+from colorsys import rgb_to_hsv
+from datetime import UTC, datetime, timezone
+from itertools import combinations
 from pathlib import Path
 
 import pytest
@@ -11,15 +13,33 @@ import report
 from playwright.sync_api import Browser, Page, expect, sync_playwright
 from report import Usage
 
+# Capture chart options offline without depending on the Chart.js CDN.
 CHART_CAPTURE = """
 window.chartConfigs = {};
 window.Chart = class {
   static defaults = { font: {} };
+  static instances = new Map();
+  static getChart(id) { return this.instances.get(id); }
   constructor(canvas, config) {
+    this.canvas = canvas;
     this.id = canvas.id;
+    this.config = config;
+    this.data = config.data;
+    this.hiddenDatasets = new Set();
+    this.hiddenItems = new Set();
     window.chartConfigs[this.id] = config;
+    window.Chart.instances.set(this.id, this);
   }
-  destroy() { delete window.chartConfigs[this.id]; }
+  isDatasetVisible(index) { return !this.hiddenDatasets.has(index); }
+  setDatasetVisibility(index, visible) {
+    if (visible) this.hiddenDatasets.delete(index); else this.hiddenDatasets.add(index);
+  }
+  getDataVisibility(index) { return !this.hiddenItems.has(index); }
+  toggleDataVisibility(index) {
+    if (this.hiddenItems.has(index)) this.hiddenItems.delete(index); else this.hiddenItems.add(index);
+  }
+  update() {}
+  destroy() { delete window.chartConfigs[this.id]; window.Chart.instances.delete(this.id); }
 };
 """
 
@@ -44,6 +64,139 @@ def page(browser: Browser) -> Iterator[Page]:
     yield page
     context.close()
     assert errors == []
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+def test_mode_switch_redraws_charts_and_keeps_metric(
+    page: Page, tmp_path: Path, theme: str
+) -> None:
+    """Canvas charts pick up mode colours without reverting a Tokens selection."""
+    now = datetime(2026, 3, 3, 12, tzinfo=UTC)
+    data = report.build_report(
+        [Usage("pi", "s1", "project", "gpt-5.5", "high", now, 10, 5, 0, 0, cost=2.0)],
+        {},
+        "all",
+        now,
+    )
+    path = tmp_path / "report.html"
+    path.write_text(
+        report.render_html(
+            data, report.TEMPLATE.read_text(encoding="utf-8"), theme=theme
+        ),
+        encoding="utf-8",
+    )
+    page.goto(path.as_uri())
+    page.wait_for_function("window.chartConfigs['c-provider']")
+    page.get_by_role("button", name="Tokens", exact=True).click()
+    page.get_by_label("Appearance").select_option("light")
+    page.evaluate("""() => {
+      Chart.getChart('c-provider').toggleDataVisibility(0);
+      Chart.getChart('c-model-effort').setDatasetVisibility(0, false);
+    }""")
+    before = page.evaluate("window.chartConfigs['c-provider'].data")
+    page.get_by_label("Appearance").select_option("dark")
+    after = page.evaluate("window.chartConfigs['c-provider'].data")
+    assert before["datasets"][0]["data"] == after["datasets"][0]["data"]
+    assert page.evaluate("Chart.getChart('c-provider').getDataVisibility(0)") is False
+    assert (
+        page.evaluate("Chart.getChart('c-model-effort').isDatasetVisible(0)") is False
+    )
+    assert (
+        before["datasets"][0]["backgroundColor"]
+        != after["datasets"][0]["backgroundColor"]
+    )
+    expect(page.get_by_role("button", name="Tokens", exact=True)).to_have_attribute(
+        "aria-pressed", "true"
+    )
+    page.set_viewport_size({"width": 320, "height": 800})
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+def test_print_redraws_dark_canvas_text_and_restores_screen(
+    page: Page, tmp_path: Path, theme: str
+) -> None:
+    """Printing resolves light text roles and preserves hidden legend items."""
+    now = datetime(2026, 3, 3, 12, tzinfo=UTC)
+    data = report.build_report(
+        [Usage("pi", "s1", "project", "gpt-5.5", "high", now, 10, 5, 0, 0, cost=2.0)],
+        {},
+        "all",
+        now,
+    )
+    path = tmp_path / "report.html"
+    path.write_text(
+        report.render_html(
+            data, report.TEMPLATE.read_text(encoding="utf-8"), theme=theme
+        ),
+        encoding="utf-8",
+    )
+    page.goto(path.as_uri())
+    page.get_by_label("Appearance").select_option("dark")
+    page.evaluate("Chart.getChart('c-provider').toggleDataVisibility(0)")
+    dark = page.evaluate("Chart.defaults.color")
+    # Chrome fires beforeprint before activating print-media CSS.
+    page.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+    page.emulate_media(media="print")
+    light = page.evaluate("Chart.defaults.color")
+    expected = page.evaluate(
+        "getComputedStyle(document.documentElement).getPropertyValue('--d-muted').trim()"
+    )
+    assert light == expected
+    assert light != dark
+    assert page.evaluate("Chart.getChart('c-provider').getDataVisibility(0)") is False
+    expect(page.get_by_label("Appearance")).not_to_be_visible()
+    page.emulate_media(media="screen")
+    page.evaluate("window.dispatchEvent(new Event('afterprint'))")
+    assert page.evaluate("Chart.defaults.color") == dark
+    assert page.evaluate("Chart.getChart('c-provider').getDataVisibility(0)") is False
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+@pytest.mark.parametrize("mode", ["light", "dark"])
+def test_rendered_heatmap_and_effort_hues_remain_distinct(
+    page: Page, tmp_path: Path, theme: str, mode: str
+) -> None:
+    """Read resolved palette roles, not the location or syntax of CSS blocks."""
+    now = datetime(2026, 3, 3, 12, tzinfo=UTC)
+    data = report.build_report(
+        [Usage("pi", "s1", "project", "gpt-5.5", "high", now, 10, 5, 0, 0)],
+        {},
+        "all",
+        now,
+    )
+    path = tmp_path / "report.html"
+    path.write_text(
+        report.render_html(
+            data, report.TEMPLATE.read_text(encoding="utf-8"), theme=theme
+        ),
+        encoding="utf-8",
+    )
+    page.goto(path.as_uri())
+    page.get_by_label("Appearance").select_option(mode)
+    colours = page.evaluate("""() => {
+      const css = getComputedStyle(document.documentElement);
+      const read = key => css.getPropertyValue(key).trim();
+      return {
+        heat: [0, 1, 2, 3, 4].map(i => read('--heat-' + i)),
+        effort: [1, 2, 3, 4, 5, 6, 7].map(i => read('--e' + i)),
+      };
+    }""")
+    for group, values in colours.items():
+        assert len(set(values)) == len(values)
+        hues = []
+        for index, value in enumerate(values):
+            rgb = tuple(int(value[i : i + 2], 16) / 255 for i in (1, 3, 5))
+            hue, saturation, _ = rgb_to_hsv(*rgb)
+            if group == "heat" and index == 0:
+                assert saturation <= 0.35, "No activity needs a neutral colour"
+                continue
+            if group == "heat" or index in (2, 4, 5):
+                assert saturation >= (0.4 if group == "heat" else 0.25)
+                hues.append(hue)
+        for first, second in combinations(hues, 2):
+            gap = abs(first - second)
+            assert min(gap, 1 - gap) * 360 >= (25 if group == "heat" else 45)
 
 
 @pytest.mark.parametrize(

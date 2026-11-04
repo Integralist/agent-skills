@@ -1,0 +1,36 @@
+/* Shared HTML foundations. Content layout stays with the calling skill. */
+:root {
+  font-family: var(--d-font-ui);
+  color: var(--d-text);
+  background: var(--d-page);
+  font-synthesis: none;
+}
+body { color: var(--d-text); background: var(--d-page); }
+h1, h2, h3 { font-family: var(--d-font-heading); font-weight: var(--d-heading-weight); }
+code, pre { font-family: var(--d-font-code); }
+.design-prose { font-family: var(--d-font-body); }
+a { color: var(--d-accent-text); text-underline-offset: .2em; }
+button, input, select, textarea { font: inherit; }
+button, select, input, textarea {
+  color: var(--d-text);
+  background: var(--d-surface);
+  border: 1px solid var(--d-border);
+  border-radius: 8px;
+}
+button, select { min-height: 36px; }
+button:hover, select:hover { background: var(--d-hover); }
+.design-primary {
+  background: var(--d-accent);
+  color: var(--d-on-accent);
+  border-color: var(--d-accent);
+}
+.design-primary:hover { background: var(--d-accent); }
+:focus-visible { outline: 3px solid var(--d-focus); outline-offset: 3px; }
+.design-appearance { display: inline-flex; align-items: center; gap: 8px; font-size: .85rem; }
+#design-mode { padding: 6px 10px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media print {
+  .design-appearance, #design-mode { display: none !important; }
+}

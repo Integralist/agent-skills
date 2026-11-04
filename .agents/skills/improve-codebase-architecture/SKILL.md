@@ -44,8 +44,10 @@ as decisions not to relitigate.
    not just move it. Done when you have a list of candidates.
 3. **Write the HTML report** to `<tmpdir>/architecture-review-<timestamp>.html`
    (`$TMPDIR`, falling back to `/tmp`, or `%TEMP%` on Windows), so nothing
-   lands in the repo and each run gets a fresh file, following
-   [HTML-REPORT.md](references/HTML-REPORT.md). Give each candidate a card
+   lands in the repo and each run gets a fresh file. Before drafting, load
+   [design](../design/SKILL.md) and its selected theme and HTML guidance,
+   then follow [HTML-REPORT.md](references/HTML-REPORT.md). Give each candidate
+   a card
    with its files, the problem, the solution in plain English, benefits in
    terms of locality, leverage, and tests, a before/after diagram, and a
    strength

@@ -1,64 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-design="/*__THEME__*/">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Model Stats</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="color-scheme" content="light dark">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt" crossorigin="anonymous"></script>
 <style>
+  /*__DESIGN__*/
   :root {
-    color-scheme: light;
-    --bg: #F7F3EC;
-    --card-bg: #FFFFFF;
-    --card-soft: #FAF7F2;
-    --text-main: #2C241E;
-    --text-muted: #6B5E54;
-    --accent-warm: #D96B27;
-    --accent-dark: #8F4215;
-    --accent-subtle: #F3E9DD;
-    --border-warm: #EADBC8;
-    --grid: rgba(44, 36, 30, 0.08);
-    --shadow: 0 10px 30px -5px rgba(44, 36, 30, 0.08), 0 4px 12px -2px rgba(44, 36, 30, 0.04);
-    --s1: #eb6834; --s2: #2a78d6; --s3: #1baf7a; --s4: #eda100;
-    --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
-    --other: #A89A8C;
-    --heat-0: #E5E7EB; --heat-1: #7C3AED; --heat-2: #0072B2; --heat-3: #00856A; --heat-4: #A67C00;
-    --e1: #64748B; --e2: #A67C00; --e3: #0072B2; --e4: #00856A; --e5: #D55E00; --e6: #7C3AED; --e7: #C0392B;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --bg: #1F1915; --card-bg: #2A231E; --card-soft: #332A24;
-      --text-main: #F3EAE0; --text-muted: #BFAE9F;
-      --accent-warm: #E8813F; --accent-dark: #F2A56E; --accent-subtle: #3D3029;
-      --border-warm: #463830; --grid: rgba(243, 234, 224, 0.08);
-      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
-      --s1: #d95926; --s2: #3987e5; --s3: #199e70; --s4: #c98500;
-      --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
-      --other: #7D6F63;
-      --heat-0: #374151; --heat-1: #A78BFA; --heat-2: #56B4E9; --heat-3: #2DD4BF; --heat-4: #FACC15;
-      --e1: #94A3B8; --e2: #FACC15; --e3: #56B4E9; --e4: #2DD4BF; --e5: #F59E0B; --e6: #C4B5FD; --e7: #F87171;
-    }
-  }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --bg: #1F1915; --card-bg: #2A231E; --card-soft: #332A24;
-    --text-main: #F3EAE0; --text-muted: #BFAE9F;
-    --accent-warm: #E8813F; --accent-dark: #F2A56E; --accent-subtle: #3D3029;
-    --border-warm: #463830; --grid: rgba(243, 234, 224, 0.08);
-    --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
-    --s1: #d95926; --s2: #3987e5; --s3: #199e70; --s4: #c98500;
-    --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
-    --other: #7D6F63;
-    --heat-0: #374151; --heat-1: #A78BFA; --heat-2: #56B4E9; --heat-3: #2DD4BF; --heat-4: #FACC15;
-    --e1: #94A3B8; --e2: #FACC15; --e3: #56B4E9; --e4: #2DD4BF; --e5: #F59E0B; --e6: #C4B5FD; --e7: #F87171;
+    --bg: var(--d-page);
+    --card-bg: var(--d-surface);
+    --card-soft: var(--d-soft);
+    --text-main: var(--d-text);
+    --text-muted: var(--d-muted);
+    --accent-warm: var(--d-accent-text);
+    --accent-dark: var(--d-accent-text);
+    --accent-subtle: var(--d-accent-soft);
+    --border-warm: var(--d-border);
+    --grid: var(--d-grid);
+    --shadow: var(--d-shadow);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--d-font-ui);
     background: var(--bg);
     color: var(--text-main);
     line-height: 1.5;
@@ -67,11 +32,10 @@
   main { max-width: 1200px; margin: 0 auto; }
   header { margin-bottom: 28px; }
   .badge {
-    display: inline-block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--accent-warm); background: var(--accent-subtle);
+    display: inline-block; font-size: 0.78rem; font-weight: 500; color: var(--accent-warm); background: var(--accent-subtle);
     padding: 4px 12px; border-radius: 999px; margin-bottom: 12px;
   }
-  h1 { font-size: 2.1rem; font-weight: 700; line-height: 1.25; }
+  h1 { font-size: 2.1rem; font-weight: var(--d-heading-weight); line-height: 1.25; }
   .subtitle { color: var(--text-muted); font-size: 1.02rem; margin-top: 6px; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 22px 0 8px; }
   .toggle { display: inline-flex; border: 1px solid var(--border-warm); border-radius: 10px; overflow: hidden; background: var(--card-bg); }
@@ -82,13 +46,13 @@
   .toggle button[aria-pressed="true"] { background: var(--accent-subtle); color: var(--accent-dark); }
   .note { font-size: 0.86rem; color: var(--text-muted); }
   h2 {
-    font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 1.15rem; font-weight: var(--d-heading-weight);
     color: var(--accent-warm); margin: 36px 0 14px;
   }
   .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   @media (max-width: 720px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
   .kpi {
-    background: var(--card-bg); border: 1px solid var(--border-warm); border-radius: 14px;
+    background: var(--card-bg); border: 1px solid var(--border-warm); border-radius: 12px;
     padding: 16px 18px; box-shadow: var(--shadow);
   }
   .kpi .label { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
@@ -97,13 +61,14 @@
   .kpi .hint { font-size: 0.78rem; color: var(--text-muted); }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 18px; }
   .card {
-    background: var(--card-bg); border: 1px solid var(--border-warm); border-radius: 16px;
+    background: var(--card-bg); border: 1px solid var(--border-warm); border-radius: 12px;
     padding: 20px 22px; box-shadow: var(--shadow); min-width: 0;
   }
   .card.wide { grid-column: 1 / -1; }
-  .card h3 { font-size: 1.05rem; font-weight: 700; color: var(--accent-dark); }
+  .card h3 { font-size: 1.05rem; font-weight: var(--d-heading-weight); color: var(--accent-dark); }
   .card p { font-size: 0.86rem; color: var(--text-muted); margin: 2px 0 12px; }
   .chart { position: relative; height: 300px; }
+  .chart canvas { max-width: 100%; }
   .chart.tall { height: 380px; }
   .heat { overflow-x: auto; padding-bottom: 4px; }
   .heat table { border-collapse: separate; border-spacing: 3px; font-size: 0.72rem; color: var(--text-muted); }
@@ -115,10 +80,10 @@
   table.data { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
   .table-wrap { overflow-x: auto; }
   table.data th, table.data td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border-warm); white-space: nowrap; }
-  table.data th { color: var(--text-muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.data th { color: var(--text-muted); font-weight: 600; font-size: 0.78rem; }
   table.data td.num, table.data th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .mono {
-    font-family: 'JetBrains Mono', monospace; font-size: 0.84em; background: var(--accent-subtle);
+    font-family: var(--d-font-code); font-size: 0.84em; background: var(--accent-subtle);
     padding: 2px 6px; border-radius: 5px; color: var(--accent-dark);
   }
   .empty { padding: 60px 20px; text-align: center; color: var(--text-muted); }
@@ -137,6 +102,7 @@
         <button type="button" data-metric="tokens" aria-pressed="false">Tokens</button>
       </div>
       <span class="note" id="basis-note"></span>
+      <label class="design-appearance">Appearance <select id="design-mode"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
     </div>
   </header>
 
@@ -234,11 +200,12 @@ const colorFor = (kind, key) => {
 };
 
 const charts = [];
+const chartVisibility = new Map();
 function chart(id, config) {
   const canvas = document.getElementById(id);
   const text = css('--text-muted');
   Chart.defaults.color = text;
-  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.font.family = css('--d-font-ui');
   Chart.defaults.borderColor = css('--grid');
   config.options = {
     responsive: true, maintainAspectRatio: false, animation: false,
@@ -250,7 +217,18 @@ function chart(id, config) {
       ...(config.options || {}).plugins,
     },
   };
-  charts.push(new Chart(canvas, config));
+  const instance = new Chart(canvas, config);
+  const previous = chartVisibility.get(id);
+  if (previous) {
+    instance.data.datasets.forEach((dataset, index) => {
+      if (previous.datasets.get(dataset.label ?? index) === false) instance.setDatasetVisibility(index, false);
+    });
+    if (config.type === 'doughnut') instance.data.labels.forEach((label, index) => {
+      if (previous.items.get(label) === false) instance.toggleDataVisibility(index);
+    });
+    instance.update('none');
+  }
+  charts.push(instance);
 }
 
 function doughnut(id, kind, keyFn) {
@@ -436,7 +414,14 @@ function basisNote() {
 }
 
 function render() {
-  charts.splice(0).forEach(c => c.destroy());
+  charts.splice(0).forEach(c => {
+    chartVisibility.set(c.canvas.id, {
+      datasets: new Map(c.data.datasets.map((dataset, index) => [dataset.label ?? index, c.isDatasetVisible(index)])),
+      items: c.config.type === 'doughnut'
+        ? new Map(c.data.labels.map((label, index) => [label, c.getDataVisibility(index)])) : new Map(),
+    });
+    c.destroy();
+  });
   kpis();
   basisNote();
   doughnut('c-provider', 'provider', r => r.provider);
@@ -568,9 +553,22 @@ if (!rows.length) {
     document.querySelectorAll('[data-metric]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
     render();
   }));
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+  document.addEventListener('designmodechange', render);
+  let screenMode = null;
+  window.addEventListener('beforeprint', () => {
+    // Chrome fires this event before print CSS is active; resolve light roles now.
+    screenMode = document.documentElement.getAttribute('data-mode');
+    document.documentElement.setAttribute('data-mode', 'light');
+    render();
+  });
+  window.addEventListener('afterprint', () => {
+    if (screenMode === null) document.documentElement.removeAttribute('data-mode');
+    else document.documentElement.setAttribute('data-mode', screenMode);
+    render();
+  });
   document.fonts.ready.then(render);
 }
 </script>
+<script>/*__MODE__*/</script>
 </body>
 </html>

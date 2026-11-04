@@ -31,7 +31,7 @@ def report_file():
 @pytest.fixture
 def page(browser):
     context = browser.new_context(
-        offline=True, viewport={"width": 1500, "height": 1100}
+        offline=True, color_scheme="dark", viewport={"width": 1500, "height": 1100}
     )
     page = context.new_page()
     errors = []
@@ -53,6 +53,64 @@ def page(browser):
 
 def node(page, slug):
     return page.locator(f'.node[data-slug="{slug}"]')
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+def test_mode_switch_keeps_chart_state(page: Page, tmp_path: Path, theme: str) -> None:
+    """Changing appearance redraws series without losing selection, pins, or Pareto."""
+    config = load_config(BASE / "defaults.json")
+    config.update(benchmark="deepswe", x="cost")
+    path = generate(
+        demo_models(), config, source="Synthetic demo", demo=True, theme=theme
+    )
+    page.goto(path.as_uri())
+    page.locator("#design-mode").select_option("dark")
+    point = node(page, "demo-claude-opus-high")
+    point.click()
+    page.locator("#pareto-toggle").check()
+    selected = page.locator(".node").count()
+    before = page.locator(".series path").first.evaluate(
+        "el => getComputedStyle(el).stroke"
+    )
+    page.locator("#design-mode").select_option("light")
+    expect(point).to_have_attribute("aria-pressed", "true")
+    expect(page.locator("#pareto-toggle")).to_be_checked()
+    assert page.locator(".node").count() == selected
+    assert (
+        page.locator(".series path").first.evaluate("el => getComputedStyle(el).stroke")
+        != before
+    )
+    assert page.locator("#x-metric").input_value() == "cost"
+    assert (
+        page.locator("#design-mode").evaluate("el => getComputedStyle(el).colorScheme")
+        == "light"
+    )
+    with page.expect_download() as downloaded:
+        page.locator("#save-html").click()
+    exported = tmp_path / "saved-view.html"
+    downloaded.value.save_as(exported)
+    page.goto(exported.as_uri())
+    page.set_viewport_size({"width": 320, "height": 800})
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    expect(page.locator("#design-mode")).to_have_value("light")
+    expect(node(page, "demo-claude-opus-high")).to_have_attribute(
+        "aria-pressed", "true"
+    )
+    expect(page.locator("#pareto-toggle")).to_be_checked()
+
+
+def test_system_mode_change_keeps_keyboard_focus(page: Page, report_file: Path) -> None:
+    """An OS appearance change must not remove the currently focused effort node."""
+    page.goto(report_file.as_uri())
+    page.locator("#design-mode").select_option("system")
+    point = node(page, "demo-claude-opus-high")
+    point.focus()
+    page.evaluate(
+        "document.addEventListener('designmodechange', () => { window.modeChanged = true; })"
+    )
+    page.emulate_media(color_scheme="light")
+    page.wait_for_function("window.modeChanged === true")
+    expect(point).to_be_focused()
 
 
 def test_dark_warm_surfaces_and_readable_text(page: Page, report_file: Path) -> None:
@@ -86,8 +144,7 @@ def test_dark_warm_surfaces_and_readable_text(page: Page, report_file: Path) -> 
             primaryContrast: contrast(luminance(rgb(primary.color)), luminance(rgb(primary.backgroundColor)))};
         }"""
     )
-    assert colors["paperColor"] == "rgb(106, 61, 23)"
-    assert colors["cardColor"] == "rgb(65, 39, 21)"
+    assert colors["paperColor"] != colors["cardColor"]
     assert colors["paper"] < 0.12
     assert all(surface["luminance"] < 0.07 for surface in colors["surfaces"])
     assert colors["scheme"] == "dark"
@@ -103,7 +160,7 @@ def test_dark_theme_hover_states_and_native_controls(
 ) -> None:
     page.goto(report_file.as_uri())
     expect(page.locator('meta[name="color-scheme"]')).to_have_attribute(
-        "content", "dark"
+        "content", "light dark"
     )
     page.locator("#models-toggle").hover()
     background = page.locator("#models-toggle").evaluate(
@@ -127,7 +184,7 @@ def test_dark_theme_hover_states_and_native_controls(
     page.emulate_media(media="print")
     assert (
         page.locator("h1").evaluate("heading => getComputedStyle(heading).color")
-        == "rgb(53, 44, 36)"
+        == "rgb(20, 20, 19)"
     )
     assert (
         page.locator(".chart-card").evaluate(

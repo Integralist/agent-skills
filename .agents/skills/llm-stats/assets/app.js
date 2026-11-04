@@ -6,11 +6,9 @@
   const $ = id => document.getElementById(id);
   const svgNS = "http://www.w3.org/2000/svg";
   const effortOrder = ["none", "default", "minimal", "low", "medium", "high", "xhigh", "max"];
-  const palettes = {
-    anthropic: ["#ff650d", "#ef286d", "#f5b400"],
-    openai: ["#00d4bb", "#39d353", "#00c7ef"],
-    google: ["#9865ff", "#3181ff", "#e14aff"],
-    other: ["#ffb000", "#00d4ff", "#ff40bd"],
+  const paletteFor = provider => {
+    const category = ["anthropic", "openai", "google"].includes(provider) ? provider : "other";
+    return [1, 2, 3].map(index => `var(--family-${category}-${index})`);
   };
   const xInfo = {
     cost: { label: "Avg cost per task · USD", unit: "USD", lower: true,
@@ -374,7 +372,7 @@
       const provider = family[0].provider;
       const index = providerCounts.get(provider) || 0;
       providerCounts.set(provider, index + 1);
-      const colors = palettes[provider] || palettes.other;
+      const colors = paletteFor(provider);
       const color = colors[index % colors.length];
       const group = svgElement("g", { class: "series", "data-series": key, "data-provider": provider }, chart);
       groups.set(key, group);

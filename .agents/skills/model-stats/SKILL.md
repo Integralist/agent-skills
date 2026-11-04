@@ -5,7 +5,7 @@ description: >-
   page. Use when the user wants to see which providers, models, harnesses, or
   projects use their tokens and money over a period.
 disable-model-invocation: true
-argument-hint: "[day|week|month|year|all]"
+argument-hint: "[day|week|month|year|all] [--theme anthropic|fastly]"
 metadata:
   model-tier: trivial
 ---
@@ -26,7 +26,9 @@ CLI. The source formats are documented in `scripts/report.py`.
    ```
 
    It writes a randomly named `/tmp/model-stats-XXXXXX.html`, prints its
-   path, and opens it. Stderr lines beginning `model-stats:` are warnings,
+   path, and opens it. Anthropic-inspired is the default; add `--theme fastly`
+   only when requested. Every page includes a System / Light / Dark control.
+   Stderr lines beginning `model-stats:` are warnings,
    including an unsuccessful price-list fetch, unreadable log, or no usage in
    the time range.
 3. **Reply with the result.** Put the path on line 1 and list each warning as
@@ -34,5 +36,8 @@ CLI. The source formats are documented in `scripts/report.py`.
 
 **Maintenance.** When a harness changes its log format, update its `load_*`
 function in `scripts/report.py` and its test in `scripts/test_report.py`. For
-chart changes, update `scripts/template.html` and `scripts/test_browser.py`.
+chart changes, first load [design](../design/SKILL.md) and its selected
+theme and HTML guidance. The generator embeds shared design assets; keep
+only chart layout and behaviour in `scripts/template.html` and update
+`scripts/test_browser.py`.
 Run `make -C <skill-base-dir> test`; browser tests require Google Chrome.

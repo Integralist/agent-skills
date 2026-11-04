@@ -308,6 +308,50 @@ def test_demo_is_explicit_and_covers_other_provider():
     assert len(models) >= 12
 
 
+def test_shared_design_default():
+    """Generated reports expose the shared default theme and appearance control."""
+    content = render(demo_models(), load_config(BASE / "defaults.json"), source="Test")
+    assert 'data-design="anthropic"' in content
+    assert 'id="design-mode"' in content
+    assert "--d-page:" in content
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+def test_shared_design_theme_selection(theme):
+    """The renderer embeds only the selected theme, with no runtime file reads."""
+    content = render(
+        demo_models(), load_config(BASE / "defaults.json"), source="Test", theme=theme
+    )
+    assert f'data-design="{theme}"' in content
+    assert "designmodechange" in content
+    assert "/*__" not in content
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+def test_cli_selects_requested_theme(theme, capsys):
+    """CLI theme selection reaches the generated standalone HTML."""
+    assert main(["--demo", "--no-open", "--theme", theme]) == 0
+    path = Path(capsys.readouterr().out.strip())
+    assert f'data-design="{theme}"' in path.read_text(encoding="utf-8")
+
+
+def test_cli_rejects_unknown_theme():
+    """An invalid theme stops at argument parsing, before reading credentials."""
+    with pytest.raises(SystemExit) as stopped:
+        main(["--theme", "../../secret"])
+    assert stopped.value.code == 2
+
+
+def test_shared_design_invalid_theme_preserves_report():
+    """Unknown theme names cannot read arbitrary files or replace the last report."""
+    config = load_config(BASE / "defaults.json")
+    path = generate(demo_models(), config, source="Keep")
+    before = path.read_text(encoding="utf-8")
+    with pytest.raises(DataError, match="theme"):
+        generate(demo_models(), config, source="Invalid", theme="../../secrets")
+    assert path.read_text(encoding="utf-8") == before
+
+
 def test_inline_html_no_external_assets_and_safe_json(api_record):
     api_record["name"] = 'Claude </script><script>alert("x")</script>'
     api_record["api_key"] = "secret-test-key"

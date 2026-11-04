@@ -564,10 +564,27 @@ def build_report(
     }
 
 
-def render_html(report: Mapping[str, object], template: str) -> str:
+def render_html(
+    report: Mapping[str, object], template: str, *, theme: str = "anthropic"
+) -> str:
+    """Embed report data and the selected shared design without runtime file reads."""
+    if theme not in ("anthropic", "fastly"):
+        raise ValueError(f"Unknown design theme: {theme}")
     if PLACEHOLDER not in template:
         raise ValueError(f"template is missing the {PLACEHOLDER} placeholder")
+    shared = TEMPLATE.parent.parent.parent / "shared"
     payload = json.dumps(report, separators=(",", ":")).replace("</", "<\\/")
+    replacements = {
+        "/*__THEME__*/": theme,
+        "/*__DESIGN__*/": "\n".join(
+            (shared / name).read_text(encoding="utf-8")
+            for name in (f"design-{theme}.css", "design-charts.css", "design.css")
+        ),
+        "/*__MODE__*/": (shared / "design-mode.js").read_text(encoding="utf-8"),
+    }
+    for placeholder, replacement in replacements.items():
+        template = template.replace(placeholder, replacement)
+    # Insert user data last so marker-like log text is never treated as an asset.
     return template.replace(PLACEHOLDER, payload)
 
 
@@ -577,6 +594,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--home", type=Path, default=Path.home(), help="home directory to read logs from")
     parser.add_argument("--offline", action="store_true", help="use the cached price list only")
     parser.add_argument("--no-open", action="store_true", help="write the page without opening it")
+    parser.add_argument("--theme", choices=("anthropic", "fastly"), default="anthropic")
     args = parser.parse_args(argv)
     logging.basicConfig(format="model-stats: %(message)s", level=logging.INFO)
 
@@ -588,7 +606,7 @@ def main(argv: list[str] | None = None) -> int:
 
     fd, name = tempfile.mkstemp(prefix="model-stats-", suffix=".html", dir="/tmp")
     with os.fdopen(fd, "w", encoding="utf-8") as handle:
-        handle.write(render_html(report, TEMPLATE.read_text(encoding="utf-8")))
+        handle.write(render_html(report, TEMPLATE.read_text(encoding="utf-8"), theme=args.theme))
     print(name)
     if not args.no_open:
         opener = "open" if sys.platform == "darwin" else "xdg-open"

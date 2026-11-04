@@ -618,8 +618,12 @@ def render(
     source: str,
     demo: bool = False,
     index_version: float | None = None,
+    theme: str = "anthropic",
 ) -> str:
-    """Inline data, CSS, and JavaScript; safely encode even hostile model names."""
+    """Inline data and shared design assets, safely encoding hostile model names."""
+    if theme not in ("anthropic", "fastly"):
+        raise DataError(f"Unknown design theme: {theme}")
+    shared = BASE.parent / "shared"
     models = normalize(models)
     keys = sorted({key for model in models for key in model["scores"]})
     benchmarks = {
@@ -647,7 +651,17 @@ def render(
     )
     template = (BASE / "assets/template.html").read_text(encoding="utf-8")
     replacements = {
-        "/*__STYLE__*/": (BASE / "assets/style.css").read_text(encoding="utf-8"),
+        "/*__THEME__*/": theme,
+        "/*__STYLE__*/": "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (
+                shared / f"design-{theme}.css",
+                shared / "design-charts.css",
+                shared / "design.css",
+                BASE / "assets/style.css",
+            )
+        ),
+        "/*__MODE__*/": (shared / "design-mode.js").read_text(encoding="utf-8"),
         "/*__APP__*/": (BASE / "assets/app.js").read_text(encoding="utf-8"),
         "/*__DATA__*/": encoded,
     }
@@ -665,10 +679,16 @@ def generate(
     source: str,
     demo: bool = False,
     index_version: float | None = None,
+    theme: str = "anthropic",
 ) -> Path:
     """Atomically replace the fixed report; preserve the old file on failure."""
     content = render(
-        models, config, source=source, demo=demo, index_version=index_version
+        models,
+        config,
+        source=source,
+        demo=demo,
+        index_version=index_version,
+        theme=theme,
     )
     temporary: Path | None = None
     try:
@@ -706,6 +726,7 @@ def main(argv: list[str] | None = None) -> int:
         "--refresh", action="store_true", help="Bypass the 24-hour API cache"
     )
     parser.add_argument("--no-open", action="store_true")
+    parser.add_argument("--theme", choices=("anthropic", "fastly"), default="anthropic")
     parser.add_argument(
         "--op-reference", help="1Password secret reference; read only on cache misses"
     )
@@ -786,7 +807,12 @@ def main(argv: list[str] | None = None) -> int:
             for model in models
         )
         path = generate(
-            models, config, source=source, demo=demo, index_version=index_version
+            models,
+            config,
+            source=source,
+            demo=demo,
+            index_version=index_version,
+            theme=args.theme,
         )
     except (DataError, OSError) as err:
         logger.error("%s", err)

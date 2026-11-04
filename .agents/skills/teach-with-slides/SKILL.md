@@ -20,8 +20,9 @@ matter to the learner.
 2. **Confirm format and theme before building.** Offer PDF (easy to share,
    hard to edit), PPTX (editable, may need a code-based generator), Google
    Slides (depends on access), or HTML (browser deck). Restate a user-named
-   format for confirmation. Offer the Claude-inspired theme by default and
-   Fastly-inspired informally; accept other formats or themes the tools support.
+   format for confirmation. Default to the Anthropic-inspired theme; use
+   Fastly-inspired only when explicitly requested. Accept an explicit custom
+   theme when the tools support it.
 3. **Set the level** from what the conversation says about the audience, or
    use a curious general audience. Ask about audience, length, or goal only
    when the answer would materially change the deck; otherwise assume and
@@ -43,9 +44,10 @@ matter to the learner.
 3. **Deliver** the path or link. Mention assumptions, style deviations, or
    missing assets in the message, not on the slides.
 
-Before drafting, read
-[SLIDE-DESIGN.md](references/SLIDE-DESIGN.md) for slide, diagram, and theme
-requirements. Read
+Before drafting, load [design](../design/SKILL.md) and its selected theme
+and slide guidance (also HTML guidance for browser decks). Read
+[SLIDE-DESIGN.md](references/SLIDE-DESIGN.md) for teaching-specific guidance.
+Read
 [conventions-mermaid](../conventions-mermaid/SKILL.md) when using Mermaid.
 
 Done when inspected and delivered in the confirmed format and theme.

@@ -6,10 +6,8 @@ import json
 import os
 import re
 import sqlite3
-from colorsys import rgb_to_hsv
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
-from itertools import combinations
 from pathlib import Path
 from unittest import mock
 
@@ -465,60 +463,80 @@ def test_build_report_filters_period_and_aggregates_per_hour() -> None:
     [row] = got["rows"]
     record = dict(zip(got["columns"], row, strict=True))
     assert record["hour"] == "2026-09-24T15"
-    assert (record["provider"], record["basis"], record["requests"], record["cost"]) == ("Anthropic", "logged", 2, 3.0)
+    assert (
+        record["provider"],
+        record["basis"],
+        record["requests"],
+        record["cost"],
+    ) == ("Anthropic", "logged", 2, 3.0)
     assert record["input"] == 200
+
+
+def test_shared_design_default() -> None:
+    """Generated reports expose the shared default theme and appearance control."""
+    data = report.build_report([usage()], {}, "all", NOW)
+    html = report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8"))
+    assert 'data-design="anthropic"' in html
+    assert 'id="design-mode"' in html
+    assert "--d-page:" in html
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+def test_shared_design_theme_selection(theme: str) -> None:
+    """The renderer embeds the selected shared palette and controller."""
+    data = report.build_report([usage()], {}, "all", NOW)
+    html = report.render_html(
+        data, report.TEMPLATE.read_text(encoding="utf-8"), theme=theme
+    )
+    assert f'data-design="{theme}"' in html
+    assert "designmodechange" in html
+    assert "/*__" not in html
+
+
+def test_shared_design_invalid_theme() -> None:
+    """Theme names are restricted before constructing an asset path."""
+    with pytest.raises(ValueError, match="theme"):
+        report.render_html(
+            {}, report.TEMPLATE.read_text(encoding="utf-8"), theme="../../secrets"
+        )
+
+
+@pytest.mark.parametrize("theme", ["anthropic", "fastly"])
+def test_cli_selects_requested_theme(
+    theme: str, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """CLI appearance selection reaches the output without needing live logs."""
+    assert (
+        report.main(
+            ["--home", str(tmp_path), "--offline", "--no-open", "--theme", theme]
+        )
+        == 0
+    )
+    path = Path(capsys.readouterr().out.strip())
+    try:
+        assert f'data-design="{theme}"' in path.read_text(encoding="utf-8")
+    finally:
+        path.unlink()
+
+
+def test_cli_rejects_unknown_theme() -> None:
+    """Unknown theme names stop before log and price-list reads."""
+    with pytest.raises(SystemExit) as stopped:
+        report.main(["--theme", "../../secret"])
+    assert stopped.value.code == 2
+
+
+def test_report_text_cannot_be_replaced_by_design_assets() -> None:
+    """User content that resembles an asset marker must survive as report data."""
+    data = {"project": "/*__DESIGN__*/ /*__MODE__*/ /*__THEME__*/"}
+    html = report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8"))
+    assert json.dumps(data, separators=(",", ":")) in html
 
 
 def test_render_html_embeds_report_and_escapes_script_close() -> None:
     html = report.render_html({"project": "</script>"}, f"<script>const R = {report.PLACEHOLDER};</script>")
     assert '{"project":"<\\/script>"}' in html
     assert html.count("</script>") == 1
-
-
-@pytest.mark.parametrize("selector", [":root", ':root:not([data-theme="light"])', ':root[data-theme="dark"]'])
-def test_render_html_effort_levels_use_distinct_hues(selector: str) -> None:
-    data = report.build_report([usage()], {}, "all", NOW)
-    html = report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8"))
-    style = re.search(rf"{re.escape(selector)}\s*\{{([^}}]+)\}}", html)
-    order = re.search(r"const EFFORT_ORDER = (\[[^\]]+\]);", html)
-    assert style is not None and order is not None
-    levels = json.loads(order[1].replace("'", '"'))
-    colours = dict(re.findall(r"--(e\d):\s*#([0-9a-fA-F]{6})", style[1]))
-    assert len(set(colours.values())) == 7
-    hues = {}
-    for level in ("low", "high", "xhigh"):
-        colour = colours[f"e{levels.index(level) + 1}"]
-        rgb = tuple(int(colour[i : i + 2], 16) / 255 for i in (0, 2, 4))
-        hue, saturation, _ = rgb_to_hsv(*rgb)
-        assert saturation >= 0.25, f"{level} needs a visible hue"
-        hues[level] = hue
-    for first, second in combinations(hues, 2):
-        gap = abs(hues[first] - hues[second])
-        assert min(gap, 1 - gap) * 360 >= 45, f"{first} and {second} need distinct hues"
-
-
-@pytest.mark.parametrize("selector", [":root", ':root:not([data-theme="light"])', ':root[data-theme="dark"]'])
-def test_render_html_heatmap_bands_use_distinct_hues(selector: str) -> None:
-    data = report.build_report([usage()], {}, "month", NOW)
-    html = report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8"))
-    style = re.search(rf"{re.escape(selector)}\s*\{{([^}}]+)\}}", html)
-    assert style is not None
-    colours = dict(re.findall(r"--heat-(\d):\s*#([0-9a-fA-F]{6})", style[1]))
-    assert len(set(colours.values())) == 5
-    hues = {}
-    for band in range(5):
-        colour = colours[str(band)]
-        rgb = tuple(int(colour[i : i + 2], 16) / 255 for i in (0, 2, 4))
-        hue, saturation, _ = rgb_to_hsv(*rgb)
-        if band == 0:
-            assert saturation <= 0.35, "No activity needs a neutral colour"
-            continue
-        assert saturation >= 0.4, f"Activity band {band} needs a visible hue"
-        hues[band] = hue
-    for first, second in combinations(hues, 2):
-        gap = abs(hues[first] - hues[second])
-        assert min(gap, 1 - gap) * 360 >= 25, f"Activity bands {first} and {second} need distinct hues"
-    assert "darker means more" not in html
 
 
 @pytest.mark.parametrize(
