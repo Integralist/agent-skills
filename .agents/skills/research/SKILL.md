@@ -5,7 +5,7 @@ description: >-
   document. Use when investigating a topic, exploring an external repository,
   or doing architecture research.
 metadata:
-  model-tier: complex
+  model-tier: moderate
 ---
 
 Produce a deep, cited reference document as a foundation for later planning or
