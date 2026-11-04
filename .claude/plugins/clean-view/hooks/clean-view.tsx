@@ -553,22 +553,19 @@ export function registerCleanView(on: On) {
         if (list.tasks.some(one => one.status !== 'done')) {
           if (endsWithQuestion(e.answer)) return { ...list, phase: 'needsYou', needsYouReason: ASKED }
           if (atWork > 0) return { ...list, phase: 'waiting', needsYouReason: null, waitingOn: atWork }
-          if (!list.tasks.some(one => one.status === 'upcoming')) {
-            const finishedAt = list.finishedAt ?? 0
-            return {
-              ...list,
-              phase: 'done',
-              tasks: list.tasks.map(one => ({
-                ...one,
-                status: 'done',
-                percent: 100,
-                startedAt: one.startedAt ?? finishedAt,
-                finishedAt: one.finishedAt ?? finishedAt,
-              })),
-              needsYouReason: null,
-            }
+          const finishedAt = list.finishedAt ?? 0
+          return {
+            ...list,
+            phase: 'done',
+            tasks: list.tasks.map(one => ({
+              ...one,
+              status: 'done',
+              percent: 100,
+              startedAt: one.startedAt ?? finishedAt,
+              finishedAt: one.finishedAt ?? finishedAt,
+            })),
+            needsYouReason: null,
           }
-          return { ...list, phase: 'ended', needsYouReason: null }
         }
         return { ...list, phase: 'done', needsYouReason: null }
       })

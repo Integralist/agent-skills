@@ -95,7 +95,8 @@ export function planSteps(list: CleanViewChecklist, steps: readonly string[], at
     tasks = tasks.map((one, i) => (i === first ? { ...one, status: 'active', startedAt: one.startedAt ?? at } : one))
   }
   const nextTitle = title?.trim() ? cleanName(title) : list.title
-  return { ...list, title: nextTitle, tasks }
+  const startedAt = hasPlan(list) && !tasks.some(one => kept.has(one.name.toLowerCase())) ? at : list.startedAt
+  return { ...list, title: nextTitle, startedAt, tasks }
 }
 
 function same(a: string, b: string): boolean {
@@ -284,9 +285,13 @@ export function asksPerson(mode: string | undefined): boolean {
   return mode === undefined || !SETTLED_ALONE.has(mode)
 }
 
-/** True when a turn's last words put a question to the person. */
+const FOLLOW_UP_OFFER =
+  /[.!]\s+(?:do you want|would you like|want me to|want to|shall i)\b[^?]*\?\s*$/i
+
+/** True when a turn's last words put a blocking question to the person rather than a post-completion offer. */
 export function endsWithQuestion(answer: string): boolean {
-  return answer.trim().endsWith('?')
+  const trimmed = answer.trim()
+  return trimmed.endsWith('?') && !FOLLOW_UP_OFFER.test(trimmed)
 }
 
 /** Phases where a plan was left part way; its active step draws as Paused. */

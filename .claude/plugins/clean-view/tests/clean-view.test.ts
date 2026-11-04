@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
-import { LOG_ENTRIES, LOG_ENTRY_CHARS, appendLog, cleanName, extractThinkingHeading, meter } from '../hooks/logic'
+import { LOG_ENTRIES, LOG_ENTRY_CHARS, appendLog, cleanName, endsWithQuestion, extractThinkingHeading, meter, newJob, planSteps, reportProgress } from '../hooks/logic'
 
 const PLUGIN = 'clean-view'
 const PLAN = 'mcp__clean-view__plan_steps'
@@ -296,6 +296,9 @@ describe('checklist', () => {
     // Active thinking deltas refresh the activity timestamp, clear the stall notice, and extract **Heading** titles
     expect(extractThinkingHeading('**First Heading** body **Investigating Stall Cause** more')).toBe('Investigating Stall Cause')
     expect(extractThinkingHeading('Plain thinking without markdown bold')).toBeUndefined()
+    expect(endsWithQuestion('Which directory should I check next?')).toBe(true)
+    expect(endsWithQuestion('The working tree is clean. Do you want me to push `main`?')).toBe(false)
+    expect(endsWithQuestion('All checks passed. Want me to commit this?')).toBe(false)
 
     w.thinkingChunks = ['**Investigating Stall', ' Cause**\n\nProbing the stall...']
     await step($)
@@ -551,17 +554,24 @@ describe('after the turn', () => {
     expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
   })
 
-  test('a turn that ends mid-plan without a question reads Ended, not Needs you', async ($, on) => {
+  test('a turn that finishes with unreported steps or a follow-up offer completes to All done, so replying starts a fresh job', async ($, on) => {
     world(on)
     await start($)
-    await prompt($, 'Build my landing page')
-    await $.tool.call({ tool: PLAN, title: 'Build my landing page', steps: ['Build the page', 'Check it', 'Publish it'] })
-    await $.tool.call({ tool: PROGRESS, task: 'Build the page', percent: 100 })
-    await $.turn.complete({ answer: 'Built the page.', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
+    await prompt($, 'Commit the changes')
+    await $.tool.call({ tool: PLAN, title: 'Ignore binary and commit changes', steps: ['Ignore the built binary', 'Commit the HTML renderer', 'Confirm the commit history'] })
+    await $.tool.call({ tool: 'Bash', command: 'git commit -m "chore"' })
+    await $.turn.complete({ answer: 'The working tree is clean. Do you want me to push `main`?', durationMs: 1000, isAborted: false, turnId: 'turn-1', reason: 'answer' })
     const texts = (await rows($, 'terminal')).join('\n')
     expect(texts).not.toContain('Needs you')
-    expect(texts).toMatch(/■ Ended · Build my landing page · 1 of 3 steps done/)
-    expect(texts).toMatch(/‖ Check it\s+[█░]{10}\s+Paused/)
+    expect(texts).not.toContain('Ended')
+    expect(texts).toContain('✓ All done · Ignore binary and commit changes')
+    expect(texts).toMatch(/✓ Confirm the commit history\s+█{10}\s+Done/)
+
+    await $.turn.start({ text: 'yes', turnId: 'turn-2' })
+    const afterYes = (await rows($, 'terminal')).join('\n')
+    expect(afterYes).toContain('Thinking...')
+    expect(afterYes).not.toContain('Ignore binary and commit changes')
+    expect(afterYes).not.toContain('Resumed the task list')
   })
 
   describe('after Esc or a pause', () => {
@@ -603,7 +613,7 @@ describe('after the turn', () => {
       expect((await rows($, 'terminal')).join('\n')).not.toContain('Stopped')
     })
 
-    for (const end of [{ answer: '', reason: 'aborted' }, { answer: 'Built the page.', reason: 'answer' }, { answer: 'Which colour?', reason: 'answer' }] as const) {
+    for (const end of [{ answer: '', reason: 'aborted' }, { answer: 'Which colour?', reason: 'answer' }] as const) {
       test(`a typed prompt after ${end.reason === 'aborted' ? 'Esc' : end.answer} carries on with the same plan`, async ($, on) => {
         world(on)
         await start($)
@@ -730,6 +740,11 @@ describe('replanning', () => {
     expect(texts).toMatch(/✓ Read your brand notes\s+█{10}\s+Done/)
     expect(texts).toMatch(/▶ Build the pricing section\s+[█░]{10}\s+Working/)
     expect(texts).toMatch(/○ Tidy the formatting\s+░{10}\s+Next/)
+
+    let list = planSteps(newJob(1000, 'Ship it'), ['Read notes', 'Build page'], 1000)
+    list = reportProgress(list, 'Read notes', 100, 2000)
+    const replaced = planSteps(list, ['Check remote branch', 'Push main'], 9000, 'Push main')
+    expect(replaced.startedAt).toBe(9000)
   })
 
   test('batches plan_steps and report_progress with sibling tools in the same turn, excludes pause time, and auto-completes the final step', async ($, on) => {
