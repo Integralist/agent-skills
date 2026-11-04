@@ -14,11 +14,11 @@ Chart token use, cost, and effort by provider, model, harness, and project
 from local logs for Claude Code, Codex, pi, OpenCode, Gemini CLI, and Copilot
 CLI. The source formats are documented in `scripts/report.py`.
 
-1. **Choose a time range.** Use the argument, or `all` when none is given.
+1. **Choose a time range.** Use the argument, or `month` when none is given.
    Accept only `day` (today), `week` (the last 7 days, including today),
-   `month` (this calendar month to date), `year` (this calendar month and
-   the 11 before it), or `all` (full history). For any other value, stop and
-   list the five valid choices.
+   `month` (to date; this calendar month through today), `year` (this
+   calendar month and the 11 before it), or `all` (full history). For any
+   other value, stop and list the five valid choices.
 2. **Generate the chart.** From this skill's base directory, run:
 
    ```bash

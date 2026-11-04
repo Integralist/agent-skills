@@ -534,7 +534,7 @@ function dateRange() {
   return out;
 }
 
-const PERIOD_LABEL = { day: 'Today', week: 'Last 7 days', month: 'This month', year: 'Last 12 months', all: 'All time' };
+const PERIOD_LABEL = { day: 'Today', week: 'Last 7 days', month: 'Month to date', year: 'Last 12 months', all: 'All time' };
 document.getElementById('title').textContent = `AI model usage · ${PERIOD_LABEL[REPORT.period]}`;
 const dates = [...new Set(rows.map(r => r.date))].sort();
 document.getElementById('subtitle').textContent = dates.length

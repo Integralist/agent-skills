@@ -284,6 +284,21 @@ def test_monthly_cost_chart_stays_in_usd_when_tokens_selected(
     assert chart_data() == expected
 
 
+def test_month_period_displays_month_to_date_title(page: Page, tmp_path: Path) -> None:
+    """The rendered month report labels its range as month to date."""
+    now = datetime(2026, 3, 3, 12, tzinfo=UTC)
+    data = report.build_report([], {}, "month", now)
+    path = tmp_path / "month.html"
+    path.write_text(
+        report.render_html(data, report.TEMPLATE.read_text(encoding="utf-8")),
+        encoding="utf-8",
+    )
+    page.goto(path.as_uri())
+    expect(
+        page.get_by_role("heading", name="AI model usage · Month to date", exact=True)
+    ).to_be_visible()
+
+
 @pytest.mark.parametrize("period", ["month", "year"])
 def test_empty_report_has_no_broken_monthly_chart(
     page: Page, tmp_path: Path, period: str
