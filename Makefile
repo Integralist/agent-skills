@@ -1,4 +1,4 @@
-.PHONY: install install-agents install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
+.PHONY: install install-agents sync-skills install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
 
 # Every action runs through scripts/step.sh, which prints one status line and
 # swallows the command's output unless it fails — see that file for the modes.
@@ -17,6 +17,10 @@ install-agents:
 	@mkdir -p ~/.agents
 	@$(STEP) "AGENTS.md → ~/.agents/AGENTS.md" cp .agents/AGENTS.md ~/.agents/AGENTS.md
 	@$(STEP) "skills/ → ~/.agents/skills/ (preserving synced/)" rsync -a --delete --exclude='/synced/' .agents/skills/ ~/.agents/skills/
+
+sync-skills:
+	@mkdir -p ~/.agents
+	@$(STEP) "skills/ → ~/.agents/skills/ (preserving synced/ and local extras)" rsync -a --exclude='/synced/' .agents/skills/ ~/.agents/skills/
 
 # Shared CLI tools driven by skills in more than one harness. crit (inline
 # code-review CLI) is used by both Claude Code and Pi. Installed via Homebrew;
