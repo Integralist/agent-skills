@@ -41,6 +41,8 @@ describe('logic', () => {
   test('includes small README and doc table/list updates in the trivial classifier tier', () => {
     expect(CLASSIFIER_SYSTEM).toContain('small README or doc updates (such as adding an entry to a table or list)')
     expect(CLASSIFIER_SYSTEM).toContain('"can you update the README.md with the new skill" -> trivial')
+    expect(CLASSIFIER_SYSTEM).toContain('codebase or topic research')
+    expect(CLASSIFIER_SYSTEM).not.toContain('open-ended research')
   })
 
   test('reads the one-word answer', () => {

@@ -87,20 +87,20 @@ path is not treated as a slash command.
 
 ### Tiers and classifier fallback
 
-| Tier       | Model line | Typical task                                                                      |
-| ---------- | ---------- | --------------------------------------------------------------------------------- |
-| `trivial`  | `haiku`    | Mechanical work, wording-only instruction edits, short writing, factual answers. |
-| `moderate` | `sonnet`   | Code changes, debugging, tests, audits, targeted lookups, bounded troubleshooting. |
-| `complex`  | `opus`     | Specs, plans, open-ended research, architecture, code or security review.          |
-| `frontier` | `fable`    | Whole-system redesign, a very large migration, extended deep research.            |
+| Tier       | Model line | Typical task                                                                                 |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------- |
+| `trivial`  | `haiku`    | Mechanical work, wording-only instruction edits, short writing, factual answers.             |
+| `moderate` | `sonnet`   | Code changes, debugging, tests, audits, research, targeted lookups, bounded troubleshooting. |
+| `complex`  | `opus`     | Specs, plans, architecture, code or security review.                                         |
+| `frontier` | `fable`    | Whole-system redesign, a very large migration, extended deep research.                       |
 
 These are aliases offered by the installed `/config` model row, not fixed
 version identifiers. The classifier uses the smallest offered line, `low`
 effort, up to 12,000 input characters, 8 output tokens, and a 4-second timeout.
 It classifies the immediate action rather than the broader project context.
-Targeted documentation lookups and bounded troubleshooting remain moderate
-when the fix becomes a reusable instruction; open-ended research and
-substantial architectural decisions are complex.
+Codebase or topic research, targeted documentation lookups, and bounded
+troubleshooting remain moderate (even when the fix becomes a reusable
+instruction); substantial architectural decisions are complex.
 
 If classification fails or gives no recognized tier, keep the current model
 and existing tier label. There is no keyword fallback or second model request.
