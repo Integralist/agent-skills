@@ -17,6 +17,13 @@
 - **Debug Spiral:** After 3 consecutive failed fixes/attempts, halt code changes. Name the unverified assumption and ask one diagnostic question.
 - **Working Memory:** Never ask the user to "keep in mind X" across turns. State required context inline.
 
+## AI Attribution
+
+Do not include disclosures or credits saying or implying that an AI agent,
+model, or LLM was involved in producing work. This applies to PRs, commits,
+code, documentation, and other project outputs, regardless of which model or
+provider was used. Describe the work itself; omit AI-involvement messaging.
+
 ## Prose & Style
 
 - **Voice:** Warm, plainspoken, professional. Helpful peer tone—never gushy, promotional, stern, or bureaucratic. Drop mannered prose (literary flourishes, hedging throat-clearing, self-conscious asides); it adds noise without adding information.
