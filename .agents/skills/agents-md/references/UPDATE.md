@@ -32,4 +32,5 @@ gate. If `AGENTS.md` is missing, tell the user and choose a mode normally.
 
 Run the [shared verification checklist](RECONCILE.md#verify-after-any-write).
 
-Finish by reporting which file is canonical, what moved, and what was created.
+Finish with the report required by the parent skill, including why no changes
+were needed if the existing setup passes the audit.

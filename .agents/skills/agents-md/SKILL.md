@@ -52,5 +52,9 @@ After any write, complete the verification checklist.
 
 ## Run and finish
 
-Follow the selected guide. Report which file is canonical, what moved, and
-what was created.
+Follow the selected guide. Report the selected mode, which instruction files
+were inspected, and the findings from each applicable check. Cite evidence for
+freshness findings. State which file is canonical and what moved or was
+created. If no changes are needed, explain why the existing setup passed the
+applicable checks; don't report only that instructions already exist or that
+no files changed.
