@@ -20,6 +20,7 @@
     "git:github.com/Integralist/pi-event-hooks",
     "git:github.com/Integralist/pi-prompt-history",
     "git:github.com/Integralist/pi-clean-view",
+    "git:github.com/Integralist/pi-stash",
     {
       "source": "git:github.com/fastly/agent-skills-internal",
       "skills": [
