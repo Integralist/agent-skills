@@ -3,10 +3,28 @@
 Use this only in Pi with the `Integralist/pi-subagents` extension. The models and
 effort come from [EXECUTION-MODELS.md](../../shared/EXECUTION-MODELS.md).
 
-**Preflight.** The active `spawn_inline_subagent` schema must expose `model`,
-`thinking`, `tools`, `max_turns`, and `allow_model_fallback`. If the fallback
-field is missing, stop and give this setup command, then `/reload` or a fresh
-session. Never leave the flag out to get around an old extension:
+**Preflight.** Check that `spawn_inline_subagent` is present in the session's
+active tools.
+
+If `spawn_inline_subagent` is missing, stop and return `BLOCKED`. Explain that
+`execute-plan` relies on subagents to:
+- isolate context and avoid context-window exhaustion across tasks;
+- reduce costs by delegating implementation to cheaper worker models while
+  keeping the coordinator on the premium model;
+- ensure clean task boundaries and atomic task verification.
+
+Instruct the user to install the extension, run `/reload`, and stop:
+
+```bash
+pi install git:github.com/Integralist/pi-subagents
+```
+
+*(Note: Users who prefer sequential in-thread execution without subagents should
+use [next-task](../../next-task/SKILL.md) instead.)*
+
+If `spawn_inline_subagent` is present but missing the `allow_model_fallback`
+field, stop and give this update command, then `/reload` or a fresh session.
+Never leave the flag out to get around an old extension:
 
 ```bash
 pi update git:github.com/Integralist/pi-subagents

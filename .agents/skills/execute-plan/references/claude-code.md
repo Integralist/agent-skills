@@ -27,7 +27,10 @@ its `model` set explicitly to the premium model. The packet tells it to follow
 user-only skill can't be preloaded.
 
 **Worker.** Launch the `Agent` tool with `subagent_type: plan-executor` and the
-packet. Never override its saved model with an inherited one. Don't give the
+packet. If `plan-executor` is not available, launch a regular subagent with
+`model` set explicitly to the cheap model from
+[EXECUTION-MODELS.md](../../shared/EXECUTION-MODELS.md). Never override its saved
+model with an inherited one. Don't give the
 `execute-plan` skill its own `model` or `context: fork`; that would move
 coordination to another model. Use one editing worker at a time, and
 `SendMessage` for direction. Permission prompts follow the user's settings, and
