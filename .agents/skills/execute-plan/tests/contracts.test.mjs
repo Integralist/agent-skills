@@ -222,8 +222,9 @@ test("manual commands build plan milestones inline through one item procedure", 
 });
 
 function assertClaudeGates(adapter, agent) {
-  assert.match(adapter, /`fallbackModel`.*`--fallback-model`.*return `BLOCKED` before edits/);
+  assert.match(adapter, /`fallbackModel`.*`--fallback-model`.*If any of them does, or its value is unknown, return `BLOCKED` before edits/);
   assert.match(adapter, /`subagent_type: plan-executor`/);
+  assert.match(adapter, /If `plan-executor` is not available, launch a regular subagent with `model` set explicitly to the cheap model.*`effort` set to `xhigh`/);
   assert.match(adapter, /`model` set explicitly to the premium model/);
   assert.match(adapter, /read the model and effort that ran/);
   assert.doesNotMatch(agent, /readiness|READY_ONLY/);
@@ -233,7 +234,8 @@ test("Claude Code blocks model overrides and verifies the model that ran", () =>
   const adapter = flat(claudePath);
   const agent = read(agentPath);
   assertClaudeGates(adapter, agent);
-  assert.throws(() => assertClaudeGates(adapter.replace("return `BLOCKED` before edits", "continue"), agent));
+  assert.throws(() => assertClaudeGates(adapter.replace("If any of them does, or its value is unknown, return `BLOCKED` before edits", "continue"), agent));
+  assert.throws(() => assertClaudeGates(adapter.replace("`effort` set to `xhigh`", "effort inherited"), agent));
   assert.throws(() => assertClaudeGates(adapter.replace("set explicitly to the premium model", "inherited"), agent));
   assert.throws(() => assertClaudeGates(adapter, `${agent}\nWait for a readiness packet.`));
 });
