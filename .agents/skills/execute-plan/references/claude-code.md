@@ -4,13 +4,14 @@ Use this for the Claude Code CLI on the company Anthropic connection, not
 Pi/Bedrock. The models and effort come from
 [EXECUTION-MODELS.md](../../shared/EXECUTION-MODELS.md).
 
-**Preflight.** The repository's
-[plan-executor definition](../../../../.claude/agents/plan-executor.md) sets the
-cheap model, `effort: xhigh`, tools, and `maxTurns`. `make install-claude`
-installs it; check the active one with `/agents`, because a project or managed
-agent of the same name can override it. Use Claude Code v2.1.293 or later for
-Haiku 5.5, and confirm the model is permitted and supports `xhigh`. These can
-defeat the policy:
+**Preflight.** When this checkout provides a `plan-executor` agent definition,
+it sets the cheap model, `effort: xhigh`, tools, and `maxTurns`. In the upstream
+checkout, `make install-claude` installs it; use `/agents` to check the active
+definition because a project or managed agent with the same name can override
+it. A checkout that vendors this skill without the agent definition can use the
+regular-subagent fallback below. Use Claude Code v2.1.293 or later for Haiku
+5.5, and confirm the model is permitted and supports `xhigh`. These can defeat
+the policy:
 
 - `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` overrides the model.
 - `CLAUDE_CODE_EFFORT_LEVEL` overrides the effort.
@@ -29,8 +30,10 @@ user-only skill can't be preloaded.
 **Worker.** Launch the `Agent` tool with `subagent_type: plan-executor` and the
 packet. If `plan-executor` is not available, launch a regular subagent with
 `model` set explicitly to the cheap model from
-[EXECUTION-MODELS.md](../../shared/EXECUTION-MODELS.md). Never override its saved
-model with an inherited one. Don't give the
+[EXECUTION-MODELS.md](../../shared/EXECUTION-MODELS.md) and `effort` set to
+`xhigh`. This requires the native `Agent` tool to support per-invocation effort.
+If it cannot set that effort, return `BLOCKED` before edits. Never inherit or
+silently override the worker model or effort. Don't give the
 `execute-plan` skill its own `model` or `context: fork`; that would move
 coordination to another model. Use one editing worker at a time, and
 `SendMessage` for direction. Permission prompts follow the user's settings, and
