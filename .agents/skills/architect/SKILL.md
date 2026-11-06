@@ -4,6 +4,7 @@ description: >-
   Take a feature from an idea through research, grilling, a spec, and a plan.
   Use when architecting a feature from an idea or this session's discussion,
   or exploring a design before planning.
+argument-hint: "[--github] [steering]"
 metadata:
   model-tier: complex
 ---
@@ -13,11 +14,12 @@ Coordinate a feature through skills in order:
 [grill-with-docs](../grill-with-docs/SKILL.md), [to-spec](../to-spec/SKILL.md),
 and [to-plan](../to-plan/SKILL.md). Each skill owns its step; carry context
 between them and keep artifacts in one `projects/<yyyy-mm-dd>-<slug>/` folder.
-When PDD hands off an approved Design, skip to step 2 (Research); for any other
-invocation, start at Bootstrap. Once the project folder exists, pass its path
-to each skill. For `github` or an issue reference (`#<n>` or URL), read and
-follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
-Issue Artifacts instead of `projects/`.
+When PDD hands off an approved Design, skip to step 2 (Research). Otherwise,
+honor an explicitly requested starting step in the user's steering text; if
+none is given, start at Bootstrap. Once the project folder exists, pass its
+path to each skill. `--github` selects GitHub Issues and Issue Artifacts
+instead of `projects/`; an issue reference (`#<n>` or URL) selects the same
+mode. Follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) for either.
 
 **Stop and ask:** If a skill reports a gap or the design does not make sense,
 tell the user and wait. Do not fill the gap with a guess.
