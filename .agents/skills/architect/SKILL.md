@@ -15,7 +15,9 @@ and [to-plan](../to-plan/SKILL.md). Each skill owns its step; carry context
 between them and keep artifacts in one `projects/<yyyy-mm-dd>-<slug>/` folder.
 When PDD hands off an approved Design, skip to step 2 (Research); for any other
 invocation, start at Bootstrap. Once the project folder exists, pass its path
-to each skill.
+to each skill. For `github` or an issue reference (`#<n>` or URL), read and
+follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
+Issue Artifacts instead of `projects/`.
 
 **Stop and ask:** If a skill reports a gap or the design does not make sense,
 tell the user and wait. Do not fill the gap with a guess.

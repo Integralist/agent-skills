@@ -853,8 +853,57 @@ test("relocated guides must have explicit links and action-specific loading trig
   }
 });
 
+const githubIssuesPath = ".agents/skills/shared/GITHUB-ISSUES.md";
+
+test("GITHUB-ISSUES.md defines the 3-level issue hierarchy, artifact rules, and hybrid closure lifecycle", () => {
+  const content = flat(githubIssuesPath);
+  for (const rule of [
+    "gh label create project",
+    "gh label create slice",
+    "gh label create task",
+    "<slug> / S<N>: <Slice Title>",
+    "<slug> / S<N>-T<M>: <Task Title>",
+    "omit the trailing `- [ ] Task <n> complete` checkbox",
+    "--parent",
+    "--blocked-by",
+    "gh issue artifact create",
+    "--type plan",
+    "Do not hard-wrap prose at 80 columns",
+    "descriptive link text alongside the issue number",
+    "First skill that writes a project artifact creates the Root Issue",
+    "Execution-Plan: #<root-issue>",
+    "Execution-Task: slice-<n>/task-<m> (#<task-issue>)",
+    "Closes #<root-issue>",
+    "Part of #<root-issue>",
+    "--draft",
+  ]) assert.ok(content.includes(rule), `missing GITHUB-ISSUES.md rule: ${rule}`);
+  assert.throws(() => {
+    const broken = content.replace("--type plan", "");
+    assert.ok(broken.includes("--type plan"));
+  });
+});
+
+test("planning and task-compilation skills conditionally load GITHUB-ISSUES.md for github mode", () => {
+  const planningSkills = [
+    ".agents/skills/pdd/SKILL.md",
+    ".agents/skills/architect/SKILL.md",
+    ".agents/skills/research/SKILL.md",
+    ".agents/skills/to-spec/SKILL.md",
+    ".agents/skills/to-plan/SKILL.md",
+    ".agents/skills/to-adr/SKILL.md",
+    ".agents/skills/to-prd/SKILL.md",
+    ".agents/skills/to-tasks/SKILL.md",
+  ];
+  const trigger = /For `github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
+  for (const skill of planningSkills) {
+    const content = read(skill);
+    assertRequiredReference(content, "../shared/GITHUB-ISSUES.md", trigger);
+    assert.throws(() => assertRequiredReference(content.replace(/read\s+and\s+follow/, "optional:"), "../shared/GITHUB-ISSUES.md", trigger));
+  }
+});
+
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"]) {
+  for (const relative of [githubIssuesPath, ".agents/skills/pdd/SKILL.md", ".agents/skills/research/SKILL.md", ".agents/skills/to-adr/SKILL.md", ".agents/skills/to-prd/SKILL.md", skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"]) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {
