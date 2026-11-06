@@ -29,7 +29,7 @@ Map the on-disk project structure onto a 3-level GitHub Sub-Issue tree using
 `--parent` and `--blocked-by`:
 
 1. **Root Project Issue (`--label project`):**
-   - **Title:** `<Project Title>`
+   - **Title:** `<Project Title> (<slug>)`
    - **Body:** Replaces `projects/<date>-<slug>/README.md`, following
      [PROJECT-README.md](PROJECT-README.md) with an explicit
      `` - **Slug:** `<slug>` `` metadata bullet.
@@ -89,8 +89,10 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
   inspect it with `gh issue view <id> --json
   number,title,state,labels,body,parent,subIssues,blockedBy`. If it is a Slice
   or Task sub-issue, resolve its `parent` chain to identify the Root Issue.
-- **Listing open projects:** Run `gh issue list --label project --state open`.
-  If more than one open project matches, ask the user which one to use.
+- **Listing open projects:** Run `gh issue list --label project --state open`
+  (or `gh issue list --search 'in:title "(<slug>)" state:open' --label=project`
+  when the project slug is known). If more than one open project matches, ask
+  the user which one to use.
 - **Listing slices or tasks for a project:** Traverse `subIssues` from the
   parent issue (`gh issue view <parent> --json subIssues`) or filter by slug
   and label:

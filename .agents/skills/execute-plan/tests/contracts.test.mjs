@@ -861,6 +861,7 @@ test("GITHUB-ISSUES.md defines the 3-level issue hierarchy, artifact rules, and 
     "gh label create project",
     "gh label create slice",
     "gh label create task",
+    "<Project Title> (<slug>)",
     "<slug> / S<N>: <Slice Title>",
     "<slug> / S<N>-T<M>: <Task Title>",
     "omit the trailing `- [ ] Task <n> complete` checkbox",
@@ -902,8 +903,25 @@ test("planning and task-compilation skills conditionally load GITHUB-ISSUES.md f
   }
 });
 
+test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-ISSUES.md for github mode", () => {
+  const executionAndDeliverySkills = [
+    ".agents/skills/next-task/SKILL.md",
+    ".agents/skills/next-slice/SKILL.md",
+    ".agents/skills/execute-plan/SKILL.md",
+    ".agents/skills/open-pr/SKILL.md",
+    ".agents/skills/stacked-prs/SKILL.md",
+    ".agents/skills/spec-delta/SKILL.md",
+  ];
+  const trigger = /For `github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
+  for (const skill of executionAndDeliverySkills) {
+    const content = read(skill);
+    assertRequiredReference(content, "../shared/GITHUB-ISSUES.md", trigger);
+    assert.throws(() => assertRequiredReference(content.replace(/read\s+and\s+follow/, "optional:"), "../shared/GITHUB-ISSUES.md", trigger));
+  }
+});
+
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [githubIssuesPath, ".agents/skills/pdd/SKILL.md", ".agents/skills/research/SKILL.md", ".agents/skills/to-adr/SKILL.md", ".agents/skills/to-prd/SKILL.md", skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"]) {
+  for (const relative of [githubIssuesPath, ".agents/skills/open-pr/SKILL.md", ".agents/skills/stacked-prs/SKILL.md", ".agents/skills/spec-delta/SKILL.md", ".agents/skills/pdd/SKILL.md", ".agents/skills/research/SKILL.md", ".agents/skills/to-adr/SKILL.md", ".agents/skills/to-prd/SKILL.md", skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"]) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {
