@@ -23,7 +23,10 @@ before and why it changed.
    this living spec. Include project specs written earlier in this session.
    If none exists, create `projects/<yyyy-mm-dd>-<slug>/`; the slug names the
    change, and create its README as
-   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes.
+   [PROJECTS-README.md](../shared/PROJECTS-README.md) describes. For `github`
+   or an issue reference (`#<n>` or URL), read and follow
+   [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
+   Issue Artifacts instead of `projects/`.
 3. **Pin the baseline before editing anything.** Record
    `git log -1 --format=%H -- <living-spec>` and copy the affected scenarios
    from `git show HEAD:<living-spec>`.

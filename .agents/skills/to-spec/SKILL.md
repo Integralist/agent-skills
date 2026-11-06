@@ -4,8 +4,8 @@ description: >-
   Write a project spec: the problem, the solution, and Gherkin acceptance
   criteria, with any delta against the living spec. Use when specifying a
   feature, saving a spec discussed in chat, or when another skill needs a spec.
-argument-hint: "[source path]"
-allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
+argument-hint: "[source path | github | #<issue>]"
+allowed-tools: Bash(git config:*), Bash(date:*), Bash(gh issue:*), Bash(gh label:*), Glob, Grep, Read, Write
 metadata:
   model-tier: complex
 ---
@@ -24,7 +24,10 @@ gaps with guesses.
 **Workflow.**
 
 1. **Choose and preserve the source.** Use the named file, or this session if
-   none is named. Capture the spec already worked out; do not start over.
+   none is named. For `github` or an issue reference (`#<n>` or URL), read and
+   follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues
+   and Issue Artifacts instead of `projects/`. Capture the spec already worked
+   out; do not start over.
    Preserve the build request and requirement-changing clarifications in
    `spec.md`'s `## Development Brief` (see
    [SPEC-GUIDE.md](references/SPEC-GUIDE.md)), using verbatim quotes or

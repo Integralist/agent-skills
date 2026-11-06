@@ -6,7 +6,7 @@ description: >-
   Engineering need agreed scope, an evaluated solution direction, and an
   approved system design before engineering specs and plans.
 disable-model-invocation: true
-argument-hint: "[project path or milestone]"
+argument-hint: "[project path | github | #<issue> | milestone]"
 metadata:
   model-tier: complex
 ---
@@ -44,6 +44,9 @@ the start, use qualified names throughout.
    and ask which project if more than one fits. If none exists, ask for the
    initiative's name and create `projects/<yyyy-mm-dd>-<slug>/`. Read its
    README, every PDD document, and all research, specs, and ADRs they link.
+   For `github` or an issue reference (`#<n>` or URL), read and follow
+   [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
+   Artifacts instead of `projects/`.
 2. **Choose one stage.** Take the first stage not marked `Approved`, in order:
    Project, Discovery, Design. If it's `Awaiting approval`, ask the user to
    approve it or request changes, then stop. A user-named stage requires all

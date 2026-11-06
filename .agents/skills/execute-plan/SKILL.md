@@ -44,7 +44,10 @@ and stop. A context transition is not task or plan completion.
 
 ## Workflow
 
-1. **Set up.** Read the plan, its spec, and linked docs. Record branch, HEAD,
+1. **Set up.** Read the plan, its spec, and linked docs. For `github` or an
+   issue reference (`#<n>` or URL), read and follow
+   [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
+   Issue Artifacts instead of `projects/`. Record branch, HEAD,
    and existing changes; keep those changes out of your commits. Record or
    resume the review baseline and delivery manifest using
    [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md), and run baseline checks.

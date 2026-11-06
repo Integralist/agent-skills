@@ -16,7 +16,10 @@ clarify skill first.
 `docs/research/<yyyy-mm-dd>-<slug>.md` using today's date. If the user or a
 coordinating skill names an active `projects/<project>/` directory, write
 `projects/<project>/research.md` instead. Ask if the scope is unclear; do not
-create a project directory solely because research may help later.
+create a project directory solely because research may help later. For `github`
+or an issue reference (`#<n>` or URL), read and follow
+[GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
+Artifacts instead of `projects/`.
 
 For project scope, create `projects/README.md` from
 [PROJECTS-README.md](../shared/PROJECTS-README.md) and
