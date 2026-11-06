@@ -5,7 +5,7 @@ description: >-
   stakeholders, from a spec, plan, or this session's discussion. Use when an
   engineering-led project needs product framing its spec doesn't give.
 argument-hint: "[source path | github | #<issue>]"
-allowed-tools: Bash(git config:*), Bash(date:*), Bash(gh issue:*), Bash(gh label:*), Glob, Read, Write
+allowed-tools: Bash(git config:*), Bash(date:*), Glob, Read, Write
 metadata:
   model-tier: complex
 ---

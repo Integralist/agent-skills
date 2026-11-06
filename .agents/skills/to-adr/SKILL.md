@@ -5,7 +5,7 @@ description: >-
   discussion, one per decision that clears the value bar. Use when recording
   an architectural decision with rejected alternatives.
 argument-hint: "[source path | github | #<issue>]"
-allowed-tools: Bash(git config:*), Bash(date:*), Bash(git mv:*), Bash(gh issue:*), Bash(gh label:*), Glob, Read, Edit, Write
+allowed-tools: Bash(git config:*), Bash(date:*), Bash(git mv:*), Glob, Read, Edit, Write
 metadata:
   model-tier: complex
 ---

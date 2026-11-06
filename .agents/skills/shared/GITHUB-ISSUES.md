@@ -7,14 +7,19 @@ project is already tracked in GitHub Issues. Keep the on-disk
 not selected.
 
 A project lives **either** on disk (`projects/<yyyy-mm-dd>-<slug>/`) **or** in
-GitHub Issues, never duplicated across both. Durable repository files
+GitHub Issues: leave project documents solely as Root Issue Artifacts and do not
+persist files under `projects/` unless the repository's `AGENTS.md` explicitly
+requires on-disk project records in Git (in which case, persist only the
+`AGENTS.md`-required files under `projects/`). Durable repository files
 (`docs/specs/<capability>.feature`, `docs/adr/README.md`, system-wide
 `docs/adr/ADR-<NNNN>.md`, `docs/research/`, and `GLOSSARY.md`) remain on disk
-in Git and are delivered via pull requests.
+in Git and are delivered via pull requests. Keep remote GitHub writes behind
+explicit user approval.
 
 ## Label bootstrap
 
-Before creating or querying project issues, ensure the three workflow labels
+Before creating the first project, slice, or task issue (never during read-only
+discovery or when inspecting a cited issue), ensure the three workflow labels
 exist idempotently in the current repository:
 
 ```bash
@@ -86,9 +91,13 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
 ## Discovery and selection
 
 - **Explicit issue reference:** If the user passes `#<number>` or an issue URL,
-  inspect it with `gh issue view <id> --json
-  number,title,state,labels,body,parent,subIssues,blockedBy`. If it is a Slice
-  or Task sub-issue, resolve its `parent` chain to identify the Root Issue.
+  first verify any URL's `<owner>/<repo>` matches the current checkout
+  (`gh repo view --json nameWithOwner --jq .nameWithOwner`); reject
+  foreign-repository issue URLs and stop rather than passing a bare `#<number>`
+  that targets the checkout's repository. Inspect the issue with `gh issue view
+  <id> --json number,title,state,labels,body,parent,subIssues,blockedBy`
+  (read-only; do not bootstrap labels or mutate the issue). If it is a Slice or
+  Task sub-issue, resolve its `parent` chain to identify the Root Issue.
 - **Listing open projects:** Run `gh issue list --label project --state open`
   (or `gh issue list --search 'in:title "(<slug>)" state:open' --label=project`
   when the project slug is known). If more than one open project matches, ask
@@ -127,9 +136,9 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
 2. **Task completion (closes locally per task):** When a task passes
    verification and is committed locally, post its
    [BUILD-ITEM.md](BUILD-ITEM.md) evidence table and commit SHA as a comment on
-   `#<task-issue>` and close it
-   immediately (`gh issue close <task-issue> --comment-file -`). In
-   `execute-plan`, use these commit trailers:
+   `#<task-issue>` (`gh issue comment <task-issue> --body-file -`), require the
+   comment command to succeed, and then close the issue (`gh issue close
+   <task-issue>`). In `execute-plan`, use these commit trailers:
 
    ```text
    Execution-Plan: #<root-issue>
@@ -141,8 +150,9 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
    Sub-Issues under `#<slice-issue>` are closed and
    [ACCEPT-SLICE.md](ACCEPT-SLICE.md) passes locally, tick the `M<n>.<m>`
    milestone checkboxes in `#<slice-issue>`'s body, post the slice acceptance
-   and review summary as a comment, and close `#<slice-issue>` (`gh issue close
-   <slice-issue>`). Closing accepted slices locally allows subsequent
+   and review summary (`gh issue comment <slice-issue> --body-file -`), require
+   it to succeed, and close `#<slice-issue>` (`gh issue close <slice-issue>`).
+   Closing accepted slices locally allows subsequent
    `next-slice` or `execute-plan` runs to see immediately which slice is next.
 4. **Pull requests and Root Issue closure (`open-pr`, `stacked-prs`):** Keep
    `#<root-issue>` open during local execution so the repository's issue list

@@ -861,6 +861,9 @@ test("GITHUB-ISSUES.md defines the 3-level issue hierarchy, artifact rules, and 
     "gh label create project",
     "gh label create slice",
     "gh label create task",
+    "never during read-only discovery",
+    "reject foreign-repository issue URLs",
+    "unless the repository's `AGENTS.md` explicitly requires on-disk project records",
     "<Project Title> (<slug>)",
     "<slug> / S<N>: <Slice Title>",
     "<slug> / S<N>-T<M>: <Task Title>",
@@ -874,10 +877,13 @@ test("GITHUB-ISSUES.md defines the 3-level issue hierarchy, artifact rules, and 
     "First skill that writes a project artifact creates the Root Issue",
     "Execution-Plan: #<root-issue>",
     "Execution-Task: slice-<n>/task-<m> (#<task-issue>)",
+    "gh issue comment <task-issue> --body-file -",
+    "gh issue close <task-issue>",
     "Closes #<root-issue>",
     "Part of #<root-issue>",
     "--draft",
   ]) assert.ok(content.includes(rule), `missing GITHUB-ISSUES.md rule: ${rule}`);
+  assert.ok(!content.includes("--comment-file"), "gh issue close does not support --comment-file");
   assert.throws(() => {
     const broken = content.replace("--type plan", "");
     assert.ok(broken.includes("--type plan"));
@@ -898,6 +904,7 @@ test("planning and task-compilation skills conditionally load GITHUB-ISSUES.md f
   const trigger = /For `github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
   for (const skill of planningSkills) {
     const content = read(skill);
+    assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);
     assertRequiredReference(content, "../shared/GITHUB-ISSUES.md", trigger);
     assert.throws(() => assertRequiredReference(content.replace(/read\s+and\s+follow/, "optional:"), "../shared/GITHUB-ISSUES.md", trigger));
   }
@@ -911,17 +918,18 @@ test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-IS
     ".agents/skills/open-pr/SKILL.md",
     ".agents/skills/stacked-prs/SKILL.md",
     ".agents/skills/spec-delta/SKILL.md",
-  ];
+  ].filter((skill) => existsSync(resolve(repo, skill)));
   const trigger = /For `github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
   for (const skill of executionAndDeliverySkills) {
     const content = read(skill);
+    assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);
     assertRequiredReference(content, "../shared/GITHUB-ISSUES.md", trigger);
     assert.throws(() => assertRequiredReference(content.replace(/read\s+and\s+follow/, "optional:"), "../shared/GITHUB-ISSUES.md", trigger));
   }
 });
 
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [githubIssuesPath, ".agents/skills/open-pr/SKILL.md", ".agents/skills/stacked-prs/SKILL.md", ".agents/skills/spec-delta/SKILL.md", ".agents/skills/pdd/SKILL.md", ".agents/skills/research/SKILL.md", ".agents/skills/to-adr/SKILL.md", ".agents/skills/to-prd/SKILL.md", skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"]) {
+  for (const relative of [githubIssuesPath, ".agents/skills/open-pr/SKILL.md", ".agents/skills/stacked-prs/SKILL.md", ".agents/skills/spec-delta/SKILL.md", ".agents/skills/pdd/SKILL.md", ".agents/skills/research/SKILL.md", ".agents/skills/to-adr/SKILL.md", ".agents/skills/to-prd/SKILL.md", skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"].filter((p) => existsSync(resolve(repo, p)))) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {
