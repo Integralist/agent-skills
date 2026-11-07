@@ -1,4 +1,4 @@
-.PHONY: install install-agents sync-skills install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
+.PHONY: install install-agents sync-skills install-claude install-pi install-gemini install-copilot install-opencode install-codex install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
 
 # Every action runs through scripts/step.sh, which prints one status line and
 # swallows the command's output unless it fails — see that file for the modes.
@@ -170,6 +170,14 @@ install-opencode:
 	@$(STEP) "model.json → ~/.local/state/opencode/model.json" cp .local/state/opencode/model.json ~/.local/state/opencode/model.json
 	@$(OPINJECT) "config.json → ~/.config/opencode/config.json" .config/opencode/config.json.tmpl ~/.config/opencode/config.json
 
+# Codex CLI reads ~/.codex. Both config.toml and hooks.json contain no secrets
+# and are copied verbatim.
+install-codex:
+	@$(STEP) --section "Codex"
+	@mkdir -p ~/.codex
+	@$(STEP) "config.toml → ~/.codex/config.toml" cp .codex/config.toml ~/.codex/config.toml
+	@$(STEP) "hooks.json → ~/.codex/hooks.json" cp .codex/hooks.json ~/.codex/hooks.json
+
 # Google Workspace MCP server (Calendar, Drive, Docs, Sheets, Slides, Gmail,
 # Chat). dist/index.js is an unmodified Apache-2.0 prebuilt bundle of upstream
 # gemini-cli-extensions/workspace (see mcp/google-workspace/NOTICE). Copied to a
@@ -219,5 +227,5 @@ check-specs:
 	@bash scripts/test-validate-specs.sh
 	@bash scripts/validate-specs.sh
 
-install: install-claude install-pi install-gemini install-copilot install-opencode install-google-workspace-mcp
+install: install-claude install-pi install-gemini install-copilot install-opencode install-codex install-google-workspace-mcp
 	@printf '\n✨ All set.\n'

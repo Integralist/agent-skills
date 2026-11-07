@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -message \"Codex finished\" -sound default"
+          }
+        ]
+      }
+    ]
+  }
+}
