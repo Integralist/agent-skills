@@ -34,10 +34,9 @@ as red. So:
 
 - **One behaviour per case.** The case name states it; a case proving two
   things becomes two cases.
-- **Every error path.** Each `if err != nil` branch in production code gets a
-  case that checks the failure, matching errors with `errors.Is` or
-  `errors.AsType`. Match on a substring only for an unexported third-party
-  error.
+- **Every error path.** Each error the public API can return gets a case that
+  checks the failure, matching errors with `errors.Is` or `errors.AsType`.
+  Match on a substring only for an unexported third-party error.
 - **Real assertions.** Assert state changes, header values, or payloads, never
   only `assert.NoError` when the call returns values. Assert the fields that
   matter rather than whole structs with `reflect.DeepEqual` or `cmp.Diff`,
@@ -50,9 +49,11 @@ as red. So:
 - **Cancellation.** A long-running, I/O-bound, or goroutine-spawning function
   gets a test proving it stops promptly when `ctx` is cancelled.
 - **Public API.** Test through exported names, preferably from
-  `package foo_test`, and delete branches no public path reaches. When
-  internal logic has intricate branching or state, extract it to a child
-  package under `internal/` with an exported API and test it there.
+  `package foo_test`. Reach each branch through the public call that triggers
+  it; delete any branch no public path reaches. Extract logic to `internal/`
+  only when it is a module with its own interface and a second caller or
+  adapter (see [code-module-design](../code-module-design/SKILL.md)), not just
+  to make it testable.
 - **No coverage loss.** Refactoring tests must never lower package statement
   coverage (`go test -cover`).
 

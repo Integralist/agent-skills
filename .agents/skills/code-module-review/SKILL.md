@@ -68,6 +68,8 @@ Use source evidence to check:
   proposed seam has a second adapter to justify it.
 - Whether moving logic would improve locality or leverage without pushing
   complexity onto callers.
+- Whether the module's tests reach it through its interface, or pin internal
+  helpers. Pinned helpers suggest the seam is in the wrong place.
 
 A finding must name its demonstrated cost: duplicated responsibility, leaked
 implementation, caller coordination, coupling, or another specific cost. A

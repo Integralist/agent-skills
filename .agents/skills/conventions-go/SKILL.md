@@ -334,13 +334,14 @@ structure. For acceptance suites and step definitions, also load
 code follows the feature's scenario structure. These rules bind whatever you
 write:
 
-- Unit-test logic, branches, and error cases in `*_test.go` with no build
-  tags. Integration-test cross-package and handler/database boundaries with
+- Test logic, branches, and error cases through the package's exported API, in
+  `*_test.go` with no build tags, preferably from `package foo_test`.
+  Integration-test cross-package and handler/database boundaries with
   `//go:build e2e` in `e2e/` or godog `.feature` files.
-- Test through the exported API, preferably from `package foo_test`. If
-  internal branching is awkward to reach that way, extract it into a child
-  package under `internal/` with its own public interface rather than testing
-  private functions.
+- Do not test unexported helpers directly. If a branch is awkward to reach,
+  change the public interface or delete the branch. Extract logic into a child
+  package under `internal/` only when it becomes a module with its own
+  interface and a second caller or adapter.
 - Write table tests as a `testCases` slice looped with `tc` and `t.Run`.
 - Mock with `testify/mock`, and add compile-time interface checks in test
   utility packages.

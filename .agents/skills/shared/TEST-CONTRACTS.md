@@ -16,3 +16,12 @@ refactors that preserve its contract.
 - Before keeping an assertion, name the contract violation it catches and an
   internal refactor it survives. Rewrite or remove checks that catch no defect;
   demonstrate failure with a stub or targeted mutation.
+
+## Placement
+
+- Put each case at the interface of the module that owns the behaviour. Do not
+  add tests for its unexported helpers.
+- Replace, don't layer: when tests at a deeper interface cover a behaviour,
+  delete the old unit tests on the shallow modules they replace. A test that
+  breaks on an internal refactor is testing past the interface; see
+  [code-module-design](../code-module-design/SKILL.md).

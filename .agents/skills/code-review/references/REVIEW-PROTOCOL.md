@@ -80,8 +80,10 @@ assigned lenses. A defect belongs to the profile whose question it answers.
    caller contracts. Check callers of changed exported symbols, signatures, or
    behaviour, including callers in unchanged files. Also check unchanged files
    bound by a changed spec, doc, or policy. Flag new public functions or error
-   branches without unit tests, endpoints or slices without integration tests,
-   and assertions that can't catch contract violations. Include
+   branches with no test reaching them through the public interface, endpoints
+   or slices without integration tests, tests that pin unexported helpers or
+   internal seams instead of the interface, and assertions that can't catch
+   contract violations. Include
    [TEST-CONTRACTS.md](../../shared/TEST-CONTRACTS.md). Hand off failure,
    concurrency, load, and rollout to reliability; attacker-driven misuse to
    security.
