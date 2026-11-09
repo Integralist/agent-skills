@@ -83,9 +83,9 @@ and stop. A context transition is not task or plan completion.
       [task-commits.md](references/task-commits.md).
 4. **Accept each slice.** Own review scheduling. Run code-review on the
    delivered diff for risky slices (security, public API or contract, schema,
-   or concurrency), using REVIEW-CHANGE.md. Other slices need no repeated
-   full review here; the final review still covers the whole plan. Explicitly
-   pass coordinator review ownership when invoking
+   or concurrency), using [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). Other
+   slices need no repeated full review here; the final review still covers the
+   whole plan. Explicitly pass coordinator review ownership when invoking
    [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md) or a standalone slice command.
    Resolve due findings through the normal task/correction loop before
    acceptance. Tick milestones only after acceptance, then prepare the next
