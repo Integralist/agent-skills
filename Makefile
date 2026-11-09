@@ -1,4 +1,4 @@
-.PHONY: install install-agents sync-skills install-claude install-pi install-gemini install-copilot install-opencode install-codex install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
+.PHONY: install install-agents sync-skills install-claude install-pi install-gemini install-copilot install-opencode install-codex install-swival install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
 
 # Every action runs through scripts/step.sh, which prints one status line and
 # swallows the command's output unless it fails — see that file for the modes.
@@ -227,5 +227,13 @@ check-specs:
 	@bash scripts/test-validate-specs.sh
 	@bash scripts/validate-specs.sh
 
-install: install-claude install-pi install-gemini install-copilot install-opencode install-codex install-google-workspace-mcp
+# Swival (Bedrock agent) config and its SSO helper. Both are copied verbatim:
+# the helper reads AWS_BEDROCK_SSO_SESSION from the environment.
+install-swival:
+	@$(STEP) --section "Swival"
+	@mkdir -p ~/.config/swival/scripts
+	@$(STEP) "config.toml → ~/.config/swival/config.toml" cp .config/swival/config.toml ~/.config/swival/config.toml
+	@$(STEP) "bedrock_sso.sh → ~/.config/swival/scripts/" cp .config/swival/scripts/bedrock_sso.sh ~/.config/swival/scripts/bedrock_sso.sh
+
+install: install-claude install-pi install-gemini install-copilot install-opencode install-codex install-swival install-google-workspace-mcp
 	@printf '\n✨ All set.\n'

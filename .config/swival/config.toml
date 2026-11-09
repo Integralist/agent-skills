@@ -1,0 +1,26 @@
+# Default behavior settings
+active_profile = "bedrock"
+cache = true
+max_turns = 250
+proactive_summaries = true
+subagents = true
+
+# AWS SSO Lifecycle Hook
+# This runs your script to ensure you are logged in before the agent starts.
+lifecycle_command = "~/.config/swival/scripts/bedrock_sso.sh"
+lifecycle_fail_closed = true
+lifecycle_timeout = 90
+
+# Define the Bedrock Profile
+[profiles.bedrock]
+aws_profile = "bedrock"
+base_url = "us-east-2"
+description = "Bedrock production environment"
+model = "global.anthropic.claude-opus-5-5"
+provider = "bedrock"
+
+[profiles.gemini]
+provider = "vertexai"
+location = "global"
+model = "gemini-3.8-flash" # gemini-4-argon
+reasoning_effort = "high"
