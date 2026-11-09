@@ -72,6 +72,11 @@ test("documented rules and unwritten precedent have different evidence requireme
   const protocol = flat(protocolPath);
   const maintainability = section(protocol, "4. **Maintainability:**", "5. **Conventions:**");
   const conventions = section(protocol, "5. **Conventions:**", "6. **Spec and plan adherence:");
+  assert.match(maintainability, /code-module-design/);
+  assert.match(maintainability, /Shotgun Surgery/);
+  assert.match(maintainability, /Divergent Change/);
+  assert.match(maintainability, /Mysterious Name/);
+  assert.match(maintainability, /demonstrated cost/);
   assert.match(maintainability, /unwritten precedent/);
   assert.match(maintainability, /at least two peer/);
   assert.match(maintainability, /documented requirements to conventions/);

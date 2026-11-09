@@ -101,10 +101,20 @@ assigned lenses. A defect belongs to the profile whose question it answers.
    changed. Hand off documented error-handling style to conventions and
    unwritten precedent to maintainability.
 4. **Maintainability:** What does this cost the next person changing it? Own
-   readability, API ergonomics, stale docs/comments, and unwritten precedent.
-   For an unwritten consistency finding, use precedent and cite at least two
-   peer `file:line` locations; one peer is a coincidence. Hand off documented
-   requirements to conventions and whether errors are handled to reliability.
+   module depth and seams
+   ([code-module-design](../../code-module-design/SKILL.md)), readability,
+   interface ergonomics, stale docs/comments, and unwritten precedent. Flag
+   structural smells only when they carry a demonstrated cost in the diff:
+   change amplification or poor locality (*Shotgun Surgery*, *Divergent Change*,
+   *Repeated Switches*), leaked ownership or coupling (*Feature Envy*, *Insider
+   Trading*, *Message Chains*, *Middle Man* pass-throughs, *Speculative
+   Generality* with a one-adapter seam), fragile interfaces or state
+   (*Mysterious Name*, *Data Clumps*, *Primitive Obsession*, *Long Parameter
+   List*, *Flag Argument*, *Temporary Field*, *Mutable/Global Data*), or tests
+   that pin internal helpers instead of the module interface. For an unwritten
+   consistency finding, use precedent and cite at least two peer `file:line`
+   locations; one peer is a coincidence. Hand off documented requirements to
+   conventions and whether errors are handled to reliability.
 5. **Conventions:** Does the code follow explicit applicable rules? Own
    documented naming, structure, idioms, error-handling style, comments,
    formatting, and test layout. Read selected skills and applicable references
