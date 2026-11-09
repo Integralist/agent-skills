@@ -17,10 +17,17 @@ set -euo pipefail
 template=.claude.json.tmpl
 target=$HOME/.claude.json
 
+# OP_ACCOUNT_NAME is the 1Password account subdomain, <name>.1password.com.
+# An unset value is an error, not a skip.
+if [ -z "${OP_ACCOUNT_NAME:-}" ]; then
+	echo "install-claude-json.sh: OP_ACCOUNT_NAME is not set; export it" >&2
+	exit 1
+fi
+
 tmp=$(mktemp)
 trap 'rm -f "$tmp" "$tmp.merged"' EXIT
 
-op inject --account fastly.1password.com -i "$template" -o "$tmp" -f
+op inject --account "$OP_ACCOUNT_NAME.1password.com" -i "$template" -o "$tmp" -f
 
 if [ ! -f "$target" ]; then
 	mv "$tmp" "$target"

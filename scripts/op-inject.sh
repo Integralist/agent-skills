@@ -12,7 +12,13 @@
 
 set -uo pipefail
 
-account=fastly.1password.com
+# OP_ACCOUNT_NAME is the 1Password account subdomain, <name>.1password.com.
+# It must be exported; an unset value is an error, not a skip.
+if [ -z "${OP_ACCOUNT_NAME:-}" ]; then
+	echo "op-inject.sh: OP_ACCOUNT_NAME is not set; export it" >&2
+	exit 1
+fi
+account="$OP_ACCOUNT_NAME.1password.com"
 step=(bash "$(dirname "$0")/step.sh")
 
 reachable() {
