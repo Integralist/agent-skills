@@ -37,6 +37,21 @@ install-tools:
 		$(STEP) --skip "crit: Homebrew not found — install manually from https://crit.md/"; \
 	fi
 
+PI_PACKAGES := \
+	npm:pi-intercom \
+	git:github.com/Integralist/pi-auto-model \
+	git:github.com/Integralist/pi-auto-suggest \
+	git:github.com/Integralist/pi-btw \
+	git:github.com/Integralist/pi-clean-view \
+	git:github.com/Integralist/pi-context-shake \
+	git:github.com/Integralist/pi-event-hooks \
+	git:github.com/Integralist/pi-prompt-history \
+	git:github.com/Integralist/pi-skill-argument-hints \
+	git:github.com/Integralist/pi-stash \
+	git:github.com/Integralist/pi-statusbar \
+	git:github.com/Integralist/pi-subagents \
+	git:github.com/Integralist/pi-transcript-enhancer
+
 # Install Pi, its configured packages, and global settings. The repository
 # settings are copied last so they remain the source of truth after pi install
 # updates the global package store. models.json stays in the repo as a reference
@@ -49,7 +64,7 @@ install-pi: install-tools
 	@mkdir -p ~/.pi/agent/skills/slack
 	@$(STEP) "slack skill → ~/.pi/agent/skills/slack/" cp .pi/agent/skills/slack/SKILL.md ~/.pi/agent/skills/slack/SKILL.md
 	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-	@for package in git:github.com/Integralist/pi-auto-model git:github.com/Integralist/pi-statusbar npm:pi-intercom git:github.com/Integralist/pi-subagents git:github.com/Integralist/pi-btw git:github.com/Integralist/pi-transcript-enhancer git:github.com/Integralist/pi-context-shake git:github.com/Integralist/pi-skill-argument-hints git:github.com/Integralist/pi-event-hooks git:github.com/Integralist/pi-prompt-history git:github.com/Integralist/pi-clean-view git:github.com/Integralist/pi-stash; do \
+	@for package in $(PI_PACKAGES); do \
 		$(STEP) --timeout $(PKG_TIMEOUT) --optional "$$package" pi install "$$package" --no-approve; \
 	done
 	@mkdir -p ~/.pi/agent/themes

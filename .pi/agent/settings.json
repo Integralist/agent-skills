@@ -11,16 +11,17 @@
   "packages": [
     "npm:pi-intercom",
     "git:github.com/Integralist/pi-auto-model",
-    "git:github.com/Integralist/pi-statusbar",
-    "git:github.com/Integralist/pi-subagents",
+    "git:github.com/Integralist/pi-auto-suggest",
     "git:github.com/Integralist/pi-btw",
-    "git:github.com/Integralist/pi-transcript-enhancer",
+    "git:github.com/Integralist/pi-clean-view",
     "git:github.com/Integralist/pi-context-shake",
-    "git:github.com/Integralist/pi-skill-argument-hints",
     "git:github.com/Integralist/pi-event-hooks",
     "git:github.com/Integralist/pi-prompt-history",
-    "git:github.com/Integralist/pi-clean-view",
+    "git:github.com/Integralist/pi-skill-argument-hints",
     "git:github.com/Integralist/pi-stash",
+    "git:github.com/Integralist/pi-statusbar",
+    "git:github.com/Integralist/pi-subagents",
+    "git:github.com/Integralist/pi-transcript-enhancer",
     {
       "source": "git:github.com/fastly/agent-skills-internal",
       "skills": [
