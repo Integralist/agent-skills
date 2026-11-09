@@ -6,20 +6,22 @@ Scenarios move between them without changing their meaning.
 
 ## Scenarios
 
-Use feature-level Gherkin: fenced `gherkin` blocks in project Markdown, raw
-Gherkin in living `.feature` files. Each scenario defines an acceptance test
-through a system boundary (API, CLI, handler); unit behaviour belongs in
-ordinary tests. For non-code work, name the checkable assertion (command
-output, file state) that proves the behaviour.
+Use fenced `gherkin` in project Markdown and raw Gherkin in living `.feature`
+files. Each scenario tests a system boundary (API, CLI, handler); unit behaviour
+belongs in ordinary tests. For non-code work, name the command output or file
+state that proves the behaviour.
 
 - **Declarative, not imperative.** Say what behaviour holds, not the clicks or
   calls that reach it.
 - **One behaviour per scenario.** If it needs "and then also", split it.
 - **Concrete and observable.** Name values and outcomes, never "works
   correctly".
-- **The domain's words.** Use the terms the glossary and code use.
-- Use `Background` for preconditions every scenario shares, and
-  `Scenario Outline` with `Examples` for one behaviour across inputs.
+- **Readable titles and steps.** Name the actor, action and observable result;
+  explain established glossary/code terms first. Keep fixtures out of user
+  goals unless the goal is testing or operation.
+- Use `Rule` to group one business rule, `Background` only for shared
+  preconditions, and `Scenario Outline` with `Examples` for varied inputs.
+  Add tags only for project conventions or explicit requirements.
 
 ## Living spec
 
@@ -65,8 +67,8 @@ and their acceptance tests together.
 Read a legacy Markdown living spec as the baseline, then plan its conversion
 with the implementation. Preserve all durable requirements: turn normative
 prose into scenarios, move supporting detail to its lasting home, and split
-multiple `Feature` blocks into capability files. Replace existing test-local
-copies with direct loading, update current links, and remove the superseded
+multiple `Feature` blocks into capability files. Replace test-local copies
+with direct loading, update links, and remove the superseded
 living Markdown. A format-only conversion preserves behaviour; any changed
 behaviour needs a delta. Leave historical project snapshots and
 revision-pinned references intact.

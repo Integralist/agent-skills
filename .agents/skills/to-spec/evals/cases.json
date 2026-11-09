@@ -1,0 +1,72 @@
+[
+  {
+    "id": "whole-spec-first-reader",
+    "prompt": "Use source.md to write projects/2026-01-01-slack/spec.md. This is a settled local feature request; leave the stated production mechanism open. Do not implement anything.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "printf '%s\\n' '# Requested Slack feature\n\nEmployees and invited customers can mention the customer app in an approved shared channel. Keep the internal app separate. Documentation needs no customer sign-in. Customer data requires the asker'\\''s own linked Customer account and ai_assistant enabled. Staff status grants no extra Customer access.\n\nEach asker privately chooses channel or DM delivery; no one inherits another person'\\''s history. A delivery choice expires five minutes after its pending record is created. Refuse late choices before sending an answer. After logout, the old link cannot start tools or send answers.\n\nThe adapter uses verified Slack request receipts and bounded delegation; these phrases name a protected request record and short-lived permission tokens, not a requirement for readers to know the platform. The broker owns linking and credential storage. No raw key enters agent inputs.\n\nFinish with the local mock stack. Real-provider deployment is outside scope. A production credential mechanism is undecided; explicitly record it under Open Questions rather than choosing it. Scenario prefixes SA and AL may be used, but explain them if used.' > source.md",
+      "git add source.md && git commit -q -m 'feature request'"
+    ],
+    "checks": [
+      "The Development Brief starts with a short current-request summary, not a transcript or chronology.",
+      "The original build request is preserved verbatim or through a fixed-revision source link.",
+      "A reader can identify which Slack customers may ask without decoding admitted surfaces.",
+      "The user stories describe user capabilities; only a testing or operator story relies on fixture terminology.",
+      "The spec explains a request receipt and delegation token before relying on those objects.",
+      "Any scenario prefixes used by the output are explained once.",
+      "The production mechanism remains a clearly labelled open question.",
+      "The completion evidence includes a clarity pass over tables, Gherkin and technical sections, not only the introduction."
+    ],
+    "verify": [
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\");const s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\");for(const h of [\"Development Brief\",\"Problem Statement\",\"Solution\",\"User Stories\",\"Acceptance Criteria\",\"Testing Seams\",\"Implementation Decisions\",\"Out of Scope\",\"Living Specifications\",\"Research\",\"Open Questions\"])a.ok(s.includes(\"## \"+h),h);a.match(s,/Status:\\*\\* Draft/);a.match(s,/```gherkin\\n/);'",
+      "git diff --exit-code HEAD -- source.md",
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\");a.match(s,/ai_assistant/);a.match(s,/five minutes|five-minute|5 minutes/);a.match(s,/## Open Questions\\n/);'"
+    ]
+  },
+  {
+    "id": "security-detail-without-shorthand",
+    "prompt": "Write projects/2026-01-01-slack/spec.md from source.md. Make it readable for a new contributor without weakening any requirement. Do not write a plan or code.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "printf '%s\\n' '# Link and delivery contract\n\nThe request uses the actor_id and customer_id fields. A verified receipt is an opaque reference to the original request record. Keep the scope docs_only for callers with no account link. A data-tool attempt returns scope_denied before any tool executes.\n\nA link generation is the version of an account link. After logout retires that generation, dispatch, token exchange and pre-send checks return invalidated; otherwise a channel-policy exclusion returns context_forbidden. Check invalidated first when both apply. Expiry is five minutes from setup creation, not the last retry.\n\nRefresh uses its own version and cannot restore a retired link. Raw credentials remain broker-owned. Runtime tests use fixtures. Staff callers have no extra Customer permission.\n\nDocument this behavior without choosing an unapproved provider schema, adding components or implementing a plan.' > source.md",
+      "git add source.md && git commit -q -m 'security contract'"
+    ],
+    "checks": [
+      "Titles and scenario steps identify the actor, action and observable refusal rather than merely saying governed or valid.",
+      "The receipt reference is distinguished from a credential or delivery acknowledgement.",
+      "The account-link version is distinguished from the refresh version.",
+      "The refusal precedence, expiry origin and absence of extra staff access remain explicit.",
+      "The technical sections explain permissions and storage in concrete actions without a blanket jargon ban.",
+      "Each obligation has one clear home or cross-reference rather than repeated paragraphs.",
+      "The spec does not invent a provider interface or claim runtime acceptance passed."
+    ],
+    "verify": [
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\");const s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\");for(const h of [\"Development Brief\",\"Problem Statement\",\"Solution\",\"User Stories\",\"Acceptance Criteria\",\"Testing Seams\",\"Implementation Decisions\",\"Out of Scope\",\"Living Specifications\",\"Research\",\"Open Questions\"])a.ok(s.includes(\"## \"+h),h);a.match(s,/Status:\\*\\* Draft/);a.match(s,/```gherkin\\n/);'",
+      "git diff --exit-code HEAD -- source.md",
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\");for(const x of [\"actor_id\",\"customer_id\",\"docs_only\",\"scope_denied\",\"invalidated\",\"context_forbidden\"])a.ok(s.includes(x),x);'"
+    ]
+  },
+  {
+    "id": "scoped-wording-revision",
+    "prompt": "In projects/2026-01-01-slack/spec.md change only the Solution paragraph to say the milestone includes the acceptance tests, not just starting the Bot. Keep the agreed access rules, scenarios, source history and open decision unchanged.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "mkdir -p projects/2026-01-01-slack",
+      "printf '%s\\n' '# Customer links — Specification\n\n- **Status:** Draft\n\n## Development Brief\n\nKeep the internal app separate. The Bot serves approved shared-channel customers.\n\n## Problem Statement\n\nCustomer linking needs a clear contract.\n\n## Solution\n\nVerify the asker and their own Customer access.\n\n## User Stories\n\n1. As a customer, I can ask in an approved shared channel.\n\n## Acceptance Criteria\n\n```gherkin\nFeature: Linked Customer access\n  Scenario: AL01 Logout stops new work\n    Given a retired account-link generation\n    When the Bot authorizes a data question\n    Then the request is refused with invalidated\n```\n\n## Testing Seams\n\nUse the private authorization API.\n\n## Implementation Decisions\n\nThe broker owns the account-link record.\n\n## Out of Scope\n\nProduction deployment.\n\n## Living Specifications\n\n`docs/specs/customer-links.feature` will own this behavior.\n\n## Research\n\nNone.\n\n## Open Questions\n\nThe production identity provider remains undecided.' > projects/2026-01-01-slack/spec.md",
+      "git add . && git commit -q -m 'initial contract'"
+    ],
+    "checks": [
+      "The revision stays within the requested Solution paragraph.",
+      "The new wording includes satisfying acceptance criteria as part of completion.",
+      "The scenario, source history and unresolved production choice remain unchanged.",
+      "The editor checks the changed section and its references without a new full architecture critique.",
+      "Completion distinguishes document validation from executing the acceptance feature."
+    ],
+    "verify": [
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),c=require(\"node:child_process\"),p=\"projects/2026-01-01-slack/spec.md\",before=c.execFileSync(\"git\",[\"show\",\"HEAD:\"+p],{encoding:\"utf8\"}),after=f.readFileSync(p,\"utf8\"),strip=s=>s.replace(/## Solution\\n[\\s\\S]*?(?=\\n## User Stories)/,\"SOLUTION\");a.equal(strip(before),strip(after));a.notEqual(before,after);'"
+    ]
+  }
+]

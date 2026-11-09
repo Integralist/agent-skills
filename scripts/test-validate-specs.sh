@@ -25,6 +25,10 @@ Document the behavior.
 
 ## Acceptance Criteria
 
+## Open Questions
+
+None.
+
 ## Living Specifications
 SPEC_HEADER
   printf '%s\n' "$living_reference" >>"$SPEC"
@@ -266,3 +270,42 @@ write_spec 'No durable behaviour changes.'
 grep -v '^[[:space:]]*When ' "$SPEC" >"$SPEC.tmp"
 mv "$SPEC.tmp" "$SPEC"
 expect_pass 'project scenarios need not invent a When step either'
+
+reset_fixture
+write_spec 'No durable behaviour changes.'
+grep -v '^## Open Questions$' "$SPEC" >"$SPEC.tmp"
+mv "$SPEC.tmp" "$SPEC"
+expect_failure 'unresolved decisions need their own discoverable section' \
+  "missing '## Open Questions'"
+
+for fence in '```' '~~~' '````'; do
+  write_spec 'No durable behaviour changes.'
+  grep -v '^## Open Questions$' "$SPEC" >"$SPEC.tmp"
+  mv "$SPEC.tmp" "$SPEC"
+  printf '\n%smarkdown\n## Open Questions\n%s\n' "$fence" "$fence" >>"$SPEC"
+  expect_failure "a $fence example heading does not replace the real questions section" \
+    "missing '## Open Questions'"
+done
+
+write_spec 'No durable behaviour changes.'
+grep -v '^## Open Questions$' "$SPEC" >"$SPEC.tmp"
+mv "$SPEC.tmp" "$SPEC"
+# Fence markers are literal Markdown, not shell substitutions.
+# shellcheck disable=SC2016
+printf '\n````markdown\n```text\n## Open Questions\n```\n````\n' >>"$SPEC"
+expect_failure 'a shorter nested fence does not expose a quoted heading' \
+  "missing '## Open Questions'"
+
+printf '\n## Open Questions\n\nNone.\n' >>"$SPEC"
+expect_pass 'a real questions heading after a fenced example is accepted'
+
+write_spec 'No durable behaviour changes.'
+grep -v '^## Open Questions$' "$SPEC" >"$SPEC.tmp"
+mv "$SPEC.tmp" "$SPEC"
+# Four-space-indented backticks are content inside this example.
+# shellcheck disable=SC2016
+printf '\n```markdown\n    ```\n## Open Questions\n```\n' >>"$SPEC"
+expect_failure 'indented backticks do not end a fenced example' \
+  "missing '## Open Questions'"
+printf '\n## Open Questions\n\nNone.\n' >>"$SPEC"
+expect_pass 'a real heading after the indented-marker example is accepted'

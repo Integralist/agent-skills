@@ -100,6 +100,25 @@ validate_doc_references() {
   return "$file_errors"
 }
 
+has_open_questions() {
+  # Ignore headings inside examples, including shorter fences nested in them.
+  awk '
+    match($0, /^ ? ? ?(```+|~~~+)/) {
+      marker = substr($0, RSTART, RLENGTH)
+      gsub(/[[:space:]]/, "", marker)
+      if (fence == "") {
+        fence = substr(marker, 1, 1); size = length(marker)
+      } else if (substr(marker, 1, 1) == fence && length(marker) >= size &&
+                 substr($0, RLENGTH + 1) ~ /^[[:space:]]*$/) {
+        fence = ""
+      }
+      next
+    }
+    fence == "" && /^## Open Questions[[:space:]]*$/ { found = 1 }
+    END { exit !found }
+  ' "$1"
+}
+
 validate_project_document() {
   local file=$1
   local file_errors=0
@@ -111,6 +130,7 @@ validate_project_document() {
     grep -q '^## Solution' "$file" || { error "$file: missing '## Solution'"; file_errors=$((file_errors + 1)); }
     grep -q '^## Acceptance Criteria' "$file" || { error "$file: missing '## Acceptance Criteria'"; file_errors=$((file_errors + 1)); }
     grep -q '^## Living Specifications' "$file" || { error "$file: missing '## Living Specifications'"; file_errors=$((file_errors + 1)); }
+    has_open_questions "$file" || { error "$file: missing '## Open Questions'"; file_errors=$((file_errors + 1)); }
     if ! validate_gherkin "$file"; then file_errors=$((file_errors + 1)); fi
     if ! validate_doc_references "$file"; then file_errors=$((file_errors + 1)); fi
   elif [[ "$(basename "$file")" == "plan.md" ]]; then

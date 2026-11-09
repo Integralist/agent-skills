@@ -1,0 +1,67 @@
+[
+  {
+    "id": "explain-security-actions",
+    "prompt": "Rewrite source.md as rewrite.md in product voice for a new contributor. Preserve the access restrictions and unresolved decision. Leave source.md unchanged.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "printf '%s\\n' '# Request handling\n\nThe independently admitted customer Slack surface consumes Slack-origin provenance receipts and issues delegation. The governed consumer rejects unscoped cross-user context before effectful work.\n\nHere that means the customer Bot checks the verified asker and approved shared channel, uses a protected request record to detect a changed question or reply destination, and issues short-lived permission tokens. Conversation history stays with its owner; no one borrows another user'\\''s Customer access.\n\nAn unlinked caller has docs_only scope. A data-tool request returns scope_denied and runs no tool. Pending choices expire five minutes after the record is created; retrying does not extend it. Keep raw credentials out of agent inputs. The mechanism for production peer authentication is still undecided.' > source.md",
+      "git add source.md && git commit -q -m 'original explanation'"
+    ],
+    "checks": [
+      "The rewrite identifies the customer Bot as the component checking the request.",
+      "It names the permitted requester and shared-channel boundary rather than a vague supported customer.",
+      "It explains receipts as protected request references, not API credentials.",
+      "It names delegation tokens rather than saying issues delegation without an object.",
+      "The rewrite preserves tool refusal, history ownership, deadline origin and credential secrecy.",
+      "The production authentication mechanism stays visibly undecided."
+    ],
+    "verify": [
+      "git diff --exit-code HEAD -- source.md",
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"rewrite.md\",\"utf8\");for(const x of [\"docs_only\",\"scope_denied\"])a.ok(s.includes(x));a.match(s,/five minutes|five-minute|5 minutes/);'"
+    ]
+  },
+  {
+    "id": "concise-not-vague",
+    "prompt": "Make source.md clearer and more concise in rewrite.md for a product reviewer. Do not change the proposal or hide unresolved details. Leave source.md unchanged.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "printf '%s\\n' '# Reply delivery\n\nThis feature, which is currently a proposal and has not been deployed, allows each asker to make a private choice of the channel or DM destination for that asker'\\''s answer. The destination chosen by one asker does not become the destination for any other asker. The feature keeps the original question unchanged. The feature keeps the original question unchanged.\n\nOnly customers invited into an approved shared channel can use this customer path. Merely saying supported customers would not explain which ones. The fixed failure code is receipt_invalid when a forwarder changes the question or reply destination. The current record has no specified conversation-expiry duration; do not borrow the five-minute choice deadline as that duration.' > source.md",
+      "git add source.md && git commit -q -m 'repetitive proposal'"
+    ],
+    "checks": [
+      "The duplicate unchanged-question statement is removed.",
+      "The rewrite still says the proposal is not deployed.",
+      "It states which customers may use the path rather than hiding eligibility in a shorter label.",
+      "The private delivery choice and per-asker destination ownership remain clear.",
+      "The missing conversation-expiry decision is visible without inventing a duration.",
+      "The rewrite is shorter by removing repetition, not by replacing explanations with unexplained acronyms."
+    ],
+    "verify": [
+      "git diff --exit-code HEAD -- source.md",
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"rewrite.md\",\"utf8\");a.ok(s.includes(\"receipt_invalid\"));a.ok(s.split(/\\s+/).length<f.readFileSync(\"source.md\",\"utf8\").split(/\\s+/).length);'"
+    ]
+  },
+  {
+    "id": "technical-prose-is-editable",
+    "prompt": "Rewrite the explanation, scenario title and natural-language steps in source.md for clarity in rewrite.md. Keep its Gherkin syntax, ID, field names, exact error value, timing and source quotation. Leave source.md unchanged.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "printf '%s\\n' '# Temporary request storage\n\n> Original request: no customer credentials in tenant storage.\n\nThe independently admitted broker consumer atomically consumes temporary opaque setup-state authority and fences invalidation before effectful execution.\n\n```gherkin\nFeature: Setup state cannot be reused\n  @proposed\n  Scenario: AL02 Invalidated setup authority cannot induce effectful work\n    Given request_id identifies setup state created five minutes ago\n    When the consumer evaluates elapsed setup authority\n    Then the consumer refuses with state_expired before effectful work\n```\n\nThis means the broker claims setup once, refuses it at its five-minute deadline and starts no work. Preserve those guarantees; the explanation can be rewritten.' > source.md",
+      "git add source.md && git commit -q -m 'technical prose'"
+    ],
+    "checks": [
+      "The technical explanation, scenario title and steps become readable rather than being exempted from editing.",
+      "AL02, request_id, state_expired and the proposed tag remain exact.",
+      "The one-use setup claim, expiry origin and no-work-on-refusal guarantees remain unchanged.",
+      "The source quotation stays verbatim.",
+      "The rewrite names the broker and says what it refuses or starts."
+    ],
+    "verify": [
+      "git diff --exit-code HEAD -- source.md",
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"rewrite.md\",\"utf8\");for(const x of [\"AL02\",\"request_id\",\"state_expired\",\"@proposed\",\"> Original request: no customer credentials in tenant storage.\",\"```gherkin\"])a.ok(s.includes(x),x);a.match(s,/five minutes|five-minute|5 minutes/);'"
+    ]
+  }
+]

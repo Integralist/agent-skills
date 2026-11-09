@@ -237,8 +237,13 @@ check-code-review:
 check-execute-plan:
 	@node --test .agents/skills/execute-plan/tests/contracts.test.mjs
 
+.PHONY: check-spec-writing
+# Check evaluation fixtures, not the skills' generated prose; cold evals run separately.
+check-spec-writing:
+	@node --test .agents/skills/to-spec/tests/cases.test.mjs
+
 # Validate active PDD project documents, project specs, plans, and living capability specs.
-check-specs:
+check-specs: check-spec-writing
 	@bash scripts/test-validate-specs.sh
 	@bash scripts/validate-specs.sh
 

@@ -4,13 +4,15 @@ Shared principle for skills whose human-readable deliverable is prose: docs,
 PR/commit messages, changelogs, plans, research, summaries, handoffs, and
 ADR/PRD text.
 
-Omit needless words (Strunk & White). Write the point, then delete any word,
-sentence, or qualifier removable without losing meaning. Prefer short words,
-active voice, and one clause over two.
+Use the shortest complete explanation, not the fewest words. State the point;
+cut filler, repetition and qualifiers that add no meaning. Prefer familiar
+words, active verbs and concrete actors over compressed jargon or acronyms.
 
-- Cut filler and throat-clearing ("this PR", "simply", "just", "in order to",
-  "it should be noted that").
-- Cut hedging and unnecessary qualifiers.
-- Don't restate what a heading, table, or diagram already says.
-- Keep technical accuracy exact. Never drop load-bearing details such as paths,
-  flags, constraints, or edge cases; keep them when in doubt.
+- Keep each obligation in one clear place; link rather than repeat it.
+- Explain a necessary term once, then use it consistently. No banned-word list
+  or sentence-length quota can decide whether a term is needed.
+- Preserve paths, flags, permissions, timing, ownership, edge cases and
+  uncertainty. If a shorter version needs more explanation, it is not clearer.
+- Separate a summary from supporting history/detail. Collapsing text improves
+  navigation, not word count. Never move a requirement out of its durable home
+  just to make a document look shorter.

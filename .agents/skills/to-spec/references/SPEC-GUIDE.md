@@ -1,54 +1,45 @@
 # Spec writing guide
 
-Read this before drafting acceptance criteria or the project spec.
+Read before drafting prose or acceptance criteria.
+
+## Reader path and clarity check
+
+Start Development Brief with a short summary of the request, boundaries and
+open choices. Preserve original requests/decisions as fixed-revision links or
+verbatim evidence; optionally collapse long history. Redact secrets.
+
+User stories describe capabilities, not fixtures, except for testing/operator
+stories. Explain roles/terms before using them; follow the glossary without
+copying its editorial notes into the spec.
+
+Before handoff, check the whole initial draft, including tables, technical
+sections and Gherkin:
+
+1. Can a fresh reader identify actor, action, permissions, outcome and open
+   decisions? Explain acronyms, objects and scenario prefixes once; link
+   relevant source code.
+2. State each obligation once; link repetitions. Separate Research from Open
+   Questions. Keep unique contracts here until a linked durable home exists;
+   replaceable tasks belong in the plan. Dropdowns do not replace criteria.
+3. Preserve IDs, protocol values, ownership, timing, failures and uncertainty.
+   If unclear wording exposes an undecided requirement, ask; do not write it
+   as settled.
 
 ## Scenarios and scope
 
-Describe observable behaviour and required contracts for human or software
-consumers. Include technical details when they define an interface, security
-guarantee, or explicit operational constraint. Keep replaceable implementation
-mechanics in Implementation Decisions or the plan. A component name or call
-restriction belongs in a scenario only when changing it would violate the
-requirement, not merely change the implementation.
+Follow [SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md). Include technical details
+only when they define a required interface, security guarantee or operational
+constraint. A component name or call restriction belongs in a scenario only
+if changing it would violate the requirement.
 
-Use Gherkin's optional `Rule` to group scenarios that illustrate one business
-rule when it adds clarity. Add tags only for an established project convention
-or explicit requirement, choosing values from that context (for example,
-`@billing`). Omit tags when they add no meaning. Use `Background` only for
-preconditions shared by every scenario; keep scenario-specific conditions in
-the scenario.
+Acceptance Criteria states observable behaviour; Testing Seams names the
+highest reusable boundary where tests observe it, not an internal call.
+Living Specifications assigns each durable scenario to an owning
+`docs/specs/<capability>.feature` file loaded directly by acceptance runners.
 
-Example:
-
-```gherkin
-Feature: Local assistant mock replies
-
-  Background:
-    Given replies are local test output, not AI-generated or live data
-    And service and statistics replies use sample information
-
-  Scenario: An ordinary question gets guidance without sign-in
-    Given the User is not signed in
-    When the User asks an ordinary question in Slack
-    Then the reply explains that this local test cannot generate AI answers
-
-  Scenario: A user asks for sample services
-    When the User asks for mock services in Slack
-    Then the reply shows sample service information
-```
-
-In `spec.md`'s `## Living Specifications` section, list each owning
-`docs/specs/<capability>.feature` file and the behaviour it covers. Acceptance
-runners load those `.feature` files directly; do not keep duplicate scenarios
-in test-local files. In `## Acceptance Criteria`, state observable behaviour:
-what users see or systems do. In `## Testing Seams`, name the highest reusable
-boundary tests should use to observe that behaviour (prefer a boundary over
-an internal call).
-
-If the feature changes behaviour held in a living spec, write a
-[`## Behavioural Delta`](../../shared/SPEC-FORMAT.md#behavioural-delta) section
-in `spec.md`. Include agreed constraints and failure behaviour. Keep newly
-identified risks and undecided responses in Open Questions until settled.
+For changed living behaviour, record a Behavioural Delta against a pinned
+baseline. Include agreed constraints and failures; leave new risks and
+undecided responses in Open Questions.
 
 ## Spec template
 
@@ -62,18 +53,17 @@ identified risks and undecided responses in Open Questions until settled.
 
 ## Development Brief
 
-These are the instructions for building this feature, kept in their original
-wording so reviewers can check that the acceptance criteria cover the request.
-
-{Quoted build request and clarifications, or revision-pinned design links.}
+{Current request, agreed boundaries and open choices. Preserve original
+requests/clarifications here or link fixed-revision evidence; collapse long
+source history, not requirements.}
 
 ## Problem Statement
 
-{What is wrong or missing, for whom.}
+{What is missing, for whom.}
 
 ## Solution
 
-{What will exist when this is done.}
+{What will exist when done.}
 
 ## User Stories
 
@@ -82,35 +72,34 @@ wording so reviewers can check that the acceptance criteria cover the request.
 ## Acceptance Criteria
 
 ```gherkin
-Feature: {capability}
+Feature: {reader-visible capability}
 
-  Scenario: {one required behaviour}
-    Given {a relevant starting state}
-    When {an actor takes an action}
-    Then {an observable outcome or required guarantee holds}
+  Scenario: {one required outcome}
+    Given {relevant starting state}
+    When {an actor acts}
+    Then {an observable result or required guarantee holds}
 ```
 
 ## Behavioural Delta
 
-{Baseline and grouped scenarios, per SPEC-FORMAT.md.}
+{Baseline and grouped scenarios per SPEC-FORMAT.md; omit if unchanged.}
 
 ## Testing Seams
 
-- {Seam} — {what it covers, why chosen}
+- {Boundary — what it proves and why chosen}
 
 ## Implementation Decisions
 
-- {Interface, contract, schema, or API shape, and the decision about it}
+- {Required interface, contract, schema or API shape and rationale}
 
 ## Out of Scope
 
-- {What is excluded, to bound the work}
+- {Exclusions}
 
 ## Living Specifications
 
-- {[`docs/specs/<capability>.feature`](...) — the behaviour it owns. Use inline
-  code for a file that implementation will create, or
-  "None — no durable behaviour changes"}
+- {Existing owning feature link and behaviour, inline-code future path,
+  or "None — no durable behaviour changes"}
 
 ## Research
 
@@ -118,5 +107,5 @@ Feature: {capability}
 
 ## Open Questions
 
-- {Unresolved decisions or risks}
+- {Unresolved decisions/risks, or "None"}
 ````

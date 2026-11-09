@@ -40,6 +40,7 @@ const planGuidePath = ".agents/skills/to-plan/references/PLAN-GUIDE.md";
 const taskGuidePath = ".agents/skills/to-tasks/references/TASK-GUIDE.md";
 const specPath = ".agents/skills/to-spec/SKILL.md";
 const specGuidePath = ".agents/skills/to-spec/references/SPEC-GUIDE.md";
+const specDraftTrigger = /Before any prose or Gherkin, read \[voice-product\]\([^)]*\), \[SPEC-FORMAT\.md\]\([^)]*\) and the \[writing guide and clarity check\]\(references\/SPEC-GUIDE\.md\)/;
 
 // Read only named references whose entry point requires loading them before
 // the action under test. A file's existence or a bare link is not enough.
@@ -66,8 +67,7 @@ function taskGuide() {
 }
 
 function specGuide() {
-  return requiredReference(specPath, specGuidePath, "references/SPEC-GUIDE.md",
-    /Before drafting scenarios or a Behavioural Delta section in `spec\.md`, read \[SPEC-FORMAT\.md\]\([^)]*\) and \[SPEC-GUIDE\.md\]\(references\/SPEC-GUIDE\.md\)/);
+  return requiredReference(specPath, specGuidePath, "references/SPEC-GUIDE.md", specDraftTrigger);
 }
 
 function reviewModes() {
@@ -417,12 +417,13 @@ test("compiled tasks map to milestones without copying the plan checklist", () =
 test("planning preserves the build request and checks coverage before handoff", () => {
   const spec = flat(specPath);
   const plan = flat(planPath);
-  assert.match(spec, /Preserve the build request and requirement-changing clarifications in `spec\.md`'s `## Development Brief` \(see \[SPEC-GUIDE\.md\]\(references\/SPEC-GUIDE\.md\)\)/);
-  assert.match(flat(specGuidePath), /Quoted build request and clarifications, or revision-pinned design links/);
-  assert.match(spec, /verbatim quotes or links to full documents at fixed revisions/);
-  assert.match(spec, /Keep earlier wording; record later decisions separately\. Redact secrets/);
+  assert.match(spec, /Preserve the request and requirement-changing clarifications in Development Brief/);
+  assert.match(spec, /Keep original evidence, record later decisions separately, and redact secrets/);
   const guide = specGuide().replace(/\s+/g, " ");
-  assert.match(guide, /newly identified risks and undecided responses in Open Questions until settled/);
+  assert.match(guide, /Preserve original requests\/decisions as fixed-revision links or verbatim evidence/);
+  assert.match(guide, /leave new risks and undecided responses in Open Questions/);
+  assert.match(spec, /whole-draft clarity check before handoff/);
+  assert.match(spec, /For a scoped revision, review changed sections and related terms\/references/);
   assert.match(plan, /fresh read-only reviewer compare the preserved build request and clarifications with the spec and plan/);
   assert.match(planGuide().replace(/\s+/g, " "), /every requirement maps to a milestone and acceptance check/);
   assert.match(plan, /If delegation or the original build request is unavailable, inspect what is available and record the limitation/);
@@ -842,13 +843,13 @@ test("relocated guides must have explicit links and action-specific loading trig
   for (const [path, target, trigger] of [
     [planPath, "references/PLAN-GUIDE.md", /Design vertical slices using \[PLAN-GUIDE\.md\]\(references\/PLAN-GUIDE\.md\)/],
     [compilerPath, "references/TASK-GUIDE.md", /Before drafting, read \[TASK-GUIDE\.md\]\(references\/TASK-GUIDE\.md\)/],
-    [specPath, "references/SPEC-GUIDE.md", /Before drafting scenarios or a Behavioural Delta section in `spec\.md`, read \[SPEC-FORMAT\.md\]\([^)]*\) and \[SPEC-GUIDE\.md\]\(references\/SPEC-GUIDE\.md\)/],
+    [specPath, "references/SPEC-GUIDE.md", specDraftTrigger],
     [reviewSkillPath, "references/MODES.md", /source commands in \[MODES\.md\]\(references\/MODES\.md\)/],
   ]) {
     const content = read(path);
     assertRequiredReference(content, target, trigger);
     assert.throws(() => assertRequiredReference(content.replaceAll(`](${target})`, "](missing.md)"), target, trigger));
-    assert.throws(() => assertRequiredReference(content.replace(/Design vertical slices using|Before drafting|source commands in/, "Optional reading:"), target, trigger));
+    assert.throws(() => assertRequiredReference(content.replace(/Design vertical slices using|Before drafting|Before any prose or Gherkin|source commands in/, "Optional reading:"), target, trigger));
     assert.throws(() => assertRequiredReference(`\`\`\`\`md\n${content}\n\`\`\`\``, target, trigger));
   }
 });
