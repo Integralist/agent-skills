@@ -68,5 +68,26 @@
     "verify": [
       "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),c=require(\"node:child_process\"),p=\"projects/2026-01-01-slack/spec.md\",before=c.execFileSync(\"git\",[\"show\",\"HEAD:\"+p],{encoding:\"utf8\"}),after=f.readFileSync(p,\"utf8\"),strip=s=>s.replace(/## Solution\\n[\\s\\S]*?(?=\\n## User Stories)/,\"SOLUTION\");a.equal(strip(before),strip(after));a.notEqual(before,after);'"
     ]
-  }
+  },
+    {
+      "id": "rule-scope-vs-test-setup",
+      "prompt": "Turn source.md into a project specification. Preserve the SA01 and SA02 scenario IDs. Keep the local mock setup and customer-tier authorization boundary under separate proposed Rules. Make clear that local mocks are where the cross-environment rule is tested, not a limit on where it applies. Do not write a plan or code.",
+      "setup": [
+        "git init -q -b eval",
+        "git config user.email 'Eval Bot' && git config user.name 'Eval Bot'",
+        "printf '%s\\n' '# Customer Slack authorization\\n\\nThe local test setup runs mocks for both the customer-facing Slack app and the internal Sumac app. This setup behavior is local-only.\\n\\nRegardless of environment, a valid delegation token issued for Trellis customer tier must never authorize Sumac or internal-only tools. Local testing supplies both apps and the token so this boundary can be exercised. Internal egress rejects the token with status 401 and an access log response_code_details beginning jwt_authn_access_denied. No policy-decision log is written and no internal tool receives the request. A valid Sumac-internal request remains permitted.\\n\\nThese new rules are proposed. The intended IDs are SA01 for mock readiness and SA02 for cross-tier denial.' > source.md",
+        "git add source.md && git commit -q -m 'authorization contract'"
+      ],
+      "checks": [
+        "The local setup Rule describes starting the mocked apps, not the customer-token authorization boundary.",
+        "The SA01 startup scenario appears only under the local setup Rule.",
+        "The customer-token denial has its own proposed Rule that is not described as local-only.",
+        "The SA02 scenario may use local mocks in Given without making the authorization rule local-only.",
+        "The internal egress 401, access-log detail, missing policy-decision log, refused tool call and valid Sumac control remain explicit.",
+        "The output marks both Rules proposed and does not claim production behavior was tested."
+      ],
+      "verify": [
+        "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\");const b=(s.match(/```gherkin\\n([\\s\\S]*?)\\n```/)||[])[1];a.ok(b,\"Gherkin missing\");const rules=[...b.matchAll(/^  @proposed\\n  Rule: (.+)$/gm)];a.equal(rules.length,2,\"expected separate proposed Rules\");const body=(i)=>{const start=rules[i].index;const end=rules[i+1]?.index??b.length;return b.slice(start,end)};const local=body(0),security=body(1);a.match(local,/Rule:.*(?:local|mock)/i);a.match(local,/SA01/);a.doesNotMatch(local,/SA02/);a.match(security,/SA02/);a.match(security,/Rule:.*customer-tier/i);a.doesNotMatch(security,/Rule:.*local/i);a.match(security,/Given the local test setup/);for(const x of [\"401\",\"jwt_authn_access_denied\",\"policy-decision log\",\"internal tool\",\"Sumac-internal request\"])a.ok(security.includes(x),x);'"
+      ]
+    }
 ]

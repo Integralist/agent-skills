@@ -22,8 +22,8 @@ sections and Gherkin:
    Questions. Keep unique contracts here until a linked durable home exists;
    replaceable tasks belong in the plan. Dropdowns do not replace criteria.
 3. Preserve IDs, protocol values, ownership, timing, failures and uncertainty.
-   If unclear wording exposes an undecided requirement, ask; do not write it
-   as settled.
+   Check each `Rule` against its child scenarios; setup belongs in `Given`
+   unless environment changes behaviour. Ask rather than settle unclear needs.
 
 ## Scenarios and scope
 
@@ -37,9 +37,7 @@ highest reusable boundary where tests observe it, not an internal call.
 Living Specifications assigns each durable scenario to an owning
 `docs/specs/<capability>.feature` file loaded directly by acceptance runners.
 
-For changed living behaviour, record a Behavioural Delta against a pinned
-baseline. Include agreed constraints and failures; leave new risks and
-undecided responses in Open Questions.
+For changed living behaviour, follow the Behavioural Delta format below.
 
 ## Spec template
 
@@ -71,14 +69,7 @@ source history, not requirements.}
 
 ## Acceptance Criteria
 
-```gherkin
-Feature: {reader-visible capability}
-
-  Scenario: {one required outcome}
-    Given {relevant starting state}
-    When {an actor acts}
-    Then {an observable result or required guarantee holds}
-```
+{Observable scenarios in fenced Gherkin; see SPEC-FORMAT.md.}
 
 ## Behavioural Delta
 

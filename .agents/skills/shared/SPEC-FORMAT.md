@@ -19,9 +19,10 @@ state that proves the behaviour.
 - **Readable titles and steps.** Name the actor, action and observable result;
   explain established glossary/code terms first. Keep fixtures out of user
   goals unless the goal is testing or operation.
-- Use `Rule` to group one business rule, `Background` only for shared
-  preconditions, and `Scenario Outline` with `Examples` for varied inputs.
-  Add tags only for project conventions or explicit requirements.
+- **Rule scope.** Each `Rule` groups one behaviour; every child scenario tests it.
+  Put setup in `Given` unless environment changes behaviour.
+- Use `Background` for shared preconditions; `Scenario Outline`/`Examples` for
+  varied inputs. Add tags only by convention or explicit requirement.
 
 ## Living spec
 
