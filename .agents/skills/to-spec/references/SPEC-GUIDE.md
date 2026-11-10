@@ -124,6 +124,11 @@ Keep setup instructions and test commands in the implementation plan.
 
 ## Implementation Decisions
 
+Start each decision with what the user or operator will experience. Then name
+the responsible component, what it does, when it acts, and what happens if a
+check fails. Replace vague labels with the component's name and role. Keep exact
+fields, permissions, timing, and failure behavior when they define the contract.
+
 - {Required interface, contract, schema or API shape and rationale}
 
 ## Out of Scope
