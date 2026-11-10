@@ -39,6 +39,7 @@
       "The account-link version is distinguished from the refresh version.",
       "The refusal precedence, expiry origin and absence of extra staff access remain explicit.",
       "The technical sections explain permissions and storage in concrete actions without a blanket jargon ban.",
+      "A reader can tell what each named internal component does; define its role on first use when needed to understand the contract.",
       "Each obligation has one clear home or cross-reference rather than repeated paragraphs.",
       "The spec does not invent a provider interface or claim runtime acceptance passed."
     ],

@@ -18,7 +18,8 @@ state that proves the behaviour.
   correctly".
 - **Readable titles and steps.** Use descriptive titles; add scenario IDs only
   when an external reference requires them. Name the actor, action and
-  observable result; explain established glossary/code terms first. Keep
+  observable result; describe components by the role they play in the behavior.
+  If an internal name matters to the contract, state its role on first use. Keep
   fixtures out of user goals unless the goal is testing or operation.
 - **System behaviour, not test-harness behaviour.** Acceptance scenarios state
   system requirements, not that a test stack starts or resets. Put test-harness
