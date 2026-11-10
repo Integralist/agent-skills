@@ -89,10 +89,11 @@ Shared skills, agents, rules, and configuration for AI coding assistants
 
 The repo serves multiple harnesses from one set of files:
 
-- **Claude Code** reads `.claude/` (CLAUDE.md, agents, rules, and a `skills`
-  symlink).
-- **Generic agents** (e.g. Gemini and OpenCode) read `.agents/` (skills,
-  AGENTS.md).
+- **Claude Code** reads root `CLAUDE.md` for project instructions plus
+  `.claude/` (agents, rules, and a `skills` symlink).
+- **Gemini** reads root `GEMINI.md` for project instructions; **OpenCode**
+  reads `.agents/` for skills and shared conventions.
+- **Copilot** reads root `AGENTS.md` natively.
 - **Pi** reads `.pi/agent/` for its settings and theme; `make install-pi` also
   copies the shared `AGENTS.md` and installs its configured packages.
 
@@ -105,13 +106,15 @@ ignore.
 
 Everything else is a thin adapter around that shared core:
 
-| Asset       | Purpose                                                          |
-| ----------- | ---------------------------------------------------------------- |
-| `CLAUDE.md` | One-line `@~/.agents/AGENTS.md` import — same conventions        |
-| `AGENTS.md` | The canonical global conventions                                 |
-| `rules/`    | Path-glob auto-loaded conventions (generic harnesses use skills) |
-| `agents/`   | Custom sub-agent definitions spawned via the Task tool           |
-| `scripts/`  | Statusline and session-cost helpers                              |
+| Asset               | Purpose                                                       |
+| ------------------- | ------------------------------------------------------------- |
+| `AGENTS.md`         | Canonical project instructions; Copilot reads it natively     |
+| `CLAUDE.md`         | Project instruction pointer: `@AGENTS.md`                     |
+| `GEMINI.md`         | Project instruction pointer: `@AGENTS.md`                     |
+| `.agents/AGENTS.md` | Shared conventions copied to user configs                     |
+| `rules/`            | Path-glob auto-loaded conventions (generic harnesses use skills) |
+| `agents/`           | Custom sub-agent definitions spawned via the Task tool        |
+| `scripts/`          | Statusline and session-cost helpers                           |
 
 ## Install
 
@@ -259,9 +262,11 @@ passively. Generic agents don't support path-scoped auto-loading, so these are
 mirrored as skills (`conventions-go`, `conventions-markdown`,
 `conventions-mermaid`, `conventions-python`, `conventions-sql`).
 
-**Project instructions** — `.agents/AGENTS.md` holds the canonical conventions;
-`.claude/CLAUDE.md` is a one-line `@~/.agents/AGENTS.md` pointer so Claude Code
-loads the same set.
+**Project instructions** — root `AGENTS.md` is canonical for this repository.
+`CLAUDE.md` and `GEMINI.md` import it; Copilot reads it natively.
+`.agents/AGENTS.md` remains the shared conventions file installed to
+`~/.agents/AGENTS.md` and `~/.pi/agent/AGENTS.md`; `.claude/CLAUDE.md`
+points to `~/.agents/AGENTS.md` for that global setup.
 
 ## MCP servers
 

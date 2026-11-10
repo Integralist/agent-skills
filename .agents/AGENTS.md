@@ -65,15 +65,6 @@ provider was used. Describe the work itself; omit AI-involvement messaging.
   documents, not terminal chat.
 - **Markdown Formatting:** Never run formatters that normalize ordered lists to `1.` (e.g. bare `mdformat`) on Skill files (`SKILL.md`), AI prompts (`**/prompts/**`), or instruction files. Always use `mdformat --number` (or exclude AI-facing paths) so sequential numbers are preserved.
 
-# Model Configuration
-
-- Route Claude Code through the company Anthropic account; use Anthropic model IDs in `.claude/settings.json.tmpl`, not Bedrock ARNs.
-- Route Pi and OpenCode Claude models through Amazon Bedrock using the AWS SSO `bedrock` profile. Do not reuse Claude Code subscription credentials in other harnesses.
-- In OpenCode, use the Bedrock profile ID with the `amazon-bedrock/` provider
-  prefix. In Pi, add provider-prefixed Bedrock IDs to `enabledModels`.
-- When changing a model, update each harness's defaults, model catalog, allowlist, and favorites as applicable. Verify the provider-specific ID and model limits.
-- If a harness does not supply pricing metadata, update its repo-owned model registry (for example, `.pi/agent/models.json`). Verify input/output and applicable cache or tiered rates against current provider pricing; keep the registry's units and never carry rates over from an older model without confirmation.
-
 # Cost & Subagents
 
 - **Model Selection:** Choose each subagent's model by what a miss would cost. Mechanical work (search, bulk reads, formatting, drafting prose) goes on the cheapest tier; judgment work (code or security review, diagnosis, design) stays on the session model or better. See `.agents/skills/shared/SUBAGENT-STEERABILITY.md`.

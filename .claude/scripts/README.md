@@ -110,18 +110,12 @@ directory is absent).
 ### Configuration
 
 Claude Code invokes the status line via the `statusLine` block in
-`~/.claude/settings.json`. A representative skeleton (secrets and the AWS
-account ID redacted):
+`~/.claude/settings.json`. A representative skeleton matching this
+repository's configured model (secrets omitted):
 
 ```json
 {
-  "awsAuthRefresh": "aws sso login --profile bedrock",
-  "env": {
-    "AWS_PROFILE": "bedrock",
-    "AWS_REGION": "us-east-2",
-    "CLAUDE_CODE_USE_BEDROCK": "1"
-  },
-  "model": "arn:aws:bedrock:us-east-2:<ACCOUNT_ID>:inference-profile/global.anthropic.claude-opus-4-8",
+  "model": "claude-opus-5-5",
   "hooks": {
     "SessionEnd": [
       {
@@ -143,3 +137,21 @@ account ID redacted):
   "theme": "dark-ansi"
 }
 ```
+
+> [!TIP]
+> Claude Code can also use Amazon Bedrock. For a Bedrock setup, use the AWS
+> SSO profile, region, Bedrock flag, and inference-profile ARN for your
+> account. Replace the example account ID and model profile with values for
+> your setup:
+>
+> ```json
+> {
+>   "awsAuthRefresh": "aws sso login --profile bedrock",
+>   "env": {
+>     "AWS_PROFILE": "bedrock",
+>     "AWS_REGION": "us-east-2",
+>     "CLAUDE_CODE_USE_BEDROCK": "1"
+>   },
+>   "model": "arn:aws:bedrock:us-east-2:<ACCOUNT_ID>:inference-profile/global.anthropic.claude-opus-4-8"
+> }
+> ```
