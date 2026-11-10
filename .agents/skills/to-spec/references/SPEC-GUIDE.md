@@ -111,7 +111,16 @@ source history, not requirements.}
 
 ## Testing Seams
 
-- {Boundary — what it proves and why chosen}
+Use a small table to tell readers what each check proves, not just where it
+runs. Choose clear column labels such as **Boundary** and **What to verify**.
+For each boundary, state the observable result the check confirms and why it
+gives meaningful evidence. Name important failure conditions and expected
+outcomes; avoid vague phrases such as “works correctly” or “fallback absent.”
+Keep setup instructions and test commands in the implementation plan.
+
+| Boundary | What to verify |
+| --- | --- |
+| {Test boundary} | {Observable result and why it provides meaningful evidence} |
 
 ## Implementation Decisions
 
