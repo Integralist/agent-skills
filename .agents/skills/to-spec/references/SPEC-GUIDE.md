@@ -17,8 +17,11 @@ sections and Gherkin:
 
 1. Can a fresh reader identify the actor, action, permissions, outcome and
    open decisions? When a requirement spans identity domains, distinguish the
-   identities and state which one controls each decision. Explain only the
-   terms needed to understand the contract; link relevant source code.
+   identities and state which one controls each decision. At first mention,
+   name each component and explain its role; use shorthand only after the
+   component is clear. If the proposal expands an existing component,
+   distinguish what it does today from the proposed responsibility. Explain
+   only the terms needed to understand the contract; link relevant source code.
 2. State each obligation once; link repetitions. Separate Research from Open
    Questions. Keep unique contracts here until a linked durable home exists;
    replaceable tasks belong in the plan. Dropdowns do not replace criteria.
@@ -44,15 +47,35 @@ Living Specifications assigns each durable scenario to an owning
 
 For changed living behaviour, follow the Behavioural Delta format below.
 
+### Tables, prose and lists
+
+Use a table when repeated facts are easier to compare or scan, such as component
+roles, terminology, feature gates, or state ownership. Keep explanations,
+reasoning, and flows in prose. Use numbered lists for ordered steps and user
+stories; use bullets for unordered items. Do not force long explanations into
+table cells.
+
+### Metadata
+
+Keep metadata concise. Use a table with Status, Author, Created and Language.
+Add Project, Baseline and Decision status rows only when they help orient the
+reader. Language names the primary implementation language; put fixture and
+runtime languages elsewhere. Baseline rows may use short SHAs that resolve
+uniquely in the named repository; keep full SHAs in pinned source links. Follow
+[Markdown conventions](../../conventions-markdown/SKILL.md). Use a clear label
+such as `Decision status`, not an ambiguous label such as `Authority`.
+
 ## Spec template
 
 ````markdown
 # {Feature} — Specification
 
-- **Status:** Draft
-- **Author:** {git config user.name}
-- **Created:** {date +%F}
-- **Language:** {detected language, or N/A}
+| Field | Value |
+| --- | --- |
+| Status | Draft |
+| Author | {git config user.name} |
+| Created | {date +%F} |
+| Language | {primary implementation language, or N/A} |
 
 ## Development Brief
 

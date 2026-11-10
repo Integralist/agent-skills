@@ -36,15 +36,29 @@ gaps with guesses.
 3. **Draft for the reader.** Before any prose or Gherkin, read
    [voice-product](../voice-product/SKILL.md),
    [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) and the
-   [writing guide and clarity check](references/SPEC-GUIDE.md). Apply them
-   throughout, including tables and technical sections. Give each requested
+   [writing guide and clarity check](references/SPEC-GUIDE.md). Use product
+   voice throughout the full specification. Default to plain, reader-facing
+   explanations that are clear to product and engineering readers. Explain
+   necessary jargon. Keep technical terms or exact values when they define a
+   required contract, security guarantee, testable outcome, or open decision;
+   explain what they mean and why they matter while preserving ownership,
+   permissions, timing, failures, and uncertainty. Name each component and
+   explain its role at first use. If a proposal expands an existing component,
+   distinguish its current responsibility from the proposed change. Use tables
+   when they make comparable facts easier to scan; keep narrative in prose and
+   use numbered lists for ordered steps and user stories. Give each requested
    behaviour a scenario and testing seam; assign durable scenarios to owning
    living features. Omit Behavioural Delta when behaviour does not change.
-4. **Write and check.** Use the guide's template. Set Status `Draft`, Author
-   from `git config user.name` and Created from `date +%F`. Run the guide's
+4. **Write and check.** Use the guide's metadata table. Set Status `Draft`,
+   Author from `git config user.name`, and Created from `date +%F`. Language
+   names the primary implementation language; put fixture/runtime languages
+   elsewhere. Add optional metadata only when it helps readers orient to the
+   project, baseline or decision status. Use repository-unique short SHAs in
+   baseline metadata and full SHAs in pinned source links, following
+   [Markdown conventions](../conventions-markdown/SKILL.md). Run the guide's
    whole-draft clarity check before handoff. For a scoped revision, review
-   changed sections and related terms/references without expanding the
-   edit or restarting architecture critique.
+   changed sections and related terms/references without expanding the edit or
+   restarting architecture critique.
 
    - **On disk:** Write in the source project folder or
      `projects/<yyyy-mm-dd>-<slug>/spec.md`. Read
