@@ -63,9 +63,14 @@ GitHub repository, use a permalink pinned to the full commit SHA inspected:
 - Directory: `https://github.com/<owner>/<repo>/tree/<sha>/<path>`
 - Repository root: `https://github.com/<owner>/<repo>/tree/<sha>`
 
-Get the SHA with `git -C <checkout> rev-parse HEAD` and the URL from the
-canonical remote. Never publish sibling-checkout paths, branches, tags, or
-short SHAs. If the source is modified or untracked, or its remote and SHA
+Get the full SHA with `git -C <checkout> rev-parse <commit>` and the URL from
+the canonical remote. Use a short SHA in prose or metadata, such as a Baseline
+row, only when it uniquely identifies the commit in the named repository. Keep
+a pinned link with the full SHA in the document; never put an abbreviated SHA
+in a URL. Generate a unique abbreviation with
+`git -C <checkout> rev-parse --short=12 <commit>`; Git may return more
+characters when needed to disambiguate. Never publish sibling-checkout paths,
+branches, or tags. If the source is modified or untracked, or its remote and SHA
 cannot be verified, say it cannot be pinned or ask for a stable revision
 instead of presenting HEAD as a permalink. `path:line` references in other
 skills apply only within the document's own repository.
