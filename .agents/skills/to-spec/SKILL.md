@@ -46,9 +46,11 @@ gaps with guesses.
    explain its role at first use. If a proposal expands an existing component,
    distinguish its current responsibility from the proposed change. Use tables
    when they make comparable facts easier to scan; keep narrative in prose and
-   use numbered lists for ordered steps and user stories. Give each requested
-   behaviour a scenario and testing seam; assign durable scenarios to owning
-   living features. Omit Behavioural Delta when behaviour does not change.
+   use numbered lists for ordered steps and user stories. In Behavioural Delta,
+   explain in plain language what the baseline requires, what changes, and what
+   remains unchanged. Give each requested behaviour a scenario and testing
+   seam; assign durable scenarios to owning living features. Omit Behavioural
+   Delta when behaviour does not change.
 4. **Write and check.** Use the guide's metadata table. Set Status `Draft`,
    Author from `git config user.name`, and Created from `date +%F`. Language
    names the primary implementation language; put fixture/runtime languages

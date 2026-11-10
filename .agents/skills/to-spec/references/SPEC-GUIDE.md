@@ -45,7 +45,13 @@ Keep test-harness and deployment details out of accepted behaviour; see
 Living Specifications assigns each durable scenario to an owning
 `docs/specs/<capability>.feature` file loaded directly by acceptance runners.
 
-For changed living behaviour, follow the Behavioural Delta format below.
+For changed living behaviour, follow the Behavioural Delta format below. Open
+with a plain-language summary that tells product and engineering readers what
+the baseline requires, what the proposal changes, and what remains unchanged.
+Keep migration chores—such as moving scenarios, editing feature descriptions,
+or updating test runners—in the plan unless they affect required behaviour.
+Retain exact scenario snapshots and technical terms when needed to preserve
+the contract.
 
 ### Tables, prose and lists
 
