@@ -1,9 +1,36 @@
 {
   "providers": {
     "google-vertex": {
+      "models": [
+        {
+          "id": "gemini-4-carbon",
+          "name": "Gemini 4 Carbon (google-vertex/gemini-4-carbon)",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": "minimal",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": null,
+            "max": null
+          },
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 1048576
+        }
+      ],
       "modelOverrides": {
         "gemini-4-argon": {
           "reasoning": false
+        },
+        "gemini-4-carbon": {
+          "cost": {
+            "input": 2.0,
+            "output": 10.0,
+            "cacheRead": 0.1,
+            "cacheWrite": 0
+          }
         }
       }
     },
