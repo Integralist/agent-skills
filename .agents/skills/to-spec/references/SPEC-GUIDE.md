@@ -15,15 +15,18 @@ copying its editorial notes into the spec.
 Before handoff, check the whole initial draft, including tables, technical
 sections and Gherkin:
 
-1. Can a fresh reader identify actor, action, permissions, outcome and open
-   decisions? Explain acronyms, objects and scenario prefixes once; link
-   relevant source code.
+1. Can a fresh reader identify the actor, action, permissions, outcome and
+   open decisions? When a requirement spans identity domains, distinguish the
+   identities and state which one controls each decision. Explain only the
+   terms needed to understand the contract; link relevant source code.
 2. State each obligation once; link repetitions. Separate Research from Open
    Questions. Keep unique contracts here until a linked durable home exists;
    replaceable tasks belong in the plan. Dropdowns do not replace criteria.
-3. Preserve IDs, protocol values, ownership, timing, failures and uncertainty.
-   Check each `Rule` against its child scenarios; setup belongs in `Given`
-   unless environment changes behaviour. Ask rather than settle unclear needs.
+3. Preserve externally referenced IDs, protocol values, ownership, timing,
+   failures and uncertainty. Use descriptive scenario titles by default; add
+   IDs or lookup tables only when external references need them. Check each
+   `Rule` against its child scenarios; put setup in `Given` unless environment
+   changes behaviour. Ask rather than settle unclear needs.
 
 ## Scenarios and scope
 
@@ -32,8 +35,10 @@ only when they define a required interface, security guarantee or operational
 constraint. A component name or call restriction belongs in a scenario only
 if changing it would violate the requirement.
 
-Acceptance Criteria states observable behaviour; Testing Seams names the
-highest reusable boundary where tests observe it, not an internal call.
+Acceptance Criteria states observable system behaviour; Testing Seams names
+the highest reusable boundary where tests observe it, not an internal call.
+Keep test-harness and deployment details out of accepted behaviour; see
+[SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md) for their placement.
 Living Specifications assigns each durable scenario to an owning
 `docs/specs/<capability>.feature` file loaded directly by acceptance runners.
 

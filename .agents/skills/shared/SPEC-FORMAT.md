@@ -16,9 +16,15 @@ state that proves the behaviour.
 - **One behaviour per scenario.** If it needs "and then also", split it.
 - **Concrete and observable.** Name values and outcomes, never "works
   correctly".
-- **Readable titles and steps.** Name the actor, action and observable result;
-  explain established glossary/code terms first. Keep fixtures out of user
-  goals unless the goal is testing or operation.
+- **Readable titles and steps.** Use descriptive titles; add scenario IDs only
+  when an external reference requires them. Name the actor, action and
+  observable result; explain established glossary/code terms first. Keep
+  fixtures out of user goals unless the goal is testing or operation.
+- **System behaviour, not test-harness behaviour.** Acceptance scenarios state
+  system requirements, not that a test stack starts or resets. Put test-harness
+  setup in Testing Seams and deployment exclusions in Out of Scope. Name an
+  environment in the accepted outcome only when the requirement itself changes
+  by environment.
 - **Rule scope.** Each `Rule` groups one behaviour; every child scenario tests it.
   Put setup in `Given` unless environment changes behaviour.
 - Use `Background` for shared preconditions; `Scenario Outline`/`Examples` for
