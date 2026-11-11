@@ -188,3 +188,28 @@ test("injection reuses the coordinator's ready or unavailable status", t => {
   assert.deepEqual(readFileSync(join(state, "op.log"), "utf8").trim().split("\n"),
     ["inject"]);
 });
+
+test("step timing reports duration for success and optional failure", () => {
+  const step = join(root, "scripts/step.sh");
+  const success = spawnSync("bash", [step, "--timing", "quick", "bash", "-c", "sleep 0.1"], {
+    cwd: root, encoding: "utf8", timeout: 5_000,
+  });
+  assert.equal(success.status, 0, success.stderr || success.stdout);
+  assert.match(success.stdout, /^  ✅ quick \(\d+(?:\.\d+)?s\)$/m);
+
+  const failure = spawnSync("bash", [step, "--timing", "--optional", "optional failure",
+    "bash", "-c", "sleep 0.1; exit 1"], {
+    cwd: root, encoding: "utf8", timeout: 5_000,
+  });
+  assert.equal(failure.status, 0, failure.stderr || failure.stdout);
+  assert.match(failure.stdout,
+    /^  🔔 optional failure \(failed — skipped\) \(\d+(?:\.\d+)?s\)$/m);
+
+  const timedOut = spawnSync("bash", [step, "--timing", "--timeout", "1", "--optional",
+    "timed out", "bash", "-c", "sleep 5"], {
+    cwd: root, encoding: "utf8", timeout: 5_000,
+  });
+  assert.equal(timedOut.status, 0, timedOut.stderr || timedOut.stdout);
+  assert.match(timedOut.stdout,
+    /^  🔔 timed out \(timed out after 1s — skipped\) \(\d+(?:\.\d+)?s\)$/m);
+});

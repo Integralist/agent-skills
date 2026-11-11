@@ -6,6 +6,7 @@
 STEP := bash scripts/step.sh
 OPINJECT := bash scripts/op-inject.sh
 PKG_TIMEOUT ?= 30
+PI_INSTALL_JOBS ?= 4
 PI_MODELS ?= false
 
 ifeq ($(SKIP_AUDIT),1)
@@ -54,8 +55,9 @@ PI_PACKAGES := \
 
 # Install Pi, its configured packages, and global settings. The leaf section
 # target lets the top-level installer run this after shared setup only once.
-# Repository settings are copied last, restoring the source of truth after
-# package installs update Pi's global store. models.json stays in the repo as a reference
+# Copy settings before package updates so each `pi update <source>` can resolve
+# its declaration. Updates change package files, not the package list.
+# models.json stays in the repo as a reference
 # and is copied only with PI_MODELS=true. mcp.json is templated because it
 # contains the Context7 API key; scripts/op-inject.sh bakes it in, skipping
 # gracefully without Fastly 1Password access.
@@ -64,16 +66,14 @@ install-pi: install-tools
 
 install-pi-section:
 	@$(STEP) --section "Pi"
-	@$(STEP) "Crit Pi skills → ~/.pi/agent/skills/" bash -c 'cd "$$HOME" && crit install pi --force'
+	@$(STEP) --timing "Crit Pi skills → ~/.pi/agent/skills/" bash -c 'cd "$$HOME" && crit install pi --force'
 	@mkdir -p ~/.pi/agent/skills/slack
 	@$(STEP) "slack skill → ~/.pi/agent/skills/slack/" cp .pi/agent/skills/slack/SKILL.md ~/.pi/agent/skills/slack/SKILL.md
-	@$(STEP) "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-	@for package in $(PI_PACKAGES); do \
-		$(STEP) --timeout $(PKG_TIMEOUT) --optional "$$package" pi install "$$package" --no-approve; \
-	done
+	@$(STEP) --timing "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
+	@PI_INSTALL_JOBS=$(PI_INSTALL_JOBS) PKG_TIMEOUT=$(PKG_TIMEOUT) node scripts/install-pi-packages.mjs $(PI_PACKAGES)
 	@mkdir -p ~/.pi/agent/themes
 	@$(STEP) "AGENTS.md → ~/.pi/agent/AGENTS.md" cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md
-	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
 	@$(STEP) "hooks.json → ~/.pi/agent/hooks.json" cp .pi/agent/hooks.json ~/.pi/agent/hooks.json
 ifeq ($(PI_MODELS),true)
 	@$(STEP) "models.json → ~/.pi/agent/models.json" cp .pi/agent/models.json ~/.pi/agent/models.json
@@ -238,7 +238,7 @@ check-rules:
 
 .PHONY: check-install
 check-install:
-	@node --test scripts/tests/install.test.mjs
+	@node --test scripts/tests/install.test.mjs scripts/tests/install-pi-packages.test.mjs
 
 .PHONY: check-code-review
 check-code-review:

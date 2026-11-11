@@ -11,7 +11,8 @@
 #
 # Options:
 #   --timeout <sec>   abort command after <sec> seconds
-#   --optional        warn and continue on failure or timeout (exit 0)
+#   --optional        warn and continue on failure or timeout
+#   --timing          append the command's elapsed time to its status (exit 0)
 #
 # A command's output is captured rather than streamed, so a successful run is
 # just a short list of statuses. On failure the whole captured stream (stdout
@@ -34,6 +35,7 @@ fi
 
 timeout=""
 optional=false
+timing=false
 timed_out=false
 
 while [ $# -gt 0 ]; do
@@ -62,6 +64,10 @@ while [ $# -gt 0 ]; do
 		optional=true
 		shift
 		;;
+	--timing)
+		timing=true
+		shift
+		;;
 	*)
 		break
 		;;
@@ -74,6 +80,12 @@ shift
 # Progress line, overwritten by the result. Pointless without a terminal.
 if [ -n "$erase" ]; then
 	printf '  ⏳ %s' "$label"
+fi
+
+start_seconds=$SECONDS
+start_microseconds=""
+if [ "$timing" = true ] && [ -n "${EPOCHREALTIME+x}" ]; then
+	start_microseconds=${EPOCHREALTIME/./}
 fi
 
 if [ -n "$timeout" ]; then
@@ -108,23 +120,34 @@ else
 	status=${status:-0}
 fi
 
+timing_suffix=""
+if [ "$timing" = true ]; then
+	if [ -n "$start_microseconds" ]; then
+		elapsed_microseconds=$((${EPOCHREALTIME/./} - start_microseconds))
+		elapsed_tenths=$(((elapsed_microseconds + 50000) / 100000))
+		printf -v timing_suffix ' (%d.%ds)' "$((elapsed_tenths / 10))" "$((elapsed_tenths % 10))"
+	else
+		printf -v timing_suffix ' (%ds)' "$((SECONDS - start_seconds))"
+	fi
+fi
+
 if [ "$status" -eq 0 ]; then
-	printf '%s  ✅ %s\n' "$erase" "$label"
+	printf '%s  ✅ %s%s\n' "$erase" "$label" "$timing_suffix"
 elif [ "$timed_out" = true ]; then
 	if [ "$optional" = true ]; then
-		printf '%s  🔔 %s (timed out after %ss — skipped)\n' "$erase" "$label" "$timeout"
+		printf '%s  🔔 %s (timed out after %ss — skipped)%s\n' "$erase" "$label" "$timeout" "$timing_suffix"
 		exit 0
 	else
-		printf '%s  ❌ %s (timed out after %ss)\n' "$erase" "$label" "$timeout"
+		printf '%s  ❌ %s (timed out after %ss)%s\n' "$erase" "$label" "$timeout" "$timing_suffix"
 		[ -n "$output" ] && printf '%s\n' "$output" | sed 's/^/     /'
 		exit 124
 	fi
 elif [ "$optional" = true ]; then
-	printf '%s  🔔 %s (failed — skipped)\n' "$erase" "$label"
+	printf '%s  🔔 %s (failed — skipped)%s\n' "$erase" "$label" "$timing_suffix"
 	[ -n "$output" ] && printf '%s\n' "$output" | sed 's/^/     /'
 	exit 0
 else
-	printf '%s  ❌ %s\n' "$erase" "$label"
+	printf '%s  ❌ %s%s\n' "$erase" "$label" "$timing_suffix"
 	[ -n "$output" ] && printf '%s\n' "$output" | sed 's/^/     /'
 	exit "$status"
 fi
