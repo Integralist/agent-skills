@@ -27,17 +27,23 @@ reachable() {
 }
 
 if [ "${1:-}" = "--check" ]; then
-	reachable
-	exit $?
+	case "${OP_INJECT_STATUS:-}" in
+	ready) exit 0 ;;
+	missing|unavailable) exit 1 ;;
+	*) reachable; exit $? ;;
+	esac
 fi
 
 label=$1 template=$2 output=$3
 
-if ! command -v op >/dev/null 2>&1; then
+if [ "${OP_INJECT_STATUS:-}" = "missing" ] || ! command -v op >/dev/null 2>&1; then
 	"${step[@]}" --skip "$label: 1Password CLI (op) not found"
 	exit 0
 fi
-if ! op vault list --account "$account" >/dev/null 2>&1; then
+if [ "${OP_INJECT_STATUS:-}" = "unavailable" ] || {
+	[ "${OP_INJECT_STATUS:-}" != "ready" ] &&
+	! op vault list --account "$account" >/dev/null 2>&1;
+}; then
 	"${step[@]}" --skip "$label: no Fastly 1Password access"
 	exit 0
 fi

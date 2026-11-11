@@ -1,4 +1,4 @@
-.PHONY: install install-agents sync-skills install-claude install-pi install-gemini install-copilot install-opencode install-codex install-swival install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-specs
+.PHONY: install install-agents sync-skills install-claude install-claude-section install-pi install-pi-section install-gemini install-copilot install-opencode install-codex install-swival install-google-workspace-mcp install-tools rules check-google-workspace-mcp update-google-workspace-mcp check-install check-specs
 
 # Every action runs through scripts/step.sh, which prints one status line and
 # swallows the command's output unless it fails — see that file for the modes.
@@ -52,13 +52,17 @@ PI_PACKAGES := \
 	git:github.com/Integralist/pi-subagents \
 	git:github.com/Integralist/pi-transcript-enhancer
 
-# Install Pi, its configured packages, and global settings. The repository
-# settings are copied last so they remain the source of truth after pi install
-# updates the global package store. models.json stays in the repo as a reference
+# Install Pi, its configured packages, and global settings. The leaf section
+# target lets the top-level installer run this after shared setup only once.
+# Repository settings are copied last, restoring the source of truth after
+# package installs update Pi's global store. models.json stays in the repo as a reference
 # and is copied only with PI_MODELS=true. mcp.json is templated because it
 # contains the Context7 API key; scripts/op-inject.sh bakes it in, skipping
 # gracefully without Fastly 1Password access.
 install-pi: install-tools
+	@$(MAKE) --no-print-directory install-pi-section
+
+install-pi-section:
 	@$(STEP) --section "Pi"
 	@$(STEP) "Crit Pi skills → ~/.pi/agent/skills/" bash -c 'cd "$$HOME" && crit install pi --force'
 	@mkdir -p ~/.pi/agent/skills/slack
@@ -104,6 +108,9 @@ rules:
 # merges only our mcpServers into it; that script documents the merge rules and
 # needs jq, so the merge is skipped when jq is missing.
 install-claude: install-agents rules install-tools
+	@$(MAKE) --no-print-directory install-claude-section
+
+install-claude-section:
 	@$(STEP) --section "Claude"
 	@mkdir -p ~/.claude
 	@$(STEP) "CLAUDE.md → ~/.claude/CLAUDE.md" cp .claude/CLAUDE.md ~/.claude/CLAUDE.md
@@ -229,6 +236,10 @@ update-google-workspace-mcp:
 check-rules:
 	@node --test .claude/scripts/tests/gen-rules.test.mjs
 
+.PHONY: check-install
+check-install:
+	@node --test scripts/tests/install.test.mjs
+
 .PHONY: check-code-review
 check-code-review:
 	@node --test .agents/skills/code-review/tests/contracts.test.mjs
@@ -255,5 +266,5 @@ install-swival:
 	@$(STEP) "config.toml → ~/.config/swival/config.toml" cp .config/swival/config.toml ~/.config/swival/config.toml
 	@$(STEP) "bedrock_sso.sh → ~/.config/swival/scripts/" cp .config/swival/scripts/bedrock_sso.sh ~/.config/swival/scripts/bedrock_sso.sh
 
-install: install-claude install-pi install-gemini install-copilot install-opencode install-codex install-swival install-google-workspace-mcp
-	@printf '\n✨ All set.\n'
+install:
+	@bash scripts/install.sh
