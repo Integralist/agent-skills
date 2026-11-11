@@ -4,7 +4,8 @@ description: >-
   Take a feature from an idea through research, grilling, a spec, and a plan.
   Use when architecting a feature from an idea or this session's discussion,
   or exploring a design before planning.
-argument-hint: "[--github] [steering]"
+argument-hint: >-
+  [next [#<issue> | URL | <project-path>]] [--github] [steering]
 metadata:
   model-tier: complex
 ---
@@ -20,6 +21,20 @@ none is given, start at Bootstrap. Once the project folder exists, pass its
 path to each skill. `--github` selects GitHub Issues and Issue Artifacts
 instead of `projects/`; an issue reference (`#<n>` or URL) selects the same
 mode. Follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) for either.
+
+**Resume with `next`.** Use `next` as the first argument to continue an
+existing flow instead of starting over. Resolve the issue reference or project
+directory after `next`, or use this session's active project; an issue
+reference selects GitHub mode. A project path identifies the on-disk project
+directory (for example, `projects/<yyyy-mm-dd>-<slug>/`). For GitHub, follow
+[GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to inspect the Root Issue and
+its artifacts read-only. For an on-disk project, inspect its README and
+artifacts. Compare that evidence with the completion conditions below. Tell
+the user the last completed step, the evidence, and the exact next step, then
+ask whether to continue. Start only after confirmation, carrying the same
+workspace and mode into that step. If the project or handoff state is unclear,
+explain what you found and ask where to resume. If all steps are complete,
+offer the handoff choices in step 6.
 
 **Stop and ask:** If a skill reports a gap or the design does not make sense,
 tell the user and wait. Do not fill the gap with a guess.
