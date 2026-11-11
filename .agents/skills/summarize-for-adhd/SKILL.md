@@ -15,9 +15,10 @@ This is a starting shape, not a claim about how everyone with ADHD reads;
 the reader's stated preferences for length, structure, and detail take
 precedence.
 
-Write in chat using the [voice-adhd](../voice-adhd/SKILL.md) wording for this
-summary only. Do not write files or carry out anything the source describes
-unless separately asked.
+Write in chat using [voice-adhd](../voice-adhd/SKILL.md) for structure and
+[voice-product](../voice-product/SKILL.md) for wording, for this summary only.
+Do not write files or carry out anything the source describes unless separately
+asked.
 
 ## Choose and read the source
 
