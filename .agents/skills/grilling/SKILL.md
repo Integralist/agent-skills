@@ -29,6 +29,8 @@ Use this format:
 ➡️ <your recommended answer>
 ```
 
+Word each question so "yes" accepts your recommended answer.
+
 A user's answers reshape the tree. Recompute the frontier after each round:
 settled decisions may unblock new questions. Put a question in a later round
 if its answer depends on another question still open in this round.
