@@ -36,8 +36,8 @@ Map the on-disk project structure onto a 3-level GitHub Sub-Issue tree using
 1. **Root Project Issue (`--label project`):**
    - **Title:** `<Project Title> (<slug>)`
    - **Body:** Replaces `projects/<date>-<slug>/README.md`, following
-     [PROJECT-README.md](PROJECT-README.md) with an explicit
-     `` - **Slug:** `<slug>` `` metadata bullet.
+     [PROJECT-README.md](PROJECT-README.md). Add a `Slug` row with value
+     `<slug>` to its opening Field/Value metadata table.
    - **Lazy creation rule:** First skill that writes a project artifact creates
      the Root Issue if no active Root Issue exists in the session or arguments,
      attaches its artifact, and passes `#<root-issue>` to downstream steps.

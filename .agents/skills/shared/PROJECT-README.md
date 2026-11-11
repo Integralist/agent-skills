@@ -4,10 +4,12 @@ This README indexes the project workspace. Keep it current as artifacts are
 created, approved, run, or superseded. The artifacts contain the source
 material; this file provides navigation and current status.
 
-- **Status:** {Planning | Ready | In progress | Complete}
-- **Owner:** {owner}
-- **Created:** {YYYY-MM-DD}
-- **Updated:** {YYYY-MM-DD}
+| Field | Value |
+| --- | --- |
+| Status | {Planning \| Ready \| In progress \| Complete} |
+| Owner | {owner} |
+| Created | {YYYY-MM-DD} |
+| Updated | {YYYY-MM-DD} |
 
 ## Summary
 
