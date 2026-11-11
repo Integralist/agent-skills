@@ -6,6 +6,7 @@
 STEP := bash scripts/step.sh
 OPINJECT := bash scripts/op-inject.sh
 PKG_TIMEOUT ?= 30
+PI_VERSION_CHECK_TIMEOUT ?= 10000
 PI_INSTALL_JOBS ?= 4
 PI_MODELS ?= false
 
@@ -69,7 +70,7 @@ install-pi-section:
 	@$(STEP) --timing "Crit Pi skills → ~/.pi/agent/skills/" bash -c 'cd "$$HOME" && crit install pi --force'
 	@mkdir -p ~/.pi/agent/skills/slack
 	@$(STEP) "slack skill → ~/.pi/agent/skills/slack/" cp .pi/agent/skills/slack/SKILL.md ~/.pi/agent/skills/slack/SKILL.md
-	@$(STEP) --timing "@earendil-works/pi-coding-agent (npm -g)" npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+	@PI_VERSION_CHECK_TIMEOUT=$(PI_VERSION_CHECK_TIMEOUT) bash scripts/install-pi-cli.sh
 	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
 	@PI_INSTALL_JOBS=$(PI_INSTALL_JOBS) PKG_TIMEOUT=$(PKG_TIMEOUT) node scripts/install-pi-packages.mjs $(PI_PACKAGES)
 	@mkdir -p ~/.pi/agent/themes
@@ -238,7 +239,7 @@ check-rules:
 
 .PHONY: check-install
 check-install:
-	@node --test scripts/tests/install.test.mjs scripts/tests/install-pi-packages.test.mjs
+	@node --test scripts/tests/install.test.mjs scripts/tests/install-pi-packages.test.mjs scripts/tests/install-pi-cli.test.mjs
 
 .PHONY: check-code-review
 check-code-review:

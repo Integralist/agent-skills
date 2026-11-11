@@ -30,6 +30,10 @@ function fixture(t, failSource = packages[4]) {
 const { appendFileSync, existsSync, readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const [command, source, approval] = process.argv.slice(2);
+if (command === "--version") {
+  process.stdout.write("1.5.2\\n");
+  process.exit(0);
+}
 const settingsPath = join(process.env.HOME, ".pi/agent/settings.json");
 let registered = false;
 if (existsSync(settingsPath)) {
