@@ -1,7 +1,7 @@
 [
   {
     "id": "whole-spec-first-reader",
-    "prompt": "Use source.md to write projects/2026-01-01-slack/spec.md. This is a settled local feature request; leave the stated production mechanism open. Do not implement anything.",
+    "prompt": "Use source.md to write projects/2026-01-01-slack/spec.md. This is a settled local feature request; leave the stated production mechanism open. Preserve the original request in intent.md and link it from the spec. Do not implement anything.",
     "setup": [
       "git init -q -b eval",
       "git config user.email eval@example.com && git config user.name 'Eval Bot'",
@@ -10,7 +10,8 @@
     ],
     "checks": [
       "The Development Brief starts with a short current-request summary, not a transcript or chronology.",
-      "The original build request is preserved verbatim or through a fixed-revision source link.",
+      "A sibling intent.md preserves the original build request verbatim or through a fixed-revision source link; the spec and project README link it.",
+      "Request history stays out of the spec; the Development Brief states the current request and links intent.md.",
       "A reader can identify which Slack customers may ask without decoding admitted surfaces.",
       "The user stories describe user capabilities; only a testing or operator story relies on fixture terminology.",
       "The spec explains a request receipt and delegation token before relying on those objects.",
@@ -21,6 +22,7 @@
     "verify": [
       "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\");const s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\");for(const h of [\"Development Brief\",\"Problem Statement\",\"Solution\",\"User Stories\",\"Acceptance Criteria\",\"Testing Seams\",\"Implementation Decisions\",\"Out of Scope\",\"Living Specifications\",\"Research\",\"Open Questions\"])a.ok(s.includes(\"## \"+h),h);a.match(s,/Status:\\*\\* Draft/);a.match(s,/```gherkin\\n/);'",
       "git diff --exit-code HEAD -- source.md",
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),p=\"projects/2026-01-01-slack/\",i=f.readFileSync(p+\"intent.md\",\"utf8\"),s=f.readFileSync(p+\"spec.md\",\"utf8\"),r=f.readFileSync(p+\"README.md\",\"utf8\");a.ok(i.trim());for(const d of [s,r])a.match(d,/\\]\\((?:\\.\\/)?intent\\.md\\)/);'",
       "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\");a.match(s,/ai_assistant/);a.match(s,/five minutes|five-minute|5 minutes/);a.match(s,/## Open Questions\\n/);'"
     ]
   },
@@ -39,6 +41,8 @@
       "The account-link version is distinguished from the refresh version.",
       "The refusal precedence, expiry origin and absence of extra staff access remain explicit.",
       "The technical sections explain permissions and storage in concrete actions without a blanket jargon ban.",
+      "Implementation Decisions uses a clear visible summary before descriptively labelled details when the supporting tables or exact fields justify expansion.",
+      "Scope, open risks and acceptance criteria stay visible; expanded detail retains exact contracts and is included in the clarity check.",
       "A reader can tell what each named internal component does; define its role on first use when needed to understand the contract.",
       "Each obligation has one clear home or cross-reference rather than repeated paragraphs.",
       "The spec does not invent a provider interface or claim runtime acceptance passed."
@@ -64,10 +68,12 @@
       "The new wording includes satisfying acceptance criteria as part of completion.",
       "The scenario, source history and unresolved production choice remain unchanged.",
       "The editor checks the changed section and its references without a new full architecture critique.",
+      "The wording-only revision creates no intent.md and leaves existing history in place.",
       "Completion distinguishes document validation from executing the acceptance feature."
     ],
     "verify": [
-      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),c=require(\"node:child_process\"),p=\"projects/2026-01-01-slack/spec.md\",before=c.execFileSync(\"git\",[\"show\",\"HEAD:\"+p],{encoding:\"utf8\"}),after=f.readFileSync(p,\"utf8\"),strip=s=>s.replace(/## Solution\\n[\\s\\S]*?(?=\\n## User Stories)/,\"SOLUTION\");a.equal(strip(before),strip(after));a.notEqual(before,after);'"
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),c=require(\"node:child_process\"),p=\"projects/2026-01-01-slack/spec.md\",before=c.execFileSync(\"git\",[\"show\",\"HEAD:\"+p],{encoding:\"utf8\"}),after=f.readFileSync(p,\"utf8\"),strip=s=>s.replace(/## Solution\\n[\\s\\S]*?(?=\\n## User Stories)/,\"SOLUTION\");a.equal(strip(before),strip(after));a.notEqual(before,after);'",
+      "test ! -e projects/2026-01-01-slack/intent.md"
     ]
   },
     {

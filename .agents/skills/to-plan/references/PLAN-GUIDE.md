@@ -1,12 +1,19 @@
 # Plan structure and slice rules
 
+Before drafting or revising prose, read and apply
+[voice-product](../../voice-product/SKILL.md) throughout the plan, including
+Notes and expanded detail, not only the Summary and slice outcomes. Preserve
+exact signatures, identifiers and contract values.
+
 Use this guide while designing slices, milestones, acceptance checks, diagrams,
 and the plan document. Keep outcomes skimmable and execution contracts
 complete: start each slice with its delivered outcome and any useful diagram,
 then put dependencies, exact interfaces, and milestones underneath in the same
 section. Use short sentences, clear headings, and small, focused bullet groups.
 Cut repetition, not requirements or caveats. Brevity applies to explanatory
-prose, not required technical detail.
+prose, not required technical detail. Follow
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) for summary-first disclosure;
+use dropdowns for supporting rationale, not slice contracts.
 
 ## Slice design
 

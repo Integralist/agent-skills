@@ -25,10 +25,9 @@ gaps with guesses.
 1. **Choose the source and destination.** Use the named file, or this session
    if none is named. For `github` or an issue reference (`#<n>` or URL), read
    and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) instead of `projects/`.
-   Keep the agreed spec. Preserve the request and requirement-changing
-   clarifications in Development Brief as the
-   [guide](references/SPEC-GUIDE.md) describes. Keep original evidence,
-   record later decisions separately, and redact secrets.
+   Keep the agreed spec. Before preserving request evidence or history, read
+   [PROJECT-INTENT.md](../shared/PROJECT-INTENT.md). Use `intent.md` when
+   needed; keep Development Brief to the current summary and a source link.
 2. **Read current truth.** Read linked research, `docs/adr/`, touched code
    and owning `docs/specs/<capability>.feature` files. Living specs are the
    baseline; without one, use code. Treat legacy Markdown contracts as
@@ -51,7 +50,8 @@ gaps with guesses.
    remains unchanged. Give each requested behaviour a scenario and testing
    seam; assign durable scenarios to owning living features. Omit Behavioural
    Delta when behaviour does not change.
-4. **Write and check.** Use the guide's metadata table. Set Status `Draft`,
+4. **Write and check.** Write any needed `intent.md` in the selected mode.
+   Use the guide's metadata table. Set Status `Draft`,
    Author from `git config user.name`, and Created from `date +%F`. Language
    names the primary implementation language; put fixture/runtime languages
    elsewhere. Add optional metadata only when it helps readers orient to the

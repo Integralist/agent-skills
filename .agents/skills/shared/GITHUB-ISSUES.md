@@ -63,6 +63,29 @@ Map the on-disk project structure onto a 3-level GitHub Sub-Issue tree using
      `- [ ] Task <n> complete` checkbox (the Task Sub-Issue's open/closed state
      tracks completion).
 
+## Root Issue readability
+
+Before writing or revising the description, read and apply
+[voice-product](../voice-product/SKILL.md). Treat the Root Issue as navigation
+and current status, not a second spec or an accumulating project diary.
+
+- **Summary:** Two or three sentences: the problem, intended outcome and
+  major scope boundary. Link detailed requirements rather than repeating them.
+- **Next action:** Put it near the top. Name one owner, one immediate action
+  and its destination. Keep blocking approvals explicit; link later steps.
+- **Artifacts:** Keep purposes and statuses to short phrases. Link review
+  findings and verification evidence instead of embedding their history.
+- **Gates:** Keep governing approvals, current blockers and verification
+  limits visible, with one concise statement and a link for each.
+- **Supporting detail:** Keep request history in intent, requirements and
+  open decisions in the spec, and sources/coordination notes in research.
+  Prefer links; use <details> only when secondary context belongs here.
+
+Retain required project metadata and PDD approval tables. On updates, replace
+stale status rather than appending chronology. Preserve unique evidence in its
+owning artifact or an issue comment before removing it from the description.
+These brevity rules do not shorten Slice or Task contracts.
+
 ## Root Issue Artifacts
 
 Store all project-level documents as Issue Artifacts on the **Root Project
@@ -71,7 +94,7 @@ Issue** using `gh issue artifact`:
 | Document | Artifact command & type |
 | --- | --- |
 | `project.md`, `discovery[-mN].md`, `design[-mN].md` | `gh issue artifact create <root> --name "<filename>" --body-file -` (default `generic`) |
-| `research.md`, `spec.md`, `prd.md` | `gh issue artifact create <root> --name "<filename>" --body-file -` (default `generic`) |
+| `intent.md`, `research.md`, `spec.md`, `prd.md` | `gh issue artifact create <root> --name "<filename>" --body-file -` (default `generic`) |
 | `plan.md` | `gh issue artifact create <root> --name "plan.md" --type plan --body-file -` |
 | `ADR-<NNNN>.md` (project-scoped) | `gh issue artifact create <root> --name "ADR-<NNNN>.md" --body-file -`; index its artifact URL in `docs/adr/README.md` |
 | `execution.md` (`execute-plan` log) | `gh issue artifact create <root> --name "execution.md" --body-file -` |

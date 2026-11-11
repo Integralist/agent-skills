@@ -16,3 +16,10 @@ words, active verbs and concrete actors over compressed jargon or acronyms.
 - Separate a summary from supporting history/detail. Collapsing text improves
   navigation, not word count. Never move a requirement out of its durable home
   just to make a document look shorter.
+
+For reader-facing specs and plans, prefer a clear standalone paragraph followed
+by `<details>` with a descriptive `<summary>` for useful supporting detail.
+Keep scope, consequential choices, open risks, acceptance criteria and slice
+contracts visible. Exact schemas, error tables and supporting rationale may
+be expandable detail in their owning artifact; reviewers read that detail too.
+Use blank lines around the Markdown inside the dropdown so it renders.

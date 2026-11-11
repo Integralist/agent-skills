@@ -1,12 +1,16 @@
 # Spec writing guide
 
-Read before drafting prose or acceptance criteria.
+Before drafting or revising, read and apply
+[voice-product](../../voice-product/SKILL.md) to all explanatory prose,
+including Implementation Decisions and expanded detail. Preserve exact
+contracts and verbatim source quotations.
 
 ## Reader path and clarity check
 
-Start Development Brief with a short summary of the request, boundaries and
-open choices. Preserve original requests/decisions as fixed-revision links or
-verbatim evidence; optionally collapse long history. Redact secrets.
+Start Development Brief with a short summary of the current request,
+boundaries and open choices. Link `intent.md` or the preserved source instead
+of embedding request/decision history. Follow
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) for summary-first disclosure.
 
 User stories describe capabilities, not fixtures, except for testing/operator
 stories. Explain roles/terms before using them; follow the glossary without
@@ -30,6 +34,8 @@ sections and Gherkin:
    IDs or lookup tables only when external references need them. Check each
    `Rule` against its child scenarios; put setup in `Given` unless environment
    changes behaviour. Ask rather than settle unclear needs.
+4. Check request coverage using
+   [PROJECT-INTENT.md](../../shared/PROJECT-INTENT.md)'s handoff check.
 
 ## Scenarios and scope
 
@@ -85,9 +91,8 @@ such as `Decision status`, not an ambiguous label such as `Authority`.
 
 ## Development Brief
 
-{Current request, agreed boundaries and open choices. Preserve original
-requests/clarifications here or link fixed-revision evidence; collapse long
-source history, not requirements.}
+{Current request, agreed boundaries and open choices. Link intent.md when
+present, otherwise the preserved source; omit a link if no source is available.}
 
 ## Problem Statement
 
@@ -124,12 +129,20 @@ Keep setup instructions and test commands in the implementation plan.
 
 ## Implementation Decisions
 
-Start each decision with what the user or operator will experience. Then name
-the responsible component, what it does, when it acts, and what happens if a
-check fails. Replace vague labels with the component's name and role. Keep exact
-fields, permissions, timing, and failure behavior when they define the contract.
+### {Decision}
 
-- {Required interface, contract, schema or API shape and rationale}
+{One clear paragraph in voice-product: what changes for the user or operator,
+which component acts, when, and what a failed check means. Explain necessary
+terms; make the decision understandable without opening the supporting detail.}
+
+<details>
+<summary>{Descriptive label for the technical detail}</summary>
+
+{Explain supporting technical detail and rationale in voice-product too.
+Preserve exact fields, permissions, timing, failure codes and schemas; clearer
+wording cannot change the contract. Omit the dropdown when it adds no value.}
+
+</details>
 
 ## Out of Scope
 

@@ -22,6 +22,7 @@ projects/<yyyy-mm-dd>-<slug>/
 ├── project.md                 # PDD project scope, when applicable
 ├── discovery[-mN].md          # PDD option evaluation, when applicable
 ├── design[-mN].md             # PDD approved blueprint, when applicable
+├── intent.md                  # Request and clarification history, when needed
 ├── spec.md                    # Problem, scope, and acceptance criteria
 ├── plan.md                    # Slices, dependencies, and delivery plan
 ├── tasks-slice-<n>.md         # Executable tasks for one implementation slice
