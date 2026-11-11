@@ -6,7 +6,7 @@
     "project": "{{ op://Employee/Google VertexAI Project ID/password }}",
     "location": "global"
   },
-  "model": "Gemini 3.1 Pro (High)",
+  "model": "Gemini 4 Argon (Medium)",
   "permissions": {
     "allow": [
       "command(agy)",
@@ -59,6 +59,7 @@
       "command(make tests)",
       "command(openssl)",
       "command(ps)",
+      "command(rg)"
       "command(sed)",
       "command(wc)",
       "mcp(google-workspace/*)"
@@ -70,7 +71,6 @@
     "enabled": true
   },
   "trustedWorkspaces": [
-    "/Users/mmcdonnell/code/agent-skills",
-    "/Users/mmcdonnell/code/fastly/blue-ribbon"
+    "/Users/mmcdonnell/code/agent-skills"
   ]
 }
