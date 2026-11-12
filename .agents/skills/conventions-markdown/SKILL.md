@@ -13,9 +13,12 @@ inclusive language.
 
 ## Formatting
 
-Wrap prose at 80 columns by hand. Use `mdformat --number` where formatting is
-appropriate; ordered lists stay numbered 1, 2, 3. Do not use `--wrap`, which
-breaks GitHub alert blocks. Install with:
+Wrap prose at 80 columns by hand in repository files. Never hard-wrap text
+published to GitHub: issue and PR descriptions, comments, and Issue Artifacts.
+GitHub renders each newline there as a line break, so write each paragraph and
+list item on one line, even when a local `*.md` file is the draft. Use `mdformat
+--number` where formatting is appropriate; ordered lists stay numbered 1, 2, 3.
+Do not use `--wrap`, which breaks GitHub alert blocks. Install with:
 
 ```bash
 pipx install mdformat
