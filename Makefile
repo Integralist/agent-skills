@@ -72,6 +72,7 @@ install-pi-section:
 	@$(STEP) "slack skill → ~/.pi/agent/skills/slack/" cp .pi/agent/skills/slack/SKILL.md ~/.pi/agent/skills/slack/SKILL.md
 	@PI_VERSION_CHECK_TIMEOUT=$(PI_VERSION_CHECK_TIMEOUT) bash scripts/install-pi-cli.sh
 	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
+	@$(STEP) "auto-suggest.json → ~/.pi/agent/auto-suggest.json" cp .pi/agent/auto-suggest.json ~/.pi/agent/auto-suggest.json
 	@PI_INSTALL_JOBS=$(PI_INSTALL_JOBS) PKG_TIMEOUT=$(PKG_TIMEOUT) node scripts/install-pi-packages.mjs $(PI_PACKAGES)
 	@mkdir -p ~/.pi/agent/themes
 	@$(STEP) "AGENTS.md → ~/.pi/agent/AGENTS.md" cp .agents/AGENTS.md ~/.pi/agent/AGENTS.md

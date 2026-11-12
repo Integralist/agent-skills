@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync,
+  chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join, resolve } from "node:path";
@@ -111,4 +111,8 @@ test("Pi package updates run concurrently, preserve settings, and print in order
   assert.ok(packageLines[4].includes("🔔") && packageLines[4].includes("failed — skipped"), packageLines[4]);
   assert.equal(readFileSync(join(env.HOME, ".pi/agent/settings.json"), "utf8"),
     readFileSync(join(root, ".pi/agent/settings.json"), "utf8"));
+  const autoSuggestPath = join(env.HOME, ".pi/agent/auto-suggest.json");
+  assert.equal(existsSync(autoSuggestPath), true, "Pi auto-suggest config should be installed");
+  assert.equal(readFileSync(autoSuggestPath, "utf8"),
+    readFileSync(join(root, ".pi/agent/auto-suggest.json"), "utf8"));
 });
