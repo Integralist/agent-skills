@@ -413,17 +413,22 @@ describe('checklist', () => {
     expect(texts).toContain('Claude needs your OK to continue')
   })
 
-  for (const [mode, shows] of [['default', true], ['auto', false], ['bypassPermissions', false], ['dontAsk', false]] as const) {
-    test(`a permission ask in ${mode} mode ${shows ? 'shows' : 'does not show'} Needs you`, async ($, on) => {
+  for (const [mode, shows] of [[undefined, false], ['default', true], ['acceptEdits', true], ['plan', true], ['auto', false], ['bypassPermissions', false], ['dontAsk', false]] as const) {
+    test(`a permission ask in ${mode ?? 'unknown'} mode ${shows ? 'shows' : 'does not show'} Needs you`, async ($, on) => {
       const w = world(on)
       w.verdict = 'ask'
       await start($)
       await prompt($, 'Build my landing page')
-      await $.classic.UserPromptSubmit({ prompt: 'Build my landing page', permission_mode: mode })
-      await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
-      const texts = (await rows($, 'terminal')).join('\n')
-      if (shows) expect(texts).toContain('Claude needs your OK to continue')
-      else expect(texts).not.toContain('Needs you')
+      await $.tool.call({ tool: PLAN, steps: ['Build the page'] })
+      if (mode !== undefined) await $.classic.UserPromptSubmit({ prompt: 'Build my landing page', permission_mode: mode })
+      const verdict = await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
+      expect(verdict.decision).toBe('ask')
+      if (mode === undefined) await w.clock.advance(60_000)
+      for (const surface of SURFACES) {
+        const texts = (await rows($, surface)).join('\n')
+        if (shows) expect(texts).toContain('Claude needs your OK to continue')
+        else expect(texts).not.toMatch(/Needs you|Paused/)
+      }
     })
   }
 
@@ -432,17 +437,19 @@ describe('checklist', () => {
     w.verdict = 'ask'
     await start($)
     await prompt($, 'Build my landing page')
+    await $.classic.UserPromptSubmit({ prompt: 'Build my landing page', permission_mode: 'default' })
     await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
     expect((await rows($, 'terminal')).join('\n')).toContain('Needs you')
     await $.classic.PermissionDenied({ tool_name: 'Bash', tool_input: { command: 'make test' }, tool_use_id: 'toolu_1', reason: 'blocked by the classifier' })
     expect((await rows($, 'terminal')).join('\n')).not.toContain('Needs you')
   })
 
-  test('a new model step clears Needs you when a managed plugin hides the mode', async ($, on) => {
+  test('a new model step clears a confirmed permission prompt when the mode is unknown', async ($, on) => {
     const w = world(on)
     w.verdict = 'ask'
     await start($)
     await prompt($, 'Build my landing page')
+    await $.classic.Notification({ message: 'Claude needs your permission', notification_type: 'permission_prompt' })
     await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
     expect((await rows($, 'terminal')).join('\n')).toContain('Needs you')
     await step($)
@@ -454,6 +461,7 @@ describe('checklist', () => {
     w.verdict = 'ask'
     await start($)
     await prompt($, 'Build my landing page')
+    await $.classic.Notification({ message: 'Claude needs your permission', notification_type: 'permission_prompt' })
     await $.tool.check({ tool: 'Bash', input: { command: 'make test' }, tool_use_id: 'toolu_1' })
     await step($, 'agent-1')
     expect((await rows($, 'terminal')).join('\n')).toContain('Needs you')

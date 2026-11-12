@@ -27,5 +27,6 @@ the prompt.
 > Where an organization manages Claude Code, a managed plugin can skip a mod's
 > `prompt.compose` and `classic.*` hooks. The system prompt section is then
 > skipped; the tool descriptions and the plan-first gate still steer Claude to
-> plan. The permission mode is then unknown, so Needs you can show for an ask
-> auto mode settles alone; the next model request clears it.
+> plan. When the permission mode is unknown, a tool's ask alone does not pause
+> the checklist: auto mode may settle it without you. A permission-prompt
+> notification still shows Needs you; the next model request clears it.

@@ -280,9 +280,9 @@ export function meter(one: CleanViewTask, frame: number): string {
 // Modes that settle a permission ask with nobody asked: a classifier, a bypass, a refusal.
 const SETTLED_ALONE = new Set(['auto', 'bypassPermissions', 'dontAsk'])
 
-/** True when an ask in this permission mode opens a dialog for the person; an unknown mode might. */
+/** True when a known mode asks the person; an unknown mode needs a prompt notification. */
 export function asksPerson(mode: string | undefined): boolean {
-  return mode === undefined || !SETTLED_ALONE.has(mode)
+  return mode !== undefined && !SETTLED_ALONE.has(mode)
 }
 
 const FOLLOW_UP_OFFER =
