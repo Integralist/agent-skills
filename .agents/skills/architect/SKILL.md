@@ -73,6 +73,7 @@ tell the user and wait. Do not fill the gap with a guess.
 6. **Hand off.** Ask the user to choose one next step, and start only that one:
    - Execute the plan with the execute-plan skill, or by hand: tell the user to
      run `/to-tasks <plan-path> slice-1` (`/to-tasks <plan-path>` for a
-     single-slice plan).
+     single-slice plan). For GitHub, use the Root Issue:
+     `/to-tasks #123 slice-1` (`/to-tasks #123` for a single-slice plan).
    - Research another topic: return to step 2.
    - Write another plan: return to step 5.
