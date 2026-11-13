@@ -464,6 +464,7 @@ def test_empty_selection_survives_reload_and_reset(page, report_file):
     page.goto(report_file.as_uri() + "?models=")
     expect(page.locator(".node")).to_have_count(0)
     expect(page.locator("#empty-state")).to_contain_text("Select")
+    expect(page.locator("#export-png")).to_be_disabled()
     page.reload()
     expect(page.locator(".node")).to_have_count(0)
     page.locator("#models-toggle").click()
@@ -535,6 +536,34 @@ def test_saved_html_keeps_view_without_query_and_exports_data(
     download.value.save_as(csv)
     assert len(csv.read_text().splitlines()) == 3
     assert "demo-gpt-high" in csv.read_text()
+
+
+def test_chart_downloads_png(page: Page, report_file: Path, tmp_path: Path) -> None:
+    """The chart button downloads the current graph as a valid PNG image."""
+    page.goto(report_file.as_uri() + "?models=demo-gpt-high,demo-gpt-max&x=cost")
+    button = page.get_by_role("button", name="Download PNG")
+    assert button.count() == 1
+    expect(page.locator(".node")).to_have_count(2)
+    with page.expect_download() as download:
+        button.click()
+    png_path = tmp_path / "chart.png"
+    download.value.save_as(png_path)
+    png = png_path.read_bytes()
+    assert png[:8] == bytes.fromhex("89504e470d0a1a0a")
+    assert int.from_bytes(png[16:20], byteorder="big") == 2560
+    assert int.from_bytes(png[20:24], byteorder="big") == 1320
+
+
+def test_png_download_reports_encoding_failure(page: Page, report_file: Path) -> None:
+    """The page reports a useful message when PNG encoding fails."""
+    page.add_init_script(
+        "HTMLCanvasElement.prototype.toBlob = callback => callback(null);"
+    )
+    page.goto(report_file.as_uri() + "?models=demo-gpt-high")
+    page.locator("#export-png").click()
+    expect(page.locator("#action-status")).to_have_text(
+        "Could not export the chart as a PNG."
+    )
 
 
 def test_presets_and_url_overrides_config(page, report_file):

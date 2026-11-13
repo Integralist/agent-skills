@@ -323,6 +323,7 @@
       ? "Select models from the dropdown to start comparing."
       : "No data for this combination. Choose another metric or import the matching benchmark export.";
     chart.hidden = !valid.length;
+    $("export-png").disabled = !valid.length;
     const info = benchmarkInfo(state.benchmark);
     $("chart-title").textContent = info.label + " vs " + xInfo[state.x].label.split(" · ")[0].toLowerCase();
     $("metric-note").textContent = xInfo[state.x].note;
@@ -494,6 +495,56 @@
     if (/^[\s]*[=+@-]/.test(text)) text = "'" + text;
     return '"' + text.replace(/"/g, '""') + '"';
   };
+  const exportPNG = async () => {
+    const chart = $("chart");
+    const svg = chart.cloneNode(true);
+    const sources = [chart, ...chart.querySelectorAll("*")];
+    const targets = [svg, ...svg.querySelectorAll("*")];
+    const properties = [
+      "fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-opacity",
+      "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin",
+      "stroke-miterlimit", "color", "font-family", "font-size", "font-style",
+      "font-weight", "letter-spacing", "text-anchor", "paint-order", "opacity",
+      "filter", "display", "visibility",
+    ];
+    sources.forEach((source, index) => {
+      const computed = getComputedStyle(source);
+      for (const property of properties) {
+        targets[index].style.setProperty(property, computed.getPropertyValue(property));
+      }
+    });
+    const { width, height } = chart.viewBox.baseVal;
+    svg.setAttribute("xmlns", svgNS);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    const background = document.createElementNS(svgNS, "rect");
+    background.setAttribute("width", width);
+    background.setAttribute("height", height);
+    background.setAttribute("fill", getComputedStyle(chart.closest(".chart-card")).backgroundColor);
+    svg.prepend(background);
+    let svgURL;
+    try {
+      svgURL = URL.createObjectURL(new Blob(
+        [new XMLSerializer().serializeToString(svg)], { type: "image/svg+xml" }));
+      const image = new Image();
+      image.src = svgURL;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = width * 2;
+      canvas.height = height * 2;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas is unavailable");
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const png = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!png) throw new Error("PNG encoding failed");
+      download(png, "image/png", "llm-stats-chart.png");
+    } catch {
+      $("action-status").textContent = "Could not export the chart as a PNG.";
+    } finally {
+      if (svgURL) URL.revokeObjectURL(svgURL);
+    }
+  };
+  $("export-png").addEventListener("click", exportPNG);
   $("save-html").addEventListener("click", () => {
     const clone = document.documentElement.cloneNode(true);
     clone.querySelector("#report-data").textContent = safeJSON(exportPayload());

@@ -76,8 +76,9 @@ and Pareto checkbox state, since URL state doesn't travel with an emailed
 file. Each run rewrites the same `$HOME/llm-stats.html`, so a bookmark with
 query parameters keeps working; keep those parameters when updating one.
 An old bookmark with
-`x=price` still shows token prices; `x=cost` gives benchmark cost. The page
-can also export all JSON or the chart's CSV.
+`x=price` still shows token prices; `x=cost` gives benchmark cost. A button
+with a download icon and the accessible name **Download PNG** saves the current
+graph as a PNG. The page can also export all JSON or the chart's CSV.
 
 **Data use.** Use the
 [API documentation](https://artificialanalysis.ai/data-api/docs) and exports
@@ -85,7 +86,8 @@ the user is allowed to share, and keep Artificial Analysis's attribution and
 data-use terms in shared files. Credentials stay in the generator's
 environment, never in the HTML.
 
-**Changing the generator.** After editing the script or the page, run
+**Changing the generator.** After editing the script or the page, verify the
+PNG button downloads the current graph, then run
 `make -C <skill-base-dir> check test`. It needs Python 3.10+, `uv`, pytest,
 Playwright, and a local Google Chrome; browser tests run with networking off
 and never read the real 1Password item.

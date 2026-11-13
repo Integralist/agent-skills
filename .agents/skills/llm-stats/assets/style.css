@@ -52,6 +52,7 @@ select { padding: 10px 30px 10px 12px; max-width: 340px; min-height: 39px; font-
 h2 { font: var(--d-heading-weight) 24px/1.2 var(--d-font-heading); letter-spacing: -.02em; margin: 0; }
 .chart-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; flex-shrink: 0; max-width: 100%; }
 .chart-actions button { padding: 7px 10px; }
+.chart-actions .icon-button { min-width: 40px; min-height: 40px; padding: 8px; display: inline-flex; align-items: center; justify-content: center; }
 .pareto-toggle { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; cursor: pointer; }
 .pareto-toggle input { margin: 0; accent-color: var(--orange); }
 .metric-note { color: var(--muted); font-size: 11px; line-height: 1.6; margin: 12px 28px 0; }

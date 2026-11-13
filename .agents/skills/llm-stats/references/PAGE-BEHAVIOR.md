@@ -21,5 +21,8 @@ revealed family does not re-enable its non-frontier mouse targets or dim other
 frontier nodes. Faded nodes, family curves, and effort labels cannot intercept
 the mouse. Switching the checkbox off restores normal styling and mouse
 access to every model.
+- The **Download PNG** icon button has the accessible name **Download PNG**. It
+  exports the current graph with its active theme and is disabled when no graph
+  is available; encoding failures produce a visible status message.
 - Reports and exports keep the API's index version, and cost tooltips keep
 four decimal places.
