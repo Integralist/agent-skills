@@ -13,8 +13,10 @@ the prompt.
   **Stuck**, **Stopped** or **All done** as the job changes.
 - **Task details:** Click **Details** beside a task to open a live pane with
   its status, reported progress, run time, and last visible activity. Use
-  **Previous task** and **Next task** (↑/↓ walks the buttons) to move between tasks, **Stop entire run** to end
-  the run, and **Esc** or **Close** to close the pane.
+  **Previous task** and **Next task** (↑/↓ walks the buttons) to move between
+  tasks. **Stop entire run** ends the run. Focus the checklist with `Ctrl+X Tab`
+  and press `i` to inspect the active task; press `i` in the focused pane,
+  **Esc**, or **Close** to close it.
 - **How the plan arrives:** the mod gives Claude two tools, `plan_steps` and
   `report_progress`, and blocks every other tool until a plan exists. The
   optional `plan_steps.title` names the job; replanning without a title keeps
@@ -25,7 +27,7 @@ the prompt.
 
 > [!WARNING]
 > Where an organization manages Claude Code, a managed plugin can skip a mod's
-> `prompt.compose` and `classic.*` hooks. The system prompt section is then
+> `prompt.compose` and `classic.*` event handlers. The system prompt section is then
 > skipped; the tool descriptions and the plan-first gate still steer Claude to
 > plan. When the permission mode is unknown, a tool's ask alone does not pause
 > the checklist: auto mode may settle it without you. A permission-prompt

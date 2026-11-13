@@ -14,6 +14,7 @@ const BAND = (columns = 80) => ({
   component: 'AbovePrompt' as const,
   props: {
     hasSurvey: false,
+    isCollapsed: false,
     isWorking: true,
     maxRows: 20,
     bodyColumns: columns,
@@ -49,6 +50,7 @@ type World = {
   failText?: string
   agents: Agent[]
   opened: Opened[]
+  closed: string[]
   aborted: string[]
   asked: number
   thinkingChunks: string[]
@@ -56,12 +58,15 @@ type World = {
 
 /** The engine beneath the mod: store, clock, tools that succeed, panes that open, and a counter for unexpected model requests. */
 function world(on: On): World {
-  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [], opened: [], aborted: [], asked: 0, thinkingChunks: ['Checking ', 'the branch.'] }
+  const w: World = { toasts: [], ran: [], clock: mock.clock(on), verdict: 'allow', agents: [], opened: [], closed: [], aborted: [], asked: 0, thinkingChunks: ['Checking ', 'the branch.'] }
   on('ui.open', ($, e) => {
     w.opened.push(e)
     return { value: { isPlaced: true as const } }
   })
-  on('ui.close', () => ({ value: undefined }))
+  on('ui.close', ($, e) => {
+    w.closed.push(e.id)
+    return { value: undefined }
+  })
   on('turn.abort', ($, e) => {
     w.aborted.push(e.turnId)
     return { value: undefined }
@@ -357,6 +362,25 @@ describe('checklist', () => {
       expect(row!.length + 1 + 11).toBeLessThanOrEqual(columns)
       await ui.unmount()
     }
+  })
+
+  test('i toggles the active task details pane', async ($, on) => {
+    const w = world(on)
+    await start($)
+    await prompt($, 'Build my landing page')
+    await $.tool.call({ tool: PLAN, steps: ['Inspect the files', 'Run the checks'] })
+
+    const band = await $.ui.mount({ ...BAND(), surface: 'terminal' })
+    expect((await band.find({ key: 'clean-view-inspect' }))?.props.hotkey).toBe('i')
+    await band.press({ key: 'clean-view-inspect' })
+    expect(w.opened.at(-1)).toMatchObject({ id: DETAILS, focus: true })
+    await band.unmount()
+
+    const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
+    expect((await pane.find({ key: 'clean-view-details-close' }))?.props.hotkey).toBe('i')
+    await pane.press({ key: 'clean-view-details-close' })
+    expect(w.closed).toEqual([DETAILS])
+    await pane.unmount()
   })
 
   test('Details opens a live task pane that pages through tasks and can stop the run', async ($, on) => {

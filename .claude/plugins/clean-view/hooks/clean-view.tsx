@@ -40,6 +40,7 @@ const COLLAPSE_MS = 5000
 const FAILURES_TO_STUCK = 3
 const PLACEHOLDER_TITLE = 'Your request'
 const DETAILS_PANE = 'clean-view-details'
+const INSPECT_HOTKEY = 'i'
 // Cells the `[ Details ]` button takes at the end of each task row.
 const DETAILS_BUTTON_CELLS = 11
 const ALWAYS_ALLOWED = new Set(['ToolSearch', 'TodoWrite', 'TaskCreate', 'TaskUpdate', 'AskUserQuestion', PLAN_TOOL, PROGRESS_TOOL])
@@ -165,6 +166,14 @@ async function openDetails($: $, taskId: string) {
   await update($, logScroll, () => 0)
   focusedButton = undefined
   await $.ui.open({ id: DETAILS_PANE, title: 'Task details', focus: true, closeOnEscape: true, holdToasts: true, rows: 24 })
+}
+
+async function toggleDetails($: $, taskId: string) {
+  if ((await read($, selectedTaskId)) !== null) {
+    await $.ui.close({ id: DETAILS_PANE })
+    return
+  }
+  await openDetails($, taskId)
 }
 
 async function pageDetails($: $, step: number) {
@@ -619,13 +628,18 @@ export function registerCleanView(on: On) {
     const isPaused = PAUSED_PHASES.has(list.phase)
     const header = headerOf(list, took, now, Text)
     const firstUpcoming = list.tasks.findIndex(one => one.status === 'upcoming')
+    const activeTask = list.tasks.find(one => one.status === 'active') ?? list.tasks[0]
+    const inspectButton = activeTask ? (
+      <Button key="clean-view-inspect" label="Inspect" hotkey={INSPECT_HOTKEY} onPress={() => void toggleDetails($, activeTask.id)} />
+    ) : null
+    const controls = <Box flexDirection="row">{inspectButton}{button}</Box>
 
     // A blank line above the band keeps it clear of the spinner line.
     if ((list.phase === 'done' || list.phase === 'ended') && list.isCollapsed) {
       return (
         <Box key="clean-view-band" marginTop={1} flexDirection="row" justifyContent="space-between">
           {header}
-          {button}
+          {controls}
         </Box>
       )
     }
@@ -640,7 +654,7 @@ export function registerCleanView(on: On) {
       <Box key="clean-view-band" marginTop={1} flexDirection="column">
         <Box key="clean-view-header" flexDirection="row" justifyContent="space-between" marginBottom={1}>
           {header}
-          {button}
+          {controls}
         </Box>
         {list.tasks.map((one, i) => (
           <Box key={`clean-view-task-row-${one.id}`} flexDirection="row" justifyContent="space-between">
@@ -735,9 +749,9 @@ export function registerCleanView(on: On) {
           {isLive && mainTurnId !== undefined && (
             <Button key="clean-view-details-stop" label="Stop entire run" autoFocus={focusedButton === 'clean-view-details-stop' || undefined} onPress={() => void $.turn.abort({ turnId: mainTurnId! })} />
           )}
-          <Button key="clean-view-details-close" label="Close" autoFocus={focusedButton === 'clean-view-details-close' || undefined} onPress={() => void $.ui.close({ id: DETAILS_PANE })} />
+          <Button key="clean-view-details-close" label="Close" hotkey={INSPECT_HOTKEY} autoFocus={focusedButton === 'clean-view-details-close' || undefined} onPress={() => void $.ui.close({ id: DETAILS_PANE })} />
         </Box>
-        <Text dimColor>Stop ends the entire run · Esc closes this pane</Text>
+        <Text dimColor>Stop ends the entire run · i or Esc closes this pane</Text>
       </Box>
     )
   })
