@@ -44,6 +44,9 @@ the start, use qualified names throughout.
    and ask which project if more than one fits. If none exists, ask for the
    initiative's name and create `projects/<yyyy-mm-dd>-<slug>/`. Read its
    README, every PDD document, and all research, specs, and ADRs they link.
+   Also read the project root `GLOSSARY.md`; if absent, use root `CONTEXT.md`
+   as its legacy equivalent. Keep PDD milestones distinct from slice
+   milestones in engineering plans.
    For `github` or an issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
    Artifacts instead of `projects/`.

@@ -36,6 +36,11 @@ failure cases and uncertainty; clearer wording cannot change their contract.
 
 ## Writing rules
 
+- For project-specific prose, use terms in the project root `GLOSSARY.md`; if
+  absent, use root `CONTEXT.md` as the legacy glossary. Prefer defined terms
+  over listed alternatives. For each glossary term, explain its meaning the
+  first time it appears; do not assume readers know or have read the glossary.
+  Surface conflicts rather than silently changing meaning.
 - Start with the reader's problem, question, or goal.
 - Explain technical choices by their effects: what changes, for whom, and why
   it matters.

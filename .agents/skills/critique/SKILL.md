@@ -16,7 +16,8 @@ problems. If the document is sound, say so.
 ## Workflow
 
 1. **Read the whole document.** Use the path the user gave. If they gave none,
-   ask which file to critique.
+   ask which file to critique. For project documents, also read root
+   `GLOSSARY.md`; if absent, use root `CONTEXT.md` as the legacy glossary.
 2. **Check for fallacies.** Look for straw man, false dichotomy, appeal to
    authority, slippery slope, circular reasoning, ad hominem, red herring,
    hasty generalization, false cause, moving the goalposts, equivocation,
@@ -32,6 +33,8 @@ problems. If the document is sound, say so.
    - Clarity: undefined terms or vagueness where precision matters.
    - Consistency: contradictions or later sections that conflict with earlier
      ones.
+   - Terminology: flag glossary conflicts or avoided alternatives only when
+     they create ambiguity or change meaning; ignore harmless style variation.
 4. **For plans only, check execution quality.** Apply this to implementation
    plans or task lists, including `plan.md` or `tasks.md` under `projects/`,
    and documents built from slices, milestones, tasks, and a File Changes

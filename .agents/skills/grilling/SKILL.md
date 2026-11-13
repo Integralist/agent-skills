@@ -8,6 +8,11 @@ metadata:
 Interview the user until you reach shared understanding. Map the subject as a
 **design tree**: each decision branches into the decisions that depend on it.
 
+For project-specific work, read the project root `GLOSSARY.md` before asking
+questions. If it is absent, use root `CONTEXT.md` as its legacy equivalent.
+Use defined terms in questions; surface conflicts rather than silently choosing
+a meaning.
+
 ## Ask questions in rounds
 
 The **frontier** is the set of decisions whose prerequisites are settled—the
