@@ -162,6 +162,8 @@ For specialised work, read:
   for the canonical living features.
 - [FUZZ-AND-BENCHMARKS.md](references/FUZZ-AND-BENCHMARKS.md): `testing.F`
   fuzzing and `b.Loop()` benchmarks.
+- [REGULAR-EXPRESSIONS.md](references/REGULAR-EXPRESSIONS.md): before
+  writing or changing tests for behaviour that depends on regular expressions.
 - [COVERAGE-PRUNING.md](references/COVERAGE-PRUNING.md): finding and pruning
   overlapping tests with Tobari.
 - The mutation-testing skill: checking whether tests catch behaviour changes.
