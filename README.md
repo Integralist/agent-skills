@@ -110,30 +110,33 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 > rather than aborting the install.
 
 ```bash
-# Generic agents only (e.g. Gemini and OpenCode): copies .agents/ to ~/.agents/
+# Everything
+make install
+
+# Shared agent instructions and skills only
 make install-agents
 
 # Pi: installs Pi, configured packages, shared instructions, and settings
 make install-pi
 
-# Claude Code (pulls in install-agents): copies CLAUDE.md, rules, agents,
-# scripts, and mods to ~/.claude/, then symlinks ~/.claude/skills → ~/.agents/skills
+# Claude Code: copies CLAUDE.md, rules, agents, scripts, and mods to ~/.claude/,
+# then symlinks ~/.claude/skills → ~/.agents/skills
 make install-claude
 
-# Gemini Antigravity CLI status line (no-op if ~/.gemini/antigravity-cli absent)
+# Gemini CLI and Antigravity CLI settings; Antigravity status line if installed
 make install-gemini
 
-# Copilot CLI status line (no-op if ~/.copilot/scripts absent)
+# Copilot CLI settings and MCP config; status line if installed
 make install-copilot
 
 # OpenCode config, TUI settings, and model preferences
 make install-opencode
 
-# Google Workspace MCP server → ~/.local/share/google-workspace-mcp/
-make install-google-workspace-mcp
+# Codex CLI config and hooks
+make install-codex
 
-# Everything (install-claude pulls in install-agents; also runs the above)
-make install
+# Swival config and Bedrock SSO helper
+make install-swival
 ```
 
 ## Developer workflows
