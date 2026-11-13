@@ -247,9 +247,6 @@
       group.classList.toggle("is-dim", Boolean(!state.pareto && key && key !== groupKey));
       group.classList.toggle("is-active", key === groupKey);
     }
-    for (const label of $("chart").querySelectorAll(".family-label")) {
-      label.classList.toggle("is-dim", dimFamily(label.dataset.series));
-    }
     for (const element of $("chart").querySelectorAll(".node")) {
       const candidate = points.get(element.dataset.slug);
       element.classList.toggle("is-frontier", Boolean(candidate.frontier));
@@ -287,6 +284,13 @@
     const chosen = models.filter(model => state.selected.has(model.slug));
     const valid = chosen.filter(model =>
       finite(model.scores[state.benchmark]) && finite(valueFor(model, state.benchmark, state.x)));
+    const orderPanel = $("pareto-order-panel");
+    const order = $("pareto-order");
+    order.replaceChildren();
+    orderPanel.hidden = !state.pareto || !valid.length;
+    $("pareto-order-heading").textContent = state.x === "cost"
+      ? "Pareto suggestions · highest task cost → lowest task cost"
+      : "Pareto suggestions · left to right";
     if (!valid.some(model => model.slug === state.pinned)) state.pinned = null;
     const unknown = [...state.selected].filter(slug => !bySlug.has(slug));
     const warnings = [...urlWarnings];
@@ -364,8 +368,6 @@
       grouped.get(key).push(model);
     }
     const providerCounts = new Map();
-    const labelPositions = [];
-    const familyLabels = [];
     for (const [key, family] of grouped) {
       family.sort((a, b) => effortOrder.indexOf(a.effort) - effortOrder.indexOf(b.effort)
         || valueFor(a, state.benchmark, state.x) - valueFor(b, state.benchmark, state.x)
@@ -415,20 +417,6 @@
         });
       }
       const anchor = line[line.length - 1];
-      const familyName = anchor.model.series.replace(" [DEMO]", "");
-      const halfWidth = Math.min(familyName.length * 3.9, 155);
-      const labelX = Math.min(right - halfWidth, Math.max(left + halfWidth, anchor.sx));
-      let labelY = Math.max(25, anchor.sy - 25);
-      for (let attempts = 0; attempts < 10; attempts++) {
-        if (!labelPositions.some(position =>
-          Math.abs(position.x - labelX) < position.width + halfWidth + 10
-          && Math.abs(position.y - labelY) < 20)) break;
-        labelY -= 22;
-      }
-      // If the top margin is crowded, move labels below their points.
-      if (labelY < 20) labelY = anchor.sy + 42;
-      labelPositions.push({ x: labelX, y: labelY, width: halfWidth });
-      familyLabels.push({ key, x: labelX, y: labelY, color, name: familyName });
       const legend = document.createElement("button");
       legend.dataset.series = key;
       legend.setAttribute("aria-label", "Highlight " + anchor.model.series);
@@ -455,6 +443,22 @@
         bestMetric = point.x;
         return true;
       }).reverse();
+      const recommendations = [...points.values()].filter(point => point.frontier)
+        .sort((a, b) => a.sx - b.sx || a.model.name.localeCompare(b.model.name)
+          || a.model.effort.localeCompare(b.model.effort)
+          || a.model.slug.localeCompare(b.model.slug));
+      for (const point of recommendations) {
+        const item = document.createElement("li");
+        const swatch = document.createElement("span");
+        swatch.className = "pareto-order-swatch";
+        swatch.setAttribute("aria-hidden", "true");
+        swatch.style.backgroundColor = point.color;
+        const label = document.createElement("span");
+        label.textContent = point.model.name + " · " + point.model.effort.toUpperCase();
+        item.append(swatch, label);
+        order.append(item);
+      }
+      orderPanel.hidden = recommendations.length === 0;
       if (frontier.length > 1) {
         const d = frontier.map((point, index) =>
           (index ? "L" : "M") + point.sx + "," + point.sy).join(" ");
@@ -463,14 +467,6 @@
           class: "pareto-line", role: "img", "aria-label": "Pareto line for selected models", d,
         }, chart);
       }
-    }
-    const labelLayer = svgElement("g", { class: "family-label-layer" }, chart);
-    for (const label of familyLabels) {
-      svgElement("text", {
-        x: label.x, y: label.y, "text-anchor": "middle", fill: label.color,
-        class: "family-label", "data-series": label.key,
-        style: "--family-label-color:" + label.color,
-      }, labelLayer, label.name);
     }
     paintHighlight();
   };

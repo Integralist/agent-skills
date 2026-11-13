@@ -137,14 +137,17 @@ def test_dark_warm_surfaces_and_readable_text(page: Page, report_file: Path) -> 
             });
           const muted = luminance(rgb(getComputedStyle(document.querySelector('.intro')).color));
           const ink = luminance(rgb(root.color));
-          const labels = [...document.querySelectorAll('.family-label, .effort-label, .axis-tick')]
+          const chartLabels = [...document.querySelectorAll('.effort-label, .axis-tick')]
             .map(label => contrast(card, luminance(rgb(getComputedStyle(label).fill))));
+          const legendLabels = [...document.querySelectorAll('.legend button')]
+            .map(button => contrast(card, luminance(rgb(getComputedStyle(button).color))));
+          const labelContrast = Math.min(...chartLabels, ...legendLabels);
           const primary = getComputedStyle(document.querySelector('#save-html'));
           return {paper, paperColor: root.backgroundColor,
             cardColor: getComputedStyle(document.querySelector('.chart-card')).backgroundColor,
             surfaces, scheme: root.colorScheme,
             inkContrast: contrast(paper, ink),
-            mutedContrast: contrast(paper, muted), labelContrast: Math.min(...labels),
+            mutedContrast: contrast(paper, muted), labelContrast,
             primaryContrast: contrast(luminance(rgb(primary.color)), luminance(rgb(primary.backgroundColor)))};
         }"""
     )
@@ -271,52 +274,40 @@ def test_omitted_model_names_are_safe_text(page: Page) -> None:
     expect(page.locator("#warnings img")).to_have_count(0)
 
 
-def test_family_labels_render_above_lines_and_dim_with_their_series(
+def test_family_names_stay_in_legend_not_plot(page: Page, report_file: Path) -> None:
+    """Family names stay outside the plot and retain their series highlights."""
+    page.goto(report_file.as_uri())
+    expect(page.locator("#chart .family-label")).to_have_count(0)
+    legend_precedes_plot = page.locator("#legend").evaluate(
+        """legend => Boolean(legend.compareDocumentPosition(
+          document.querySelector("#chart")) & Node.DOCUMENT_POSITION_FOLLOWING)"""
+    )
+    assert legend_precedes_plot
+    expect(page.locator("#legend button")).to_have_count(4)
+    node(page, "demo-claude-opus-high").hover()
+    expect(page.locator("#legend button.is-dim")).to_have_count(3)
+
+
+def test_family_legend_swatches_match_their_series(
     page: Page, report_file: Path
 ) -> None:
+    """Legend swatches identify each line and names stay readable in both themes."""
     page.goto(report_file.as_uri())
-    layering = page.locator("#chart").evaluate(
-        """chart => {
-          const series = [...chart.querySelectorAll('.series')];
-          const labels = [...chart.querySelectorAll('.family-label')];
-          return {
-            labelsFollowLines: series.every(group => labels.every(label =>
-              Boolean(group.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING))),
-            labelCount: labels.length,
-            pointerEvents: chart.querySelector('.family-label-layer')
-              ? getComputedStyle(chart.querySelector('.family-label-layer')).pointerEvents
-              : null,
-          };
-        }"""
-    )
-    assert layering == {
-        "labelsFollowLines": True,
-        "labelCount": 4,
-        "pointerEvents": "none",
-    }
-
-    node(page, "demo-claude-opus-high").hover()
-    expect(page.locator(".family-label.is-dim")).to_have_count(3)
-
-
-def test_family_label_colors_match_their_series(page: Page, report_file: Path) -> None:
-    """Family labels retain the series hue and readable contrast in both modes."""
-    page.goto(report_file.as_uri())
-    colors = page.locator(".family-label").evaluate_all(
-        """labels => labels.map(label => {
+    colors = page.locator("#legend button").evaluate_all(
+        """buttons => buttons.map(button => {
           const series = [...document.querySelectorAll('.series')]
-            .find(group => group.dataset.series === label.dataset.series);
-          return [label.getAttribute('fill'),
-            series.querySelector('path').getAttribute('stroke')];
+            .find(group => group.dataset.series === button.dataset.series);
+          return [getComputedStyle(button.querySelector('.legend-swatch')).backgroundColor,
+            getComputedStyle(series.querySelector('path')).stroke];
         })"""
     )
-    assert colors
-    assert all(label_color == line_color for label_color, line_color in colors)
+    assert len(colors) == 4
+    assert all(swatch_color == line_color for swatch_color, line_color in colors)
 
     for mode in ("dark", "light"):
         page.locator("#design-mode").select_option(mode)
-        contrasts = page.locator(".family-label").evaluate_all(
-            """labels => {
+        contrasts = page.locator("#legend button").evaluate_all(
+            """buttons => {
               const rgb = color => {
                 const channels = color.match(/[\\d.]+/g).slice(0, 3).map(Number);
                 return color.startsWith('color(srgb ')
@@ -329,8 +320,8 @@ def test_family_label_colors_match_their_series(page: Page, report_file: Path) -
               const contrast = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
               const card = luminance(rgb(getComputedStyle(
                 document.querySelector('.chart-card')).backgroundColor));
-              return labels.map(label => contrast(card,
-                luminance(rgb(getComputedStyle(label).fill))));
+              return buttons.map(button => contrast(card,
+                luminance(rgb(getComputedStyle(button).color))));
             }"""
         )
         assert contrasts
@@ -824,6 +815,7 @@ def test_pareto_line_uses_nondominated_points(
     page.locator("#x-metric").select_option(metric)
     checkbox.check()
     expect(page.locator(".pareto-line")).to_have_count(1)
+    expect(page.locator("#pareto-order-panel")).to_be_visible()
     expect_frontier(page, ["premium", "middle", "cheap", "zero"])
     expect(page.locator(".node")).to_have_count(8)
     expect(page.locator("#warnings")).to_contain_text("Missing Score")
@@ -841,18 +833,43 @@ def test_pareto_line_uses_nondominated_points(
     assert style["events"] == "none"
 
 
+def test_pareto_order_lists_frontier_models_and_efforts_in_cost_order(
+    page: Page, pareto_report: Path
+) -> None:
+    """List all frontier variants from the highest task cost to the lowest."""
+    page.goto(pareto_report.as_uri() + "?pareto=1")
+    panel = page.locator("#pareto-order-panel")
+    assert panel.count() == 1
+    expect(panel).to_be_visible()
+    expect(page.locator("#pareto-order-heading")).to_contain_text(
+        "highest task cost → lowest task cost"
+    )
+    assert page.locator("#pareto-order li").all_text_contents() == [
+        "Premium · DEFAULT",
+        "Middle · DEFAULT",
+        "Middle Twin · DEFAULT",
+        "Cheap · DEFAULT",
+        "Zero · DEFAULT",
+    ]
+    page.get_by_role("checkbox", name="Pareto line").uncheck()
+    expect(panel).to_be_hidden()
+
+
 def test_pareto_recomputes_for_model_and_benchmark_changes(
     page: Page, pareto_report: Path
 ) -> None:
     """Removing frontier models promotes alternatives; a new benchmark recalculates."""
     page.goto(pareto_report.as_uri() + "?pareto=1")
     expect_frontier(page, ["premium", "middle", "cheap", "zero"])
+    expect(page.locator("#pareto-order li")).to_have_count(5)
     page.locator("#models-toggle").click()
     page.get_by_role("checkbox", name="Middle", exact=True).uncheck()
     page.get_by_role("checkbox", name="Middle Twin", exact=True).uncheck()
     expect_frontier(page, ["premium", "dominated", "cheap", "zero"])
+    expect(page.locator("#pareto-order li")).to_have_count(4)
     page.get_by_role("checkbox", name="Premium", exact=True).uncheck()
     expect_frontier(page, ["dominated", "cheap", "zero"])
+    expect(page.locator("#pareto-order li")).to_have_count(3)
     page.get_by_label("Search models", exact=True).press("Escape")
     page.locator("#benchmark").select_option("deepswe")
     expect(page.locator(".pareto-line")).to_have_count(0)
@@ -866,16 +883,26 @@ def test_pareto_recomputes_for_model_and_benchmark_changes(
 
 
 @pytest.mark.parametrize(
-    "selection",
-    ["", "zero", "middle,middle-twin", "missing-score,missing-metric"],
+    ("selection", "recommendation_count"),
+    [
+        ("", 0),
+        ("zero", 1),
+        ("middle,middle-twin", 2),
+        ("missing-score,missing-metric", 0),
+    ],
 )
 def test_pareto_does_not_invent_lines_with_fewer_than_two_locations(
-    page: Page, pareto_report: Path, selection: str
+    page: Page, pareto_report: Path, selection: str, recommendation_count: int
 ) -> None:
     """Empty, missing, singleton, and coincident selections have no fake segment."""
     page.goto(pareto_report.as_uri() + f"?models={selection}&pareto=1")
     expect(page.get_by_role("checkbox", name="Pareto line")).to_be_checked()
     expect(page.locator(".pareto-line")).to_have_count(0)
+    expect(page.locator("#pareto-order li")).to_have_count(recommendation_count)
+    if recommendation_count:
+        expect(page.locator("#pareto-order-panel")).to_be_visible()
+    else:
+        expect(page.locator("#pareto-order-panel")).to_be_hidden()
     assert "NaN" not in page.locator("#chart").inner_html()
     assert "Infinity" not in page.locator("#chart").inner_html()
 
@@ -1003,11 +1030,12 @@ def test_pareto_line_stands_out_from_context(page: Page, pareto_report: Path) ->
     """A thick yellow line with a dark outline outranks faded family context."""
     page.goto(pareto_report.as_uri() + "?pareto=1")
     assert effective_opacities(page, ".series path") == [0.2]
-    expect(page.locator(".family-label").filter(has_text="Mixed family")).to_have_css(
+    expect(page.locator("#chart .family-label")).to_have_count(0)
+    expect(page.locator("#legend button").filter(has_text="Mixed family")).to_have_css(
         "opacity", "1"
     )
-    expect(page.locator(".family-label").filter(has_text="dominated")).to_have_css(
-        "opacity", "0.25"
+    expect(page.locator("#legend button").filter(has_text="dominated")).to_have_css(
+        "opacity", "0.4"
     )
     style = page.locator(".pareto-line").evaluate(
         """line => {
@@ -1071,7 +1099,7 @@ def test_pareto_keeps_keyboard_access_and_restores_normal_view(
     expect(page.locator(".pareto-line, .pareto-outline")).to_have_count(0)
     assert effective_opacities(page, ".node") == [1] * 8
     assert effective_opacities(page, ".series path") == [1]
-    assert all(value == 1 for value in effective_opacities(page, ".family-label"))
+    expect(page.locator("#chart .family-label")).to_have_count(0)
 
 
 def test_pareto_focus_marks_all_coincident_frontier_nodes_without_a_line(

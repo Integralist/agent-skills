@@ -49,12 +49,16 @@
     <p id="metric-note" class="metric-note"></p>
     <p id="pareto-note" class="metric-note" hidden>The yellow dashed line connects the best score/metric trade-offs among selected models. Only yellow nodes respond to the mouse; faded models remain accessible with Tab and Enter/Space. Segments are visual guides, not measured intermediate results.</p>
     <div id="warnings" class="warning" role="status" hidden></div>
+    <div id="legend" class="legend" aria-label="Model families"></div>
+    <div id="pareto-order-panel" class="pareto-order-panel" hidden>
+      <p id="pareto-order-heading" class="pareto-order-heading"></p>
+      <ol id="pareto-order" class="pareto-order" aria-labelledby="pareto-order-heading"></ol>
+    </div>
     <div class="chart-scroll">
       <svg id="chart" viewBox="0 0 1280 660" aria-label="Model comparison chart"></svg>
     </div>
     <div id="tooltip" class="tooltip" role="status" hidden></div>
     <p id="empty-state" class="empty-state" hidden></p>
-    <div id="legend" class="legend" aria-label="Model families"></div>
     <div class="chart-foot"><p>Hover to explore. Click an effort node to pin its line; click it again to release. Tab + Enter works too.</p><span id="pin-status" aria-live="polite">No line pinned</span></div>
   </section>
   <section class="bottom-bar" aria-label="Sharing and data">
