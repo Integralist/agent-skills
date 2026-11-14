@@ -3,10 +3,13 @@
 These behaviours are covered by the tests and must be preserved when changing
 the page.
 
-- Hovering or focusing an effort node highlights its family. The normal view
-dims other families; Pareto mode keeps frontier nodes vivid. Clicking or
-Enter/Space pins it, clicking another replaces the pin, and clicking it again,
-Escape, or **Clear highlight** releases it.
+- Hovering or focusing an effort node or family name in the legend temporarily
+  highlights its family. The normal view dims other families; Pareto mode keeps
+  frontier nodes vivid. Legend hover does not show a node tooltip. When neither
+  pointer nor focus remains on the legend item, any pinned highlight stays in
+  effect. Clicking or Enter/Space on a node or legend item pins it, clicking
+  another replaces the pin, and clicking it again, Escape, or **Clear
+  highlight** releases it.
 - The model dropdown has fuzzy search, checkboxes, Clear, Select matches, and
 Reset defaults, with arrow keys to move and Escape to close.
 - Models missing the chosen score or metric are left out with a visible

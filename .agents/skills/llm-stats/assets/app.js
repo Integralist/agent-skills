@@ -118,7 +118,10 @@
       : saved.models || defaults(report.config);
     const pinned = params.has("highlight") ? params.get("highlight") : saved.pinned || null;
     const pareto = params.has("pareto") ? params.get("pareto") === "1" : saved.pareto === true;
-    state = { selected: new Set(selected), benchmark, x, pinned, pareto, hovered: null };
+    state = {
+      selected: new Set(selected), benchmark, x, pinned, pareto,
+      hovered: null, hoveredSeries: null,
+    };
     if (!state.selected.has(pinned) || !bySlug.has(pinned)) state.pinned = null;
   };
   const syncURL = () => {
@@ -236,7 +239,7 @@
   const paintHighlight = () => {
     const slug = state.pinned || state.hovered;
     const point = points.get(slug);
-    const key = point ? seriesKey(point.model) : null;
+    const key = point ? seriesKey(point.model) : state.hoveredSeries;
     const emphasized = new Set([...points.values()].filter(point => point.frontier)
       .map(point => seriesKey(point.model)));
     if (key) emphasized.add(key);
@@ -272,7 +275,15 @@
       ? "Pinned: " + point.model.series + " · " + point.model.effort.toUpperCase() : "No line pinned";
     $("clear-highlight").disabled = !slug;
   };
+  const syncLegendHover = () => {
+    const buttons = [...$("legend").querySelectorAll("button")];
+    const active = buttons.find(button => button.matches(":hover"))
+      || buttons.find(button => button.matches(":focus"));
+    state.hoveredSeries = active?.dataset.series || null;
+    paintHighlight();
+  };
   const renderChart = () => {
+    state.hoveredSeries = null;
     $("pareto-toggle").checked = state.pareto;
     $("pareto-note").hidden = !state.pareto;
     const chart = $("chart");
@@ -426,6 +437,9 @@
       const label = document.createElement("span");
       label.textContent = anchor.model.series;
       legend.append(swatch, label);
+      for (const event of ["pointerenter", "pointerleave", "focus", "blur"]) {
+        legend.addEventListener(event, syncLegendHover);
+      }
       legend.addEventListener("click", () => pin(anchor.model.slug));
       $("legend").append(legend);
     }

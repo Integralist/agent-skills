@@ -288,6 +288,35 @@ def test_family_names_stay_in_legend_not_plot(page: Page, report_file: Path) -> 
     expect(page.locator("#legend button.is-dim")).to_have_count(3)
 
 
+def test_family_legend_temporarily_highlights_on_hover_and_focus(
+    page: Page, report_file: Path
+) -> None:
+    """Hovering or focusing a family legend item highlights its line temporarily."""
+    page.goto(report_file.as_uri())
+    legend = page.locator("#legend button").first
+    family = legend.get_attribute("data-series")
+    assert family is not None
+
+    active = page.locator(".series.is-active")
+    legend.hover()
+    expect(active).to_have_count(1)
+    assert active.get_attribute("data-series") == family
+    expect(page.locator(".series.is-dim")).to_have_count(3)
+    expect(legend).to_have_attribute("aria-pressed", "false")
+    expect(page.locator("#tooltip")).to_be_hidden()
+
+    page.locator("#benchmark").hover()
+    expect(page.locator(".series.is-dim")).to_have_count(0)
+    expect(active).to_have_count(0)
+
+    legend.focus()
+    expect(active).to_have_count(1)
+    assert active.get_attribute("data-series") == family
+    page.locator("#benchmark").focus()
+    expect(page.locator(".series.is-dim")).to_have_count(0)
+    expect(active).to_have_count(0)
+
+
 def test_family_legend_swatches_match_their_series(
     page: Page, report_file: Path
 ) -> None:
