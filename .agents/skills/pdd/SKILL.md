@@ -75,6 +75,9 @@ the start, use qualified names throughout.
      interactions, and measures of success. Technologies are allowed; slices,
      interface contracts, and tasks are not. Ready means reviewers can
      authorize implementation without reopening rejected options.
+     When the design coordinates 3+ lifecycle states, retries, or concurrent
+     actors, validate its transitions with
+     [STATE-MODEL.md](../shared/STATE-MODEL.md).
 
    When revising, preserve approved content and record requested changes
    rather than rewriting history. If the work reveals a code, tooling, or

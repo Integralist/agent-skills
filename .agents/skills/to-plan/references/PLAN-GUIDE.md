@@ -51,6 +51,9 @@ For every slice:
 - Choose an outcome diagram (individual, shared, mixed, or none) using
   [OUTCOME-DIAGRAMS.md](../../shared/OUTCOME-DIAGRAMS.md), based on what helps
   the reviewer understand the change.
+- When a slice introduces 3+ interacting states, retries/timeouts, or
+  concurrency without a prior spec check, run
+  [STATE-MODEL.md](../../shared/STATE-MODEL.md).
 - Choose the delivery shape using
   [PULL-REQUEST-DELIVERY.md](../../shared/PULL-REQUEST-DELIVERY.md). Name
   slices or milestones, not task numbers.

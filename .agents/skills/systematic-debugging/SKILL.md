@@ -60,7 +60,8 @@ discuss the design with the user before continuing.
 **Common cases.** For “it worked before,” use `git bisect` to find the
 breaking commit and the assumption it changed. For intermittent failures,
 look for races, shared mutable state, and async ordering before adding waits
-or retries.
+or retries; use [STATE-MODEL.md](../shared/STATE-MODEL.md) to find the
+shortest failing trace and replay it as a test.
 
 **Reporting.** State errors plainly: where, what you saw, and what you
 expected. If the cause is unproven, name the missing evidence rather than

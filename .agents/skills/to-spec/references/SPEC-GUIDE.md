@@ -70,6 +70,10 @@ invariants and existing contracts are settled upfront:
 4. Repeated, duplicate, or expired actions (idempotency and timing).
 5. Partial failure, concurrency, or rollback guarantees.
 
+When behaviour spans 3+ interacting states, retries/timeouts, or concurrent
+actors, run [STATE-MODEL.md](../../shared/STATE-MODEL.md) before drafting
+Gherkin so deadlocks and broken invariants become scenarios.
+
 Check owning `docs/specs/*.feature` files first; extend or modify an
 existing scenario or `Scenario Outline` rather than adding overlapping
 scenarios.
