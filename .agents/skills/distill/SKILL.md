@@ -88,4 +88,4 @@ items it cannot find.
 - For a repo document's structure and quality, use
   [tech-docs](../tech-docs/SKILL.md).
 - To explain an engineering document to a non-engineer, use
-  [summarize-for-product](../summarize-for-product/SKILL.md).
+  [summarize](../summarize/SKILL.md).

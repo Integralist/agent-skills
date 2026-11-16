@@ -1,7 +1,7 @@
 # Summary Output Templates
 
-Read the template for the shape the user chose. Use it with the agreed
-rendering style.
+Read the template for the chosen share-out shape before writing, and apply the
+agreed rendering (`markdown`, `plain`, or `slack-mrkdwn`).
 
 ## PR
 
