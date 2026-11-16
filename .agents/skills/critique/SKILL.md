@@ -30,15 +30,17 @@ problems. If the document is sound, say so.
      statistics.
    - Assumptions: what is unstated and whether it is reasonable.
    - Completeness: missing counterarguments or perspectives.
-   - Clarity: undefined terms or vagueness where precision matters.
+   - Clarity: undefined terms, unexplained lettered IDs or shorthand before
+     first use, or vagueness where precision matters.
    - Consistency: contradictions or later sections that conflict with earlier
      ones.
    - Terminology: flag glossary conflicts or avoided alternatives only when
      they create ambiguity or change meaning; ignore harmless style variation.
 4. **For plans only, check execution quality.** Apply this to implementation
    plans or task lists, including `plan.md` or `tasks.md` under `projects/`,
-   and documents built from slices, milestones, tasks, and a File Changes
-table. Skip it for blog posts, research, and design notes. Check:
+   or as GitHub Issue Artifacts, and documents built from slices, milestones,
+   tasks, and a File Changes table. Skip it for blog posts, research, and design
+   notes. Check:
    - Scope drift into unnecessary refactors, renames, or cleanup.
    - Required files missing from the File Changes table.
    - Tasks or milestones without pass/fail signals, such as "improve X" or

@@ -45,7 +45,8 @@ request history there.
    Set Status to `Planning`; fill Author and Created using
    `git config user.name` and
    `date +%F`. Use voice-product throughout explanatory prose, including
-   Summary, slice outcomes, Notes and expanded detail. Preserve exact contracts.
+   Summary, slice outcomes, Notes and expanded detail. Define any lettered IDs
+   or shorthand before first use, and preserve exact contracts.
 
    - **On disk:** Use the spec's project folder, or create
      `projects/<yyyy-mm-dd>-<slug>/` if there is no spec. Read

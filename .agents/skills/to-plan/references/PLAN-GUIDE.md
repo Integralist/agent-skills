@@ -15,6 +15,12 @@ prose, not required technical detail. Follow
 [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) for summary-first disclosure;
 use dropdowns for supporting rationale, not slice contracts.
 
+**Define lettered IDs before use.** Spell out every lettered identifier,
+prefix, or shorthand before its first use—for example, `Slice 1 (S1)`,
+`Milestone 1.1 (M1.1)`, or `Contract 1 (C1)`. When using a numbered series such
+as `C1–C7` or token symbols such as `T_A` and `T_M`, explain what each letter
+or symbol stands for in prose or a short key before referencing the codes.
+
 ## Slice design
 
 Cut vertical slices: each should trace through every layer it touches, be

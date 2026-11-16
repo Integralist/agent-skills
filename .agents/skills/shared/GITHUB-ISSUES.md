@@ -147,6 +147,10 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
   `[Task 1](https://github.com/<owner>/<repo>/issues/27) (#27)`).
 - **Caption signature code blocks:** Introduce any code block under
   `Produces:` with a short phrase explaining what the snippet represents.
+- **Define lettered IDs before use:** In Issue Artifacts (including `plan.md`)
+  and issue bodies, spell out what each lettered prefix, symbol, or shorthand
+  stands for before its first use (for example, `Slice 1 (S1)`,
+  `Milestone 1.1 (M1.1)`, `Contract 1 (C1)`, or `Task 1 (T1)`).
 
 ## Branch guard, execution, and hybrid closure lifecycle
 
