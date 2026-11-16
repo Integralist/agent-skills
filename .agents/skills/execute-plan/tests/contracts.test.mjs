@@ -417,14 +417,16 @@ test("compiled tasks map to milestones without copying the plan checklist", () =
 test("planning preserves the build request and checks coverage before handoff", () => {
   const spec = flat(specPath);
   const plan = flat(planPath);
-  assert.match(spec, /Preserve the request and requirement-changing clarifications in Development Brief/);
-  assert.match(spec, /Keep original evidence, record later decisions separately, and redact secrets/);
+  requiredReference(specPath, ".agents/skills/shared/PROJECT-INTENT.md", "../shared/PROJECT-INTENT.md",
+    /Before preserving request evidence or history, read \[PROJECT-INTENT\.md\]\(\.\.\/shared\/PROJECT-INTENT\.md\)/);
+  const intentGuide = flat(".agents/skills/shared/PROJECT-INTENT.md");
+  assert.match(intentGuide, /Preserve original wording as quotations or fixed-revision links; redact secrets/);
+  assert.match(intentGuide, /Record later clarifications and decisions separately/);
   const guide = specGuide().replace(/\s+/g, " ");
-  assert.match(guide, /Preserve original requests\/decisions as fixed-revision links or verbatim evidence/);
-  assert.match(guide, /leave new risks and undecided responses in Open Questions/);
+  assert.match(guide, /Check request coverage using \[PROJECT-INTENT\.md\]\([^)]*\)'s handoff check/);
   assert.match(spec, /whole-draft clarity check before handoff/);
   assert.match(spec, /For a scoped revision, review changed sections and related terms\/references/);
-  assert.match(plan, /fresh read-only reviewer compare the preserved build request and clarifications with the spec and plan/);
+  assert.match(plan, /fresh read-only reviewer compare `intent\.md` \(or preserved source\) with the spec and plan/);
   assert.match(planGuide().replace(/\s+/g, " "), /every requirement maps to a milestone and acceptance check/);
   assert.match(plan, /If delegation or the original build request is unavailable, inspect what is available and record the limitation/);
   assert.match(plan, /Repeat only if the brief, acceptance criteria, or milestone mapping changes/);
@@ -902,7 +904,7 @@ test("planning and task-compilation skills conditionally load GITHUB-ISSUES.md f
     ".agents/skills/to-prd/SKILL.md",
     ".agents/skills/to-tasks/SKILL.md",
   ];
-  const trigger = /For `github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
+  const trigger = /For `(?:--)?github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
   for (const skill of planningSkills) {
     const content = read(skill);
     assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);
@@ -920,7 +922,7 @@ test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-IS
     ".agents/skills/stacked-prs/SKILL.md",
     ".agents/skills/spec-delta/SKILL.md",
   ].filter((skill) => existsSync(resolve(repo, skill)));
-  const trigger = /For `github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
+  const trigger = /For `(?:--)?github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
   for (const skill of executionAndDeliverySkills) {
     const content = read(skill);
     assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);

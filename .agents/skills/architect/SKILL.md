@@ -20,7 +20,8 @@ honor an explicitly requested starting step in the user's steering text; if
 none is given, start at Bootstrap. Once the project folder exists, pass its
 path to each skill. `--github` selects GitHub Issues and Issue Artifacts
 instead of `projects/`; an issue reference (`#<n>` or URL) selects the same
-mode. Follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) for either.
+mode. For `--github` or an issue reference (`#<n>` or URL), read and follow
+[GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md).
 
 **Resume with `next`.** Use `next` as the first argument to continue an
 existing flow instead of starting over. Resolve the issue reference or project
