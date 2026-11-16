@@ -6,7 +6,7 @@ description: >-
   on it.
 disable-model-invocation: true
 metadata:
-  model-tier: moderate
+  model-tier: complex
 ---
 
 Critique a document for logical fallacies and structural weaknesses. Quote each
@@ -36,21 +36,14 @@ problems. If the document is sound, say so.
      ones.
    - Terminology: flag glossary conflicts or avoided alternatives only when
      they create ambiguity or change meaning; ignore harmless style variation.
-4. **For plans only, check execution quality.** Apply this to implementation
-   plans or task lists, including `plan.md` or `tasks.md` under `projects/`,
-   or as GitHub Issue Artifacts, and documents built from slices, milestones,
-   tasks, and a File Changes table. Skip it for blog posts, research, and design
-   notes. Check:
-   - Scope drift into unnecessary refactors, renames, or cleanup.
-   - Required files missing from the File Changes table.
-   - Tasks or milestones without pass/fail signals, such as "improve X" or
-     "clean up Y".
-   - Uncheckable milestones or `**Verify:**` lines without a command and
-     expected output.
-   - Dependencies on another slice's task, file, type, or contract that are
-     absent from Blocked by, Consumes, or Produces.
-   - Missing error paths, partial failures, concurrent callers, rollback, or
-     existing-data migration cases.
+4. **Apply artifact-specific checks when relevant.** Skip this step for blog
+   posts, research, PDD drafts, and design notes.
+   - **Plans and task lists** (`plan.md`, `tasks*.md`, or documents built from
+     slices, milestones, and a File Changes table): read and follow
+     [the plan checklist](references/PLAN-CHECKLIST.md).
+   - **Specs and Gherkin** (`spec.md`, `*.feature`, or work involving
+     acceptance criteria or `docs/specs/`): read and follow
+     [the spec checklist](references/SPEC-CHECKLIST.md).
 5. **Report the findings.** Write two sections: **Logical Fallacies** and
    **Document Weaknesses**. Include one entry per issue. If there are no
    fallacies, say so. Focus on the weakest points; critique rather than

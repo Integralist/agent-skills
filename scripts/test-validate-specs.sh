@@ -309,3 +309,64 @@ expect_failure 'indented backticks do not end a fenced example' \
   "missing '## Open Questions'"
 printf '\n## Open Questions\n\nNone.\n' >>"$SPEC"
 expect_pass 'a real heading after the indented-marker example is accepted'
+
+reset_fixture
+write_feature <<'FEATURE'
+Feature: Every scenario asserts an outcome
+  Scenario: First scenario has an outcome
+    When the validator runs
+    Then it checks the outcome
+
+  Scenario: Second scenario lacks an outcome
+    When the validator runs
+FEATURE
+expect_failure 'every scenario requires its own Then step' \
+  "scenario 'Second scenario lacks an outcome' is missing a Then step"
+
+reset_fixture
+write_feature <<'FEATURE'
+Feature: Outlines need examples
+  Scenario Outline: Missing examples table
+    When <actor> runs the command
+    Then it completes
+FEATURE
+expect_failure 'a Scenario Outline requires an Examples table' \
+  "scenario outline 'Missing examples table' is missing an Examples table"
+
+reset_fixture
+write_feature <<'FEATURE'
+Feature: Background stays setup-only
+  Background:
+    Given a starting state
+    When an action happens
+
+  Scenario: Verify outcome
+    Then an outcome holds
+FEATURE
+expect_failure 'Background rejects When and Then steps' \
+  'Background must contain only Given preconditions, not When'
+
+reset_fixture
+write_feature <<'FEATURE'
+Feature: No duplicate scenario titles in one file
+  Scenario: Duplicate title
+    When the user acts
+    Then it works
+
+  Scenario: Duplicate title
+    When the user acts again
+    Then it still works
+FEATURE
+expect_failure 'duplicate scenario titles in one file fail' \
+  'duplicate scenario title: Duplicate title'
+
+reset_fixture
+write_living_spec
+cat >"$FIXTURE/docs/specs/second.feature" <<'FEATURE'
+Feature: Second capability
+  Scenario: Check the contract
+    When another workflow runs
+    Then it fails duplication check
+FEATURE
+expect_failure 'duplicate scenario titles across living specs fail' \
+  'duplicate scenario title across living specs: Check the contract'

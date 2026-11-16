@@ -29,9 +29,11 @@ gaps with guesses.
    [PROJECT-INTENT.md](../shared/PROJECT-INTENT.md). Use `intent.md` when
    needed; keep Development Brief to the current summary and a source link.
 2. **Read current truth.** Read linked research, `docs/adr/`, touched code
-   and owning `docs/specs/<capability>.feature` files. Living specs are the
-   baseline; without one, use code. Treat legacy Markdown contracts as
-   migration baselines, not the output format. Preserve governing decisions.
+   and owning `docs/specs/<capability>.feature` files so new criteria extend
+   or modify existing scenarios rather than duplicating behaviour. Living
+   specs are the baseline; without one, use code. Treat legacy Markdown
+   contracts as migration baselines, not the output format. Preserve
+   governing decisions.
 3. **Draft for the reader.** Before any prose or Gherkin, read
    [voice-product](../voice-product/SKILL.md),
    [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) and the
@@ -43,9 +45,8 @@ gaps with guesses.
    explain what they mean and why they matter while preserving ownership,
    permissions, timing, failures, and uncertainty. Name each component and
    explain its role at first use. If a proposal expands an existing component,
-   distinguish its current responsibility from the proposed change. Use tables
-   when they make comparable facts easier to scan; keep narrative in prose and
-   use numbered lists for ordered steps and user stories. In Behavioural Delta,
+   distinguish its current responsibility from the proposed change. In
+   Behavioural Delta,
    explain in plain language what the baseline requires, what changes, and what
    remains unchanged. Give each requested behaviour a scenario and testing
    seam; assign durable scenarios to owning living features. Omit Behavioural
@@ -58,7 +59,11 @@ gaps with guesses.
    project, baseline or decision status. Use repository-unique short SHAs in
    baseline metadata and full SHAs in pinned source links, following
    [Markdown conventions](../conventions-markdown/SKILL.md). Run the guide's
-   whole-draft clarity check before handoff. For a scoped revision, review
+   whole-draft clarity check before handoff. For a new spec or behaviour
+   change (when no parent workflow runs its own critique), have a separate
+   read-only reviewer run [critique](../critique/SKILL.md) on `spec.md` and
+   run the repository's spec check (such as `make check-specs` or its
+   acceptance runner dry-run) when available. For a scoped revision, review
    changed sections and related terms/references without expanding the edit or
    restarting architecture critique.
 

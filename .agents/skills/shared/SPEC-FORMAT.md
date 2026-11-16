@@ -28,8 +28,48 @@ state that proves the behaviour.
   by environment.
 - **Rule scope.** Each `Rule` groups one behaviour; every child scenario tests it.
   Put setup in `Given` unless environment changes behaviour.
-- Use `Background` for shared preconditions; `Scenario Outline`/`Examples` for
-  varied inputs. Add tags only by convention or explicit requirement.
+- Use `Background` for shared preconditions; use `Scenario Outline`/`Examples`
+  when one rule and action hold across varied input and expected values. Keep
+  distinct lifecycle states, rules, or failure outcomes as separate `Scenario`
+  blocks rather than folding them into a generic table. Add tags only by
+  convention or explicit requirement.
+
+### Examples
+
+Keep steps at the observable system boundary and split compound outcomes:
+
+```txt
+BAD (imperative + internal leak):
+  Scenario: User logs out
+    When the handler calls revokeGeneration(actor_id)
+    And the test mock resets
+    Then revokeGeneration returns nil
+
+GOOD (declarative product voice):
+  Scenario: Retired account link is refused before running a tool
+    Given the caller logged out and retired their account link
+    When the caller requests customer data using that link
+    Then the request is rejected with error code "invalidated"
+    And no customer-data tool runs
+```
+
+```txt
+BAD (two behaviours in one scenario):
+  Scenario: Create API token and reject expired token
+    When the member creates a token
+    Then the token works, and then also after expiry it returns 401
+
+GOOD (separate scenarios for distinct lifecycle rules):
+  Scenario: Active token authorizes member requests
+    Given the member holds an active API token
+    When the member calls the protected endpoint
+    Then the request succeeds
+
+  Scenario: Expired token is rejected
+    Given the member holds an expired API token
+    When the member calls the protected endpoint
+    Then the request is rejected with status 401
+```
 
 ## Living spec
 

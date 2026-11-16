@@ -14,6 +14,8 @@ pass() {
   echo "✅ $1"
 }
 
+LIVING_TITLES=$'\n'
+
 validate_gherkin() {
   local file=$1
   local in_block=0
@@ -24,8 +26,33 @@ validate_gherkin() {
   local features=0
   local scenarios=0
   local thens=0
+  local current_scenario=""
+  local scenario_thens=0
+  local in_background=0
+  local in_outline=0
+  local outline_examples=0
+  local block_titles=$'\n'
+  local title=""
+  local normalized=""
   local line
   local trimmed
+
+  close_scenario() {
+    if [[ -n "$current_scenario" ]]; then
+      if (( scenario_thens == 0 )); then
+        error "$file: scenario '$current_scenario' is missing a Then step"
+        file_errors=$((file_errors + 1))
+      fi
+      if (( in_outline && outline_examples == 0 )); then
+        error "$file: scenario outline '$current_scenario' is missing an Examples table"
+        file_errors=$((file_errors + 1))
+      fi
+    fi
+    current_scenario=""
+    scenario_thens=0
+    in_outline=0
+    outline_examples=0
+  }
 
   if [[ "$file" == *.feature ]]; then
     raw=1
@@ -37,9 +64,12 @@ validate_gherkin() {
     if (( ! raw )); then
       if (( ! in_block )) && [[ "$line" == *'```gherkin'* ]]; then
         in_block=1
+        block_titles=$'\n'
         continue
       fi
       if (( in_block )) && [[ "$line" == '```'* ]]; then
+        close_scenario
+        in_background=0
         in_block=0
         continue
       fi
@@ -63,10 +93,56 @@ validate_gherkin() {
       continue
     fi
 
-    [[ "$line" =~ ^[[:space:]]*Feature: ]] && features=$((features + 1))
-    [[ "$line" =~ ^[[:space:]]*(Scenario([[:space:]](Outline|Template))?|Example): ]] && scenarios=$((scenarios + 1))
-    [[ "$line" =~ ^[[:space:]]*Then[[:space:]] ]] && thens=$((thens + 1))
+    if [[ "$line" =~ ^[[:space:]]*Feature: ]]; then
+      close_scenario
+      in_background=0
+      features=$((features + 1))
+    elif [[ "$line" =~ ^[[:space:]]*Rule: ]]; then
+      close_scenario
+      in_background=0
+    elif [[ "$line" =~ ^[[:space:]]*Background: ]]; then
+      close_scenario
+      in_background=1
+    elif [[ "$line" =~ ^[[:space:]]*(Scenario([[:space:]](Outline|Template))?|Example):[[:space:]]*(.*)$ ]]; then
+      close_scenario
+      in_background=0
+      scenarios=$((scenarios + 1))
+      title="${BASH_REMATCH[4]}"
+      title="${title%"${title##*[![:space:]]}"}"
+      current_scenario="${title:-<untitled>}"
+      if [[ "${BASH_REMATCH[3]}" == "Outline" || "${BASH_REMATCH[3]}" == "Template" ]]; then
+        in_outline=1
+      fi
+      if [[ -n "$title" ]]; then
+        normalized=$(printf '%s' "$title" | tr '[:upper:]' '[:lower:]' | tr -s '[:space:]' ' ')
+        if [[ "$block_titles" == *$'\n'"$normalized"$'\n'* ]]; then
+          error "$file: duplicate scenario title: $title"
+          file_errors=$((file_errors + 1))
+        else
+          block_titles+="$normalized"$'\n'
+        fi
+        if (( raw )); then
+          if [[ "$LIVING_TITLES" == *$'\n'"$normalized"$'\n'* ]]; then
+            error "$file: duplicate scenario title across living specs: $title"
+            file_errors=$((file_errors + 1))
+          else
+            LIVING_TITLES+="$normalized"$'\n'
+          fi
+        fi
+      fi
+    elif [[ "$line" =~ ^[[:space:]]*(Examples|Scenarios): ]]; then
+      outline_examples=$((outline_examples + 1))
+    elif (( in_background )) && [[ "$line" =~ ^[[:space:]]*(When|Then)[[:space:]] ]]; then
+      error "$file: Background must contain only Given preconditions, not ${BASH_REMATCH[1]}"
+      file_errors=$((file_errors + 1))
+    elif [[ "$line" =~ ^[[:space:]]*Then[[:space:]] ]]; then
+      thens=$((thens + 1))
+      if [[ -n "$current_scenario" ]]; then
+        scenario_thens=$((scenario_thens + 1))
+      fi
+    fi
   done <"$file"
+  close_scenario
 
   if (( raw )); then
     (( features == 1 )) || { error "$file: living spec must contain exactly one Feature"; file_errors=$((file_errors + 1)); }

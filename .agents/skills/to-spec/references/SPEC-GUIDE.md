@@ -59,6 +59,21 @@ or updating test runners—in the plan unless they affect required behaviour.
 Retain exact scenario snapshots and technical terms when needed to preserve
 the contract.
 
+### Rule-first invariant pass
+
+Before drafting Gherkin, list each `Rule` and check five lenses so
+invariants and existing contracts are settled upfront:
+
+1. Happy path and actor or permission eligibility.
+2. Unauthorized, forbidden, or invalid cases, plus refusal precedence.
+3. Empty, missing, or boundary inputs.
+4. Repeated, duplicate, or expired actions (idempotency and timing).
+5. Partial failure, concurrency, or rollback guarantees.
+
+Check owning `docs/specs/*.feature` files first; extend or modify an
+existing scenario or `Scenario Outline` rather than adding overlapping
+scenarios.
+
 ### Tables, prose and lists
 
 Use a table when repeated facts are easier to compare or scan, such as component
