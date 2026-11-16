@@ -40,7 +40,8 @@ completion and retry protocol.
 
 Confirm the topic, audience, and purpose with the user. Draft the document
 with the five pillars applied from the start, then present the draft for
-review.
+review. If the scope covers distinct topics that would cram one page, propose
+splitting them into separate, cross-linked documents.
 
 ## Improve-mode output
 

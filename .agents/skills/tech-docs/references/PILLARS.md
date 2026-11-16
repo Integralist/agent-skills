@@ -37,6 +37,8 @@ generic schema or contract.
 
 ## 5. One document, one purpose
 
-Flag a section long enough to stand alone for extraction and add
-cross-references between related documents. Define terms an outsider would
-not know, without explaining standard industry concepts at length.
+Prefer smaller, focused documents over cramming multiple topics onto one page.
+Splitting details into well-scoped files lowers cognitive load and reading time.
+Call out sections or subtopics that belong in their own document and link
+related files together. Define terms an outsider would not know, without
+explaining standard industry concepts at length.
