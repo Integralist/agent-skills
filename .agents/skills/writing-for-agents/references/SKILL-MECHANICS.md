@@ -19,9 +19,12 @@ Split out a model-invoked skill only for a distinct trigger.
 ## Arguments
 
 `argument-hint` is an autocomplete hint, not a parser or validation schema.
-State meaningful defaults, mode selection, missing-input handling, and any
-flag that changes behaviour in the body or a required reference. Explain what
-syntax leaves unspecified rather than repeating the hint.
+Use `--flag` (or `--key=value`) for mode toggles and options rather than bare
+positional keywords, so flag order does not matter and options cannot collide
+with targets or file paths; accept flags in any position. State meaningful
+defaults, mode selection, missing-input handling, and any flag that changes
+behaviour in the body or a required reference. Explain what syntax leaves
+unspecified rather than repeating the hint.
 
 ## Model tier
 

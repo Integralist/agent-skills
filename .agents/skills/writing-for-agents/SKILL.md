@@ -24,5 +24,5 @@ per heading. Required references shorten human reading, not total agent
 context; conditional ones can shorten both.
 
 **Before drafting.** Read and follow the [writing guide](references/WRITING.md).
-Before changing skill frontmatter, also read
+Before changing skill frontmatter or arguments, also read
 [skill mechanics](references/SKILL-MECHANICS.md).
