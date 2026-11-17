@@ -9,12 +9,14 @@ Each task must be executable from this document and a shell alone: the agent
 must not need to make a design choice or open an unnamed file. Supply missing
 judgment or split the task.
 
-Follow [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) for the two-layer
-layout: keep the visible top short (<= 120 words per task: `Delivers`,
-`Supports`, `Location`, one-line `Verify`) and place `Stub`, `Test (red)`,
-and `Implementation guidance (green)` inside `<details>`. Never copy
-`AGENTS.md`, PR rules, or approval reminders into task bodies—link `AGENTS.md`
-once if a task needs a repo-specific rule.
+Follow [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) and
+[PR-DESCRIPTION.md](../../shared/PR-DESCRIPTION.md) for the two-layer layout:
+keep the visible top short (<= 220 words per task: `Problem`, `Solution`,
+optional `Notes`, `Supports`, `Location`, and one-line `Verify`) with blank
+lines between bullets, and place `Stub`, `Test (red)`, and `Implementation
+guidance (green)` inside `<details>`. Never copy `AGENTS.md`, PR rules, or
+approval reminders into task bodies—link `AGENTS.md` once if a task needs a
+repo-specific rule.
 
 Apply the same brevity and clarity inside `<details>`: use only the template
 sections below (plus optional `Prerequisites` in 1–3 short bullets when a task
@@ -24,8 +26,10 @@ action per bullet, no prose paragraphs or defensive disclaimers.
 
 Each task gives the executor:
 
-- **Visible top:** `Delivers`, `Supports` (milestone keys), `Location`, and
-  a runnable `Verify` command with its pass condition.
+- **Visible top:** `Problem` (brief system/context intro + why the task
+  exists, explaining non-obvious terms on first use), `Solution` (what changes
+  and what stays untouched), optional `Notes`, `Supports` (milestone keys),
+  `Location`, and a runnable `Verify` command with its pass condition.
 - **Collapsed detail:** a stub only when needed to compile, the failing
   test (red) and why it fails, and implementation guidance (`path:line` pattern
   to follow; verbatim code only for tricky security or concurrency parts).
@@ -94,15 +98,29 @@ Conventions and gotchas:
 
 ### Task {n}: {what it delivers}
 
-**Delivers:** {One sentence on the behaviour this task delivers.}
+#### Problem
+
+{1–2 plain sentences introducing the system/context and what is missing or
+broken, explaining unfamiliar terms on first use.}
+
+- **Blocked by:** {previous task or "None"}
+
+- **Supports:** {milestone keys; omit when the source has none}
+
+#### Solution
+
+{1–2 plain sentences on what changes and what stays untouched.}
 
 {Optional focused outcome diagram for Task {n}, captioned with its ID. Omit
 when covered by a shared diagram or clearer without one.}
 
-- **Supports:** {milestone keys; omit when the source has none}
 - **Location:** `{path}`, `{path}`
 
 - **Verify:** `{command}` passes when {observable pass condition}.
+
+#### Notes
+
+- {Optional 1–2 short boundary or scope bullets; omit if none.}
 
 <details>
 <summary>Stub, test, and implementation details</summary>

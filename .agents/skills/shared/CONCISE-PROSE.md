@@ -27,12 +27,12 @@ Keep visible sections scannable in one screen:
 
 - Aim for <= 250 words in a GitHub root issue (status, next action, blockers,
   and links).
-- Aim for <= 200 words above `<details>` in a slice issue (deliverable, gates,
-  blockers, and milestones); put signatures, verification tables, and
+- Aim for <= 220 words above `<details>` in a slice issue (`Problem` and
+  `Solution`); put milestones, tasks, signatures, verification tables, and
   supporting context inside `<details>`.
-- Aim for <= 120 words above `<details>` in a task issue (deliverable,
-  location, and one-line verify); put stubs, red tests, and guidance inside
-  `<details>`.
+- Aim for <= 220 words above `<details>` in a task issue (`Problem`,
+  `Solution`, optional `Notes`, `Location`, and one-line `Verify`); put
+  stubs, red tests, and guidance inside `<details>`.
 - Limit lists to ~5 bullets per group, and replace multi-sentence table cells
   with `Name — one-line outcome` bullets.
 

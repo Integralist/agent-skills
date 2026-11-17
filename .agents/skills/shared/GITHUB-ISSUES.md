@@ -45,24 +45,30 @@ Map the on-disk project structure onto a 3-level GitHub Sub-Issue tree using
    - **Title:** `<slug> / S<N>: <Slice Title>`
    - **Dependencies:** Pass `--blocked-by <slice-issue>` for slices that depend
      on earlier slices.
-   - **Body (two layers):** Keep the visible top <= 200 words: links to Parent
-     Project, Spec, and Plan section; one-sentence `Delivers`; `Needs decision
-     / gate` (only when gated); `Blocked by`; and `M<n>.<m>` milestone
-     checkboxes. Never copy shared `plan.md` sections (prerequisites, PR
+   - **Body (two layers):** Keep the visible top <= 220 words in
+     [PR-DESCRIPTION.md](PR-DESCRIPTION.md) style: `## Problem` (1–2 plain
+     sentences introducing system role and terms on first use, plus
+     blank-line-spaced `Parent Project`, `Artifacts`, `Gate`, and
+     `Blocked by` bullets) and `## Solution` (what changes and why, plus
+     `Status`). Never copy shared `plan.md` sections (prerequisites, PR
      delivery tables, repo rules, or other slices' contracts) into a Slice
-     issue—link them once. Put `Consumes`/`Produces` (with captioned signature
-     blocks), `Acceptance Verification`, and `## Starting Context`
-     (appended by `to-tasks`) inside a `<details><summary>Contracts and
-     verification details</summary>` block. Do not attach artifacts to Slice
-     issues.
+     issue—link them once. Put `M<n>.<m>` milestone checkboxes and compiled
+     task links inside `<details><summary>Milestones and tasks</summary>`, and
+     put `Consumes`/`Produces` (with captioned signature blocks),
+     `Acceptance Verification`, and `## Starting Context` (appended by
+     `to-tasks`) inside `<details><summary>Contracts and verification
+     details</summary>`. Do not attach artifacts to Slice issues.
 3. **Task Sub-Issues (`--label task`, `--parent <slice-issue>`):**
    - **Title:** `<slug> / S<N>-T<M>: <Task Title>`
    - **Just-in-time creation:** Created one slice at a time by `to-tasks` (or
      `execute-plan` Step 2) against live code, chained in dependency order with
      `--blocked-by <prev-task-issue>`.
-   - **Body (two layers):** Keep the visible top <= 120 words: `Delivers`,
-     `Parent Slice` and `Blocked by` links, `Supports` milestone keys,
-     `Location`, and one-line `Verify`. Put `Stub`, `Test (red)`, and
+   - **Body (two layers):** Keep the visible top <= 220 words in
+     [PR-DESCRIPTION.md](PR-DESCRIPTION.md) style: `## Problem` (1–2 plain
+     sentences introducing system role and terms on first use, plus blank-line-spaced
+     `Parent Slice`, `Blocked by`, and `Supports` bullets), `## Solution`
+     (what changes and why, plus `Location` and one-line `Verify`), and
+     optional 1–2 bullet `## Notes`. Put `Stub`, `Test (red)`, and
      `Implementation guidance (green)` inside a `<details><summary>Stub,
      test, and implementation details</summary>` block. Never repeat `AGENTS.md`
      or process checklists inline, stick to the template sections (with optional

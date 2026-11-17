@@ -92,9 +92,18 @@ then a fenced Mermaid block. Omit when better covered within Implementation.}
 
 ### Slice 1: {what it delivers end to end}
 
-- **Delivers:** {one sentence on observable behaviour}
+#### Problem
+
+{1–2 plain sentences introducing the system/context and what is missing or
+broken, explaining unfamiliar terms on first use.}
+
 - **Gate / needs decision:** {approval or blocker, or omit}
+
 - **Blocked by:** None
+
+#### Solution
+
+{1–2 plain sentences on what changes and what stays untouched.}
 
 {Optional focused outcome diagram for Slice 1, captioned with its ID. Omit
 when covered by a shared diagram or clearer without one.}
