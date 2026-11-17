@@ -235,7 +235,10 @@ Never store these mirrors inside the repository working tree.
   `gh issue close`, `gh issue comment`, or `gh issue artifact` read/write,
   refresh the mirrored JSON/file and `manifest.json` timestamps. Before writing
   to GitHub, check `outbox.jsonl`: if pending entries exist, reconcile them
-  first instead of overwriting remote state.
+  first instead of overwriting remote state. When first mirroring an existing
+  Root Issue (`manifest.json` does not exist yet), run a read-only hydration of
+  the Root Issue, all its existing Root Issue Artifacts, and any open Slice or
+  Task Sub-Issues so mid-flight projects have a full local backup right away.
 - **Degraded reads when GitHub fails:** If `gh` fails due to a network, auth,
   or GitHub outage, print
   `⚠️ GitHub unavailable — running from local mirror and queuing updates.`,
