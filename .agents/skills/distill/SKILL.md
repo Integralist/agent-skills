@@ -5,8 +5,7 @@ description: >-
   an inventory and audit. Use for a plan, technical guide, runbook, agent
   instructions, or any prose too long or hard to follow, especially before
   an agent executes it.
-disable-model-invocation: true
-argument-hint: "[file path | pasted text]"
+argument-hint: "[file path | #<issue> | pasted text] [--github] [--prune]"
 metadata:
   model-tier: moderate
 ---
@@ -16,11 +15,19 @@ reader needs to act safely and accurately. Preservation is the goal; brevity is
 the means. A short rewrite can silently lose a path, ordering rule, or edge
 case, so inventory the requirements and audit the result.
 
-## Target and approval
+## Target and mode
 
 - **Pasted text:** Give the rewrite in chat and write nothing to disk.
 - **File:** Read it in full, propose the rewrite with its audit, and write
-  in-place only after the user approves.
+  in-place only after the user approves (or within an already-approved
+  workflow).
+- **GitHub issue or artifact:** For `--github` or an issue reference (`#<n>` or
+  URL), read and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to
+  inspect and condense issue bodies or Root Issue Artifacts.
+- **Prune pass (`--prune`):** When invoked inside [architect](../architect/SKILL.md)
+  or another drafting workflow after critique/revision, condense the artifact
+  directly against [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md) budgets and
+  skip printing the full inventory table in chat unless requested.
 - **Unclear target:** Ask which one the user means.
 
 ## Workflow

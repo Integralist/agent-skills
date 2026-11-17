@@ -5,7 +5,7 @@ description: >-
   audience-first shape, or format a copy-ready PR, Slack, or email update. Use
   when the user asks to summarise or recap something, or explain engineering
   work to non-engineers.
-argument-hint: "[session | file | URL | diff] [--shape pr|slack|email] [instructions]"
+argument-hint: "[session | file | URL | #<issue> | diff] [--github] [--shape pr|slack|email] [instructions]"
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(ls:*)
 metadata:
   model-tier: trivial
@@ -24,9 +24,13 @@ to save a file.
 
 ## Choose and read the source
 
-1. **Pick the source.** Use an explicit file path, URL, plan, or git scope if
-   given; otherwise summarise the current session, scoped to any thread or
-   task named. If the user asks for a non-engineer update without naming the
+1. **Pick the source.** Use an explicit file path, URL, `#<issue>`, plan, or
+   git scope if given; otherwise summarise the current session, scoped to any
+   thread or task named. For `--github` or a GitHub issue reference (`#<n>` or
+   issue URL), read and follow
+   [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) (read-only: inspect the
+   issue, its sub-issues, and Root Issue Artifacts with `gh`). If the user
+   asks for a non-engineer update without naming the
    source, shape, or rendering, ask all missing choices in one message before
    writing:
    - **Source:** branch-matched plan (`projects/<branch-slug>/plan.md`),
@@ -44,6 +48,9 @@ to save a file.
    - **Session:** favour the goal, latest decisions, verified progress,
      blockers, and open work over a replay.
    - **File:** continue through truncated output until the scope is covered.
+   - **GitHub issue / artifact:** read the issue body, sub-issue list, and
+     relevant Root Issue Artifacts via `gh`; call out unread artifacts or
+     sub-issues as partial coverage if skipped for size.
    - **URL:** fetch and read the page content; never rely on search snippets or
      guesses from the URL.
    - **Plan or diff:** read the full relevant diff and enough surrounding code
