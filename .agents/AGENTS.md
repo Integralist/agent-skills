@@ -40,9 +40,9 @@
   question is not an edit request. Keep changes scoped.
 - **Large diffs:** For changes over 40 lines, give a one-line summary and let
   the user choose to review the full diff or proceed.
-- **Auto execution:** `execute-plan auto` approves edits, large diffs, and model
-  downgrades only within its named plan. Follow skill boundaries, stricter
-  project gates, and runtime permissions.
+- **Auto execution:** `execute-plan --auto` approves edits, large diffs, and
+  model downgrades only within its named plan. Follow skill boundaries,
+  stricter project gates, and runtime permissions.
 
 # Tools & Verification
 

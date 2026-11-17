@@ -6,7 +6,7 @@ description: >-
   Engineering need agreed scope, an evaluated solution direction, and an
   approved system design before engineering specs and plans.
 disable-model-invocation: true
-argument-hint: "[project path | github | #<issue> | milestone]"
+argument-hint: "[project path | #<issue> | <milestone>] [--github]"
 metadata:
   model-tier: complex
 ---
@@ -47,7 +47,7 @@ the start, use qualified names throughout.
    Also read the project root `GLOSSARY.md`; if absent, use root `CONTEXT.md`
    as its legacy equivalent. Keep PDD milestones distinct from slice
    milestones in engineering plans.
-   For `github` or an issue reference (`#<n>` or URL), read and follow
+   For `--github` or an issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
    Artifacts instead of `projects/`.
 2. **Choose one stage.** Take the first stage not marked `Approved`, in order:

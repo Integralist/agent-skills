@@ -31,7 +31,7 @@ in the wrong layer.
 3. **Write each layer's PR description** using
    [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md). Target the layer's base:
    trunk for the bottom layer and the layer below for each higher layer. For
-   `github` or an issue reference (`#<n>` or URL), read and follow
+   `--github` or an issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
    Issue Artifacts instead of `projects/`. Show every title and body, then wait
    for the user's approval.

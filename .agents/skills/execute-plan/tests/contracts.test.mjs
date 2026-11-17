@@ -85,18 +85,18 @@ test("explicit invocation keeps the session model coordinating", () => {
 });
 
 function assertAutoInvocation(content) {
-  assert.match(content, /argument-hint: "<plan-path> \[auto\]"/);
-  assert.match(content, /Without `auto`, confirm the plan/);
+  assert.match(content, /argument-hint: "<plan-path> \[--auto\]"/);
+  assert.match(content, /Without `--auto`, confirm the plan/);
   assert.match(content, /\(references\/auto\.md\)/);
 }
 
-test("auto is the only opt-in spelling and interactive stays the default", () => {
+test("--auto is the only opt-in spelling and interactive stays the default", () => {
   const content = flat(skillPath);
   assertAutoInvocation(content);
-  assert.throws(() => assertAutoInvocation(content.replace('[auto]"', '[--auto]"')));
-  assert.throws(() => assertAutoInvocation(content.replace("Without `auto`, confirm the plan", "Always run unattended")));
+  assert.throws(() => assertAutoInvocation(content.replace('[--auto]"', '[auto]"')));
+  assert.throws(() => assertAutoInvocation(content.replace("Without `--auto`, confirm the plan", "Always run unattended")));
   for (const relative of [skillPath, autoPath, commitsPath, "README.md", ".agents/AGENTS.md"])
-    assert.doesNotMatch(read(relative), /execute-plan[^\n]*--auto|`--auto`/, `${relative}: still mentions --auto`);
+    assert.doesNotMatch(read(relative), /execute-plan[^\n]*(?<![\w-])auto\b|`auto`/, `${relative}: still mentions bare auto`);
 });
 
 function assertProvider(content) {
@@ -131,7 +131,7 @@ test("hard stops apply in both modes", () => {
   const content = flat(skillPath);
   assertStops(content);
   for (const stop of STOPS) assert.throws(() => assertStops(content.replace(stop, "")));
-  assert.match(flat(autoPath), /stops in \[SKILL\.md\]\([^)]*\) hold in `auto` too/);
+  assert.match(flat(autoPath), /stops in \[SKILL\.md\]\([^)]*\) hold in `--auto` too/);
 });
 
 function assertGuardrails(content) {
@@ -152,14 +152,14 @@ function assertAutoAuthority(content) {
   assert.match(content, /standing authorization for the named plan's whole local execution/);
   assert.match(content, /per-task and bookkeeping commits on the recorded branch/);
   assert.match(content, /fresh approval for each diff is a blocker/);
-  assert.match(content, /Require `auto` again on every new invocation/);
+  assert.match(content, /Require `--auto` again on every new invocation/);
 }
 
 test("auto grants local authority without bypassing approvals or resume consent", () => {
   const content = flat(autoPath);
   assertAutoAuthority(content);
   assert.throws(() => assertAutoAuthority(content.replace("fresh approval for each diff is a blocker", "approval rules are skipped")));
-  assert.throws(() => assertAutoAuthority(content.replace("Require `auto` again on every new invocation", "Inherit auto from the log")));
+  assert.throws(() => assertAutoAuthority(content.replace("Require `--auto` again on every new invocation", "Inherit auto from the log")));
 });
 
 function assertDecisionLog(content) {
@@ -904,7 +904,7 @@ test("planning and task-compilation skills conditionally load GITHUB-ISSUES.md f
     ".agents/skills/to-prd/SKILL.md",
     ".agents/skills/to-tasks/SKILL.md",
   ];
-  const trigger = /For `(?:--)?github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
+  const trigger = /For `--github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
   for (const skill of planningSkills) {
     const content = read(skill);
     assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);
@@ -922,7 +922,7 @@ test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-IS
     ".agents/skills/stacked-prs/SKILL.md",
     ".agents/skills/spec-delta/SKILL.md",
   ].filter((skill) => existsSync(resolve(repo, skill)));
-  const trigger = /For `(?:--)?github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
+  const trigger = /For `--github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
   for (const skill of executionAndDeliverySkills) {
     const content = read(skill);
     assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);

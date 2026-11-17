@@ -4,7 +4,7 @@ description: >-
   Write an implementation plan of slices and milestones from a spec or a
   session's discussion. Use when creating a feature plan, saving a plan
   discussed in chat, or when another skill needs a plan.
-argument-hint: "[source path | github | #<issue>]"
+argument-hint: "[source path | #<issue>] [--github]"
 metadata:
   model-tier: complex
 ---
@@ -21,7 +21,7 @@ gaps with guesses.
 
 **Source.** Use the file named by the user or calling skill. If none is named,
 use this session's discussion and capture the plan already worked out. For
-`github` or an issue reference (`#<n>` or URL), read and follow
+`--github` or an issue reference (`#<n>` or URL), read and follow
 [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
 Artifacts instead of `projects/`. Use a
 spec named by the user or caller, or `spec.md` in the source's project folder.

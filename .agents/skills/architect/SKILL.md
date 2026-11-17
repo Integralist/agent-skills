@@ -5,7 +5,7 @@ description: >-
   Use when architecting a feature from an idea or this session's discussion,
   or exploring a design before planning.
 argument-hint: >-
-  [next [#<issue> | URL | <project-path>]] [--github] [steering]
+  [--next [#<issue> | URL | <project-path>]] [--github] [steering]
 metadata:
   model-tier: complex
 ---
@@ -23,9 +23,9 @@ instead of `projects/`; an issue reference (`#<n>` or URL) selects the same
 mode. For `--github` or an issue reference (`#<n>` or URL), read and follow
 [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md).
 
-**Resume with `next`.** Use `next` as the first argument to continue an
-existing flow instead of starting over. Resolve the issue reference or project
-directory after `next`, or use this session's active project; an issue
+**Resume with `--next`.** Pass `--next` in any position to continue an
+existing flow instead of starting over. Resolve the supplied issue reference
+or project directory, or use this session's active project; an issue
 reference selects GitHub mode. A project path identifies the on-disk project
 directory (for example, `projects/<yyyy-mm-dd>-<slug>/`). For GitHub, follow
 [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to inspect the Root Issue and
@@ -73,8 +73,8 @@ tell the user and wait. Do not fill the gap with a guess.
    implementation or passing acceptance tests.
 6. **Hand off.** Ask the user to choose one next step, and start only that one:
    - Execute the plan with the execute-plan skill, or by hand: tell the user to
-     run `/to-tasks <plan-path> slice-1` (`/to-tasks <plan-path>` for a
+     run `/to-tasks <plan-path> --slice=1` (`/to-tasks <plan-path>` for a
      single-slice plan). For GitHub, use the Root Issue:
-     `/to-tasks #123 slice-1` (`/to-tasks #123` for a single-slice plan).
+     `/to-tasks #123 --slice=1` (`/to-tasks #123` for a single-slice plan).
    - Research another topic: return to step 2.
    - Write another plan: return to step 5.

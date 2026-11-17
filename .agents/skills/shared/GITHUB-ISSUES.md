@@ -1,6 +1,6 @@
 # GitHub Issues Project Workspace
 
-Use this guide when the user or calling skill passes `github`, an issue
+Use this guide when the user or calling skill passes `--github`, an issue
 number (`#<n>`), or a GitHub issue URL, or when the current session's active
 project is already tracked in GitHub Issues. Keep the on-disk
 `projects/<yyyy-mm-dd>-<slug>/` workspace as the default when GitHub mode is

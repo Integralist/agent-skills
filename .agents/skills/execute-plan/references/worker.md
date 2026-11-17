@@ -13,7 +13,7 @@ tools and run shell commands from the root. If anything is missing, return
 
 Repository rules and permissions still apply, and so do any per-edit approval
 and PDD gates. When one needs a new decision, return it to the coordinator. In
-`auto` the packet carries the standing authorization and decision IDs from
+`--auto` the packet carries the standing authorization and decision IDs from
 [auto.md](auto.md), so don't ask again; return new ambiguity instead of making
 a design choice.
 

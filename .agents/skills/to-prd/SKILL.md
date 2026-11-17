@@ -4,7 +4,7 @@ description: >-
   Write a PRD that frames a feature's goals, users, and success metrics for
   stakeholders, from a spec, plan, or this session's discussion. Use when an
   engineering-led project needs product framing its spec doesn't give.
-argument-hint: "[source path | github | #<issue>]"
+argument-hint: "[source path | #<issue>] [--github]"
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Read, Write
 metadata:
   model-tier: complex
@@ -21,7 +21,7 @@ or points to a wrong design, tell the user and wait; do not guess.
 
 1. **Choose and read the source.** Use the file named by the user or calling
    skill; otherwise use this session's discussion. Read it in full, including
-   its linked spec and plan. For `github` or an issue reference (`#<n>` or URL),
+   its linked spec and plan. For `--github` or an issue reference (`#<n>` or URL),
    read and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub
    Issues and Issue Artifacts instead of `projects/`.
 2. **Check that a PRD adds value.** Write nothing; explain why if PDD

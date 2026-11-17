@@ -4,7 +4,7 @@ description: >-
   Write a project spec: the problem, the solution, and Gherkin acceptance
   criteria, with any delta against the living spec. Use when specifying a
   feature, saving a spec discussed in chat, or when another skill needs a spec.
-argument-hint: "[source path | github | #<issue>]"
+argument-hint: "[source path | #<issue>] [--github]"
 allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
 metadata:
   model-tier: complex
@@ -23,7 +23,7 @@ gaps with guesses.
 **Workflow.**
 
 1. **Choose the source and destination.** Use the named file, or this session
-   if none is named. For `github` or an issue reference (`#<n>` or URL), read
+   if none is named. For `--github` or an issue reference (`#<n>` or URL), read
    and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) instead of `projects/`.
    Keep the agreed spec. Before preserving request evidence or history, read
    [PROJECT-INTENT.md](../shared/PROJECT-INTENT.md). Use `intent.md` when

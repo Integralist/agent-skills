@@ -14,7 +14,7 @@ be delegated through code-review. Stop after this slice.
 
 1. **Select the file and slice.** Use the file named by the user, or the one
    already in use this session. If neither exists, ask for the path. For
-   `github` or an issue reference (`#<n>` or URL), read and follow
+   `--github` or an issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
    Issue Artifacts instead of `projects/`. Use the
    requested slice number, or choose the first slice with unticked items or

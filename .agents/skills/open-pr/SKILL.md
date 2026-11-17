@@ -16,7 +16,7 @@ Open a ready-for-review PR for the current branch.
    or after the user chooses.
 2. **Draft the PR.** Read and follow
    [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md), using the default branch
-   as the base. For `github` or an issue reference (`#<n>` or URL), read and
+   as the base. For `--github` or an issue reference (`#<n>` or URL), read and
    follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues
    and Issue Artifacts instead of `projects/` (passing `--draft` to
    `gh pr create` when requested or when open Slice Sub-Issues remain).

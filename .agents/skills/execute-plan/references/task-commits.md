@@ -2,7 +2,7 @@
 
 How the coordinator commits each verified task and lists the commits at the
 end. Workers never stage or commit. Per-task commits on the named branch are
-authorized at startup, by the user's confirmation or by [`auto`](auto.md).
+authorized at startup, by the user's confirmation or by [`--auto`](auto.md).
 
 **Before each task,** record HEAD, branch, index, and the user's existing
 changes. Give the task a stable key from the plan path, slice, and task ID, and

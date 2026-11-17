@@ -13,7 +13,7 @@ If work cannot settle safely, record the blocker rather than acknowledging
 readiness. Do not abandon workers to make the session appear idle.
 
 **Pi.** Automatic recovery is opt-in through the installed context-shake
-extension, not part of execute-plan's `auto` approvals. Enable it with the
+extension, not part of execute-plan's `--auto` approvals. Enable it with the
 user's consent using its documented command; do not assume it is installed.
 At 50% it requests a checkpoint file and a one-time readiness acknowledgement.
 Fill the extension's checkpoint with references to the execution log and

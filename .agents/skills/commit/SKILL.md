@@ -3,7 +3,7 @@ name: commit
 description: >-
   Create git commits with intelligent file grouping. Use when
   committing changes or drafting a commit message.
-argument-hint: '[force]'
+argument-hint: '[--force]'
 allowed-tools: Bash(git status:*), Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
 metadata:
   model-tier: trivial
@@ -15,7 +15,7 @@ shape, and `git commit -F <file>`. Start with `git status --short --branch`
 and `git diff HEAD`.
 
 **Branch protection.** On `main` or `master`, warn and ask for approval before
-committing unless the user passed `force`. If they decline, use
+committing unless `--force` is passed. If they decline, use
 [branch](../branch/SKILL.md) to create a branch, then continue.
 
 **Staging.** If the tree is clean, say so and stop. If files are already

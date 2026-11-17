@@ -5,7 +5,7 @@ description: >-
   page. Use when the user wants to see which providers, models, harnesses, or
   projects use their tokens and money over a period.
 disable-model-invocation: true
-argument-hint: "[day|week|month|year|all] [--theme anthropic|fastly]"
+argument-hint: "[--period day|week|month|year|all] [--theme anthropic|fastly]"
 metadata:
   model-tier: trivial
 ---
@@ -14,8 +14,8 @@ Chart token use, cost, and effort by provider, model, harness, and project
 from local logs for Claude Code, Codex, pi, OpenCode, Gemini CLI, and Copilot
 CLI. The source formats are documented in `scripts/report.py`.
 
-1. **Choose a time range.** Use the argument, or `month` when none is given.
-   Accept only `day` (today), `week` (the last 7 days, including today),
+1. **Choose a time range.** Use `--period` (or an unambiguous range if passed),
+   defaulting to `month`. Accept only `day` (today), `week` (the last 7 days,
    `month` (to date; this calendar month through today), `year` (this
    calendar month and the 11 before it), or `all` (full history). For any
    other value, stop and list the five valid choices.

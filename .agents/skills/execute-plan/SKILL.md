@@ -2,9 +2,9 @@
 name: execute-plan
 description: >-
   Implement a whole project plan slice by slice, committing each task. Pass
-  auto to run without prompts.
+  --auto to run without prompts.
 disable-model-invocation: true
-argument-hint: "<plan-path> [auto]"
+argument-hint: "<plan-path> [--auto]"
 metadata:
   model-tier: complex
 ---
@@ -20,12 +20,12 @@ reach a model. Verify all results yourself and own every commit.
 
 ## Modes and stop conditions
 
-- **Interactive mode (default):** Without `auto`, confirm the plan, branch,
+- **Interactive mode (default):** Without `--auto`, confirm the plan, branch,
   worker model, and per-task commits once at the start. Ask when a design
   question arises.
-- **`auto` mode:** Do not prompt. Decide, log each non-trivial decision, and
-  continue as described in [auto.md](references/auto.md). `auto` must be
-  supplied on every invocation.
+- **`--auto` mode:** Do not prompt. Decide, log each non-trivial decision, and
+  continue as described in [auto.md](references/auto.md). `--auto` must be
+  supplied on every invocation (in any position).
 
 In either mode, stop and report if it is unsafe to continue (unsafe staging,
 conflicting requirements, or three failed fixes for one problem); the worker
@@ -44,7 +44,7 @@ and stop. A context transition is not task or plan completion.
 
 ## Workflow
 
-1. **Set up.** Read the plan, its spec, and linked docs. For `github` or an
+1. **Set up.** Read the plan, its spec, and linked docs. For `--github` or an
    issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
    Issue Artifacts instead of `projects/`. Record branch, HEAD,
@@ -69,7 +69,7 @@ and stop. A context transition is not task or plan completion.
 3. **Run tasks in order, one editing worker at a time.** For each task:
    1. Give a cheap subagent a self-contained packet with repository root,
       task-list path, the single task, allowed files, conventions, and—in
-      `auto`—applicable decision IDs. Follow
+      `--auto`—applicable decision IDs. Follow
       [worker.md](references/worker.md).
    2. Inspect the actual diff and compare it with the task. Verify check
       evidence using [BUILD-ITEM.md](../shared/BUILD-ITEM.md); a worker report
@@ -106,7 +106,7 @@ and stop. A context transition is not task or plan completion.
 
 Keep `execution.md` beside the plan. Record mode, branch and baseline,
 requested and observed worker models, each task's status and commit, check
-results, review ownership and evidence references, `auto` decisions, and the
+results, review ownership and evidence references, `--auto` decisions, and the
 next action. On resume, read the log and Git history first; never redo a
 committed task. Revalidate review evidence before reusing it.
 
@@ -117,5 +117,5 @@ Report:
 - Plan status: done, incomplete, or partly verified.
 - Commits for review, listed per [task-commits.md](references/task-commits.md#final-review-list).
 - Checks run, review reports, finding dispositions, and remaining gaps.
-- In `auto`, the decision index from auto.md.
+- In `--auto`, the decision index from auto.md.
 - Anything left and one next action.

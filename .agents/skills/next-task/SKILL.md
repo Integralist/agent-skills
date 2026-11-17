@@ -12,7 +12,7 @@ Delegate test runs as [BUILD-ITEM.md](../shared/BUILD-ITEM.md) describes;
 read-only review may also be delegated through code-review.
 
 1. **Select the file.** Use the file named by the user, or the one already in
-   use this session. If neither exists, ask for its path. For `github` or an
+   use this session. If neither exists, ask for its path. For `--github` or an
    issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
    Issue Artifacts instead of `projects/`.

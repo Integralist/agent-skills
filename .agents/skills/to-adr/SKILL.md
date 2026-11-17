@@ -4,7 +4,7 @@ description: >-
   Extract Architecture Decision Records from a plan, spec, or this session's
   discussion, one per decision that clears the value bar. Use when recording
   an architectural decision with rejected alternatives.
-argument-hint: "[source path | github | #<issue>]"
+argument-hint: "[source path | #<issue>] [--github]"
 allowed-tools: Bash(git config:*), Bash(date:*), Bash(git mv:*), Glob, Read, Edit, Write
 metadata:
   model-tier: complex
@@ -21,7 +21,7 @@ or points to a wrong design, tell the user and wait; do not guess.
 **Workflow.**
 
 1. **Choose the source.** Use the file named by the user or calling skill;
-   otherwise use this session's discussion. Read it in full. For `github` or an
+   otherwise use this session's discussion. Read it in full. For `--github` or an
    issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
    Artifacts instead of `projects/`.
