@@ -23,8 +23,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**changelog**](.agents/skills/changelog/SKILL.md)                                         | Add a changelog entry for uncommitted or branch changes.                                                 |
 | [**clarify**](.agents/skills/clarify/SKILL.md)                                             | Resolve ambiguous requirements before work begins.                                                       |
 | [**cleanup**](.agents/skills/cleanup/SKILL.md)                                             | Audit AI-generated clutter, then apply approved fixes interactively.                                     |
-| [**code-module-design**](.agents/skills/code-module-design/SKILL.md)                       | Design deep modules with high leverage, strong locality, and clean seams.                                |
-| [**code-module-review**](.agents/skills/code-module-review/SKILL.md)                       | Map code structure and assess module ownership, boundaries, and interactions.                            |
+| [**code-module-design**](.agents/skills/code-module-design/SKILL.md)                       | Design deep modules (`--review` maps and audits module boundaries).                                      |
 | [**code-review**](.agents/skills/code-review/SKILL.md)                                     | Review diffs for correctness, security, reliability, performance, and maintainability.                   |
 | [**code-review-feedback**](.agents/skills/code-review-feedback/SKILL.md)                   | Verify review feedback before accepting or implementing it.                                              |
 | [**commit**](.agents/skills/commit/SKILL.md)                                               | Group related changes and create clear Git commits.                                                      |
@@ -206,7 +205,7 @@ The Design document is not the same artifact as `plan.md`:
 
 | Skill                                                                | Use when                                                                           | Primary output                                                                     |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| [**code-module-review**](.agents/skills/code-module-review/SKILL.md) | Understand a feature's structure and assess module ownership                       | Mermaid maps and evidence-backed findings                                          |
+| [**code-module-design**](.agents/skills/code-module-design/SKILL.md) (`--review`) | Understand a feature's structure and assess module ownership                       | Mermaid maps and evidence-backed findings                                          |
 | [**code-review**](.agents/skills/code-review/SKILL.md)               | Code or a diff exists and you want defects identified                              | Verified findings and open questions                                               |
 | [**explain-code**](.agents/skills/explain-code/SKILL.md)             | You are new to the repo and want to understand what code does and why it is useful | Concise Problem/Solution explanation, visual, and optional PR-author clarification |
 | [**is-it-safe**](.agents/skills/is-it-safe/SKILL.md)                 | You need the worst credible outcome of committing or merging a change              | Verdict and evidence-backed impact path                                            |

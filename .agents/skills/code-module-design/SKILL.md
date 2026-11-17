@@ -1,10 +1,12 @@
 ---
 name: code-module-design
 description: >-
-  Vocabulary and principles for designing deep modules. Use when designing or
-  improving a module's interface, looking for deepening opportunities, deciding
-  where a seam goes, making code more testable or easier for agents to
-  navigate, or when another skill needs the deep-module vocabulary.
+  Design deep modules and review existing module boundaries. Use when designing
+  or improving a module's interface, looking for deepening opportunities,
+  deciding where a seam goes, making code more testable or easier for agents to
+  navigate, or when asked how a feature or package is structured, where logic
+  should live, or whether boundaries are clean.
+argument-hint: "[--review] [target or path]"
 metadata:
   model-tier: complex
 ---
@@ -13,6 +15,11 @@ Design deep modules: place substantial behaviour behind a small interface,
 choose a clean seam, and test through that interface. Use the vocabulary and
 principles here whenever code is designed or restructured. Deep modules give
 callers leverage and maintainers locality.
+
+**Review mode.** Pass `--review` in any position—or ask how existing code is
+structured, where logic should live, or whether boundaries are clean—to run a
+read-only audit using [REVIEW.md](references/REVIEW.md); change code only when
+asked.
 
 ## Vocabulary
 

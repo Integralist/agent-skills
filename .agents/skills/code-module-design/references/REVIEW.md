@@ -1,22 +1,12 @@
----
-name: code-module-review
-description: >-
-  Explain and review how a scoped piece of code is structured. Use when the
-  user asks how a feature or package is put together; whether a PR or existing
-  code has clean module boundaries; where new logic should live or which
-  module should own it; or how the code could be reshaped.
-metadata:
-  model-tier: moderate
----
+# Module Review
 
 Map a scoped piece of code, then assess whether its modules and seams belong
 where they are. Back every claim with source evidence. This is review-only:
 change code only when the user asks.
 
-Use the vocabulary and principles in
-[code-module-design](../code-module-design/SKILL.md), the project's domain
-terms from `GLOSSARY.md`, and
-[conventions-mermaid](../conventions-mermaid/SKILL.md) for every diagram.
+Use the vocabulary and principles in [SKILL.md](../SKILL.md), the project's
+domain terms from `GLOSSARY.md`, and
+[conventions-mermaid](../../conventions-mermaid/SKILL.md) for every diagram.
 
 ## 1. Scope
 
@@ -98,8 +88,8 @@ Finish when the report is delivered.
 ## Hand off when appropriate
 
 - For a broad scan for deepening opportunities, use
-  [improve-codebase-architecture](../improve-codebase-architecture/SKILL.md).
+  [improve-codebase-architecture](../../improve-codebase-architecture/SKILL.md).
 - For a scoped reimplementation plan, use
-  [redesign](../redesign/SKILL.md).
+  [redesign](../../redesign/SKILL.md).
 - To explore alternative interfaces for a chosen module, follow
-  [DESIGN-IT-TWICE.md](../code-module-design/references/DESIGN-IT-TWICE.md).
+  [DESIGN-IT-TWICE.md](DESIGN-IT-TWICE.md).
