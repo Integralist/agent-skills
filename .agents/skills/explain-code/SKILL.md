@@ -70,10 +70,10 @@ authority.
    when no useful flow exists. Confirm it matches the prose.
 4. **Write the explanation.** Read
    [EXPLANATION-TEMPLATE.md](references/EXPLANATION-TEMPLATE.md) before
-   drafting. Use [voice-product](../voice-product/SKILL.md) for wording and
-   [voice-adhd](../voice-adhd/SKILL.md) for structure within the headings.
-   Aim for about 150 words of prose besides diagram and sources; it is a
-   target, not a cap. Use short paragraphs or up to five bullets.
+   drafting. Read and follow [voice-product](../voice-product/SKILL.md) for
+   wording and [voice-adhd](../voice-adhd/SKILL.md) for structure within the
+   headings. Aim for about 150 words of prose besides diagram and sources;
+   it is a target, not a cap. Use short paragraphs or up to five bullets.
 
    - **Problem:** Stand alone. Introduce prerequisite concepts before dependent
      terms; explain their purpose, provider or user, and connection. Explain
