@@ -37,6 +37,9 @@ test("the entry point loads the protocol and preserves review gates", () => {
   assert.match(skill, /Never edit code, change state, or comment on a PR/);
   const protocol = flat(protocolPath);
   assert.match(protocol, /intent documents/);
+  assert.match(protocol, /canonical domain sources/);
+  assert.match(protocol, /domain definitions and relationships/);
+  assert.match(protocol, /Domain model/);
   assert.match(protocol, /reviewer profiles/i);
   assert.match(protocol, /finding schema/);
   assert.match(protocol, /verifier subagent/);

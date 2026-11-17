@@ -22,6 +22,11 @@ spec whose contract covers the changed behaviour. Record an unknown if
 applicability is unclear. A completed project outside the diff is history; its
 living spec supersedes it. Read every document at the reviewed revision.
 
+Also inspect repository instructions for canonical domain sources. Read a
+project-root `GLOSSARY.md` or `CONTEXT.md`, and any such file linked by
+instructions, when its stated scope covers the change. If applicability is
+unclear, record an unknown; do not infer rules beyond the document's scope.
+
 Write `CONTEXT_PATH` with the stated purpose, PR title and body, repository
 instructions, each intent document labelled by path, and available test
 results. Reviewers judge the change against this context; unclear intent is an
@@ -32,7 +37,8 @@ unknown, not a defect.
 Use scope and impact, not line count alone. Start one read-only generalist
 reviewer for a localized, low-risk change. It covers behaviour and tests, then
 security, reliability, and maintainability where relevant; include intent docs
-and check adherence in that pass.
+and check adherence in that pass, including applicable domain definitions and
+relationships.
 
 Add specialist reviewers only for concrete signals:
 
@@ -41,6 +47,9 @@ Add specialist reviewers only for concrete signals:
   or rollout.
 - **Maintainability:** broad refactors, new public APIs, or changes across
   modules.
+- **Domain model:** a glossary or context document changes, or the change
+  introduces or redefines domain terms across files. Check affected usages
+  against canonical sources; do not infer undocumented rules.
 
 Keep behaviour and tests in scope. Use a separate spec-and-plan reviewer only
 when requirements are substantial or cross-cutting. A one-line authorization
