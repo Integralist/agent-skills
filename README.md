@@ -72,6 +72,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**show-me**](.agents/skills/show-me/SKILL.md)                                             | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.                       |
 | [**skill-rewrite**](.agents/skills/skill-rewrite/SKILL.md)                                 | Rewrite a skill to be short and readable without losing its core behaviour.                              |
 | [**spec-delta**](.agents/skills/spec-delta/SKILL.md)                                       | Record a living-spec behaviour change as a project spec with a Behavioural Delta.                        |
+| [**spike**](.agents/skills/spike/SKILL.md)                                                 | Run a throwaway Go spike to settle an empirical backend design unknown.                                  |
 | [**stacked-prs**](.agents/skills/stacked-prs/SKILL.md)                                     | Create and manage dependent PRs with the official `gh stack` extension.                                  |
 | [**summarize**](.agents/skills/summarize/SKILL.md)                                         | Summarise a session, file, URL, plan, or diff in a scannable shape, or format a PR/Slack/email update.   |
 | [**systematic-debugging**](.agents/skills/systematic-debugging/SKILL.md)                   | Find root causes through a four-phase debugging workflow.                                                |

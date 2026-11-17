@@ -13,12 +13,15 @@ metadata:
 Coordinate a feature through skills in order:
 [agents-md](../agents-md/SKILL.md), [research](../research/SKILL.md),
 [grill-with-docs](../grill-with-docs/SKILL.md), [to-spec](../to-spec/SKILL.md),
-and [to-plan](../to-plan/SKILL.md). Each skill owns its step; carry context
-between them and keep artifacts in one `projects/<yyyy-mm-dd>-<slug>/` folder.
-When PDD hands off an approved Design, skip to step 2 (Research). Otherwise,
-honor an explicitly requested starting step in the user's steering text; if
-none is given, start at Bootstrap. Once the project folder exists, pass its
-path to each skill. `--github` selects GitHub Issues and Issue Artifacts
+and [to-plan](../to-plan/SKILL.md), invoking [spike](../spike/SKILL.md) only
+when an empirical unknown passes its initiation gate. Each skill owns its
+step; carry context between them and keep artifacts in one
+`projects/<yyyy-mm-dd>-<slug>/` folder (or one Root Project Issue in GitHub
+mode). When PDD hands off an approved Design, carry the same project folder
+or `#<issue>` forward and skip to step 2 (Research). Otherwise, honor an
+explicitly requested starting step in the user's steering text; if none is
+given, start at Bootstrap. Once the workspace exists, pass its project path or
+`#<issue>` to each skill. `--github` selects GitHub Issues and Issue Artifacts
 instead of `projects/`; an issue reference (`#<n>` or URL) selects the same
 mode. For `--github` or an issue reference (`#<n>` or URL), read and follow
 [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md).
@@ -49,10 +52,14 @@ tell the user and wait. Do not fill the gap with a guess.
 2. **Research.** Use [research](../research/SKILL.md) on the idea, scoped to the
    project folder. Present a [summarize](../summarize/SKILL.md)-style digest
    in chat (bottom line, <= 5 key findings, one next step) and ask whether to
-   research more or grill.
+   research more, run a [spike](../spike/SKILL.md) (only if an unresolved
+   unknown passes its initiation gate), or grill. If a spike runs, record its
+   verdict in `research.md` and discard spike code before grilling.
 3. **Grill.** Use [grill-with-docs](../grill-with-docs/SKILL.md) to
    stress-test the researched idea until the user confirms shared
-   understanding. Do not write the spec yet.
+   understanding. If grilling uncovers an empirical unknown that passes the
+   [spike](../spike/SKILL.md) initiation gate, pause to run the spike and
+   bring its verdict back before continuing. Do not write the spec yet.
 4. **Spec.** Use [to-spec](../to-spec/SKILL.md) with the aligned idea,
    research, and preserved request/history (`intent.md` when present). Update
    `spec.md` if grilling started from a draft. Have a separate read-only
