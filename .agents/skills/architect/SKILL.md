@@ -47,30 +47,32 @@ tell the user and wait. Do not fill the gap with a guess.
    why. Carry the original request and later clarifications into downstream
    steps, not just a summary.
 2. **Research.** Use [research](../research/SKILL.md) on the idea, scoped to the
-   project folder. Ask whether to research another topic or move on. Continue
-   when the user is ready to grill.
+   project folder. Present a [summarize](../summarize/SKILL.md)-style digest
+   in chat (bottom line, <= 5 key findings, one next step) and ask whether to
+   research more or grill.
 3. **Grill.** Use [grill-with-docs](../grill-with-docs/SKILL.md) to
    stress-test the researched idea until the user confirms shared
    understanding. Do not write the spec yet.
 4. **Spec.** Use [to-spec](../to-spec/SKILL.md) with the aligned idea,
-   research, and preserved request/history (`intent.md` when present). If
-   grilling began from an existing draft, update `spec.md` with
-   confirmed changes. Then have a separate read-only reviewer follow the
-   [critique skill](../critique/SKILL.md) on the spec. Resolve agreed findings
-   and repeat the critique after material changes. Continue when `spec.md` is
-   written and its critique is resolved. Do not plan or implement before
-   alignment is confirmed.
+   research, and preserved request/history (`intent.md` when present). Update
+   `spec.md` if grilling started from a draft. Have a separate read-only
+   reviewer run [critique](../critique/SKILL.md) on `spec.md`, resolve agreed
+   findings, then run [distill](../distill/SKILL.md) (`--prune`) to strip
+   accumulated repetition and caveats before handoff. Present a short
+   [summarize](../summarize/SKILL.md)-style digest in chat. Do not plan or
+   implement before alignment is confirmed.
 5. **Plan.** Use [to-plan](../to-plan/SKILL.md) with the spec and preserved
-   intent, then have a separate read-only reviewer follow the
-   [critique skill](../critique/SKILL.md) on the completed plan. Resolve agreed
-   findings and repeat
-   after material changes. Then use [to-adr](../to-adr/SKILL.md) on the plan.
-   If it writes no ADR, note why in the plan's Notes. Unless the project
-   started from a PDD Design, offer [to-prd](../to-prd/SKILL.md) for
-   stakeholder framing; run it only if the user wants it. Finish when each
-   slice has the acceptance verification contract required by to-plan, and
-   the critiques, ADRs, and PRD are settled. This ends planning, not
-   implementation or passing acceptance tests.
+   intent, then have a separate read-only reviewer run
+   [critique](../critique/SKILL.md) on the plan. Resolve agreed findings, then
+   run [distill](../distill/SKILL.md) (`--prune`) so slice summaries stay
+   within [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md) budgets and shared
+   sections are linked, not copied. Run [to-adr](../to-adr/SKILL.md) on the
+   plan (noting in Notes if none qualify) and offer [to-prd](../to-prd/SKILL.md)
+   for stakeholder framing. Finish when each slice has the acceptance
+   verification contract required by to-plan and the critiques, ADRs, and PRD
+   are settled—this ends planning, not implementation or passing acceptance
+   tests. Present a short [summarize](../summarize/SKILL.md)-style digest in
+   chat when planning ends.
 6. **Hand off.** Ask the user to choose one next step, and start only that one:
    - Execute the plan with the execute-plan skill, or by hand: tell the user to
      run `/to-tasks <plan-path> --slice=1` (`/to-tasks <plan-path>` for a

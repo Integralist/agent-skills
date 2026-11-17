@@ -64,5 +64,9 @@ request history there.
    record the limitation. Repeat only if the brief, acceptance criteria, or
    milestone mapping changes.
 
+6. Present the plan in chat with a brief
+   [summarize](../summarize/SKILL.md)-style digest (bottom line, slice count
+   and gates, one next step) rather than repeating plan prose.
+
 **Done when** coverage is checked or its limits are recorded, discrepancies
-are resolved, and the user has the plan path.
+are resolved, and the user has the plan path and summary.

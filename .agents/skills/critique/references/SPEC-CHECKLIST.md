@@ -22,7 +22,9 @@ both passes in sequence.
    - Necessary technical terms and component roles are explained at first use;
      existing responsibilities are distinct from proposed changes.
    - Prose, titles, and Gherkin steps are short, active, and concrete without
-     weakening exact fields, codes, timing, or guarantees.
+     weakening exact fields, codes, timing, or guarantees. Flag repeated
+     explanations, defensive process disclaimers, or near-duplicate scenarios
+     that belong in a `Scenario Outline`.
    - Test-harness setup stays in Testing Seams and deployment exclusions stay
      in Out of Scope rather than leaking into acceptance scenarios.
 2. **Invariants, duplication, and accuracy reviewer (full context).** Read the

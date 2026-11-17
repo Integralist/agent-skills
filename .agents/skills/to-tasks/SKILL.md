@@ -48,4 +48,7 @@ gaps with guesses.
    for whom, and why it matters. Add the task list to the project README as
    described in [PROJECTS-README.md](../shared/PROJECTS-README.md).
 
+5. Present the compiled tasks in chat as a short list (task count, blockers,
+   and the immediate first task to run).
+
 **Done when** the task list is written and the user has its path.

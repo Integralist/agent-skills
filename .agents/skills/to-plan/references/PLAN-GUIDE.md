@@ -6,20 +6,19 @@ Notes and expanded detail, not only the Summary and slice outcomes. Preserve
 exact signatures, identifiers and contract values.
 
 Use this guide while designing slices, milestones, acceptance checks, diagrams,
-and the plan document. Keep outcomes skimmable and execution contracts
-complete: start each slice with its delivered outcome and any useful diagram,
-then put dependencies, exact interfaces, and milestones underneath in the same
-section. Use short sentences, clear headings, and small, focused bullet groups.
-Cut repetition, not requirements or caveats. Brevity applies to explanatory
-prose, not required technical detail. Follow
-[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) for summary-first disclosure;
-use dropdowns for supporting rationale, not slice contracts.
+and the plan document. Keep the top of each section scannable and short: follow
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) budgets and put the
+deliverable, blockers, gates, and milestones first. Collapse dense signature
+blocks, acceptance-verification tables, and supporting rationale inside
+`<details>` so they do not bury what needs review.
 
-**Define lettered IDs before use.** Spell out every lettered identifier,
-prefix, or shorthand before its first use—for example, `Slice 1 (S1)`,
-`Milestone 1.1 (M1.1)`, or `Contract 1 (C1)`. When using a numbered series such
-as `C1–C7` or token symbols such as `T_A` and `T_M`, explain what each letter
-or symbol stands for in prose or a short key before referencing the codes.
+**Link shared context once.** Never copy `Prerequisites`, `Pull Request
+Delivery`, repo rules, or shared interfaces into individual slices or GitHub
+Slice Sub-Issues; link the shared `plan.md` section instead.
+
+**Define lettered IDs before use.** Spell out a lettered prefix or shorthand on
+first use (`Slice 1 (S1)`, `Milestone 1.1 (M1.1)`), or keep a compact 3–5 row
+key once at the top instead of repeating definitions.
 
 ## Slice design
 
@@ -31,9 +30,9 @@ form.
 
 For every slice:
 
-- State `Blocked by` and `Consumes`/`Produces` with exact signatures. An
-  implementer sees only its own slice, so these contracts provide the names
-  and types of neighbouring slices.
+- State `Blocked by` and `Consumes`/`Produces` with exact signatures (placed
+  in `<details>` when multi-line). Implementers read their own slice plus the
+  linked shared contracts in `plan.md`.
 - Give milestones verifiable outcomes, keyed `M<slice>.<n>`. Describe what is
   true when done, not which files change. Link each milestone to its spec
   criterion when there is a spec. Without one, make the milestone wording
@@ -93,12 +92,21 @@ then a fenced Mermaid block. Omit when better covered within Implementation.}
 
 ### Slice 1: {what it delivers end to end}
 
-- **Delivers:** {observable behaviour}
+- **Delivers:** {one sentence on observable behaviour}
+- **Gate / needs decision:** {approval or blocker, or omit}
+- **Blocked by:** None
 
 {Optional focused outcome diagram for Slice 1, captioned with its ID. Omit
 when covered by a shared diagram or clearer without one.}
 
-- **Blocked by:** None
+#### Slice 1 Milestones
+
+- [ ] **M1.1**: {checkable outcome}
+  {— [criterion](./spec.md#anchor), when there's a spec}
+
+<details>
+<summary>Contracts and acceptance verification</summary>
+
 - **Consumes:** None
 - **Produces:** {exact signatures later slices rely on}
 
@@ -106,16 +114,13 @@ when covered by a shared diagram or clearer without one.}
 {key signatures}
 ```
 
-#### Slice 1 Milestones
-
-- [ ] **M1.1**: {checkable outcome}
-  {— [criterion](./spec.md#anchor), when there's a spec}
-
 #### Acceptance Verification
 
 | Criterion | Feature scenarios / assertions | Boundary | Command |
 | --- | --- | --- | --- |
 | {M1.1 + criterion} | {feature + names + rows} | {boundary} | `{command}` |
+
+</details>
 
 ### Slice 2: {what it delivers end to end}
 

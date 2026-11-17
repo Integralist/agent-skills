@@ -9,26 +9,33 @@ Each task must be executable from this document and a shell alone: the agent
 must not need to make a design choice or open an unnamed file. Supply missing
 judgment or split the task.
 
+Follow [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) for the two-layer
+layout: keep the visible top short (<= 120 words per task: `Delivers`,
+`Supports`, `Location`, one-line `Verify`) and place `Stub`, `Test (red)`,
+and `Implementation guidance (green)` inside `<details>`. Never copy
+`AGENTS.md`, PR rules, or approval reminders into task bodies—link `AGENTS.md`
+once if a task needs a repo-specific rule.
+
+Apply the same brevity and clarity inside `<details>`: use only the template
+sections below (plus optional `Prerequisites` in 1–3 short bullets when a task
+needs task-specific setup). Write `Prerequisites`, `Test (red)` framing,
+`Implementation guidance (green)`, and `Verify` as short, flat bullets—one
+action per bullet, no prose paragraphs or defensive disclaimers.
+
 Each task gives the executor:
 
-- What it delivers and where it goes.
-- A stub only when a test needs it to compile.
-- The failing test (red), its command, and why it fails.
-- Implementation guidance: the behaviour and approach to implement.
-- A runnable Verify command and an observable pass condition. A task with no
-  code, such as adding a dependency, still needs a runnable Verify.
+- **Visible top:** `Delivers`, `Supports` (milestone keys), `Location`, and
+  a runnable `Verify` command with its pass condition.
+- **Collapsed detail:** a stub only when needed to compile, the failing
+  test (red) and why it fails, and implementation guidance (`path:line` pattern
+  to follow; verbatim code only for tricky security or concurrency parts).
 
-Make verification runnable at this stage. Include required fixtures, service
-launchers, or harness setup before the checks that need them. Scope Verify to
-the delivered outcome and project-required checks; later-stage verification
-belongs to its owning milestones. Name the testing boundary and mocked
-external dependencies, and state which live-service interactions the checks do
-not verify.
-
-Describe the implementation's behaviour, approach, and an existing `path:line`
-pattern to follow. Include verbatim code only where a capable agent could
-still get it subtly wrong, such as concurrency, security, or a tricky
-algorithm.
+Include required fixtures, service launchers, or harness setup before the
+checks that need them. Scope Verify to the delivered outcome and
+project-required checks; later-stage verification belongs to its owning
+milestones. Name the testing boundary and mocked external dependencies, and
+state which live-service interactions the checks do not verify—in one concise
+line per task rather than a repeated boilerplate paragraph.
 
 ## Contracts and coverage
 
@@ -73,7 +80,7 @@ algorithm.
 {Optional shared outcome diagram: caption the covered task IDs, then a fenced
 Mermaid block. Omit when better covered beside the relevant tasks.}
 
-## Context for the executor
+## Starting Context
 
 Existing code the tasks build on (verified — do not re-explore):
 
@@ -95,6 +102,11 @@ when covered by a shared diagram or clearer without one.}
 - **Supports:** {milestone keys; omit when the source has none}
 - **Location:** `{path}`, `{path}`
 
+- **Verify:** `{command}` passes when {observable pass condition}.
+
+<details>
+<summary>Stub, test, and implementation details</summary>
+
 **Stub** — add to `{path}` (only if the test needs it to compile):
 
 ```{language}
@@ -109,10 +121,12 @@ when covered by a shared diagram or clearer without one.}
 
 Run `{command}`; it fails because {why the assertion fails}.
 
-**Implementation guidance (green)** — in `{path}`: {behaviour, approach, and
-the `path:line` pattern to follow; a verbatim block only for a tricky part}.
+**Implementation guidance (green)** — short bullets in `{path}`:
 
-**Verify:** `{command}` passes when {observable pass condition}.
+- {step or `path:line` pattern to follow}
+- {tricky security/concurrency snippet only if needed}
+
+</details>
 
 - [ ] Task {n} complete
 `````

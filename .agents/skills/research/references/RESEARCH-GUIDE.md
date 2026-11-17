@@ -46,8 +46,8 @@
    and discussions, and to note stale `docs/**/*.md` or `**/README.md` files.
    Done when it returns complete findings.
 
-The saved document starts with a **Project Metadata** section holding the
-snapshot and high-risk files, then follows the template.
+The saved document puts **Project Metadata** inside a `<details>` block (keeping
+only the repo revision and high-risk files visible), then follows the template.
 
 ## Topic research
 
@@ -109,7 +109,9 @@ code in the document's repository, a commit-pinned permalink for another
 repository, and a URL for external docs, following
 [conventions-markdown](../../conventions-markdown/SKILL.md). Label an uncited
 claim "unverified assumption" and say how to verify it. Draw diagrams
-following [conventions-mermaid](../../conventions-mermaid/SKILL.md). Cover
-everything but omit needless words, following
-[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md): exhaustive means no fact
-dropped, not more words per fact. Wrap Markdown at 80 columns.
+following [conventions-mermaid](../../conventions-mermaid/SKILL.md). Keep
+findings decision-relevant and concise, following
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md): answer the research
+questions directly, put raw inventories or background history inside
+`<details>`, and skip details that do not inform design choices. Wrap Markdown
+at 80 columns.

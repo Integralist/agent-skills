@@ -37,20 +37,14 @@ gaps with guesses.
 3. **Draft for the reader.** Before any prose or Gherkin, read
    [voice-product](../voice-product/SKILL.md),
    [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) and the
-   [writing guide and clarity check](references/SPEC-GUIDE.md). Use product
-   voice throughout the full specification. Default to plain, reader-facing
-   explanations that are clear to product and engineering readers. Explain
-   necessary jargon. Keep technical terms or exact values when they define a
-   required contract, security guarantee, testable outcome, or open decision;
-   explain what they mean and why they matter while preserving ownership,
-   permissions, timing, failures, and uncertainty. Name each component and
-   explain its role at first use. If a proposal expands an existing component,
-   distinguish its current responsibility from the proposed change. In
-   Behavioural Delta,
-   explain in plain language what the baseline requires, what changes, and what
-   remains unchanged. Give each requested behaviour a scenario and testing
-   seam; assign durable scenarios to owning living features. Omit Behavioural
-   Delta when behaviour does not change.
+   [writing guide and clarity check](references/SPEC-GUIDE.md). Keep prose
+   short and plain. Explain necessary jargon or component roles once with a
+   brief parenthetical gloss (a few words); do not write paragraph-long
+   definitions or repeat them across sections. Preserve exact values,
+   ownership, timing, and failures in concise rules, and fold repetitive
+   scenario variants into `Scenario Outline` tables. In Behavioural Delta, state
+   in 2–3 sentences what the baseline requires, what changes, and what stays
+   unchanged; omit it when behaviour does not change.
 4. **Write and check.** Write any needed `intent.md` in the selected mode.
    Use the guide's metadata table. Set Status `Draft`,
    Author from `git config user.name`, and Created from `date +%F`. Language

@@ -14,3 +14,6 @@ and a File Changes table):
   from Blocked by, Consumes, or Produces.
 - Missing error paths, partial failures, concurrent callers, rollback, or
   existing-data migration cases.
+- Duplication or bloat: shared plan sections or repo-rule boilerplate copied
+  into slices/tasks instead of linked, or dense contracts not collapsed under
+  `<details>`.

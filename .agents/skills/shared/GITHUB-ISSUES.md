@@ -45,46 +45,53 @@ Map the on-disk project structure onto a 3-level GitHub Sub-Issue tree using
    - **Title:** `<slug> / S<N>: <Slice Title>`
    - **Dependencies:** Pass `--blocked-by <slice-issue>` for slices that depend
      on earlier slices.
-   - **Body:** Self-contained slice contract created by `to-plan` (Parent
-     Project link, Spec/Plan artifact links, `Delivers`, `Blocked by`,
-     `Consumes`/`Produces` with captioned signature blocks, `M<n>.<m>`
-     milestone checkboxes, and the `Acceptance Verification` table). When
-     `to-tasks` compiles the slice, append `## Context for the executor` to
-     this Slice Sub-Issue body. Do not attach artifacts to Slice issues.
+   - **Body (two layers):** Keep the visible top <= 200 words: links to Parent
+     Project, Spec, and Plan section; one-sentence `Delivers`; `Needs decision
+     / gate` (only when gated); `Blocked by`; and `M<n>.<m>` milestone
+     checkboxes. Never copy shared `plan.md` sections (prerequisites, PR
+     delivery tables, repo rules, or other slices' contracts) into a Slice
+     issue—link them once. Put `Consumes`/`Produces` (with captioned signature
+     blocks), `Acceptance Verification`, and `## Starting Context`
+     (appended by `to-tasks`) inside a `<details><summary>Contracts and
+     verification details</summary>` block. Do not attach artifacts to Slice
+     issues.
 3. **Task Sub-Issues (`--label task`, `--parent <slice-issue>`):**
    - **Title:** `<slug> / S<N>-T<M>: <Task Title>`
    - **Just-in-time creation:** Created one slice at a time by `to-tasks` (or
      `execute-plan` Step 2) against live code, chained in dependency order with
      `--blocked-by <prev-task-issue>`.
-   - **Body:** Self-contained task contract (`Delivers`, `Parent Slice` link,
-     `Blocked by` link, `Supports` milestone keys, `Location`, optional
-     `Stub`, `Test (red)`, `Implementation guidance (green)`, and `Verify`). Do
-     not attach artifacts to Task issues, and omit the trailing
-     `- [ ] Task <n> complete` checkbox (the Task Sub-Issue's open/closed state
-     tracks completion).
+   - **Body (two layers):** Keep the visible top <= 120 words: `Delivers`,
+     `Parent Slice` and `Blocked by` links, `Supports` milestone keys,
+     `Location`, and one-line `Verify`. Put `Stub`, `Test (red)`, and
+     `Implementation guidance (green)` inside a `<details><summary>Stub,
+     test, and implementation details</summary>` block. Never repeat `AGENTS.md`
+     or process checklists inline, stick to the template sections (with optional
+     `Prerequisites` inside `<details>` only for task-specific setup), and write
+     guidance as short flat bullets rather than prose paragraphs. Do not attach
+     artifacts to Task issues, and
+     omit the trailing `- [ ] Task <n> complete` checkbox (the Task Sub-Issue's
+     open/closed state tracks completion).
 
-## Root Issue readability
+## Issue readability
 
-Before writing or revising the description, read and apply
-[voice-product](../voice-product/SKILL.md). Treat the Root Issue as navigation
-and current status, not a second spec or an accumulating project diary.
+Before writing or revising any issue description, read
+[CONCISE-PROSE.md](CONCISE-PROSE.md) and apply
+[voice-product](../voice-product/SKILL.md). Treat Root, Slice, and Task
+descriptions as decision-first navigation on top, with dense supporting detail
+collapsed below.
 
-- **Summary:** Two or three sentences: the problem, intended outcome and
-  major scope boundary. Link detailed requirements rather than repeating them.
-- **Next action:** Put it near the top. Name one owner, one immediate action
-  and its destination. Keep blocking approvals explicit; link later steps.
-- **Artifacts:** Keep purposes and statuses to short phrases. Link review
-  findings and verification evidence instead of embedding their history.
-- **Gates:** Keep governing approvals, current blockers and verification
-  limits visible, with one concise statement and a link for each.
-- **Supporting detail:** Keep request history in intent, requirements and
-  open decisions in the spec, and sources/coordination notes in research.
-  Prefer links; use <details> only when secondary context belongs here.
-
-Retain required project metadata and PDD approval tables. On updates, replace
-stale status rather than appending chronology. Preserve unique evidence in its
-owning artifact or an issue comment before removing it from the description.
-These brevity rules do not shorten Slice or Task contracts.
+- **Root Issue (<= 250 words):** Lead with `Summary` (2 sentences max) and
+  `Next action` (one owner, one action, one link). Keep `Artifacts`,
+  `Gates`, and `Slice tracking` to short phrases. Never repeat review
+  history, PR rules, or spec prose; link the owning artifact or comment.
+- **Slice & Task Issues:** Keep the summary, blockers, gates, and next check
+  above `<details>`. Put dense supporting detail (contracts, verification
+  tables, stubs, and tests) inside `<details>`—held to the same brevity and
+  no-boilerplate rules—with blank lines around the Markdown so GitHub renders
+  it.
+- **Updates:** Replace stale status instead of appending chronology. Preserve
+  unique evidence in its owning artifact or an issue comment before removing it
+  from a description.
 
 ## Root Issue Artifacts
 

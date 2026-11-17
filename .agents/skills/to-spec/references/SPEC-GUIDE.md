@@ -7,49 +7,38 @@ contracts and verbatim source quotations.
 
 ## Reader path and clarity check
 
-Start Development Brief with a short summary of the current request,
-boundaries and open choices. Link `intent.md` or the preserved source instead
-of embedding request/decision history. Follow
-[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) for summary-first disclosure.
+Keep `spec.md` decision-first and compact. Follow
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md): open `Development Brief`,
+`Problem Statement`, and `Solution` in 1–3 sentences each, and link `intent.md`
+instead of embedding request or review history.
 
-User stories describe capabilities, not fixtures, except for testing/operator
-stories. Explain roles/terms before using them; follow the glossary without
-copying its editorial notes into the spec.
+Explain necessary technical terms or component roles once with a short
+parenthetical gloss (a few words) or a compact table—never multi-sentence
+explanations repeated across sections. Omit defensive process disclaimers
+("this draft does not approve X"); state decision status once in metadata.
 
-Before handoff, check the whole initial draft, including tables, technical
-sections and Gherkin:
+Before handoff, check the draft:
 
-1. Can a fresh reader identify the actor, action, permissions, outcome and
-   open decisions? When a requirement spans identity domains, distinguish the
-   identities and state which one controls each decision. At first mention,
-   name each component and explain its role; use shorthand only after the
-   component is clear. If the proposal expands an existing component,
-   distinguish what it does today from the proposed responsibility. Explain
-   only the terms needed to understand the contract; link relevant source code.
-2. State each obligation once; link repetitions. Separate Research from Open
-   Questions. Keep unique contracts here until a linked durable home exists;
-   replaceable tasks belong in the plan. Dropdowns do not replace criteria.
-3. Preserve externally referenced IDs, protocol values, ownership, timing,
-   failures and uncertainty. Use descriptive scenario titles by default; add
-   IDs or lookup tables only when external references need them. Check each
-   `Rule` against its child scenarios; put setup in `Given` unless environment
-   changes behaviour. Ask rather than settle unclear needs.
+1. Can a fresh reader spot the actor, action, permissions, outcome, and open
+   decisions in one pass? Distinguish new component responsibilities from
+   existing ones in one line.
+2. Is every obligation stated once (linked elsewhere) and Research separated
+   from Open Questions?
+3. Are externally referenced IDs, timing, and failure codes exact, with each
+   `Rule` matching its child scenarios and setup in `Given`?
 4. Check request coverage using
    [PROJECT-INTENT.md](../../shared/PROJECT-INTENT.md)'s handoff check.
 
 ## Scenarios and scope
 
-Follow [SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md). Include technical details
-only when they define a required interface, security guarantee or operational
-constraint. A component name or call restriction belongs in a scenario only
-if changing it would violate the requirement.
+Follow [SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md). Fold repetitive variants
+into a `Scenario Outline` with `Examples` instead of copying near-identical
+scenarios, and link owning `.feature` files once created.
 
-Acceptance Criteria states observable system behaviour; Testing Seams names
-the highest reusable boundary where tests observe it, not an internal call.
-Keep test-harness and deployment details out of accepted behaviour; see
-[SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md) for their placement.
-Living Specifications assigns each durable scenario to an owning
-`docs/specs/<capability>.feature` file loaded directly by acceptance runners.
+Acceptance Criteria states observable behaviour; Testing Seams names the test
+boundary in a short `Boundary | What to verify` bullet or table without
+repeating setup commands. Living Specifications assigns each durable scenario to
+an owning `docs/specs/<capability>.feature` file.
 
 For changed living behaviour, follow the Behavioural Delta format below. Open
 with a plain-language summary that tells product and engineering readers what

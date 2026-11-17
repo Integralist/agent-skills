@@ -32,6 +32,9 @@ problems. If the document is sound, say so.
    - Completeness: missing counterarguments or perspectives.
    - Clarity: undefined terms, unexplained lettered IDs or shorthand before
      first use, or vagueness where precision matters.
+   - Bloat and buried decisions: repeated sections across slices or artifacts,
+     process/repo-rule boilerplate, walls of prose, or key decisions buried
+     under uncollapsed technical detail.
    - Consistency: contradictions or later sections that conflict with earlier
      ones.
    - Terminology: flag glossary conflicts or avoided alternatives only when

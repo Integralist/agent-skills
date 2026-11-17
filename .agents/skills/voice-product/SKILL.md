@@ -38,17 +38,17 @@ failure cases and uncertainty; clearer wording cannot change their contract.
 
 - For project-specific prose, use terms in the project root `GLOSSARY.md`; if
   absent, use root `CONTEXT.md` as the legacy glossary. Prefer defined terms
-  over listed alternatives. For each glossary term, explain its meaning the
-  first time it appears; do not assume readers know or have read the glossary.
-  Surface conflicts rather than silently changing meaning.
+  over listed alternatives. Explain each glossary term once on first
+  use with a brief parenthetical gloss (a few words); do not expand it into a
+  paragraph or repeat the definition later. Surface conflicts rather than
+  silently changing meaning.
 - Start with the reader's problem, question, or goal.
-- Explain technical choices by their effects: what changes, for whom, and why
-  it matters.
+- Explain technical choices by their effects in one or two crisp sentences:
+  what changes, for whom, and why it matters.
 - Name the actor, action and object: who checks what, what is allowed, and
   what happens next.
-- Use technical terms when they add precision; explain them on first use.
-  A glossary does not replace explaining the action. State eligibility
-  explicitly when it matters.
+- Use technical terms when they add precision; explain them briefly on first
+  use. State eligibility concisely when it matters.
 - Prefer concrete examples and observable outcomes to abstract or promotional
   claims. Keep the tone direct and warm.
 - Separate verified facts from assumptions. Never invent benefits or impact.

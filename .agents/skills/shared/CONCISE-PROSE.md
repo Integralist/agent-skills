@@ -4,22 +4,36 @@ Shared principle for skills whose human-readable deliverable is prose: docs,
 PR/commit messages, changelogs, plans, research, summaries, handoffs, and
 ADR/PRD text.
 
-Use the shortest complete explanation, not the fewest words. State the point;
-cut filler, repetition and qualifiers that add no meaning. Prefer familiar
-words, active verbs and concrete actors over compressed jargon or acronyms.
+Use the shortest complete explanation, not the fewest words. State the point
+first; cut filler, repetition, defensive caveats, and process reminders already
+covered by `AGENTS.md`. Prefer plain words, active verbs, and flat bullets over
+dense prose or multi-column text tables.
 
-- Keep each obligation in one clear place; link rather than repeat it.
-- Explain a necessary term once, then use it consistently. No banned-word list
-  or sentence-length quota can decide whether a term is needed.
-- Preserve paths, flags, permissions, timing, ownership, edge cases and
-  uncertainty. If a shorter version needs more explanation, it is not clearer.
-- Separate a summary from supporting history/detail. Collapsing text improves
-  navigation, not word count. Never move a requirement out of its durable home
-  just to make a document look shorter.
+- Keep each obligation in one place; link rather than copy it into any other
+  section or document (such as specs, plans, slices, or tasks).
+- Expand non-obvious acronyms and explain necessary terms once on first use in
+  a short phrase (a few words); do not repeat definitions across sections.
+- Preserve exact paths, flags, permissions, timing, ownership, and failure
+  rules in their owning artifact; keep the context needed to understand them,
+  without padding them with filler.
+- Lead with the **summary and decisions**; put heavy **supporting detail**
+  (`<details>` or linked files) underneath to keep the page focused.
+  Collapsing detail improves focus, not quality: apply the same clarity,
+  brevity, and no-duplication rules inside `<details>` as everywhere else.
 
-For reader-facing specs and plans, prefer a clear standalone paragraph followed
-by `<details>` with a descriptive `<summary>` for useful supporting detail.
-Keep scope, consequential choices, open risks, acceptance criteria and slice
-contracts visible. Exact schemas, error tables and supporting rationale may
-be expandable detail in their owning artifact; reviewers read that detail too.
-Use blank lines around the Markdown inside the dropdown so it renders.
+## Readability budgets
+
+Keep visible sections scannable in one screen:
+
+- Aim for <= 250 words in a GitHub root issue (status, next action, blockers,
+  and links).
+- Aim for <= 200 words above `<details>` in a slice issue (deliverable, gates,
+  blockers, and milestones); put signatures, verification tables, and
+  supporting context inside `<details>`.
+- Aim for <= 120 words above `<details>` in a task issue (deliverable,
+  location, and one-line verify); put stubs, red tests, and guidance inside
+  `<details>`.
+- Limit lists to ~5 bullets per group, and replace multi-sentence table cells
+  with `Name — one-line outcome` bullets.
+
+Use blank lines around Markdown inside `<details>` so GitHub renders it.
