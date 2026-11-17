@@ -1,12 +1,18 @@
 # PR title and description
 
-How to write a pull request's title and description. Write both with the
-voice-product skill, after reading every commit and the full diff against the
-PR's base, not just the list of changed files.
+How to write a pull request's title and description. Read and follow the
+[voice-product](../voice-product/SKILL.md) skill before drafting, after reading
+every commit, the full diff against the PR's base, and enough surrounding
+context (callers, config, tests, and linked issues, specs, or decisions) to
+explain why the change exists and what changes in behaviour.
+
+Derive implemented behaviour from code and tests; treat commit messages and
+issue text as motivation, not proof. Separate implemented work from planned
+follow-ups.
 
 ## Title
 
-Write it as the commit skill writes a subject:
+Write it as the [commit](../commit/SKILL.md) skill writes a subject:
 `type(scope): <why it matters>`. If the repo lints PR titles (a workflow in
 `.github/workflows/` or a commitlint config), its rules win.
 
@@ -17,26 +23,38 @@ Use this template, even when the repo ships its own:
 ````md
 ## Problem
 
-<What's wrong or missing, and why it matters. Reference the issue or ticket
-if there is one.>
+<What's wrong or missing, who or what it affects, and why it matters. State
+system role and prerequisite terms if crossing boundaries. Reference the
+issue or ticket if there is one.>
 
 ## Solution
 
-<What the change does to fix it, verifiable against the diff. Lead with the
-key change; note trade-offs.>
+<Lead with the key change: who changes what, where, and why, naming real
+components, files, or environments. Separate setup from runtime behaviour,
+state what stays the same, and note trade-offs beside benefits.>
 
-<Optional: one high-level Mermaid diagram.>
+```mermaid
+<High-level diagram when flow, branching, or state changes.>
+```
 
 ## Notes
 
-<Optional: testing done, migration steps, risks. Omit if empty.>
+<Optional: pre-merge checks—what tests were run and what they verify,
+migration steps, risks. Omit if empty.>
 ````
 
-- Describe behaviour and intent. The reviewer gets file-by-file detail from the
-  diff.
-- Notes holds only what a reviewer can check before merging. Leave post-merge
-  work, such as deploys, to the ticket. List only testing that you or the user
-  actually did.
+### Rules
+
+- Describe behaviour and intent, not a file-by-file inventory. The reviewer
+  gets line detail from the diff.
+- In `Problem`, briefly introduce the system's role and avoid unexplained
+  jargon or acronyms: explain necessary terms on first use in plain words
+  (expanding an acronym is not enough), even when a term looks familiar.
+- In `Solution`, name concrete components, files, or environments rather than
+  vague abstractions, and say what stays unchanged in refactors.
+- Keep `Notes` strictly to what a reviewer can check before merging. Leave
+  post-merge work, such as deploys, to the ticket. List only testing you or
+  the user actually ran, stating what it exercises and verifies.
 - Write each paragraph as one line. GitHub soft-wraps, so breaks at 80 columns
   render ragged.
 - Separate bullet items with a blank line so GitHub spaces them out.
@@ -46,15 +64,17 @@ key change; note trade-offs.>
 - Wrap a Markdown code block in 4 backticks so inner 3-backtick blocks don't
   break it.
 
-## Diagram
+### Diagram
 
-When the change alters how parts call each other, branch, or move through
-states, add one Mermaid diagram of the type that fits:
+Include one Mermaid diagram whenever the change alters how parts call each
+other, branch, or move through states; omit it only when no useful flow exists:
 
 - `sequenceDiagram` for calls between parts
 - `flowchart` for branching
 - `stateDiagram-v2` for lifecycles
 
-Keep it high-level: only the slice that changed, a dozen nodes or fewer, with
-` (new)` or ` (changed)` on the steps the diff touches. Check it with the
-conventions-mermaid skill.
+Keep it high-level: plain role labels, only the slice that changed, a dozen
+nodes or fewer (prefer six or fewer when clear), setup separated from runtime
+when helpful, an error or rejection path when useful, and ` (new)` or
+` (changed)` on the steps the diff touches. Check it with the
+[conventions-mermaid](../conventions-mermaid/SKILL.md) skill.
