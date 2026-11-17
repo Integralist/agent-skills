@@ -25,7 +25,9 @@ Use this template, even when the repo ships its own:
 
 <What's wrong or missing, who or what it affects, and why it matters. State
 system role and prerequisite terms if crossing boundaries. Reference the
-issue or ticket if there is one.>
+issue or ticket as separate bullet items if there is one (for example,
+`- Part of #<root> — <title>` and `- Delivers #<slice> — <title>`, or
+`- Closes #<issue>`).>
 
 ## Solution
 

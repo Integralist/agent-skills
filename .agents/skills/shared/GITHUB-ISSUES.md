@@ -192,15 +192,16 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
    `#<root-issue>` open during local execution so the repository's issue list
    reflects active/in-review work until code lands on the default branch:
    - **Single PR or final slice PR:** Include `Closes #<root-issue>` and list
-     delivered slices (`Delivers #<slice-issue>`). When the PR merges to the
-     default branch, GitHub closes `#<root-issue>` automatically.
+     delivered slices on separate bullet lines (`- Closes #<root-issue>` and
+     `- Delivers #<slice-issue>`). When the PR merges to the default branch,
+     GitHub closes `#<root-issue>` automatically.
    - **Early backup or work-in-progress PR:** If open Slice Sub-Issues remain
      on `#<root-issue>` and you want to push work to GitHub early (for example,
      before time away), open a draft PR (`gh pr create --draft`). Pushing a
      branch or opening a draft PR does not close `#<root-issue>` until merged.
    - **Partial or stacked slice PR merged before the project is complete:** If
      a PR merges an individual slice while other Slice Sub-Issues on
-     `#<root-issue>` remain open, use `Part of #<root-issue>` and `Delivers
-     #<slice-issue>` (never `Closes #<root-issue>`) so merging that slice does
-     not close the project early. Put `Closes #<root-issue>` only on the final
-     slice PR.
+     `#<root-issue>` remain open, list `- Part of #<root-issue>` and
+     `- Delivers #<slice-issue>` as separate bullets (never `Closes
+     #<root-issue>`) so merging that slice does not close the project early. Put
+     `- Closes #<root-issue>` only on the final slice PR.
