@@ -50,14 +50,20 @@ tell the user and wait. Do not fill the gap with a guess.
    why. Carry the original request and later clarifications into downstream
    steps, not just a summary.
 2. **Research.** Use [research](../research/SKILL.md) on the idea, scoped to the
-   project folder. Present a [summarize](../summarize/SKILL.md)-style digest
+   project folder. For runnable applications, inspect existing local-running
+   commands, dependencies, upstream contracts, and integration-test tooling.
+   Present a [summarize](../summarize/SKILL.md)-style digest
    in chat (bottom line, <= 5 key findings, one next step) and ask whether to
    research more, run a [spike](../spike/SKILL.md) (only if an unresolved
    unknown passes its initiation gate), or grill. If a spike runs, record its
    verdict in `research.md` and discard spike code before grilling.
 3. **Grill.** Use [grill-with-docs](../grill-with-docs/SKILL.md) to
    stress-test the researched idea until the user confirms shared
-   understanding. If grilling uncovers an empirical unknown that passes the
+   understanding. For runnable applications, agree the local-running and
+   end-to-end integration-test scope: real dependencies, mocked upstreams,
+   contract sources, and any exceptions. Carry these decisions into the spec
+   and plan, including when starting at a later step.
+   If grilling uncovers an empirical unknown that passes the
    [spike](../spike/SKILL.md) initiation gate, pause to run the spike and
    bring its verdict back before continuing. Do not write the spec yet.
 4. **Spec.** Use [to-spec](../to-spec/SKILL.md) with the aligned idea,
@@ -76,7 +82,8 @@ tell the user and wait. Do not fill the gap with a guess.
    sections are linked, not copied. Run [to-adr](../to-adr/SKILL.md) on the
    plan (noting in Notes if none qualify) and offer [to-prd](../to-prd/SKILL.md)
    for stakeholder framing. Finish when each slice has the acceptance
-   verification contract required by to-plan and the critiques, ADRs, and PRD
+   verification contract required by to-plan, including applicable local-running
+   coverage, and the critiques, ADRs, and PRD
    are settled—this ends planning, not implementation or passing acceptance
    tests. Present a short [summarize](../summarize/SKILL.md)-style digest in
    chat when planning ends.

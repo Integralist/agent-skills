@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
-const skills = ["to-spec", "voice-product"];
+const skills = ["to-spec", "to-plan", "voice-product"];
 const quote = value => `'${value.replaceAll("'", "'\\''")}'`;
 
 test("spec output keeps local files and GitHub artifacts in separate branches", () => {
@@ -79,7 +79,9 @@ for (const skill of skills) {
       assert.match(item.id, /^[a-z0-9]+(?:-[a-z0-9]+)*$/);
       assert.equal(typeof item.prompt, "string");
       assert.ok(item.prompt.trim());
-      for (const field of ["setup", "checks", "verify"]) {
+      const fields = ["setup", "checks"];
+      if (item.verify !== undefined) fields.push("verify");
+      for (const field of fields) {
         assert.ok(Array.isArray(item[field]) && item[field].length > 0,
           `${item.id}: missing ${field}`);
         assert.ok(item[field].every(value => typeof value === "string" && value.trim()),
@@ -89,7 +91,7 @@ for (const skill of skills) {
   });
 
   for (const item of cases) {
-    test(`${skill}/${item.id} setup works and verification rejects an untouched fixture`, () => {
+    test(`${skill}/${item.id} setup works and any verification rejects an untouched fixture`, () => {
       const scratch = realpathSync(mkdtempSync(join(tmpdir(), "spec-writing-case-")));
       const env = fixtureEnvironment();
       const run = command => spawnSync("bash", ["-e", "-u", "-o", "pipefail", "-c",
@@ -106,11 +108,13 @@ for (const skill of skills) {
 
         const setup = run(item.setup.join("\n"));
         assert.equal(setup.status, 0, `${item.id}: ${setup.stderr || setup.error}`);
-        const results = item.verify.map(command => run(command));
+        const results = (item.verify ?? []).map(command => run(command));
         assert.ok(results.every(result => result.status !== null),
           `${item.id}: a verification command did not finish`);
-        assert.ok(results.some(result => result.status !== 0),
-          `${item.id}: verification accepts the unchanged starting state`);
+        if (results.length > 0) {
+          assert.ok(results.some(result => result.status !== 0),
+            `${item.id}: verification accepts the unchanged starting state`);
+        }
       } finally {
         rmSync(scratch, { recursive: true, force: true });
       }

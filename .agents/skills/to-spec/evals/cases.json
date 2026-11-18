@@ -98,5 +98,51 @@
       "verify": [
         "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\"),s=f.readFileSync(\"projects/2026-01-01-slack/spec.md\",\"utf8\"),b=(s.match(/```gherkin\\n([\\s\\S]*?)\\n```/)||[])[1];a.ok(b,\"Gherkin missing\");a.match(s,/## Testing Seams[\\s\\S]*local mocks/i);a.match(s,/## Out of Scope[\\s\\S]*real-provider deployment/i);const rules=[...b.matchAll(/^  @proposed\\n  Rule: (.+)$/gm)];a.equal(rules.length,1,\"expected one proposed authorization Rule\");a.match(rules[0][1],/customer-tier/i);a.doesNotMatch(rules[0][1],/local|mock/i);a.doesNotMatch(b,/Scenario(?: Outline)?:\\s*(?:SA|AL|SP|CC|DT)\\d+/);a.doesNotMatch(b,/Scenario(?: Outline)?:.*(?:local stack startup|mock availability|deployment status)/i);a.doesNotMatch(b,/Scenario family|\\| Prefix \\|/i);for(const x of [\"Regardless of environment\",\"401\",\"jwt_authn_access_denied\",\"policy-decision log\",\"internal tool\",\"Sumac-internal request\"])a.ok(b.includes(x),x);'"
       ]
-    }
+    },
+  {
+    "id": "local-application-testing-seams",
+    "prompt": "Write projects/labels/spec.md from source.md. The existing draft is incomplete. Do not write a plan or application code.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "mkdir -p projects/labels contracts",
+      "printf '%s\\n' '# Label service' '' 'Build a Go HTTP application backed by MySQL 8.' 'POST /labels validates a SKU with the Catalog API, stores the label, and returns 201.' 'If Catalog returns 503, return 503 and store no label.' 'GET /labels/{id} returns a stored label.' 'contracts/catalog-v1.json is the approved upstream contract for this design.' 'No application or local test harness exists yet. Production deployment is outside scope.' > source.md",
+      "printf '%s\\n' 'POST /labels accepts {\"sku\":\"sku-1\"}. A SKU contains 1–64 ASCII letters, digits, or hyphens.' 'Stored labels contain a generated UUIDv4 id and sku. POST returns 201 with that object; GET /labels/{id} returns 200 with the same object.' 'Invalid requests return 400 {\"error\":\"invalid_request\"} before any Catalog call or database write. Unknown labels return 404 {\"error\":\"not_found\"}.' 'Catalog HTTP 503 responses, non-timeout connection failures before any response, and request timeouts all return 503 {\"error\":\"catalog_unavailable\"} without storing a label. MySQL failures return 500 {\"error\":\"storage_unavailable\"}.' 'Repeated valid POST requests create distinct labels. Authentication and additional Catalog outcomes are outside this fixture'\\''s scope.' >> source.md",
+      "printf '%s\\n' '{\"version\":\"catalog-v1\",\"request\":{\"method\":\"GET\",\"path\":\"/v1/items/{sku}\"},\"responses\":{\"200\":{\"sku\":\"sku-1\",\"name\":\"Example\"},\"503\":{\"error\":\"unavailable\"}}}' > contracts/catalog-v1.json",
+      "printf '%s\\n' '# Labels — Specification' '' '## Acceptance Criteria' '' '```gherkin' 'Feature: Labels' '  Scenario: Create a label' '    Given a valid item' '    When a customer creates a label' '    Then the label is stored' '```' '' '## Testing Seams' '' 'Handler tests use mocked storage and a Catalog function.' > projects/labels/spec.md",
+      "git add . && git commit -q -m 'evaluation fixture'"
+    ],
+    "checks": [
+      "Testing Seams requires verification through the running application's HTTP entrypoint.",
+      "Testing Seams identifies real MySQL as part of the exercised application path.",
+      "Testing Seams places the Catalog mock behind the production outbound HTTP client.",
+      "The Catalog mock is grounded in contracts/catalog-v1.json.",
+      "The spec names a check that compares mock requests and responses with the approved Catalog contract.",
+      "The spec preserves the no-write guarantee when Catalog returns 503.",
+      "A non-timeout Catalog connection failure has an explicit acceptance scenario or outline row requiring the specified 503 response with no label stored.",
+      "Test-stack startup and reset remain outside product acceptance scenarios.",
+      "The spec distinguishes mock-backed evidence from unperformed live-service verification."
+    ],
+    "verify": [
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\");const s=f.readFileSync(\"projects/labels/spec.md\",\"utf8\"),m=s.match(/^## Testing Seams\\s*\\n([\\s\\S]*?)(?=^## |$(?![\\s\\S]))/m);a.ok(m,\"Testing Seams missing\");for(const r of [/MySQL/i,/contracts\\/catalog-v1\\.json/,/mock|stub|stand-in|fake/i])a.match(m[1],r);a.match(s,/```gherkin\\n/);'",
+      "git diff --exit-code HEAD -- source.md contracts/catalog-v1.json"
+    ]
+  },
+  {
+    "id": "missing-upstream-contract-stops-spec",
+    "prompt": "Write projects/labels/spec.md from source.md. Do not implement the application.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "mkdir -p projects/labels",
+      "printf '%s\\n' '# Label service' '' 'Build a Go HTTP application backed by MySQL 8.' 'A label can be stored only after Catalog validates its SKU.' 'The Catalog owner has not supplied the request/response contract or error semantics.' 'No approved client, schema, recorded fixture, or implementation is available.' > source.md",
+      "git add . && git commit -q -m 'evaluation fixture'"
+    ],
+    "checks": [
+      "The agent identifies the missing Catalog contract as a blocker to defining the mock's behavior.",
+      "The agent asks the user for an authoritative contract or independently checked fixture.",
+      "The agent leaves upstream methods, paths, payloads, and failure semantics undecided.",
+      "The agent leaves the specification unfinished rather than presenting it as ready for planning."
+    ]
+  }
 ]

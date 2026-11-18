@@ -13,7 +13,8 @@ blocks, acceptance-verification tables, and supporting rationale inside
 `<details>` so they do not bury what needs review.
 
 **Link shared context once.** Never copy `Prerequisites`, `Pull Request
-Delivery`, repo rules, or shared interfaces into individual slices or GitHub
+Delivery`, `Local Running and Integration Tests`, repo rules, or shared
+interfaces into individual slices or GitHub
 Slice Sub-Issues; link the shared `plan.md` section instead.
 
 **Define lettered IDs before use.** Spell out a lettered prefix or shorthand on
@@ -46,7 +47,10 @@ For every slice:
   [skill](../../conventions-acceptance-tests/SKILL.md).
   If no feature applies, explain why and name equivalent executable
   assertions. A missing required feature or harness is planned work, not an
-  exemption.
+  exemption. For application behaviour, name the real entrypoint, layers,
+  infrastructure, and mocked upstreams exercised. Build or extend the minimum
+  local harness in the first slice that needs it; later slices extend its
+  coverage rather than deferring integration to a final slice.
 - Choose an outcome diagram (individual, shared, mixed, or none) using
   [OUTCOME-DIAGRAMS.md](../../shared/OUTCOME-DIAGRAMS.md), based on what helps
   the reviewer understand the change.
@@ -60,6 +64,31 @@ For every slice:
 The plan is complete when every requirement maps to a milestone and acceptance
 check, and every shared name is consistent. Planning records how acceptance
 will be proved; execution supplies passing evidence.
+
+## Local running and integration tests
+
+For runnable applications, define one shared local-running section, reusing
+existing project tooling. Follow the spec's Testing Seams; without a spec,
+settle the same decisions before handoff. Record agreed exceptions or why a
+local application runtime does not apply.
+
+- Exercise the running application with production wiring, relevant real
+  storage/cache engines, and production outbound clients calling local
+  protocol mocks. Do not mock the application behaviour being verified.
+- Name mock contracts/fixtures and their conformance checks, configurable
+  endpoints, and synthetic identities/credentials. After dependency bootstrap,
+  the local path needs no live upstreams or credentials; never fall back to
+  live endpoints. Keep any required live-service checks explicit and separate.
+- Specify startup, bounded readiness checks, migrations/seeding, reset, test,
+  and teardown commands, including cleanup after failure. Share wiring between
+  manual development and automated tests, but isolate test state and cleanup
+  from developer data.
+- Reuse the project's native or container runtime; choose Docker or Apple
+  Container where appropriate, not both by default. Keep full observability
+  optional unless required to prove the agreed behaviour.
+
+Acceptance scenarios can run through this path; add focused integration checks
+only for gaps. Record mock-backed evidence as such, not as live-service proof.
 
 ## Plan template
 
@@ -83,6 +112,11 @@ then a fenced Mermaid block. Omit when better covered within Implementation.}
 ## Prerequisites
 
 {Services, libraries, tools, or config needed first, or "None".}
+
+## Local Running and Integration Tests
+
+{Shared runtime, dependencies/mocks, contract checks, lifecycle and test
+commands per this guide; link existing setup. Or state why not applicable.}
 
 ## Pull Request Delivery
 

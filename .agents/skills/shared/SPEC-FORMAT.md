@@ -22,10 +22,10 @@ state that proves the behaviour.
   If an internal name matters to the contract, state its role on first use. Keep
   fixtures out of user goals unless the goal is testing or operation.
 - **System behaviour, not test-harness behaviour.** Acceptance scenarios state
-  system requirements, not that a test stack starts or resets. Put test-harness
-  setup in Testing Seams and deployment exclusions in Out of Scope. Name an
-  environment in the accepted outcome only when the requirement itself changes
-  by environment.
+  system requirements, not that a test stack starts or resets. Put testing
+  boundaries and stand-ins in Testing Seams, executable setup in the plan,
+  and deployment exclusions in Out of Scope. Name an environment in the
+  accepted outcome only when the requirement itself changes by environment.
 - **Rule scope.** Each `Rule` groups one behaviour; every child scenario tests it.
   Put setup in `Given` unless environment changes behaviour.
 - Use `Background` for shared preconditions; use `Scenario Outline`/`Examples`

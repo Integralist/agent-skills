@@ -12,6 +12,11 @@ and a File Changes table):
   output.
 - Dependencies on another slice's task, file, type, or contract that are absent
   from Blocked by, Consumes, or Produces.
+- Application integration coverage without a runnable local path, named real
+  layers and mocked upstreams, contract checks, or isolated lifecycle commands.
+  Flag handler-only mocks labelled as end-to-end evidence, live-service
+  fallback, or a required harness postponed beyond the slice that needs it.
+  Respect recorded non-applicability and agreed exceptions.
 - Missing error paths, partial failures, concurrent callers, rollback, or
   existing-data migration cases.
 - Duplication or bloat: shared plan sections or repo-rule boilerplate copied

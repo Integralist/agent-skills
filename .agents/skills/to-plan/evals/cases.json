@@ -1,0 +1,88 @@
+[
+  {
+    "id": "acceptance-path-supplies-integration-coverage",
+    "prompt": "Write projects/labels/plan.md from source.md. Replace the incomplete draft. Do not implement the plan.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "mkdir -p projects/labels contracts",
+      "printf '%s\\n' '# Label service — agreed design' '' 'Build a Go HTTP application backed by MySQL 8.' 'Slice outcomes are creating a label and retrieving a stored label.' 'POST /labels validates a SKU with Catalog, stores the label, and returns 201.' 'Catalog 503 produces 503 with no label stored; GET /labels/{id} returns a stored label.' 'Use the approved contracts/catalog-v1.json contract.' 'The planned acceptance runner will load docs/specs/labels.feature directly.' 'Its scenarios will call the running application'\\''s HTTP endpoint, use real MySQL, and send production Catalog-client requests to a local protocol mock.' 'No launchers, fixtures, migrations, or test harness have been implemented.' > source.md",
+      "printf '%s\\n' 'POST /labels accepts {\"sku\":\"sku-1\"}. A SKU contains 1–64 ASCII letters, digits, or hyphens.' 'Stored labels contain a generated UUIDv4 id and sku. POST returns 201 with that object; GET /labels/{id} returns 200 with the same object.' 'Invalid requests return 400 {\"error\":\"invalid_request\"} before any Catalog call or database write. Unknown labels return 404 {\"error\":\"not_found\"}.' 'Catalog failures and timeouts return 503 {\"error\":\"catalog_unavailable\"} without storing a label. MySQL failures return 500 {\"error\":\"storage_unavailable\"}.' 'Repeated valid POST requests create distinct labels. Authentication and additional Catalog outcomes are outside this fixture'\\''s scope.' >> source.md",
+      "printf '%s\\n' '{\"version\":\"catalog-v1\",\"request\":{\"method\":\"GET\",\"path\":\"/v1/items/{sku}\"},\"responses\":{\"200\":{\"sku\":\"sku-1\",\"name\":\"Example\"},\"503\":{\"error\":\"unavailable\"}}}' > contracts/catalog-v1.json",
+      "printf '%s\\n' '# Labels — Plan' '' '## Local Running and Integration Tests' '' 'Handler-only tests are sufficient; no running application is planned.' '' '## Implementation' '' '### Slice 1: Labels' '' '- [ ] **M1.1**: Labels can be created.' '' '## Notes' '' 'Draft.' > projects/labels/plan.md",
+      "git add . && git commit -q -m 'evaluation fixture'"
+    ],
+    "checks": [
+      "The first slice that requires the application includes its minimum runnable local harness.",
+      "Acceptance verification identifies the real HTTP entrypoint, MySQL, and production Catalog client.",
+      "The plan uses the acceptance scenarios for integration evidence where they exercise that complete path.",
+      "The plan keeps product scenario text in one owning feature rather than copying it into another suite.",
+      "The shared local-running section identifies the startup command.",
+      "The shared local-running section defines bounded readiness checks.",
+      "The shared local-running section identifies how migrations are run.",
+      "The shared local-running section identifies how seed data is loaded.",
+      "The shared local-running section identifies how state is reset.",
+      "The shared local-running section identifies the integration-test command.",
+      "The shared local-running section identifies how teardown is invoked.",
+      "Automated tests isolate their state and cleanup from manual developer data.",
+      "The local path uses synthetic credentials and local upstreams after dependency bootstrap.",
+      "The plan names a mock-conformance check against contracts/catalog-v1.json.",
+      "The local configuration fails rather than falling back to a live upstream."
+    ],
+    "verify": [
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\");const s=f.readFileSync(\"projects/labels/plan.md\",\"utf8\");a.match(s,/^## Local Running and Integration Tests\\s*$/m);a.match(s,/contracts\\/catalog-v1\\.json/);a.match(s,/docs\\/specs\\/labels\\.feature/);a.match(s,/- \\[ \\] \\*\\*M1\\.\\d+:?\\*\\*/);a.ok(!s.includes(\"Handler-only tests are sufficient\"),\"incomplete draft retained\");'",
+      "git diff --exit-code HEAD -- source.md contracts/catalog-v1.json"
+    ]
+  },
+  {
+    "id": "handler-only-acceptance-needs-integration",
+    "prompt": "Write projects/labels/plan.md from source.md. Replace the incomplete draft. Do not implement the plan.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "mkdir -p projects/labels contracts",
+      "printf '%s\\n' '# Label service — agreed design' '' 'Build a Go HTTP application backed by MySQL 8.' 'POST /labels validates a SKU with Catalog, stores the label, and returns 201.' 'The proposed acceptance suite calls handlers directly with mocked repositories and a mocked Catalog function.' 'Those handler checks do not start an application, open a database connection, or send an outbound HTTP request.' 'Use contracts/catalog-v1.json for the upstream protocol.' 'No application or harness has been implemented.' > source.md",
+      "printf '%s\\n' 'POST /labels accepts {\"sku\":\"sku-1\"}. A SKU contains 1–64 ASCII letters, digits, or hyphens.' 'Stored labels contain a generated UUIDv4 id and sku. POST returns 201 with that object; GET /labels/{id} returns 200 with the same object.' 'Invalid requests return 400 {\"error\":\"invalid_request\"} before any Catalog call or database write. Unknown labels return 404 {\"error\":\"not_found\"}.' 'Catalog failures and timeouts return 503 {\"error\":\"catalog_unavailable\"} without storing a label. MySQL failures return 500 {\"error\":\"storage_unavailable\"}.' 'Repeated valid POST requests create distinct labels. Authentication and additional Catalog outcomes are outside this fixture'\\''s scope.' 'The handler-only design is an initial proposal, not a restriction. Running-application integration checks are authorized.' >> source.md",
+      "printf '%s\\n' '{\"version\":\"catalog-v1\",\"request\":{\"method\":\"GET\",\"path\":\"/v1/items/{sku}\"},\"responses\":{\"200\":{\"sku\":\"sku-1\",\"name\":\"Example\"},\"503\":{\"error\":\"unavailable\"}}}' > contracts/catalog-v1.json",
+      "printf '%s\\n' '# Labels — Plan' '' '## Local Running and Integration Tests' '' 'Handler-only tests are sufficient; no running application is planned.' '' '## Implementation' '' '### Slice 1: Labels' '' '- [ ] **M1.1**: Labels can be created.' '' '## Notes' '' 'Draft.' > projects/labels/plan.md",
+      "git add . && git commit -q -m 'evaluation fixture'"
+    ],
+    "checks": [
+      "The plan identifies the handler-only acceptance checks as insufficient service-level end-to-end evidence.",
+      "The plan adds integration coverage through a running application with real MySQL and production outbound HTTP client wiring.",
+      "The plan assigns the required integration coverage to the slice that delivers the behavior.",
+      "The plan preserves valid handler-level checks where they cover behavior not covered by the new integration tests.",
+      "The plan gives executable verification commands for the required integration path.",
+      "The plan keeps mocked-upstream evidence distinct from live Catalog compatibility."
+    ],
+    "verify": [
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\");const s=f.readFileSync(\"projects/labels/plan.md\",\"utf8\");a.match(s,/^## Local Running and Integration Tests\\s*$/m);a.match(s,/MySQL/i);a.match(s,/contracts\\/catalog-v1\\.json/);a.ok(!s.includes(\"Handler-only tests are sufficient\"),\"handler-only draft retained\");'",
+      "git diff --exit-code HEAD -- source.md contracts/catalog-v1.json"
+    ]
+  },
+  {
+    "id": "documentation-change-needs-no-runtime",
+    "prompt": "Write projects/operations-guide/plan.md from source.md. Do not implement the plan.",
+    "setup": [
+      "git init -q -b eval",
+      "git config user.email eval@example.com && git config user.name 'Eval Bot'",
+      "mkdir -p projects/operations-guide docs",
+      "printf '%s\\n' '# Improve the operations guide' '' 'Revise docs/operations.md to explain the existing backup and recovery procedure.' 'This is documentation-only work. No application behavior or dependencies change.' 'Use the existing make check-docs target. Do not introduce new runtime infrastructure.' > source.md",
+      "printf '%s\\n' 'Existing procedure: ops stop; ops backup --output PATH; ops restore --input PATH; ops start; confirm ops status reports healthy.' 'These commands already exist. Only documentation changes are requested.' >> source.md",
+      "printf '%s\\n' '# Operations' '' 'Back up the data. Restore it when needed.' > docs/operations.md",
+      "printf '%s\\n' 'check-docs:' '\t@test -s docs/operations.md' > Makefile",
+      "printf '%s\\n' '# Operations guide — Plan' '' '## Notes' '' 'Draft.' > projects/operations-guide/plan.md",
+      "git add . && git commit -q -m 'evaluation fixture'"
+    ],
+    "checks": [
+      "The plan records why a local application runtime and service-level integration harness do not apply.",
+      "The plan uses make check-docs to verify the documentation change.",
+      "The plan leaves container stacks, databases, and mock services outside the work.",
+      "The plan does not create product acceptance scenarios for unchanged application behavior."
+    ],
+    "verify": [
+      "node -e 'const a=require(\"node:assert/strict\"),f=require(\"node:fs\");const s=f.readFileSync(\"projects/operations-guide/plan.md\",\"utf8\");a.match(s,/make check-docs/);a.match(s,/^## Local Running and Integration Tests\\s*$/m);'",
+      "git diff --exit-code HEAD -- source.md docs/operations.md Makefile"
+    ]
+  }
+]

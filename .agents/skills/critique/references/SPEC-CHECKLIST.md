@@ -25,8 +25,9 @@ both passes in sequence.
      weakening exact fields, codes, timing, or guarantees. Flag repeated
      explanations, defensive process disclaimers, or near-duplicate scenarios
      that belong in a `Scenario Outline`.
-   - Test-harness setup stays in Testing Seams and deployment exclusions stay
-     in Out of Scope rather than leaking into acceptance scenarios.
+   - Testing boundaries and stand-ins stay in Testing Seams, executable setup
+     stays in the plan, and deployment exclusions stay in Out of Scope rather
+     than leaking into acceptance scenarios.
 2. **Invariants, duplication, and accuracy reviewer (full context).** Read the
    spec alongside `intent.md` (or preserved source), `docs/adr/`, touched
    code, owning `docs/specs/*.feature` files, and
@@ -45,6 +46,10 @@ both passes in sequence.
      `docs/specs/*.feature` files. Flag behaviour that overlaps an existing
      scenario under different wording; propose modifying or extending the
      owning scenario or `Scenario Outline` instead of adding a duplicate.
+   - **Local verification:** For runnable applications, Testing Seams identifies
+     the application entrypoint, real layers and infrastructure, mocked
+     upstreams, contract sources/conformance checks, important failure cases,
+     and live-service exclusions or agreed exceptions.
    - **Contract and delta coverage:** Every source requirement and open
      question is accounted for; Behavioural Delta pins the baseline commit and
      keeps `ADDED`, `MODIFIED`, and `REMOVED` accurate.

@@ -59,6 +59,10 @@ invariants and existing contracts are settled upfront:
 4. Repeated, duplicate, or expired actions (idempotency and timing).
 5. Partial failure, concurrency, or rollback guarantees.
 
+For outbound calls, distinguish required upstream error responses, connection
+failures before a response, and timeouts. Give each required failure mode its
+own scenario or outline row, even when the expected outcome is the same.
+
 When behaviour spans 3+ interacting states, retries/timeouts, or concurrent
 actors, run [STATE-MODEL.md](../../shared/STATE-MODEL.md) before drafting
 Gherkin so deadlocks and broken invariants become scenarios.
@@ -129,7 +133,18 @@ runs. Choose clear column labels such as **Boundary** and **What to verify**.
 For each boundary, state the observable result the check confirms and why it
 gives meaningful evidence. Name important failure conditions and expected
 outcomes; avoid vague phrases such as “works correctly” or “fallback absent.”
-Keep setup instructions and test commands in the implementation plan.
+For runnable applications, require local end-to-end integration coverage.
+Name the application entrypoint, real layers and infrastructure exercised,
+mocked upstreams, and important failure outcomes. Ground mocks in versioned
+upstream contracts or independently checked fixtures; record how conformance
+will be checked and which live-service guarantees remain unverified. Interfaces
+alone do not prove transport compatibility. Record agreed exceptions or why a
+local application runtime does not apply. Keep setup instructions and test
+commands in the implementation plan.
+
+Reuse acceptance scenarios when they exercise the required end-to-end
+application path. Otherwise, add integration tests for the missing coverage.
+Do not copy scenario text solely to maintain separate suites.
 
 | Boundary | What to verify |
 | --- | --- |
