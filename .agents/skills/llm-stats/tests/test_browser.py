@@ -1258,3 +1258,108 @@ def test_pareto_nonfrontier_nodes_stay_mouse_inert_when_their_family_is_revealed
     node(page, "tied-score").focus()
     node(page, "tied-score").press("Space")
     expect(node(page, "tied-score")).to_have_attribute("aria-pressed", "true")
+
+
+def test_legend_click_toggles_off_immediately_while_hovered_and_focused(
+    page: Page, report_file: Path
+) -> None:
+    """Clicking the same legend item twice unhighlights it right away."""
+    page.goto(report_file.as_uri())
+    first = page.locator("#legend button").first
+    first.click()
+    expect(first).to_have_attribute("aria-pressed", "true")
+    expect(page.locator(".series.is-dim")).to_have_count(3)
+    expect(page.locator("#pin-status")).not_to_have_text("No line pinned")
+
+    first.click()
+    expect(first).to_have_attribute("aria-pressed", "false")
+    expect(page.locator(".series.is-dim")).to_have_count(0)
+    expect(page.locator(".series.is-active")).to_have_count(0)
+    expect(page.locator("#pin-status")).to_have_text("No line pinned")
+    assert "highlight=" not in page.url
+
+    page.locator("h1").hover()
+    expect(page.locator(".series.is-dim")).to_have_count(0)
+    expect(page.locator(".series.is-active")).to_have_count(0)
+
+    first.hover()
+    expect(page.locator(".series.is-active")).to_have_count(1)
+
+
+def test_shift_click_pins_multiple_models_from_legend_and_nodes(
+    page: Page, report_file: Path, tmp_path: Path
+) -> None:
+    """Shift+click highlights multiple models and toggles individual ones off."""
+    page.goto(report_file.as_uri())
+    buttons = page.locator("#legend button")
+    first = buttons.nth(0)
+    second = buttons.nth(1)
+    third = buttons.nth(2)
+
+    first.click()
+    second.click(modifiers=["Shift"])
+    expect(first).to_have_attribute("aria-pressed", "true")
+    expect(second).to_have_attribute("aria-pressed", "true")
+    expect(third).to_have_attribute("aria-pressed", "false")
+    expect(page.locator(".series.is-active")).to_have_count(2)
+    expect(page.locator(".series.is-dim")).to_have_count(2)
+    expect(page.locator("#legend button.is-dim")).to_have_count(2)
+    expect(page.locator("#pin-status")).to_contain_text("Pinned (2):")
+    expect(page.locator("#tooltip")).to_be_hidden()
+
+    page.reload()
+    expect(page.locator("#legend button[aria-pressed='true']")).to_have_count(2)
+    expect(page.locator(".series.is-active")).to_have_count(2)
+    expect(page.locator(".series.is-dim")).to_have_count(2)
+
+    with page.expect_download() as download:
+        page.locator("#save-html").click()
+    saved = tmp_path / "multi-pin.html"
+    download.value.save_as(saved)
+    page.goto(saved.as_uri())
+    expect(page.locator("#legend button[aria-pressed='true']")).to_have_count(2)
+    expect(page.locator(".series.is-active")).to_have_count(2)
+
+    second.click(modifiers=["Shift"])
+    expect(first).to_have_attribute("aria-pressed", "true")
+    expect(second).to_have_attribute("aria-pressed", "false")
+    expect(page.locator(".series.is-active")).to_have_count(1)
+    expect(page.locator(".series.is-dim")).to_have_count(3)
+
+    node(page, "demo-gpt-high").click(modifiers=["Shift"])
+    expect(page.locator(".series.is-active")).to_have_count(2)
+    expect(node(page, "demo-gpt-high")).to_have_attribute("aria-pressed", "true")
+
+    third.click()
+    expect(first).to_have_attribute("aria-pressed", "false")
+    expect(third).to_have_attribute("aria-pressed", "true")
+    expect(page.locator(".series.is-active")).to_have_count(1)
+    expect(page.locator(".series.is-dim")).to_have_count(3)
+
+    second.click(modifiers=["Shift"])
+    expect(page.locator(".series.is-active")).to_have_count(2)
+    page.keyboard.press("Escape")
+    expect(page.locator(".series.is-active")).to_have_count(0)
+    expect(page.locator(".series.is-dim")).to_have_count(0)
+    expect(page.locator("#pin-status")).to_have_text("No line pinned")
+    assert "highlight=" not in page.url
+
+
+def test_shift_click_multi_pin_preserves_pareto_frontier(
+    page: Page, pareto_report: Path
+) -> None:
+    """Multiple pinned families stay vivid in Pareto mode without hiding frontier nodes."""
+    page.goto(pareto_report.as_uri() + "?pareto=1")
+    dominated_btn = page.locator("#legend button").filter(has_text="dominated")
+    tied_cost_btn = page.locator("#legend button").filter(has_text="tied-cost")
+
+    dominated_btn.click()
+    tied_cost_btn.click(modifiers=["Shift"])
+    assert effective_opacities(page, '.node[data-slug="dominated"]') == [1]
+    assert effective_opacities(page, '.node[data-slug="tied-cost"]') == [1]
+    assert effective_opacities(page, '.node[data-slug="cheap"]') == [1]
+    assert effective_opacities(page, '.node[data-slug="tied-score"]') == [0.25]
+
+    page.locator("#clear-highlight").click()
+    assert effective_opacities(page, '.node[data-slug="dominated"]') == [0.25]
+    assert effective_opacities(page, '.node[data-slug="tied-cost"]') == [0.25]

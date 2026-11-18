@@ -7,9 +7,10 @@ the page.
   highlights its family. The normal view dims other families; Pareto mode keeps
   frontier nodes vivid. Legend hover does not show a node tooltip. When neither
   pointer nor focus remains on the legend item, any pinned highlight stays in
-  effect. Clicking or Enter/Space on a node or legend item pins it, clicking
-  another replaces the pin, and clicking it again, Escape, or **Clear
-  highlight** releases it.
+  effect. Clicking or Enter/Space on a node or legend item pins it;
+  Shift+clicking (or Shift+Enter/Space) toggles it in a multi-model pin set.
+  Unshifted clicks replace any multi-pin with the clicked item, and clicking the
+  only pinned item again, Escape, or **Clear highlight** releases it.
 - The model dropdown has fuzzy search, checkboxes, Clear, Select matches, and
 Reset defaults, with arrow keys to move and Escape to close.
 - Models missing the chosen score or metric are left out with a visible

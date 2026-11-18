@@ -246,7 +246,8 @@ with `x=cost` rather than expecting the new default to override URL state.
   defaults.
 - `benchmark`: score key.
 - `x`: cost, tokens, time, price, or speed.
-- `highlight`: pinned node's slug; it must be selected and have plotted data.
+- `highlight`: comma-separated pinned node slugs; each must be selected and
+  have plotted data.
 - `pareto`: `1` enables the Pareto line; `0` disables it. Without a URL value,
   use the saved HTML setting, or off for a newly generated report.
 

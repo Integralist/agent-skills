@@ -91,6 +91,8 @@
   let points = new Map();
   let groups = new Map();
   let guides;
+  let legendPointer = null;
+  let legendFocus = null;
   let urlWarnings = [];
   const readState = () => {
     const params = new URLSearchParams(location.search);
@@ -116,13 +118,16 @@
     const selected = params.has("models")
       ? params.get("models").split(",").map(slug => slug.trim()).filter(Boolean)
       : saved.models || defaults(report.config);
-    const pinned = params.has("highlight") ? params.get("highlight") : saved.pinned || null;
+    const rawPinned = params.has("highlight")
+      ? params.get("highlight").split(",").map(slug => slug.trim()).filter(Boolean)
+      : Array.isArray(saved.pinned) ? saved.pinned : saved.pinned ? [saved.pinned] : [];
     const pareto = params.has("pareto") ? params.get("pareto") === "1" : saved.pareto === true;
+    const selectedSet = new Set(selected);
+    const pinned = [...new Set(rawPinned)].filter(slug => selectedSet.has(slug) && bySlug.has(slug));
     state = {
-      selected: new Set(selected), benchmark, x, pinned, pareto,
+      selected: selectedSet, benchmark, x, pinned, pareto,
       hovered: null, hoveredSeries: null,
     };
-    if (!state.selected.has(pinned) || !bySlug.has(pinned)) state.pinned = null;
   };
   const syncURL = () => {
     const url = new URL(location.href);
@@ -130,7 +135,7 @@
     url.searchParams.set("benchmark", state.benchmark);
     url.searchParams.set("x", state.x);
     url.searchParams.set("pareto", state.pareto ? "1" : "0");
-    if (state.pinned) url.searchParams.set("highlight", state.pinned);
+    if (state.pinned.length) url.searchParams.set("highlight", state.pinned.join(","));
     else url.searchParams.delete("highlight");
     if (state.x === "cost") url.searchParams.set("eval-cost",
       state.benchmark === "intelligence" ? "intelligence-vs-total-cost" : "score-vs-cost-per-task");
@@ -144,7 +149,8 @@
     }
   };
   const savedState = () => ({
-    models: [...state.selected], benchmark: state.benchmark, x: state.x, pinned: state.pinned,
+    models: [...state.selected], benchmark: state.benchmark, x: state.x,
+    pinned: state.pinned.length > 1 ? [...state.pinned] : state.pinned[0] || null,
     pareto: state.pareto,
   });
   const svgElement = (tag, attributes, parent, content) => {
@@ -208,15 +214,59 @@
     $("models-panel").hidden = true;
     $("models-toggle").setAttribute("aria-expanded", "false");
   };
-  const pin = slug => {
-    state.pinned = state.pinned === slug ? null : slug;
+  const dismissLegendSeries = series => {
+    if (!series) return;
+    if (legendPointer === series) legendPointer = null;
+    if (legendFocus === series) legendFocus = null;
+    state.hoveredSeries = legendPointer || legendFocus;
+  };
+  const pin = (slug, { multi = false, series = null } = {}) => {
+    if (multi) {
+      if (series) {
+        const hasSeries = state.pinned.some(item => {
+          const point = points.get(item);
+          return point && seriesKey(point.model) === series;
+        });
+        if (hasSeries) {
+          state.pinned = state.pinned.filter(item => {
+            const point = points.get(item);
+            return !point || seriesKey(point.model) !== series;
+          });
+          dismissLegendSeries(series);
+        } else {
+          state.pinned = [...state.pinned, slug];
+        }
+      } else if (state.pinned.includes(slug)) {
+        state.pinned = state.pinned.filter(item => item !== slug);
+      } else {
+        state.pinned = [...state.pinned, slug];
+      }
+    } else if (series) {
+      const onlyThisSeries = state.pinned.length > 0 && state.pinned.every(item => {
+        const point = points.get(item);
+        return point && seriesKey(point.model) === series;
+      });
+      if (onlyThisSeries) {
+        state.pinned = [];
+        dismissLegendSeries(series);
+      } else {
+        state.pinned = [slug];
+      }
+    } else if (state.pinned.length === 1 && state.pinned[0] === slug) {
+      state.pinned = [];
+    } else {
+      state.pinned = [slug];
+    }
     state.hovered = null;
     paintHighlight();
     syncURL();
   };
   const clearHighlight = () => {
-    state.pinned = null;
+    state.pinned = [];
     state.hovered = null;
+    legendPointer = null;
+    legendFocus = null;
+    state.hoveredSeries = null;
     paintHighlight();
     syncURL();
   };
@@ -232,34 +282,39 @@
     const status = document.createElement("div");
     status.className = "muted";
     status.textContent = point.model.provider + " · " + point.model.effort.toUpperCase()
-      + (state.pinned ? " · pinned" : " · click to pin");
+      + (state.pinned.includes(point.model.slug) ? " · pinned" : " · click to pin");
     box.append(title, score, value, status);
     box.hidden = false;
   };
   const paintHighlight = () => {
-    const slug = state.pinned || state.hovered;
-    const point = points.get(slug);
-    const key = point ? seriesKey(point.model) : state.hoveredSeries;
-    const emphasized = new Set([...points.values()].filter(point => point.frontier)
-      .map(point => seriesKey(point.model)));
-    if (key) emphasized.add(key);
+    const pinnedPoints = state.pinned.map(slug => points.get(slug)).filter(Boolean);
+    const pinnedSet = new Set(pinnedPoints.map(point => point.model.slug));
+    const pinnedSeries = new Set(pinnedPoints.map(point => seriesKey(point.model)));
+    const hoverPoint = pinnedPoints.length !== 1 ? points.get(state.hovered) : null;
+    const activeSeries = new Set(pinnedSeries);
+    if (pinnedPoints.length === 0 && hoverPoint) activeSeries.add(seriesKey(hoverPoint.model));
+    if (state.hoveredSeries) activeSeries.add(state.hoveredSeries);
+    const point = pinnedPoints.length === 1 ? pinnedPoints[0] : hoverPoint;
+    const emphasized = new Set([...points.values()].filter(candidate => candidate.frontier)
+      .map(candidate => seriesKey(candidate.model)));
+    for (const family of activeSeries) emphasized.add(family);
     const dimFamily = family => state.pareto
-      ? !emphasized.has(family) : Boolean(key && key !== family);
+      ? !emphasized.has(family) : Boolean(activeSeries.size && !activeSeries.has(family));
     for (const [groupKey, group] of groups) {
       // Parent opacity would also hide frontier nodes in a mixed family.
-      group.classList.toggle("is-dim", Boolean(!state.pareto && key && key !== groupKey));
-      group.classList.toggle("is-active", key === groupKey);
+      group.classList.toggle("is-dim", Boolean(!state.pareto && activeSeries.size && !activeSeries.has(groupKey)));
+      group.classList.toggle("is-active", activeSeries.has(groupKey));
     }
     for (const element of $("chart").querySelectorAll(".node")) {
       const candidate = points.get(element.dataset.slug);
       element.classList.toggle("is-frontier", Boolean(candidate.frontier));
       element.classList.toggle("is-muted", Boolean(state.pareto && !candidate.frontier
-        && seriesKey(candidate.model) !== key));
-      element.setAttribute("aria-pressed", String(element.dataset.slug === state.pinned));
+        && !activeSeries.has(seriesKey(candidate.model))));
+      element.setAttribute("aria-pressed", String(pinnedSet.has(element.dataset.slug)));
     }
     for (const button of $("legend").querySelectorAll("button")) {
       button.classList.toggle("is-dim", dimFamily(button.dataset.series));
-      button.setAttribute("aria-pressed", String(Boolean(state.pinned && key === button.dataset.series)));
+      button.setAttribute("aria-pressed", String(pinnedSeries.has(button.dataset.series)));
     }
     guides?.replaceChildren();
     $("tooltip").hidden = !point;
@@ -271,18 +326,18 @@
       svgElement("text", { x: sx, y: 588, "text-anchor": "middle", fill: color }, guides, formatX(point.x));
       tooltip(point);
     }
-    $("pin-status").textContent = state.pinned && point
-      ? "Pinned: " + point.model.series + " · " + point.model.effort.toUpperCase() : "No line pinned";
-    $("clear-highlight").disabled = !slug;
-  };
-  const syncLegendHover = () => {
-    const buttons = [...$("legend").querySelectorAll("button")];
-    const active = buttons.find(button => button.matches(":hover"))
-      || buttons.find(button => button.matches(":focus"));
-    state.hoveredSeries = active?.dataset.series || null;
-    paintHighlight();
+    $("pin-status").textContent = pinnedPoints.length === 0
+      ? "No line pinned"
+      : pinnedPoints.length === 1
+        ? "Pinned: " + pinnedPoints[0].model.series + " · " + pinnedPoints[0].model.effort.toUpperCase()
+        : "Pinned (" + pinnedPoints.length + "): " + pinnedPoints
+          .map(pinnedPoint => pinnedPoint.model.series + " · " + pinnedPoint.model.effort.toUpperCase())
+          .join(", ");
+    $("clear-highlight").disabled = !(pinnedPoints.length || hoverPoint || state.hoveredSeries);
   };
   const renderChart = () => {
+    legendPointer = null;
+    legendFocus = null;
     state.hoveredSeries = null;
     $("pareto-toggle").checked = state.pareto;
     $("pareto-note").hidden = !state.pareto;
@@ -302,7 +357,8 @@
     $("pareto-order-heading").textContent = state.x === "cost"
       ? "Pareto suggestions · highest task cost → lowest task cost"
       : "Pareto suggestions · left to right";
-    if (!valid.some(model => model.slug === state.pinned)) state.pinned = null;
+    const validSlugs = new Set(valid.map(model => model.slug));
+    state.pinned = state.pinned.filter(slug => validSlugs.has(slug));
     const unknown = [...state.selected].filter(slug => !bySlug.has(slug));
     const warnings = [...urlWarnings];
     if (unknown.length) warnings.push("Unknown model slugs: " + unknown.join(", "));
@@ -413,17 +469,17 @@
         svgElement("text", { x: point.sx, y: point.sy + 20, fill: color,
           "text-anchor": "middle", class: "effort-label" }, element, model.effort.toUpperCase());
         svgElement("title", {}, element, model.name);
-        const hover = () => { if (!state.pinned) { state.hovered = model.slug; paintHighlight(); } };
+        const hover = () => { if (state.pinned.length !== 1) { state.hovered = model.slug; paintHighlight(); } };
         element.addEventListener("pointerenter", hover);
         element.addEventListener("focus", hover);
         const leave = () => { state.hovered = null; paintHighlight(); };
         element.addEventListener("pointerleave", leave);
         element.addEventListener("blur", leave);
-        element.addEventListener("click", () => pin(model.slug));
+        element.addEventListener("click", event => pin(model.slug, { multi: event.shiftKey }));
         element.addEventListener("keydown", event => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            pin(model.slug);
+            pin(model.slug, { multi: event.shiftKey });
           }
         });
       }
@@ -437,10 +493,35 @@
       const label = document.createElement("span");
       label.textContent = anchor.model.series;
       legend.append(swatch, label);
-      for (const event of ["pointerenter", "pointerleave", "focus", "blur"]) {
-        legend.addEventListener(event, syncLegendHover);
-      }
-      legend.addEventListener("click", () => pin(anchor.model.slug));
+      legend.addEventListener("pointerenter", () => {
+        legendPointer = key;
+        state.hoveredSeries = legendPointer || legendFocus;
+        paintHighlight();
+      });
+      legend.addEventListener("pointerleave", () => {
+        if (legendPointer === key) legendPointer = null;
+        state.hoveredSeries = legendFocus || legendPointer;
+        paintHighlight();
+      });
+      legend.addEventListener("focus", () => {
+        legendFocus = key;
+        state.hoveredSeries = legendFocus || legendPointer;
+        paintHighlight();
+      });
+      legend.addEventListener("blur", () => {
+        if (legendFocus === key) legendFocus = null;
+        state.hoveredSeries = legendFocus || legendPointer;
+        paintHighlight();
+      });
+      legend.addEventListener("click", event => pin(anchor.model.slug, {
+        multi: event.shiftKey, series: key,
+      }));
+      legend.addEventListener("keydown", event => {
+        if (event.shiftKey && (event.key === "Enter" || event.key === " ")) {
+          event.preventDefault();
+          pin(anchor.model.slug, { multi: true, series: key });
+        }
+      });
       $("legend").append(legend);
     }
     if (state.pareto) {
@@ -628,7 +709,7 @@
   $("reset-models").addEventListener("click", () => {
     state.selected = new Set(defaults(report.config));
     state.hovered = null;
-    state.pinned = null;
+    state.pinned = [];
     $("preset").value = "";
     refresh();
   });
@@ -645,7 +726,7 @@
     if (preset.benchmark) state.benchmark = preset.benchmark;
     if (preset.x) state.x = preset.x;
     state.hovered = null;
-    state.pinned = null;
+    state.pinned = [];
     renderMetricControls();
     refresh();
   });
