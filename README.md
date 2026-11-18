@@ -25,6 +25,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**changelog**](.agents/skills/changelog/SKILL.md)                                         | Add a changelog entry for uncommitted or branch changes.                                                 |
 | [**clarify**](.agents/skills/clarify/SKILL.md)                                             | Resolve ambiguous requirements before work begins.                                                       |
 | [**cleanup**](.agents/skills/cleanup/SKILL.md)                                             | Audit AI-generated clutter, then apply approved fixes interactively.                                     |
+| [**code-graph**](.agents/skills/code-graph/SKILL.md)                                       | Map code structure and changes in Mermaid. Use `--save` for a large PNG.                                 |
 | [**code-module-design**](.agents/skills/code-module-design/SKILL.md)                       | Design deep modules (`--review` maps and audits module boundaries).                                      |
 | [**code-review**](.agents/skills/code-review/SKILL.md)                                     | Review diffs for defects, or use `--feedback` to verify existing review comments.                        |
 | [**commit**](.agents/skills/commit/SKILL.md)                                               | Group related changes and create clear Git commits.                                                      |
@@ -234,6 +235,7 @@ The Design document is not the same artifact as `plan.md`:
 
 | Skill                                                                | Use when                                                                           | Primary output                                                                     |
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [**code-graph**](.agents/skills/code-graph/SKILL.md)                 | See how packages or modules connect, or how those links changed                   | Editable Mermaid code map, with optional PNG export                                |
 | [**code-module-design**](.agents/skills/code-module-design/SKILL.md) (`--review`) | Understand a feature's structure and assess module ownership                       | Mermaid maps and evidence-backed findings                                          |
 | [**code-review**](.agents/skills/code-review/SKILL.md)               | Code or a diff exists and you want defects identified                              | Verified findings and open questions                                               |
 | [**council**](.pi/agent/skills/council/SKILL.md) 🥧                  | A change is in place and you want a quick second opinion from other providers      | Cross-model findings, disagreements, and missed risks                              |
