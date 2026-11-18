@@ -743,17 +743,18 @@ describe('after the turn', () => {
 })
 
 describe('plan first', () => {
-  test('denies other tools before a plan and allows them after', async ($, on) => {
+  test('runs other tools before a plan with a reminder, and drops the reminder after', async ($, on) => {
     const w = world(on)
     await start($)
     await prompt($, 'Build my landing page')
     const before = await $.tool.call({ tool: 'Bash', command: 'ls', description: 'list' })
-    expect(before.deny).toContain('plan_steps')
-    expect(w.ran).not.toContain('Bash')
+    expect(before.deny).toBeUndefined()
+    expect(w.ran).toContain('Bash')
+    expect(before.context?.join('\n')).toContain('plan_steps')
     await $.tool.call({ tool: PLAN, steps: ['Look around', 'Build it'] })
     const after = await $.tool.call({ tool: 'Bash', command: 'ls', description: 'list' })
     expect(after.deny).toBeUndefined()
-    expect(w.ran).toContain('Bash')
+    expect(after.context ?? []).not.toContainEqual(expect.stringContaining('plan_steps'))
   })
 })
 

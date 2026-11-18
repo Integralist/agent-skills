@@ -18,9 +18,10 @@ the prompt.
   and press `i` to inspect the active task; press `i` in the focused pane,
   **Esc**, or **Close** to close it.
 - **How the plan arrives:** the mod gives Claude two tools, `plan_steps` and
-  `report_progress`, and blocks every other tool until a plan exists. The
-  optional `plan_steps.title` names the job; replanning without a title keeps
-  the existing one. A to-do list (TodoWrite, TaskCreate) also counts as the plan.
+  `report_progress`, and reminds Claude to plan after each tool call until a
+  plan exists. The optional `plan_steps.title` names the job; replanning
+  without a title keeps the existing one. A to-do list (TodoWrite, TaskCreate)
+  also counts as the plan.
 - **Replanning:** if the work grows past the plan, a second `plan_steps` updates
   the list and keeps finished steps checked off.
 - **Cost:** job titles come from the plan, without a separate model request.

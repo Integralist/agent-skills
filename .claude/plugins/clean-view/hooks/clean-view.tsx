@@ -364,9 +364,9 @@ export function registerCleanView(on: On) {
     await pendingPlanUpdate
     const list = await read($, checklist)
     const isEnabled = await isOn($)
-    if (enforcedForRun && isEnabled && isRunning(list) && !hasPlan(list) && !ALWAYS_ALLOWED.has(tool)) {
-      return { deny: `Clean View: call ${PLAN_TOOL} first to lay out the steps of this job (load it with ToolSearch if it is deferred), then try again.` }
-    }
+    // Nudge rather than refuse: a refusal costs a round trip and fails a whole
+    // codemode script when the prompt section was skipped (managed sessions).
+    const needsPlan = enforcedForRun && isEnabled && isRunning(list) && !hasPlan(list) && !ALWAYS_ALLOWED.has(tool)
 
     await edit($, backToWork)
     if (!PLAN_UPDATERS.has(tool)) {
@@ -428,6 +428,9 @@ export function registerCleanView(on: On) {
     } else {
       failures = 0
       await edit($, unstuck)
+    }
+    if (needsPlan) {
+      return { ...ran, context: [...(ran.context ?? []), `Clean View: call ${PLAN_TOOL} in your next response to lay out the steps of this job (load it with ToolSearch if it is deferred).`] }
     }
     return ran
   }).catch(($, e, next) => next(e))
