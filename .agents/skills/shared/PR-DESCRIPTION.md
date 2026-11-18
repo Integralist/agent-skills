@@ -49,6 +49,9 @@ migration steps, risks. Omit if empty.>
 
 - Describe behaviour and intent, not a file-by-file inventory. The reviewer
   gets line detail from the diff.
+- For GitHub-tracked projects, before drafting or updating issue references,
+  read and follow [task and PR reconciliation](GITHUB-ISSUES.md#task-and-pr-reconciliation).
+  A slice reference alone is not a delivered-task inventory.
 - In `Problem`, briefly introduce the system's role and avoid unexplained
   jargon or acronyms: explain necessary terms on first use in plain words
   (expanding an acronym is not enough), even when a term looks familiar.

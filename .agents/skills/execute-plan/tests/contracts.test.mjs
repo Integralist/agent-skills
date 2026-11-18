@@ -893,6 +893,52 @@ test("GITHUB-ISSUES.md defines the 3-level issue hierarchy, artifact rules, and 
   });
 });
 
+function assertTaskReconciliation(policy) {
+  for (const rule of [
+    "A task does not wait for PR merge or parent slice acceptance unless its own outcome requires that gate.",
+    "Inventory every delivered task from the plan, issue links, execution records, commits and actual diff, not only the first task or parent slice.",
+    "For every task, verify its own outcome, required checks, commit SHA, posted evidence and issue state.",
+    "Publish missing evidence before closing a verified, committed task; leave tasks with missing required checks or approval open.",
+    "For already merged work, verify the delivered snapshot and reuse valid evidence; rerun missing or affected checks and record limits.",
+    "List every delivered task in the PR as `- Delivers #<task-issue> — <title>` with its state and evidence link.",
+    "`Delivers` is a navigation label, not a GitHub closing keyword; it never replaces task evidence and explicit closure.",
+    "Task closure does not accept a slice, satisfy ratification, or close the Root Issue.",
+  ]) assert.ok(policy.includes(rule), `missing task reconciliation rule: ${rule}`);
+}
+
+test("task closure stays separate from slice acceptance and PR navigation", () => {
+  const policy = flat(githubIssuesPath);
+  assertTaskReconciliation(policy);
+  for (const [before, after] of [
+    ["A task does not wait for PR merge", "A task waits for PR merge"],
+    ["not only the first task or parent slice", "only the first task or parent slice"],
+    ["Publish missing evidence before closing", "Close before publishing evidence"],
+    ["leave tasks with missing required checks or approval open", "close tasks with missing required checks or approval"],
+    ["For already merged work, verify the delivered snapshot", "For already merged work, trust the merge"],
+    ["not a GitHub closing keyword", "a GitHub closing keyword"],
+  ]) assert.throws(() => assertTaskReconciliation(policy.replace(before, after)));
+});
+
+test("artifact publication excludes CLI metadata, not document frontmatter", () => {
+  const policy = flat(githubIssuesPath);
+  const check = (text) => {
+    assert.ok(text.includes("Publish only the extracted artifact body, not the CLI's rendered metadata."));
+    assert.ok(text.includes("Preserve frontmatter that belongs to the document itself."));
+  };
+  check(policy);
+  assert.throws(() => check(policy.replace("not the CLI's rendered metadata", "with the CLI's rendered metadata")));
+  assert.throws(() => check(policy.replace("Preserve frontmatter", "Remove frontmatter")));
+});
+
+test("PR descriptions require task reconciliation before writing issue references", () => {
+  const source = read(".agents/skills/shared/PR-DESCRIPTION.md");
+  const target = "GITHUB-ISSUES.md#task-and-pr-reconciliation";
+  const trigger = /For GitHub-tracked projects, before drafting or updating issue references, read and follow \[task and PR reconciliation\]/;
+  assertRequiredReference(source, target, trigger);
+  assertAnchor(read(githubIssuesPath), "task-and-pr-reconciliation", target);
+  assert.throws(() => assertRequiredReference(source.replace("read and follow", "optionally consult"), target, trigger));
+});
+
 test("planning and task-compilation skills conditionally load GITHUB-ISSUES.md for github mode", () => {
   const planningSkills = [
     ".agents/skills/pdd/SKILL.md",

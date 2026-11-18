@@ -122,6 +122,9 @@ gh issue artifact view <root> <artifact-number> --json body --jq .body
 gh issue artifact edit <root> <artifact-number> --body-file -
 ```
 
+Publish only the extracted artifact body, not the CLI's rendered metadata.
+Preserve frontmatter that belongs to the document itself.
+
 Whenever an artifact is created or its status changes, update the `##
 Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
 <root> --body-file -`).
@@ -180,7 +183,9 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
    [BUILD-ITEM.md](BUILD-ITEM.md) evidence table and commit SHA as a comment on
    `#<task-issue>` (`gh issue comment <task-issue> --body-file -`), require the
    comment command to succeed, and then close the issue (`gh issue close
-   <task-issue>`). In `execute-plan`, use these commit trailers:
+   <task-issue>`). A task does not wait for PR merge or parent slice acceptance
+   unless its own outcome requires that gate. In `execute-plan`, use these
+   commit trailers:
 
    ```text
    Execution-Plan: #<root-issue>
@@ -213,6 +218,28 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
      `- Delivers #<slice-issue>` as separate bullets (never `Closes
      #<root-issue>`) so merging that slice does not close the project early. Put
      `- Closes #<root-issue>` only on the final slice PR.
+
+## Task and PR reconciliation
+
+Before drafting or updating a PR, and when recovering missed task closure:
+
+- Inventory every delivered task from the plan, issue links, execution
+  records, commits and actual diff, not only the first task or parent slice.
+- For every task, verify its own outcome, required checks, commit SHA,
+  posted evidence and issue state. Publish missing evidence before closing a
+  verified, committed task; leave tasks with missing required checks or
+  approval open. Follow step 2 above, with approved GitHub writes.
+- For already merged work, verify the delivered snapshot and reuse valid
+  evidence; rerun missing or affected checks and record limits. Do not invent
+  past results or repeat completed implementation to recover bookkeeping.
+- List every delivered task in the PR as
+  `- Delivers #<task-issue> — <title>` with its state and evidence link.
+  `Delivers` is a navigation label, not a GitHub closing keyword; it never
+  replaces task evidence and explicit closure. Keep Root Issue and slice
+  references under step 4 above; do not add `Closes` for an incomplete task.
+- Task closure does not accept a slice, satisfy ratification, or close the
+  Root Issue. Reconcile parent summaries and plan status without advancing
+  their gates or milestone checkboxes.
 
 ## Local mirror and offline outbox
 
