@@ -63,6 +63,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**open-pr**](.agents/skills/open-pr/SKILL.md)                                             | Write and open a concise PR with clear Problem and Solution sections.                                    |
 | [**pdd**](.agents/skills/pdd/SKILL.md)                                                     | Run a Product-Engineering initiative through Project, Discovery, and Design approvals.                   |
 | [**perspectives**](.agents/skills/perspectives/SKILL.md)                                   | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.                    |
+| [**pi-models**](.agents/skills/pi-models/SKILL.md)                                         | Add, update, or prune Pi model definitions, overrides, and enabled models from docs or a URL.            |
 | [**polish**](.agents/skills/polish/SKILL.md)                                               | Improve a short passage's clarity and concision.                                                         |
 | [**precedent**](.agents/skills/precedent/SKILL.md)                                         | Align work with patterns established by peer files.                                                      |
 | [**recap**](.agents/skills/recap/SKILL.md)                                                 | Summarize what is done, in progress, and next.                                                           |
@@ -136,6 +137,30 @@ make install-codex
 
 # Swival config and Bedrock SSO helper
 make install-swival
+```
+
+### Check available Pi models
+
+List models available to your authenticated Pi providers. This merges Pi's
+catalog (`~/.pi/agent/models-store.json`) with any overrides or additions in
+`~/.pi/agent/models.json`:
+
+```bash
+pi --list-models [amazon-bedrock|github-copilot|google-vertex]
+```
+
+> [!NOTE]
+> Passing `--offline` only skips network catalog refreshes; it still applies
+> `~/.pi/agent/models.json`.
+
+To see what Pi supports natively without `~/.pi/agent/models.json` overrides
+(useful for checking which overrides can be pruned), query the cached catalog
+directly:
+
+```bash
+# Replace "google-vertex" with "amazon-bedrock" or "github-copilot" as needed
+jq -r '."google-vertex".models[] | [.id, .contextWindow, .maxTokens] | @tsv' \
+  ~/.pi/agent/models-store.json
 ```
 
 ## Developer workflows
