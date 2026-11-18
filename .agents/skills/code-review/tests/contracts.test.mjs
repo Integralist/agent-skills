@@ -53,8 +53,10 @@ test("feedback mode takes a separate, approval-gated path", () => {
   const mode = section(skill, "**Feedback mode (`--feedback`).**", "**Standard review.**");
   assert.ok(mode.includes("[FEEDBACK.md](references/FEEDBACK.md)"));
   assert.match(mode.replace(/\s+/g, " "), /instead of running a fresh review/);
+  assert.match(mode.replace(/\s+/g, " "), /For security items.*SECURITY-FEEDBACK\.md/);
   const normal = section(skill, "**Standard review.**", "## Choose the source");
   assert.match(normal.replace(/\s+/g, " "), /Never edit code, change state, or comment on a PR/);
+  assert.doesNotMatch(normal, /SECURITY-FEEDBACK\.md/);
   const feedback = flat(feedbackPath);
   assert.match(feedback, /before editing code or posting a reply/);
   assert.match(feedback, /\*\*accept\*\*, \*\*push back\*\*, or \*\*can't verify\*\*/);
@@ -211,7 +213,8 @@ test("living-spec presence triggers adherence checks and acceptance guidance", (
 });
 
 test("new guidance links resolve", () => {
-  for (const path of [skillPath, protocolPath, conventionsPath, feedbackPath]) {
+  const securityFeedbackPath = join(dirname(feedbackPath), "SECURITY-FEEDBACK.md");
+  for (const path of [skillPath, protocolPath, conventionsPath, feedbackPath, securityFeedbackPath]) {
     const content = read(path);
     for (const match of content.matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g)) {
       if (match[1].includes("://")) continue;

@@ -1,18 +1,8 @@
----
-name: security-review-feedback
-description: >-
-  Validate security review findings and vulnerability reports before fixing.
-  Use when triaging security findings, vulnerability scanner output, or audit
-  reports.
-metadata:
-  model-tier: complex
----
+# Security feedback
 
 Validate each security finding before changing code. Give it one verdict—
 `TRUE POSITIVE`, `FALSE POSITIVE`, or `NEEDS-INFO`—backed by evidence. Fix only
-true positives. This skill adds the verdict step to the
-[review feedback workflow](../code-review/references/FEEDBACK.md). Follow it
-to respond and fix.
+true positives. Then resume at **Respond** in [FEEDBACK.md](FEEDBACK.md).
 
 ## Review each finding
 
@@ -50,12 +40,10 @@ to respond and fix.
    trivially reachable RCE is critical; the same bug behind three privilege
    checks is not, and improbable preconditions make severity `low`. Before a
    `FALSE POSITIVE` verdict, read
-   [FALSE-POSITIVE-CHECKS.md](references/FALSE-POSITIVE-CHECKS.md) and support the
+   [FALSE-POSITIVE-CHECKS.md](FALSE-POSITIVE-CHECKS.md) and support the
    rejection with evidence.
-6. **Check chains.** Consider whether findings that failed individually can
-   combine into a viable attack, such as an information leak that provides an
-   address needed by a rejected overflow. A chain can be a `TRUE POSITIVE`
-   even when its links are not.
+6. **Check reported interactions.** Verify whether a reported interaction
+   changes the verdict using source evidence. Do not construct exploits.
 7. **Fix true positives.** Fix them one at a time, highest severity first,
    following the feedback workflow. Test each fix. Reach a verdict before any
    fix, even when it looks cheap; verify each instance because callers and
@@ -74,7 +62,7 @@ FINDING #3 NEEDS-INFO — Can't identify middleware or route; ask for the path
 
 For a multi-module finding or several independent clusters, you may delegate
 traces to read-only investigators under the
-[shared subagent policy](../shared/SUBAGENT-STEERABILITY.md). Give each the
+[shared subagent policy](../../shared/SUBAGENT-STEERABILITY.md). Give each the
 claim, threat model, revision, scoped paths, and relevant instructions; allow
 only verified read-only tools—no edits, test runs, or remote writes. Require
 `COMPLETE` or `INCOMPLETE`, checked paths, source-to-sink and guard citations,

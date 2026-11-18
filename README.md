@@ -27,7 +27,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**cleanup**](.agents/skills/cleanup/SKILL.md)                                             | Audit AI-generated clutter, then apply approved fixes interactively.                                     |
 | [**code-graph**](.agents/skills/code-graph/SKILL.md)                                       | Map code structure and changes in Mermaid. Use `--save` for a large PNG.                                 |
 | [**code-module-design**](.agents/skills/code-module-design/SKILL.md)                       | Design deep modules (`--review` maps and audits module boundaries).                                      |
-| [**code-review**](.agents/skills/code-review/SKILL.md)                                     | Review diffs for defects, or use `--feedback` to verify existing review comments.                        |
+| [**code-review**](.agents/skills/code-review/SKILL.md)                                     | Review diffs for defects, or use `--feedback` to verify review comments and security findings.           |
 | [**commit**](.agents/skills/commit/SKILL.md)                                               | Group related changes and create clear Git commits.                                                      |
 | [**conventions-acceptance-tests**](.agents/skills/conventions-acceptance-tests/SKILL.md)   | Keep Go/Godog and Make/Bash acceptance tests aligned with feature scenarios.                             |
 | [**conventions-go**](.agents/skills/conventions-go/SKILL.md)                               | Apply Go conventions when editing or reviewing `.go` files.                                              |
@@ -72,7 +72,6 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**recap**](.agents/skills/recap/SKILL.md)                                                 | Summarize what is done, in progress, and next.                                                           |
 | [**redesign**](.agents/skills/redesign/SKILL.md)                                           | Plan a simpler rebuild of a feature, subsystem, or codebase, with tests pinned first.                    |
 | [**research**](.agents/skills/research/SKILL.md)                                           | Research a topic or repository and save a sourced reference under `docs/research/`.                      |
-| [**security-review-feedback**](.agents/skills/security-review-feedback/SKILL.md)           | Validate vulnerability findings for reachability and exploitability before fixing.                       |
 | [**show-me**](.agents/skills/show-me/SKILL.md)                                             | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.                       |
 | [**skill-rewrite**](.agents/skills/skill-rewrite/SKILL.md)                                 | Rewrite a skill to be short and readable without losing its core behaviour.                              |
 | [**slack**](.pi/agent/skills/slack/SKILL.md) 🥧                                            | Send, edit, and delete Slack messages in Pi without the attribution footer.                              |
