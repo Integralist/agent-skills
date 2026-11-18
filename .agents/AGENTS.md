@@ -36,10 +36,11 @@
   compile error. Make the smallest passing change and remove dead code. Test
   every public function and error branch; integration-test every feature slice.
   Assert behavior, not implementation.
-- **Approval:** Before editing, show the diff and get explicit approval. A
-  question is not an edit request. Keep changes scoped.
-- **Large diffs:** For changes over 40 lines, give a one-line summary and let
-  the user choose to review the full diff or proceed.
+- **Approval:** Before editing, show the diff inline in chat and get explicit
+  approval. Never write or link to a patch or diff file. A question is not an
+  edit request. Keep changes scoped.
+- **Large diffs:** For changes over 40 lines, give a one-line summary and ask
+  whether to show the full diff inline in chat or proceed.
 - **Auto execution:** `execute-plan --auto` approves edits, large diffs, and
   model downgrades only within its named plan. Follow skill boundaries,
   stricter project gates, and runtime permissions.
