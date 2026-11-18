@@ -3,8 +3,7 @@
   "defaultModel": "pi-auto-model/auto",
   "defaultThinkingLevel": "high",
   "modelThinkingLevels": {
-    "github-copilot/gpt-6-luna": "xhigh",
-    "github-copilot/gpt-6.1-sol": "xhigh"
+    "github-copilot/gpt-6-luna": "xhigh"
   },
   "hideThinkingBlock": true,
   "theme": "nord-contrast",
@@ -46,11 +45,9 @@
     "amazon-bedrock/global.anthropic.claude-sonnet-5-5",
     "amazon-bedrock/global.anthropic.claude-opus-5-5",
     "github-copilot/gpt-6-luna",
-    "github-copilot/gpt-6-sol",
-    "github-copilot/gpt-6-astra",
-    "github-copilot/gpt-6.1-sol",
+    "github-copilot/gpt-6.2-astra",
+    "github-copilot/gpt-6.2-sol",
     "github-copilot/kimi-k3",
-    "google-vertex/gemini-3.1-pro-preview",
     "google-vertex/gemini-3.8-flash",
     "google-vertex/gemini-4-argon",
     "google-vertex/gemini-4-carbon",
