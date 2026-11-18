@@ -68,8 +68,11 @@ install-pi: install-tools
 install-pi-section:
 	@$(STEP) --section "Pi"
 	@$(STEP) --timing "Crit Pi skills → ~/.pi/agent/skills/" bash -c 'cd "$$HOME" && crit install pi --force'
-	@mkdir -p ~/.pi/agent/skills/slack
-	@$(STEP) "slack skill → ~/.pi/agent/skills/slack/" cp .pi/agent/skills/slack/SKILL.md ~/.pi/agent/skills/slack/SKILL.md
+	@mkdir -p ~/.pi/agent/skills
+	@for dir in .pi/agent/skills/*/; do \
+		name=$$(basename "$$dir"); \
+		$(STEP) "$$name skill → ~/.pi/agent/skills/$$name/" rsync -a --delete "$$dir" "$$HOME/.pi/agent/skills/$$name/" || exit 1; \
+	done
 	@PI_VERSION_CHECK_TIMEOUT=$(PI_VERSION_CHECK_TIMEOUT) bash scripts/install-pi-cli.sh
 	@$(STEP) "settings.json → ~/.pi/agent/settings.json" cp .pi/agent/settings.json ~/.pi/agent/settings.json
 	@$(STEP) "auto-suggest.json → ~/.pi/agent/auto-suggest.json" cp .pi/agent/auto-suggest.json ~/.pi/agent/auto-suggest.json

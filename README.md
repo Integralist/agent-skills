@@ -13,6 +13,8 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 
 ## Skill reference
 
+- 🥧 Pi-only skill (`.pi/agent/skills/`)
+
 | Skill                                                                                      | Description                                                                                              |
 | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
 | [**acp**](.agents/skills/acp/SKILL.md)                                                     | Approve the current change, commit it to `main`, and push to `origin`.                                   |
@@ -33,6 +35,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**conventions-mermaid**](.agents/skills/conventions-mermaid/SKILL.md)                     | Apply Mermaid conventions when creating or editing diagram files or blocks.                              |
 | [**conventions-python**](.agents/skills/conventions-python/SKILL.md)                       | Apply Python conventions when editing or reviewing `.py` files.                                          |
 | [**conventions-sql**](.agents/skills/conventions-sql/SKILL.md)                             | Apply SQL conventions when editing or creating migration files.                                          |
+| [**council**](.pi/agent/skills/council/SKILL.md) 🥧                                        | Get a read-only second opinion on a diff across Copilot, Vertex, and Bedrock models.                     |
 | [**critique**](.agents/skills/critique/SKILL.md)                                           | Find logical weaknesses in a document and suggest fixes.                                                 |
 | [**decide**](.agents/skills/decide/SKILL.md)                                               | Compare consequential options and record a reasoned decision.                                            |
 | [**design**](.agents/skills/design/SKILL.md)                                               | Apply shared Anthropic- or Fastly-inspired themes to visual work, with switchable HTML light/dark mode.  |
@@ -72,6 +75,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**security-review-feedback**](.agents/skills/security-review-feedback/SKILL.md)           | Validate vulnerability findings for reachability and exploitability before fixing.                       |
 | [**show-me**](.agents/skills/show-me/SKILL.md)                                             | Explain a topic visually with concise diagrams, code sketches, and HTML artifacts.                       |
 | [**skill-rewrite**](.agents/skills/skill-rewrite/SKILL.md)                                 | Rewrite a skill to be short and readable without losing its core behaviour.                              |
+| [**slack**](.pi/agent/skills/slack/SKILL.md) 🥧                                            | Send, edit, and delete Slack messages in Pi without the attribution footer.                              |
 | [**spec-delta**](.agents/skills/spec-delta/SKILL.md)                                       | Record a living-spec behaviour change as a project spec with a Behavioural Delta.                        |
 | [**spike**](.agents/skills/spike/SKILL.md)                                                 | Run a throwaway Go spike to settle an empirical backend design unknown.                                  |
 | [**stacked-prs**](.agents/skills/stacked-prs/SKILL.md)                                     | Create and manage dependent PRs with the official `gh stack` extension.                                  |
@@ -233,6 +237,7 @@ The Design document is not the same artifact as `plan.md`:
 | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | [**code-module-design**](.agents/skills/code-module-design/SKILL.md) (`--review`) | Understand a feature's structure and assess module ownership                       | Mermaid maps and evidence-backed findings                                          |
 | [**code-review**](.agents/skills/code-review/SKILL.md)               | Code or a diff exists and you want defects identified                              | Verified findings and open questions                                               |
+| [**council**](.pi/agent/skills/council/SKILL.md) 🥧                  | A change is in place and you want a quick second opinion from other providers      | Cross-model findings, disagreements, and missed risks                              |
 | [**explain-code**](.agents/skills/explain-code/SKILL.md)             | You are new to the repo and want to understand what code does and why it is useful | Concise Problem/Solution explanation, visual, and optional PR-author clarification |
 | [**is-it-safe**](.agents/skills/is-it-safe/SKILL.md)                 | You need the worst credible outcome of committing or merging a change              | Verdict and evidence-backed impact path                                            |
 | [**precedent**](.agents/skills/precedent/SKILL.md)                   | Work is correct and you want it to match the project's own patterns                | Divergences citing the peer that sets each pattern                                 |
