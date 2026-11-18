@@ -8,7 +8,7 @@ metadata:
   model-tier: trivial
 ---
 
-Search, read, and post to Fastly Slack in Pi through `mcp__slack` while keeping
+Search, read, and post to Slack in Pi through `mcp__slack` while keeping
 posted messages free of the `*Sent using* <@Claude>` footer that Slack's hosted
 MCP endpoint appends.
 
