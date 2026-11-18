@@ -21,6 +21,9 @@ Specifications, every `docs/specs/` file changed by the diff, and any living
 spec whose contract covers the changed behaviour. Record an unknown if
 applicability is unclear. A completed project outside the diff is history; its
 living spec supersedes it. Read every document at the reviewed revision.
+Also record whether `docs/specs/` exists at the reviewed revision (listing its
+capability files in `CONTEXT_PATH`) so reviewers know if the repository uses
+Gherkin living specs.
 
 Also inspect repository instructions for canonical domain sources. Read a
 project-root `GLOSSARY.md` or `CONTEXT.md`, and any such file linked by
@@ -131,7 +134,11 @@ assigned lenses. A defect belongs to the profile whose question it answers.
    and exceptions. Recommendations are not mandates; personal preferences are
    not findings. Hand off unwritten precedent to maintainability, and merge
    duplicate functional/security findings with their owning profiles.
-6. **Spec and plan adherence:** Use only when step 2 found intent documents.
+6. **Spec and plan adherence:** Use when step 2 found intent documents or the
+   repository maintains `docs/specs/`. Load
+   [SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md) and
+   [conventions-acceptance-tests](../../conventions-acceptance-tests/SKILL.md)
+   when `docs/specs/`, Behavioural Deltas, or acceptance suites are in scope.
    Does the change meet the plan and spec, and do they agree? Check:
    - Each milestone the change claims or marks complete.
    - Plan `Consumes` and `Produces` signatures.
@@ -140,6 +147,10 @@ assigned lenses. A defect belongs to the profile whose question it answers.
    - Scope excess, reported without judging it.
    - Conflicts among project/living specs, docs, PR body, and code, including
      unchanged code bound by a changed contract.
+   - Missing living-spec updates: whether added or changed system-boundary
+     behaviour (API, CLI, handler, or workflow) in a repository using
+     `docs/specs/` needs a new or updated Gherkin scenario and matching
+     acceptance steps; leave internal unit-only behaviour out of scope.
    - Every Behavioural Delta scenario appears in its named living spec, and
      every behavioural edit to `docs/specs/` appears in a delta, as
      [SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md) describes.
@@ -246,8 +257,9 @@ sort High to Low, and list dropped findings with the verifier's reason. Offer
 to address actionable findings. Every changed file must be accounted for;
 unknowns stay separate from defects.
 
-Spec conflicts and delta-sync gaps rank with other actionable findings. Put
-other adherence checks under Informational unless strict scope was requested.
+Spec conflicts, missing living-spec updates, and delta-sync gaps rank with
+other actionable findings. Put other adherence checks under Informational
+unless strict scope was requested.
 If a reviewer hits its turn limit, add a `⚠️` line after “Subagent pass” with
 the original/retry limits and whether retry completed.
 
@@ -277,7 +289,7 @@ Use this template:
 
 ### Spec and Plan Adherence
 
-{Only when intent documents were found.}
+{Only when intent documents were found or living specs apply.}
 
 - **Intent documents:** {paths}
 - **Milestones:** …

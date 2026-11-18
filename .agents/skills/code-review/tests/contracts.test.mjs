@@ -145,7 +145,7 @@ test("evaluation cases cover selection, written rules, conflicts, and missing gu
 
 test("new evaluation fixtures produce branch changes without touching the parent repo", () => {
   const cases = JSON.parse(read(casesPath))
-    .filter(item => item.id.startsWith("conventions-"));
+    .filter(item => item.id.startsWith("conventions-") || item.id === "spec-missing-living-feature");
   for (const item of cases) {
     const scratch = mkdtempSync(join(tmpdir(), "review-conventions-eval-"));
     try {
@@ -167,6 +167,33 @@ test("new evaluation fixtures produce branch changes without touching the parent
       rmSync(scratch, { recursive: true, force: true });
     }
   }
+});
+
+test("living-spec presence triggers adherence checks and acceptance guidance", () => {
+  const protocol = flat(protocolPath);
+  const intent = section(protocol, "## Gather review intent", "## Select and brief reviewers");
+  assert.match(intent, /docs\/specs\//);
+  assert.match(intent, /Gherkin living specs/);
+
+  const adherence = section(protocol, "6. **Spec and plan adherence:", "If `--plan` was passed");
+  assert.match(adherence, /repository maintains `docs\/specs\/`/);
+  assert.match(adherence, /SPEC-FORMAT\.md/);
+  assert.match(adherence, /conventions-acceptance-tests/);
+  assert.match(adherence, /Missing living-spec updates/);
+  assert.match(adherence, /system-boundary behaviour/);
+  assert.match(adherence, /internal unit-only behaviour out of scope/);
+
+  const report = section(protocol, "## Report format", "````markdown");
+  assert.match(report, /missing living-spec updates/);
+
+  const conventions = flat(conventionsPath);
+  assert.match(conventions, /Living specs \(`docs\/specs\/`\).*conventions-acceptance-tests/);
+
+  const cases = JSON.parse(read(casesPath));
+  const specCase = cases.find(item => item.id === "spec-missing-living-feature");
+  assert.ok(specCase, "missing evaluation case: spec-missing-living-feature");
+  assert.ok(specCase.setup.length > 0);
+  assert.ok(specCase.checks.length >= 3);
 });
 
 test("new guidance links resolve", () => {

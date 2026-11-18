@@ -284,5 +284,28 @@
       "Does not claim a clean conventions pass while required guidance remains unavailable",
       "Continues reviewing applicable available rules and records the reviewed source paths"
     ]
+  },
+  {
+    "id": "spec-missing-living-feature",
+    "prompt": "Review my branch.",
+    "setup": [
+      "git init -q -b main",
+      "git config user.email eval@example.com",
+      "git config user.name 'Eval Bot'",
+      "mkdir -p docs/specs",
+      "cat > docs/specs/orders.feature <<'EOF'\nFeature: Orders\n  Scenario: Get an existing order\n    Given an order exists with ID \"ord-1\"\n    When the caller requests order \"ord-1\"\n    Then the order details are returned\nEOF",
+      "cat > api.py <<'EOF'\n\"\"\"Order API handlers.\"\"\"\n\n\ndef get_order(store, order_id):\n    \"\"\"Return an order by ID.\"\"\"\n    order = store.get(order_id)\n    if order is None:\n        return {\"error\": \"not found\"}, 404\n    return order, 200\nEOF",
+      "git add . && git commit -q -m 'initial commit'",
+      "git checkout -q -b cancel-order",
+      "cat >> api.py <<'EOF'\n\n\ndef cancel_order(store, order_id):\n    \"\"\"Cancel an existing order.\"\"\"\n    order = store.get(order_id)\n    if order is None:\n        return {\"error\": \"not found\"}, 404\n    order[\"status\"] = \"cancelled\"\n    return order, 200\nEOF",
+      "cat > test_api.py <<'EOF'\nfrom api import cancel_order\n\n\ndef test_cancel_order():\n    store = {\"ord-1\": {\"id\": \"ord-1\", \"status\": \"open\"}}\n    body, status = cancel_order(store, \"ord-1\")\n    assert status == 200\n    assert body[\"status\"] == \"cancelled\"\nEOF",
+      "git add . && git commit -q -m 'add cancel_order handler'"
+    ],
+    "checks": [
+      "Records docs/specs/ and docs/specs/orders.feature in CONTEXT_PATH during intent gathering even though the diff leaves docs/specs/ unchanged",
+      "Runs spec and plan adherence checks and loads SPEC-FORMAT.md and conventions-acceptance-tests",
+      "Reports an actionable finding that the new cancel_order system-boundary behaviour is missing a Gherkin scenario update in docs/specs/ and matching acceptance steps",
+      "Leaves the working tree clean — git status shows no changes after the review"
+    ]
   }
 ]

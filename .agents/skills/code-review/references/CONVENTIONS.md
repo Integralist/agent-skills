@@ -12,8 +12,8 @@ apply even when a file has no language-specific suffix.
 - Markdown: [conventions-markdown](../../conventions-markdown/SKILL.md), plus
   [conventions-mermaid](../../conventions-mermaid/SKILL.md) for Mermaid files or
   diagram blocks.
-- Acceptance suites, steps, runners, and Makefile and shell acceptance
-  workflows: load
+- Living specs (`docs/specs/`), acceptance suites, steps, runners, and
+  Makefile and shell acceptance workflows: load
   [conventions-acceptance-tests](../../conventions-acceptance-tests/SKILL.md)
   alongside any language conventions.
 
