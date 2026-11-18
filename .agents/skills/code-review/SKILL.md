@@ -4,14 +4,22 @@ description: >-
   Review a PR or local changes with risk-based read-only reviewers, verify
   findings, and check the change against its project's spec and plan. Use when
   reviewing a remote PR or local code, including unpushed or
-  uncommitted changes. Pass --plan=<path> to name the plan or task list.
-argument-hint: '[--branch | --uncommitted | --all-changes | --baseline=<commit> | path | PR_URL] [--plan=<path>] [instructions]'
+  uncommitted changes, or verifying existing review feedback (--feedback).
+  Pass --plan=<path> to name the plan or task list.
+argument-hint: '[--feedback] [--branch | --uncommitted | --all-changes | --baseline=<commit> | path | PR_URL] [--plan=<path>] [instructions]'
 metadata:
   model-tier: complex
 ---
 
 Review a PR or local changes for defects, convention violations, and gaps
-against project intent. Use read-only reviewers. **Never edit code, change
+against project intent.
+
+**Feedback mode (`--feedback`).** When the user passes the flag or asks to
+assess existing review feedback, follow [FEEDBACK.md](references/FEEDBACK.md)
+instead of running a fresh review. Use the supplied target as context. Ask
+for missing feedback or unclear scope. Edits and replies require approval.
+
+**Standard review.** Use read-only reviewers. **Never edit code, change
 state, or comment on a PR.**
 
 Before reviewing, read [REVIEW-PROTOCOL.md](references/REVIEW-PROTOCOL.md) for

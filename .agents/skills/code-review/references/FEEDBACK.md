@@ -1,15 +1,12 @@
----
-name: code-review-feedback
-description: >-
-  Pressure-test code-review feedback before acting on it. Use when receiving
-  review feedback or evaluating suggested code changes.
-metadata:
-  model-tier: moderate
----
+# Review feedback
 
 Treat review feedback as a suggestion to verify, not an order. Understand every
 item, check it against the codebase, then fix it or push back with technical
 reasoning. Technical correctness takes priority over social comfort.
+
+Get user approval before editing code or posting a reply. Show the proposed
+diff or exact reply first. If the user only asks for an assessment, stop
+once you've reported the verdicts.
 
 1. **Understand all feedback before acting.** Read every item and restate it in
    your own words. If any item is unclear, ask about it before implementing
@@ -22,8 +19,8 @@ reasoning. Technical correctness takes priority over social comfort.
          before I start."
    ```
 
-2. **Verify each item.** Feedback from the user is trusted: once understood,
-   implement it. Check other reviewers' feedback skeptically:
+2. **Verify each item.** Treat the user's feedback as direction once
+   understood. Check other reviewers' feedback skeptically:
    - Is it correct on every platform and version the codebase supports?
    - Could it break existing behavior or undo a deliberate legacy or
      compatibility choice?

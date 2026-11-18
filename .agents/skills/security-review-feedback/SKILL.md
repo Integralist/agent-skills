@@ -11,8 +11,8 @@ metadata:
 Validate each security finding before changing code. Give it one verdict—
 `TRUE POSITIVE`, `FALSE POSITIVE`, or `NEEDS-INFO`—backed by evidence. Fix only
 true positives. This skill adds the verdict step to the
-[code-review-feedback](../code-review-feedback/SKILL.md) workflow; follow that
-skill to respond and fix.
+[review feedback workflow](../code-review/references/FEEDBACK.md). Follow it
+to respond and fix.
 
 ## Review each finding
 
@@ -57,7 +57,7 @@ skill to respond and fix.
    address needed by a rejected overflow. A chain can be a `TRUE POSITIVE`
    even when its links are not.
 7. **Fix true positives.** Fix them one at a time, highest severity first,
-   following code-review-feedback. Test each fix. Reach a verdict before any
+   following the feedback workflow. Test each fix. Reach a verdict before any
    fix, even when it looks cheap; verify each instance because callers and
    protections can differ.
 

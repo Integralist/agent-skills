@@ -10,6 +10,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const skillPath = ".agents/skills/code-review/SKILL.md";
 const protocolPath = ".agents/skills/code-review/references/REVIEW-PROTOCOL.md";
 const conventionsPath = ".agents/skills/code-review/references/CONVENTIONS.md";
+const feedbackPath = ".agents/skills/code-review/references/FEEDBACK.md";
 const casesPath = ".agents/skills/code-review/evals/cases.json";
 
 function read(path) {
@@ -44,6 +45,19 @@ test("the entry point loads the protocol and preserves review gates", () => {
   assert.match(protocol, /finding schema/);
   assert.match(protocol, /verifier subagent/);
   assert.match(protocol, /report format/i);
+});
+
+test("feedback mode takes a separate, approval-gated path", () => {
+  const skill = read(skillPath);
+  assert.match(skill, /^argument-hint:.*--feedback/m);
+  const mode = section(skill, "**Feedback mode (`--feedback`).**", "**Standard review.**");
+  assert.ok(mode.includes("[FEEDBACK.md](references/FEEDBACK.md)"));
+  assert.match(mode.replace(/\s+/g, " "), /instead of running a fresh review/);
+  const normal = section(skill, "**Standard review.**", "## Choose the source");
+  assert.match(normal.replace(/\s+/g, " "), /Never edit code, change state, or comment on a PR/);
+  const feedback = flat(feedbackPath);
+  assert.match(feedback, /before editing code or posting a reply/);
+  assert.match(feedback, /\*\*accept\*\*, \*\*push back\*\*, or \*\*can't verify\*\*/);
 });
 
 test("selection considers purpose as well as file type", () => {
@@ -197,7 +211,7 @@ test("living-spec presence triggers adherence checks and acceptance guidance", (
 });
 
 test("new guidance links resolve", () => {
-  for (const path of [skillPath, protocolPath, conventionsPath]) {
+  for (const path of [skillPath, protocolPath, conventionsPath, feedbackPath]) {
     const content = read(path);
     for (const match of content.matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g)) {
       if (match[1].includes("://")) continue;

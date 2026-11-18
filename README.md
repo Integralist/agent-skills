@@ -26,8 +26,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**clarify**](.agents/skills/clarify/SKILL.md)                                             | Resolve ambiguous requirements before work begins.                                                       |
 | [**cleanup**](.agents/skills/cleanup/SKILL.md)                                             | Audit AI-generated clutter, then apply approved fixes interactively.                                     |
 | [**code-module-design**](.agents/skills/code-module-design/SKILL.md)                       | Design deep modules (`--review` maps and audits module boundaries).                                      |
-| [**code-review**](.agents/skills/code-review/SKILL.md)                                     | Review diffs for correctness, security, reliability, performance, and maintainability.                   |
-| [**code-review-feedback**](.agents/skills/code-review-feedback/SKILL.md)                   | Verify review feedback before accepting or implementing it.                                              |
+| [**code-review**](.agents/skills/code-review/SKILL.md)                                     | Review diffs for defects, or use `--feedback` to verify existing review comments.                        |
 | [**commit**](.agents/skills/commit/SKILL.md)                                               | Group related changes and create clear Git commits.                                                      |
 | [**conventions-acceptance-tests**](.agents/skills/conventions-acceptance-tests/SKILL.md)   | Keep Go/Godog and Make/Bash acceptance tests aligned with feature scenarios.                             |
 | [**conventions-go**](.agents/skills/conventions-go/SKILL.md)                               | Apply Go conventions when editing or reviewing `.go` files.                                              |
