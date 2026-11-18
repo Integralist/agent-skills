@@ -18,9 +18,9 @@ working-tree changes. If the checked-out branch has commits or changes the PR
 lacks, ask the user to choose:
 
 1. The remote PR as published.
-2. The local branch, including unpushed commits (branch-diff, with the PR's
+2. The local branch, including unpushed commits (`--branch`, with the PR's
    `baseRefName` as `DEFAULT_BRANCH`).
-3. All local changes, including uncommitted ones (all-local, same base).
+3. All local changes, including uncommitted ones (`--all-changes`, same base).
 
 ## Default branch (local modes)
 
@@ -28,7 +28,7 @@ Use the first that succeeds as `DEFAULT_BRANCH`: `git rev-parse --verify main`,
 `git rev-parse --verify master`, then the branch named by
 `git symbolic-ref refs/remotes/origin/HEAD`.
 
-## Local branch (`--diff`)
+## Local branch (`--branch`)
 
 ```bash
 BASE=$(git merge-base HEAD "$DEFAULT_BRANCH")
@@ -50,7 +50,7 @@ git status --porcelain | sed -n 's/^?? //p'
 Include untracked files' contents alongside the diff. Read files from the
 working tree.
 
-## All local (`--all-local`)
+## All changes (`--all-changes`)
 
 ```bash
 BASE=$(git merge-base HEAD "$DEFAULT_BRANCH")

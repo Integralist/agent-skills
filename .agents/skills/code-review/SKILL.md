@@ -5,7 +5,7 @@ description: >-
   findings, and check the change against its project's spec and plan. Use when
   reviewing a remote PR or local code, including unpushed or
   uncommitted changes. Pass --plan=<path> to name the plan or task list.
-argument-hint: '[PR_URL | --diff | --uncommitted | --all-local | --baseline=<commit> | path] [--plan=<path>]'
+argument-hint: '[--branch | --uncommitted | --all-changes | --baseline=<commit> | path | PR_URL] [--plan=<path>] [instructions]'
 metadata:
   model-tier: complex
 ---
@@ -25,13 +25,15 @@ and load their guidance.
 | Argument | Source |
 | --- | --- |
 | PR URL or `owner/repo#number` | Remote PR |
-| `--diff` or none | Local branch vs. default branch |
+| `--branch` | Local branch vs. default branch |
 | `--uncommitted` | Working-tree changes |
-| `--all-local` | Local branch plus working tree |
+| `--all-changes` | Local branch plus working tree |
 | `--baseline=<commit>` | Recorded execution and manifest |
 | File path or glob | Explicit paths |
 
-Use `--plan=<path>` to name a plan or task list for intent review.
+If no source argument is given and the user has not named a target, ask the
+user which source to review before continuing. Use `--plan=<path>` to name a
+plan or task list for intent review.
 
 ## Coordinate the review
 

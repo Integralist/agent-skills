@@ -257,7 +257,7 @@ Use this template:
 ## {PR #<number> Review Summary: "<title>" | Code Review: <branch, "uncommitted", or path>}
 
 - **Date:** {YYYY-MM-DD HH:MM}
-- **Mode:** {remote PR | branch-diff | uncommitted | all-local | execution | paths}
+- **Mode:** {remote PR | branch-diff | uncommitted | all-changes | execution | paths}
 - **Base:** {merge-base or recorded execution baseline, when applicable}
 - **Files reviewed:** {count}
 - **Snapshot:** {reviewed HEAD and dirty/new content fingerprints}
