@@ -60,6 +60,11 @@ migration steps, risks. Omit if empty.>
 - Keep `Notes` strictly to what a reviewer can check before merging. Leave
   post-merge work, such as deploys, to the ticket. List only testing you or
   the user actually ran, stating what it exercises and verifies.
+- Include concise before/after evidence when it clarifies a behavior change:
+  a regression test, screenshot for a visual change, or observed output.
+- For material risks, name affected users, systems, or data, and say whether
+  reverting the code restores prior behavior; call out effects a revert
+  cannot undo, such as deleted data.
 - Write each paragraph as one line. GitHub soft-wraps, so breaks at 80 columns
   render ragged.
 - Separate bullet items with a blank line so GitHub spaces them out.
