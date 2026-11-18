@@ -76,8 +76,9 @@ migration steps, risks. Omit if empty.>
 
 ### Diagram
 
-Include one Mermaid diagram whenever the change alters how parts call each
-other, branch, or move through states; omit it only when no useful flow exists:
+Include a high-level Mermaid diagram whenever the change alters how parts
+call each other, branch, or move through states. Omit it only when no useful
+flow exists:
 
 - `sequenceDiagram` for calls between parts
 - `flowchart` for branching
@@ -88,3 +89,13 @@ nodes or fewer (prefer six or fewer when clear), setup separated from runtime
 when helpful, an error or rejection path when useful, and ` (new)` or
 ` (changed)` on the steps the diff touches. Check it with the
 [conventions-mermaid](../conventions-mermaid/SKILL.md) skill.
+
+**Optional code map.** Add a second diagram only if it reveals a changed
+caller, dependency, or package boundary that matters to the review and isn't
+clear from the first diagram. Read [code-graph](../code-graph/SKILL.md) and
+use its tracing, change-mapping, and validation guidance with the same base
+and head as the PR diff.
+
+Under `Solution`, follow the first diagram with a short paragraph explaining
+what the map adds and what it helps reviewers check. Then include the map in
+a `mermaid` block. Do not export a PNG.
