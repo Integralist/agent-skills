@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'claude-code/testing'
 import type { Engine, MockClock } from 'claude-code/testing'
 import type { On } from 'claude-code'
 
-import { LOG_ENTRIES, LOG_ENTRY_CHARS, appendLog, cleanName, endsWithQuestion, extractThinkingHeading, meter, newJob, planSteps, reportProgress } from '../hooks/logic'
+import { LOG_ENTRIES, LOG_ENTRY_CHARS, appendLog, cleanName, endsWithQuestion, extractThinkingHeading, logLines, meter, newJob, planSteps, reportProgress, wrapLine } from '../hooks/logic'
 
 const PLUGIN = 'clean-view'
 const PLAN = 'mcp__clean-view__plan_steps'
@@ -170,6 +170,30 @@ describe('raw log', () => {
     const long = appendLog([], 'result', 'r', 'x'.repeat(LOG_ENTRY_CHARS + 50))[0].text
     expect(long).toHaveLength(LOG_ENTRY_CHARS + 1)
     expect(long.endsWith('…')).toBe(true)
+  })
+
+  test('entries keep their line breaks and up to 4,000 characters', () => {
+    expect(LOG_ENTRY_CHARS).toBe(4000)
+    expect(appendLog([], 'result', 'r', 'line one\r\n\tline two')[0]?.text).toBe('line one\n  line two')
+    expect(appendLog([], 'call', 'c', 'y'.repeat(1000))[0]?.text).toHaveLength(1000)
+  })
+
+  test('wrapLine breaks at spaces and splits words longer than the width', () => {
+    expect(wrapLine('aaa bbb ccc', 7)).toEqual(['aaa bbb', 'ccc'])
+    expect(wrapLine('abcdefghij', 4)).toEqual(['abcd', 'efgh', 'ij'])
+    expect(wrapLine('', 5)).toEqual([''])
+  })
+
+  test('logLines filters, puts the newest first, and wraps thinking or everything', () => {
+    let log = appendLog([], 'thinking', 't', 'think about it')
+    log = appendLog(log, 'call', 'c', '→ Bash one two three four')
+    log = appendLog(log, 'result', 'r', '← ok')
+    log = appendLog(log, 'error', 'e', '← error: boom')
+    const texts = (filter: 'all' | 'thinking' | 'inputs', wrap = false) => logLines(log, filter, wrap, 10).map(one => one.text.trimEnd())
+    expect(texts('all')).toEqual(['← error: …', '← ok', '→ Bash on…', 'think', 'about it'])
+    expect(texts('thinking')).toEqual(['think', 'about it'])
+    expect(texts('inputs')).toEqual(['→ Bash on…', 'think', 'about it'])
+    expect(texts('inputs', true)).toEqual(['→ Bash one', 'two three', 'four', 'think', 'about it'])
   })
 })
 
@@ -377,9 +401,57 @@ describe('checklist', () => {
     await band.unmount()
 
     const pane = await $.ui.mount({ ...PANE, surface: 'terminal' })
-    expect((await pane.find({ key: 'clean-view-details-close' }))?.props.hotkey).toBe('i')
+    // In the pane, i filters the log to inputs; Esc or Close closes it.
+    expect((await pane.find({ key: 'clean-view-details-close' }))?.props.hotkey).toBeUndefined()
+    expect((await pane.find({ key: 'clean-view-details-inputs' }))?.props.hotkey).toBe('i')
     await pane.press({ key: 'clean-view-details-close' })
     expect(w.closed).toEqual([DETAILS])
+    await pane.unmount()
+  })
+
+  test('the step log filters to thinking (t) or inputs (i) and wraps long lines (w)', async ($, on) => {
+    world(on)
+    await start($)
+    await prompt($, 'Check the branch')
+    await $.tool.call({ tool: PLAN, steps: ['Check the branch', 'Report back'] })
+    await step($)
+    const long = `echo ${'x'.repeat(100)} END`
+    await $.tool.call({ tool: 'Bash', command: long })
+
+    const tall = { ...PANE, props: { ...PANE.props, scroll: { ...PANE.props.scroll, bodyRows: 40 } } }
+    const pane = await $.ui.mount({ ...tall, surface: 'terminal' })
+    const text = async () => (await pane.findAll({ type: 'Text' })).map(one => one.text).join('\n')
+    const hotkey = async (key: string) => (await pane.find({ key }))?.props.hotkey
+    expect(await hotkey('clean-view-details-thinking')).toBe('t')
+    expect(await hotkey('clean-view-details-inputs')).toBe('i')
+    expect(await hotkey('clean-view-details-wrap')).toBe('w')
+
+    const all = await text()
+    expect(all).toContain('Step log · newest first')
+    expect(all).toContain('💭 Checking the branch.')
+    expect(all).toContain('← ok')
+    expect(all).not.toContain('END')
+
+    await pane.press({ key: 'clean-view-details-inputs' })
+    const inputs = await text()
+    expect(inputs).toContain('Step log · hide output')
+    expect(inputs).toContain('→ Bash')
+    expect(inputs).not.toContain('← ok')
+
+    await pane.press({ key: 'clean-view-details-thinking' })
+    const thinking = await text()
+    expect(thinking).toContain('Step log · thinking only')
+    expect(thinking).toContain('💭 Checking the branch.')
+    expect(thinking).not.toContain('→ Bash')
+    expect((await pane.find({ key: 'clean-view-details-inputs' }))?.props.label).toContain('○')
+
+    await pane.press({ key: 'clean-view-details-thinking' })
+    await pane.press({ key: 'clean-view-details-wrap' })
+    expect(await text()).toContain('END')
+
+    await pane.press({ key: 'clean-view-details-next' })
+    await pane.press({ key: 'clean-view-details-thinking' })
+    expect(await text()).toContain('No thinking recorded for this step yet')
     await pane.unmount()
   })
 

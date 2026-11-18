@@ -342,15 +342,15 @@ export function label(one: CleanViewTask, isFirstUpcoming: boolean, isPaused = f
   return isFirstUpcoming ? 'Next' : 'Up next'
 }
 
-// The newest entries a step's raw log keeps, and the characters each summary line keeps.
+// The newest entries a step's raw log keeps, and the characters each entry keeps.
 export const LOG_ENTRIES = 200
-export const LOG_ENTRY_CHARS = 160
+export const LOG_ENTRY_CHARS = 4000
 
 const ANSI = /\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g
 const CONTROL = /[\x00-\x08\x0b-\x1f\x7f-\x9f\ud800-\udfff\u{10eeee}]/gu
 
 function sanitizeLog(text: string): string {
-  return text.slice(0, LOG_ENTRY_CHARS * 4).replace(ANSI, '').replace(/[\r\n\t]+/g, ' ').toWellFormed().replace(CONTROL, '')
+  return text.slice(0, LOG_ENTRY_CHARS * 4).replace(ANSI, '').replace(/\r/g, '').replace(/\t/g, '  ').toWellFormed().replace(CONTROL, '')
 }
 
 function clip(text: string): string {
@@ -366,6 +366,52 @@ export function appendLog(log: readonly CleanViewLogEntry[], kind: CleanViewLogE
   const last = log.at(-1)
   if (last?.key === key) return [...log.slice(0, -1), { ...last, text: clip(last.text + text) }]
   return [...log, { kind, key, text: clip(text) }].slice(-LOG_ENTRIES)
+}
+
+export type LogFilter = 'all' | 'thinking' | 'inputs'
+export type LogLine = { key: string; kind: CleanViewLogEntry['kind']; text: string }
+
+/** One line broken at spaces to fit `width`; a word longer than the width is split. */
+export function wrapLine(text: string, width: number): string[] {
+  const w = Math.max(1, width)
+  const out: string[] = []
+  let line = ''
+  for (const word of text.split(' ')) {
+    // Code points, so a split never leaves half of a surrogate pair.
+    let rest = Array.from(word)
+    while (rest.length > w) {
+      if (line !== '') out.push(line)
+      line = ''
+      out.push(rest.slice(0, w).join(''))
+      rest = rest.slice(w)
+    }
+    const piece = rest.join('')
+    if (line === '') line = piece
+    else if (Array.from(line).length + 1 + rest.length <= w) line += ` ${piece}`
+    else {
+      out.push(line)
+      line = piece
+    }
+  }
+  out.push(line)
+  return out
+}
+
+/**
+ * The step log's lines, newest entry first: `thinking` keeps thinking only,
+ * `inputs` drops results and errors. Thinking always wraps; other entries wrap
+ * when `wrap` is on, else are cut to one line.
+ */
+export function logLines(log: readonly CleanViewLogEntry[], filter: LogFilter, wrap: boolean, width: number): LogLine[] {
+  const kept = log.filter(entry =>
+    filter === 'thinking' ? entry.kind === 'thinking' : filter === 'inputs' ? entry.kind !== 'result' && entry.kind !== 'error' : true,
+  )
+  return [...kept].reverse().flatMap(entry => {
+    const texts = wrap || entry.kind === 'thinking'
+      ? entry.text.split('\n').flatMap(line => wrapLine(line, width))
+      : [fit(entry.text.replace(/\n+/g, ' '), width)]
+    return texts.map((text, i) => ({ key: `${entry.key}-${i}`, kind: entry.kind, text }))
+  })
 }
 
 /** A name sized to the column: cut with "…" when it would wrap, padded otherwise. */

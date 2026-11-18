@@ -47,6 +47,10 @@ declare module 'claude-code' {
       selectedTaskId: string | null
       taskLogs: Record<string, CleanViewLogEntry[]>
       logScroll: number
+      /** The step log's filter in the details pane: everything, thinking only, or inputs only. */
+      logFilter: 'all' | 'thinking' | 'inputs'
+      /** Whether the details pane wraps every log line, not just thinking. */
+      logWrap: boolean
       tick: number
     }
   }

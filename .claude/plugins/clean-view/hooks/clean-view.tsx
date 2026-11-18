@@ -22,6 +22,7 @@ import {
   isRunning,
   isUserRejection,
   label,
+  logLines,
   meter,
   newJob,
   planSteps,
@@ -29,6 +30,7 @@ import {
   taskElapsed,
   updateTask,
 } from './logic'
+import type { LogFilter } from './logic'
 
 const PLUGIN = 'clean-view'
 const COMMAND = 'simple'
@@ -62,6 +64,19 @@ const checklist = atom({ plugin: 'clean-view', key: 'checklist' } as const, EMPT
 const selectedTaskId = atom({ plugin: 'clean-view', key: 'selectedTaskId' } as const, null as string | null)
 const taskLogs = atom({ plugin: 'clean-view', key: 'taskLogs' } as const, {} as Record<string, CleanViewLogEntry[]>)
 const logScroll = atom({ plugin: 'clean-view', key: 'logScroll' } as const, 0)
+const logFilter = atom({ plugin: 'clean-view', key: 'logFilter' } as const, 'all' as LogFilter)
+const logWrap = atom({ plugin: 'clean-view', key: 'logWrap' } as const, false)
+
+const LOG_TITLE: Record<LogFilter, string> = {
+  all: 'Step log · newest first',
+  thinking: 'Step log · thinking only',
+  inputs: 'Step log · hide output',
+}
+const LOG_EMPTY: Record<LogFilter, string> = {
+  all: 'Nothing recorded for this step yet',
+  thinking: 'No thinking recorded for this step yet',
+  inputs: 'No inputs recorded for this step yet',
+}
 const tick = atom({ plugin: 'clean-view', key: 'tick' } as const, 0)
 
 const SECTION = `# Clean View checklist
@@ -164,6 +179,8 @@ async function recordTaskLog($: $, kind: CleanViewLogEntry['kind'], text: string
 async function openDetails($: $, taskId: string) {
   await update($, selectedTaskId, () => taskId)
   await update($, logScroll, () => 0)
+  await update($, logFilter, () => 'all' as LogFilter)
+  await update($, logWrap, () => false)
   focusedButton = undefined
   await $.ui.open({ id: DETAILS_PANE, title: 'Task details', focus: true, closeOnEscape: true, holdToasts: true, rows: 24 })
 }
@@ -185,6 +202,17 @@ async function pageDetails($: $, step: number) {
     await update($, selectedTaskId, () => next.id)
     await update($, logScroll, () => 0)
   }
+}
+
+/** Turns a step-log filter on, or off when it is already on; thinking and inputs exclude each other. */
+async function toggleLogFilter($: $, filter: LogFilter) {
+  await update($, logFilter, current => (current === filter ? 'all' : filter))
+  await update($, logScroll, () => 0)
+}
+
+async function toggleLogWrap($: $) {
+  await update($, logWrap, current => !current)
+  await update($, logScroll, () => 0)
 }
 
 function toolActivity(tool: string, finished = false): string {
@@ -692,11 +720,11 @@ export function registerCleanView(on: On) {
     const index = Math.max(0, list.tasks.findIndex(one => one.id === id))
     const task = list.tasks[index]
     if (!task) return <Text dimColor>No task to show.</Text>
-    const logs = [...((await read($, taskLogs))[task.id] ?? [])].reverse()
-    const lines = logs.flatMap(entry =>
-      entry.text.split('\n').map((line, i) => ({ key: `${entry.key}-${i}`, kind: entry.kind, text: fit(line, Math.max(10, e.props.bodyColumns - 8)) })),
-    )
-    const innerRows = Math.max(4, Math.min(12, e.props.scroll.bodyRows - 18))
+    const filter = await read($, logFilter)
+    const wrap = await read($, logWrap)
+    const lines = logLines((await read($, taskLogs))[task.id] ?? [], filter, wrap, Math.max(10, e.props.bodyColumns - 8))
+    // 19 rows hold the fields, the log's title and toggle rows, its border, and the buttons.
+    const innerRows = Math.max(4, Math.min(12, e.props.scroll.bodyRows - 19))
     maxLogScroll = Math.max(0, lines.length - innerRows)
     const offset = Math.min(await read($, logScroll), maxLogScroll)
     const visible = lines.slice(offset, offset + innerRows)
@@ -733,12 +761,17 @@ export function registerCleanView(on: On) {
         {field('Activity', activity)}
         <Text> </Text>
         <Text>
-          <Text bold>Step log · newest first</Text>
+          <Text bold>{LOG_TITLE[filter]}</Text>
           {lines.length > innerRows && <Text dimColor>{`  ${offset + 1}-${offset + visible.length} of ${lines.length} (scroll to view)`}</Text>}
         </Text>
+        <Box flexDirection="row">
+          <Button key="clean-view-details-thinking" label={`${filter === 'thinking' ? '●' : '○'} Thinking (t)`} hotkey="t" autoFocus={focusedButton === 'clean-view-details-thinking' || undefined} onPress={() => void toggleLogFilter($, 'thinking')} />
+          <Button key="clean-view-details-inputs" label={`${filter === 'inputs' ? '●' : '○'} Inputs (i)`} hotkey="i" autoFocus={focusedButton === 'clean-view-details-inputs' || undefined} onPress={() => void toggleLogFilter($, 'inputs')} />
+          <Button key="clean-view-details-wrap" label={`${wrap ? '●' : '○'} Wrap (w)`} hotkey="w" autoFocus={focusedButton === 'clean-view-details-wrap' || undefined} onPress={() => void toggleLogWrap($)} />
+        </Box>
         <Box borderStyle="round" borderDimColor flexDirection="column" height={innerRows + 2} overflow="hidden" paddingX={1}>
           {visible.length === 0 ? (
-            <Text dimColor>Nothing recorded for this step yet</Text>
+            <Text dimColor>{LOG_EMPTY[filter]}</Text>
           ) : (
             visible.map(line => (
               <Text key={`clean-view-log-${line.key}`} color={line.kind === 'error' ? 'red' : undefined} dimColor={line.kind === 'result'}>{line.text}</Text>
@@ -752,9 +785,9 @@ export function registerCleanView(on: On) {
           {isLive && mainTurnId !== undefined && (
             <Button key="clean-view-details-stop" label="Stop entire run" autoFocus={focusedButton === 'clean-view-details-stop' || undefined} onPress={() => void $.turn.abort({ turnId: mainTurnId! })} />
           )}
-          <Button key="clean-view-details-close" label="Close" hotkey={INSPECT_HOTKEY} autoFocus={focusedButton === 'clean-view-details-close' || undefined} onPress={() => void $.ui.close({ id: DETAILS_PANE })} />
+          <Button key="clean-view-details-close" label="Close" autoFocus={focusedButton === 'clean-view-details-close' || undefined} onPress={() => void $.ui.close({ id: DETAILS_PANE })} />
         </Box>
-        <Text dimColor>Stop ends the entire run · i or Esc closes this pane</Text>
+        <Text dimColor>Stop ends the entire run · t thinking · i inputs · w wrap · Esc closes this pane</Text>
       </Box>
     )
   })

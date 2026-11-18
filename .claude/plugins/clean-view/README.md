@@ -15,8 +15,12 @@ the prompt.
   its status, reported progress, run time, and last visible activity. Use
   **Previous task** and **Next task** (↑/↓ walks the buttons) to move between
   tasks. **Stop entire run** ends the run. Focus the checklist with `Ctrl+X Tab`
-  and press `i` to inspect the active task; press `i` in the focused pane,
-  **Esc**, or **Close** to close it.
+  and press `i` to inspect the active task; press **Esc** or **Close** to
+  close it.
+- **Step log:** The pane lists the step's thinking, tool calls and results,
+  newest first. Press `t` to show thinking only, `i` to hide results and
+  errors (inputs only), or `w` to wrap long lines; each key turns its filter
+  off again. Thinking always wraps. Each entry keeps up to 4,000 characters.
 - **How the plan arrives:** the mod gives Claude two tools, `plan_steps` and
   `report_progress`, and reminds Claude to plan after each tool call until a
   plan exists. The optional `plan_steps.title` names the job; replanning
