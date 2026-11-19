@@ -40,7 +40,6 @@ install-tools:
 	fi
 
 PI_PACKAGES := \
-	npm:pi-intercom \
 	git:github.com/Integralist/pi-auto-model \
 	git:github.com/Integralist/pi-auto-suggest \
 	git:github.com/Integralist/pi-btw \

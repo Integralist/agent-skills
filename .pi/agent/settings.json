@@ -8,7 +8,6 @@
   "hideThinkingBlock": true,
   "theme": "nord-contrast",
   "packages": [
-    "npm:pi-intercom",
     "git:github.com/Integralist/pi-auto-model",
     "git:github.com/Integralist/pi-auto-suggest",
     "git:github.com/Integralist/pi-btw",

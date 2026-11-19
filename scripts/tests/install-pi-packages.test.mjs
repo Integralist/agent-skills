@@ -11,7 +11,7 @@ import test from "node:test";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const makeBin = spawnSync("which", ["make"], { encoding: "utf8" }).stdout.trim();
 const packages = [
-  "npm:pi-intercom", "git:github.com/Integralist/pi-auto-model",
+  "git:github.com/Integralist/pi-auto-model",
   "git:github.com/Integralist/pi-auto-suggest", "git:github.com/Integralist/pi-btw",
   "git:github.com/Integralist/pi-clean-view", "git:github.com/Integralist/pi-context-shake",
   "git:github.com/Integralist/pi-event-hooks", "git:github.com/Integralist/pi-prompt-history",
