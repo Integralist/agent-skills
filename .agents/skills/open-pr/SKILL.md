@@ -8,18 +8,19 @@ metadata:
   model-tier: moderate
 ---
 
-Open a ready-for-review PR for the current branch.
+Open a ready-for-review PR for the current branch unless the user passes
+`--draft` to this skill. Only that explicit flag permits a draft PR.
+This rule overrides any draft guidance in linked references.
 
 1. **Check the branch.** On the default branch, ask whether to create a
    branch with the branch skill or stop. If an open PR exists, ask whether to
    update its description. Continue only on a feature branch with no open PR,
    or after the user chooses.
-2. **Draft the PR.** Read and follow
+2. **Write the PR description.** Read and follow
    [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md), using the default branch
    as the base. For `--github` or an issue reference (`#<n>` or URL), read and
    follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues
-   and Issue Artifacts instead of `projects/` (passing `--draft` to
-   `gh pr create` when requested or when open Slice Sub-Issues remain).
+   and Issue Artifacts instead of `projects/`.
 3. **Get approval.** Show the title and body, then wait for approval. Do not
    open the PR before approval.
 4. **Open it.** If there's no upstream, run `git push -u origin <branch>`.
@@ -29,4 +30,5 @@ Open a ready-for-review PR for the current branch.
    gh pr create --base <default-branch> --title "<title>" --body-file <file>
    ```
 
+   Append `--draft` only if the user passed it to this skill.
    Share the PR URL from `gh`.
