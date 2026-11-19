@@ -85,6 +85,17 @@ authority.
    headings. Aim for about 150 words of prose besides diagram and sources;
    it is a target, not a cap. Use short paragraphs or up to five bullets.
 
+   **Define names once, then use them consistently.** At the first
+   mention of a system or component a newcomer may not know, add a
+   short parenthetical explaining what it does in this example. This
+   applies to the takeaway too, not just Problem. If you want to use
+   a shorter name later, introduce it at first mention. Otherwise,
+   keep the same name in the prose and diagram labels.
+
+   Before sending, scan for undefined names and unintroduced aliases.
+   A reader should never have to guess whether two labels name the
+   same thing.
+
    - **Problem:** Stand alone. Introduce prerequisite concepts before dependent
      terms; explain their purpose, provider or user, and connection. Explain
      familiar-looking terms such as "key", "token", or "issuer" too; expanding
