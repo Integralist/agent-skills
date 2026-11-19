@@ -298,6 +298,10 @@
   const paintHighlight = () => {
     const pinnedPoints = state.pinned.map(slug => points.get(slug)).filter(Boolean);
     const pinnedSet = new Set(pinnedPoints.map(point => point.model.slug));
+    const provider = pinnedPoints[0]?.model.provider;
+    const providerPoints = [...points.values()].filter(point => point.model.provider === provider);
+    $("highlight-provider").value = provider && providerPoints.length === pinnedSet.size
+      && providerPoints.every(point => pinnedSet.has(point.model.slug)) ? provider : "";
     const pinnedSeries = new Set(pinnedPoints.map(point => seriesKey(point.model)));
     const hoverPoint = pinnedPoints.length !== 1 ? points.get(state.hovered) : null;
     const activeSeries = new Set(pinnedSeries);
@@ -359,6 +363,11 @@
     const chosen = models.filter(model => state.selected.has(model.slug));
     const valid = chosen.filter(model =>
       finite(model.scores[state.benchmark]) && finite(valueFor(model, state.benchmark, state.x)));
+    const picker = $("highlight-provider");
+    const providers = [...new Set(valid.map(model => model.provider))].sort();
+    picker.replaceChildren(new Option("Highlight provider…", ""),
+      ...providers.map(provider => new Option(provider, provider)));
+    picker.disabled = providers.length === 0;
     const orderPanel = $("pareto-order-panel");
     const order = $("pareto-order");
     order.replaceChildren();
@@ -810,6 +819,18 @@
   });
   $("pareto-toggle").addEventListener("change", () => {
     state.pareto = $("pareto-toggle").checked;
+    renderChart();
+    syncURL();
+  });
+  $("highlight-provider").addEventListener("change", event => {
+    const provider = event.currentTarget.value;
+    if (!provider) {
+      clearHighlight();
+      return;
+    }
+    state.pinned = [...points.values()]
+      .filter(({ model }) => model.provider === provider)
+      .map(({ model }) => model.slug);
     renderChart();
     syncURL();
   });

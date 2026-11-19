@@ -506,6 +506,56 @@ def test_offline_default_providers_and_axes(page, report_file):
     assert page.locator(".series path").count() == 4
 
 
+def test_provider_highlight_pins_only_selected_models(
+    page: Page, report_file: Path
+) -> None:
+    """A provider choice replaces pins without changing the model selection."""
+    slugs = "demo-claude-opus-low,demo-claude-opus-max,demo-claude-sonnet-high,demo-gpt-high,demo-gemini-pro-high"
+    page.goto(f"{report_file.as_uri()}?models={slugs}&highlight=demo-gpt-high")
+    picker = page.get_by_role("combobox", name="Highlight provider")
+    expect(picker.locator("option")).to_have_text(
+        ["Highlight provider…", "anthropic", "google", "openai"]
+    )
+    picker.select_option("anthropic")
+    expect(picker).to_have_value("anthropic")
+    expect(page.locator('#legend button[aria-pressed="true"]')).to_have_text(
+        ["Claude Opus [DEMO]", "Claude Sonnet [DEMO]"]
+    )
+    expect(page.locator('.series.is-active[data-provider="anthropic"]')).to_have_count(
+        2
+    )
+    expect(page.locator(".series.is-dim")).to_have_count(2)
+    expect(
+        page.locator('.series[data-provider="anthropic"] .node[aria-pressed="true"]')
+    ).to_have_count(3)
+    expect(node(page, "demo-gpt-high")).to_have_attribute("aria-pressed", "false")
+    expect(page.locator(".node")).to_have_count(5)
+
+    page.reload()
+    expect(picker).to_have_value("anthropic")
+    expect(page.locator('#legend button[aria-pressed="true"]')).to_have_count(2)
+    picker.select_option("")
+    expect(page.locator(".series.is-dim")).to_have_count(0)
+    expect(page.locator(".node")).to_have_count(5)
+    assert "highlight=" not in page.url
+
+    picker.select_option("openai")
+    expect(node(page, "demo-gpt-high")).to_have_attribute("aria-pressed", "true")
+    expect(page.locator(".series.is-active")).to_have_count(1)
+    page.get_by_role("button", name="Clear highlight").click()
+    expect(picker).to_have_value("")
+    expect(page.locator(".series.is-active")).to_have_count(0)
+    picker.select_option("anthropic")
+    page.keyboard.press("Escape")
+    expect(picker).to_have_value("")
+    expect(page.locator(".series.is-dim")).to_have_count(0)
+
+    page.locator("#models-toggle").click()
+    page.locator("#clear-models").click()
+    expect(picker).to_be_disabled()
+    expect(picker.locator("option")).to_have_text(["Highlight provider…"])
+
+
 def test_hover_pin_switch_toggle_and_crosshairs(page, report_file):
     page.goto(report_file.as_uri())
     first = node(page, "demo-claude-opus-high")

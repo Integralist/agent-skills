@@ -32,8 +32,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, .node:focus-vis
 .toolbar > label { display: flex; flex-direction: column; gap: 7px; color: var(--muted); font-size: 11px; }
 select { padding: 10px 30px 10px 12px; max-width: 340px; min-height: 39px; font-size: 12px; cursor: pointer; }
 #save-html { margin-left: auto; }
+.toolbar select, #highlight-provider, #models-toggle {
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%23757575' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-image: var(--chevron);
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px;
+  padding-right: 36px;
+}
+.toolbar select, #highlight-provider { appearance: none; }
 #models-toggle { min-width: 176px; text-align: left; }
-#models-toggle::after { content: "⌄"; float: right; margin-left: 14px; }
+#models-toggle:hover { background-image: var(--chevron); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px; }
+.provider-highlight { margin: 12px 28px 8px; }
 .picker { position: relative; }
 .picker-panel { position: absolute; top: calc(100% + 10px); left: 0; width: min(450px, calc(100vw - 40px)); z-index: 10; background: var(--card); border: 1px solid var(--border); box-shadow: var(--d-shadow); border-radius: 12px; padding: 16px; }
 .search-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 7px; }
@@ -124,7 +134,7 @@ a { color: var(--accent-text); text-underline-offset: 3px; }
   #save-html { margin-left: 0; }
   .chart-heading { padding: 20px 18px 0; flex-direction: column; align-items: flex-start; }
   h2 { font-size: 21px; }
-  .metric-note, .warning { margin-left: 18px; margin-right: 18px; }
+  .metric-note, .warning, .provider-highlight { margin-left: 18px; margin-right: 18px; }
   .legend { padding-left: 18px; padding-right: 18px; }
   .pareto-order-panel { padding-left: 18px; padding-right: 18px; }
   .chart-foot { flex-direction: column; margin: 0 18px; gap: 7px; }
