@@ -3,7 +3,10 @@
 Read this before writing the explanation.
 
 ````md
-<One-sentence takeaway, naming the PR, comparison, commit, or code scope.>
+<System name> (<what the system is and what it does in plain English>):
+<What the PR, commit, or scoped code does and why it matters.>
+
+<Link or revision comparison, when applicable.>
 
 ## Problem
 

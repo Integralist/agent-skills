@@ -92,8 +92,10 @@ authority.
    a shorter name later, introduce it at first mention. Otherwise,
    keep the same name in the prose and diagram labels.
 
-   Before sending, scan for undefined names and unintroduced aliases.
-   A reader should never have to guess whether two labels name the
+   Before sending, check that the opening defines the primary system,
+   even if its name appears in a link. If the definition is missing,
+   revise before sending. Scan for undefined names and unintroduced
+   aliases so readers never have to guess whether two labels name the
    same thing.
 
    - **Problem:** Stand alone. Introduce prerequisite concepts before dependent
