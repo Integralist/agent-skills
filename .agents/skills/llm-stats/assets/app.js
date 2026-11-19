@@ -6,9 +6,14 @@
   const $ = id => document.getElementById(id);
   const svgNS = "http://www.w3.org/2000/svg";
   const effortOrder = ["none", "default", "minimal", "low", "medium", "high", "xhigh", "max"];
-  const paletteFor = provider => {
-    const category = ["anthropic", "openai", "google"].includes(provider) ? provider : "other";
-    return [1, 2, 3].map(index => `var(--family-${category}-${index})`);
+  const familyPalette = Array.from({ length: 10 }, (_, i) => `--chart-family-${i + 1}`);
+  const familyColour = index => {
+    const base = `var(${familyPalette[index % familyPalette.length]})`;
+    const cycle = Math.floor(index / familyPalette.length);
+    if (!cycle) return base;
+    const target = cycle % 2 ? "--ink" : "--paper";
+    const weight = 100 - 36 * (1 - 1 / (1 + Math.ceil(cycle / 2)));
+    return `color-mix(in oklab, ${base} ${weight}%, var(${target}))`;
   };
   const xInfo = {
     cost: { label: "Avg cost per task · USD", unit: "USD", lower: true,
@@ -23,6 +28,10 @@
       note: "Median output-generation speed from the source data; not end-to-end task completion speed." },
   };
   const seriesKey = model => JSON.stringify([model.provider, model.series]);
+  const tooltipName = name => name
+    .replace(/,\s*default fallback(?=\s*[,)]|\s*$)/i, "")
+    .replace(/\s*\(default fallback\)\s*$/i, "");
+  const legendName = series => series.replace(/\s*·\s*default fallback\s*$/i, "");
   const searchable = value => value.toLowerCase().normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
   const glob = (pattern, value) => new RegExp("^" + pattern
@@ -274,7 +283,7 @@
     const box = $("tooltip");
     box.replaceChildren();
     const title = document.createElement("strong");
-    title.textContent = point.model.name;
+    title.textContent = tooltipName(point.model.name);
     const score = document.createElement("div");
     score.textContent = benchmarkInfo(state.benchmark).label + ": " + formatY(point.y);
     const value = document.createElement("div");
@@ -434,16 +443,13 @@
       if (!grouped.has(key)) grouped.set(key, []);
       grouped.get(key).push(model);
     }
-    const providerCounts = new Map();
+    let familyIndex = 0;
     for (const [key, family] of grouped) {
       family.sort((a, b) => effortOrder.indexOf(a.effort) - effortOrder.indexOf(b.effort)
         || valueFor(a, state.benchmark, state.x) - valueFor(b, state.benchmark, state.x)
         || a.slug.localeCompare(b.slug));
       const provider = family[0].provider;
-      const index = providerCounts.get(provider) || 0;
-      providerCounts.set(provider, index + 1);
-      const colors = paletteFor(provider);
-      const color = colors[index % colors.length];
+      const color = familyColour(familyIndex++);
       const group = svgElement("g", { class: "series", "data-series": key, "data-provider": provider }, chart);
       groups.set(key, group);
       const line = family.map(model => {
@@ -452,6 +458,7 @@
         points.set(model.slug, point);
         return point;
       });
+      const isPoint = line.length === 1;
       if (line.length > 1) {
         svgElement("path", { d: line.map((point, i) =>
           (i ? "L" : "M") + point.sx + "," + point.sy).join(" "), stroke: color }, group);
@@ -486,12 +493,14 @@
       const anchor = line[line.length - 1];
       const legend = document.createElement("button");
       legend.dataset.series = key;
-      legend.setAttribute("aria-label", "Highlight " + anchor.model.series);
+      const name = legendName(anchor.model.series);
+      legend.setAttribute("aria-label", "Highlight " + name);
       const swatch = document.createElement("span");
       swatch.className = "legend-swatch";
       swatch.style.background = color;
+      if (isPoint) swatch.dataset.marker = "circle";
       const label = document.createElement("span");
-      label.textContent = anchor.model.series;
+      label.textContent = name;
       legend.append(swatch, label);
       legend.addEventListener("pointerenter", () => {
         legendPointer = key;
@@ -621,11 +630,55 @@
       image.src = svgURL;
       await image.decode();
       const canvas = document.createElement("canvas");
-      canvas.width = width * 2;
-      canvas.height = height * 2;
       const context = canvas.getContext("2d");
       if (!context) throw new Error("Canvas is unavailable");
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const padding = 28;
+      const rowHeight = 24;
+      const fontSize = 14;
+      const maxLabelWidth = width - 2 * padding - 24;
+      let x = padding;
+      let y = height + rowHeight / 2;
+      const buttons = [...$("legend").querySelectorAll("button")];
+      const pinned = buttons.filter(button => button.getAttribute("aria-pressed") === "true");
+      const legend = (pinned.length ? pinned : buttons).map(button => {
+        const style = getComputedStyle(button);
+        const [swatch, label] = button.children;
+        const font = `${style.fontWeight} ${fontSize}px ${style.fontFamily}`;
+        context.font = font;
+        const labelWidth = Math.min(context.measureText(label.textContent).width, maxLabelWidth);
+        if (x + 24 + labelWidth > width - padding) {
+          x = padding;
+          y += rowHeight;
+        }
+        const entry = {
+          x, y, font, label: label.textContent, ink: style.color,
+          color: getComputedStyle(swatch).backgroundColor,
+          isPoint: swatch.dataset.marker === "circle",
+        };
+        x += 24 + labelWidth + 18;
+        return entry;
+      });
+      const exportHeight = legend.length ? y + rowHeight : height;
+      canvas.width = width * 2;
+      canvas.height = exportHeight * 2;
+      context.scale(2, 2);
+      context.drawImage(image, 0, 0, width, height);
+      context.fillStyle = background.getAttribute("fill");
+      context.fillRect(0, height, width, exportHeight - height);
+      context.textBaseline = "middle";
+      for (const entry of legend) {
+        context.fillStyle = entry.color;
+        if (entry.isPoint) {
+          context.beginPath();
+          context.arc(entry.x + 8, entry.y, 5, 0, 2 * Math.PI);
+          context.fill();
+        } else {
+          context.fillRect(entry.x, entry.y - 2, 16, 4);
+        }
+        context.fillStyle = entry.ink;
+        context.font = entry.font;
+        context.fillText(entry.label, entry.x + 24, entry.y, maxLabelWidth);
+      }
       const png = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
       if (!png) throw new Error("PNG encoding failed");
       download(png, "image/png", "llm-stats-chart.png");

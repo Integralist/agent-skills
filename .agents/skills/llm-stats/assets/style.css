@@ -98,6 +98,8 @@ h2 { font: var(--d-heading-weight) 24px/1.2 var(--d-font-heading); letter-spacin
 .legend button { border: 0; background: none; padding: 4px 0; color: var(--muted); display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 500; }
 .legend button.is-dim { opacity: .4; }
 .legend-swatch { height: 4px; width: 16px; border-radius: 2px; box-shadow: 0 0 0 1px var(--d-border); }
+.legend-swatch[data-marker] { height: 12px; box-shadow: none; }
+.legend-swatch[data-marker="circle"] { clip-path: circle(5px); }
 .chart-foot { border-top: 1px solid var(--border); margin: 0 28px; padding: 14px 0; display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 10px; line-height: 1.6; }
 .chart-foot p { margin: 0; }
 #pin-status { color: var(--orange); text-align: right; }

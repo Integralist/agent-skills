@@ -1,5 +1,16 @@
 /* Stable data categories, separate from either theme's action colours. */
 :root {
+  /* Qualitative chart palette: separate hues and lightness in both modes. */
+  --chart-family-1: light-dark(#1559d6, #508aff);
+  --chart-family-2: light-dark(#ad3700, #ff690d);
+  --chart-family-3: light-dark(#007568, #00d4bb);
+  --chart-family-4: light-dark(#7928b8, #ad70ff);
+  --chart-family-5: light-dark(#8a6800, #ffd44d);
+  --chart-family-6: light-dark(#397700, #91e52d);
+  --chart-family-7: light-dark(#b71474, #ff70cd);
+  --chart-family-8: light-dark(#e33a3c, #ff394d);
+  --chart-family-9: light-dark(#36393f, #d0d5df);
+  --chart-family-10: light-dark(#007ca6, #49cfff);
   --s1: #eb6834;
   --s2: #2a78d6;
   --s3: #1baf7a;

@@ -368,6 +368,82 @@ def test_model_lines_are_bright_and_distinct(page: Page, report_file: Path) -> N
     assert all(max(color) - min(color) >= 140 for color in colors)
 
 
+@pytest.mark.parametrize("mode", ["light", "dark"])
+def test_gemini_families_use_ten_colours_then_shades(page: Page, mode: str) -> None:
+    """Ten Gemini lines and one single-point family differ by colour only."""
+    variants = [
+        model for model in demo_models() if model["slug"].startswith("demo-gpt-")
+    ]
+    models = [
+        {
+            **model,
+            "slug": f"gemini-{family}-{model['effort']}",
+            "provider": "google",
+            "series": f"Gemini {family}",
+        }
+        for family in range(1, 11)
+        for model in variants
+    ]
+    models.append({**models[-1], "slug": "gemini-argon", "series": "Gemini Argon"})
+    config = load_config(BASE / "defaults.json")
+    config.update(benchmark="deepswe", x="cost", models=[m["slug"] for m in models])
+    path = generate(models, config, source="Synthetic demo", demo=True)
+    try:
+        page.goto(path.as_uri())
+        page.locator("#design-mode").select_option(mode)
+        styles = page.locator(".series path").evaluate_all(
+            """paths => paths.map(path => {
+                const style = getComputedStyle(path);
+                return [style.stroke, style.strokeDasharray];
+            })"""
+        )
+        assert len(styles) == 10
+        colours = [color for color, _ in styles]
+        separation, contrast = page.evaluate(
+            """colours => {
+                const linear = rgb => rgb.match(/[\\d.]+/g).slice(0, 3).map(value => {
+                    const c = Number(value) / 255;
+                    return c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
+                });
+                const lab = ([r, g, b]) => {
+                    const l = Math.cbrt(.41222*r + .53633*g + .05145*b);
+                    const m = Math.cbrt(.21190*r + .68070*g + .10740*b);
+                    const s = Math.cbrt(.08830*r + .28172*g + .62998*b);
+                    return [.21045*l + .79362*m - .00407*s,
+                        1.978*l - 2.42859*m + .45059*s, .02590*l + .78277*m - .80868*s];
+                };
+                const luminance = ([r, g, b]) => .2126*r + .7152*g + .0722*b;
+                const rgb = colours.map(linear);
+                const labs = rgb.map(lab);
+                const background = getComputedStyle(document.querySelector('.chart-card'));
+                const surface = luminance(linear(background.backgroundColor)) + .05;
+                const separations = labs.flatMap((a, i) => labs.slice(i + 1).map(b =>
+                    Math.hypot(...a.map((channel, j) => channel - b[j]))));
+                const contrasts = rgb.map(colour => {
+                    const light = luminance(colour) + .05;
+                    return Math.max(light, surface) / Math.min(light, surface);
+                });
+                return [Math.min(...separations), Math.min(...contrasts)];
+            }""",
+            colours,
+        )
+        assert separation >= 0.09
+        assert contrast >= 3
+        assert all(dash == "none" for _, dash in styles)
+        argon = node(page, "gemini-argon")
+        expect(argon.locator("circle.dot")).to_have_count(1)
+        argon_colour = argon.locator(".dot").evaluate(
+            "dot => getComputedStyle(dot).fill"
+        )
+        assert argon_colour not in {color for color, _ in styles}
+        swatches = page.locator("#legend .legend-swatch").evaluate_all(
+            "swatches => swatches.map(swatch => getComputedStyle(swatch).backgroundColor)"
+        )
+        assert swatches == [color for color, _ in styles] + [argon_colour]
+    finally:
+        path.unlink(missing_ok=True)
+
+
 def test_default_preview_uses_intelligence_not_deepswe(page: Page) -> None:
     path = generate(
         demo_models(), load_config(BASE / "defaults.json"), source="Demo", demo=True
@@ -558,9 +634,42 @@ def test_saved_html_keeps_view_without_query_and_exports_data(
     assert "demo-gpt-high" in csv.read_text()
 
 
-def test_chart_downloads_png(page: Page, report_file: Path, tmp_path: Path) -> None:
-    """The chart button downloads the current graph as a valid PNG image."""
-    page.goto(report_file.as_uri() + "?models=demo-gpt-high,demo-gpt-max&x=cost")
+def test_default_fallback_hidden_in_tooltip_and_legend(page: Page) -> None:
+    """Hide the fallback suffix without removing the benchmark point."""
+    config = load_config(BASE / "defaults.json")
+    config.update(benchmark="deepswe", x="cost")
+    model = next(model for model in demo_models() if model["slug"] == "demo-gpt-high")
+    model.update(
+        name="Example Model (Xhigh, Default Fallback)",
+        series="Example Model · default fallback",
+    )
+    path = generate([model], config, source="Synthetic demo", demo=True)
+    try:
+        page.goto(path.as_uri() + "?models=demo-gpt-high")
+        node(page, "demo-gpt-high").focus()
+        expect(page.locator("#tooltip strong")).to_have_text("Example Model (Xhigh)")
+        legend = page.get_by_role("button", name="Highlight Example Model", exact=True)
+        expect(legend).to_have_text("Example Model")
+    finally:
+        path.unlink(missing_ok=True)
+
+
+@pytest.mark.parametrize("pin_family", [False, True])
+def test_chart_downloads_png(
+    page: Page, report_file: Path, tmp_path: Path, pin_family: bool
+) -> None:
+    """Export all plotted family swatches or only the pinned family swatch."""
+    page.goto(
+        report_file.as_uri() + "?models=demo-gpt-high,demo-claude-opus-high&x=cost"
+    )
+    if pin_family:
+        node(page, "demo-gpt-high").click()
+    legend = page.locator("#legend button")
+    expect(legend).to_have_count(2)
+    expect(legend.filter(has=page.locator(".legend-swatch"))).to_have_count(2)
+    expect(page.locator('#legend button[aria-pressed="true"]')).to_have_count(
+        int(pin_family)
+    )
     button = page.get_by_role("button", name="Download PNG")
     assert button.count() == 1
     expect(page.locator(".node")).to_have_count(2)
@@ -571,7 +680,30 @@ def test_chart_downloads_png(page: Page, report_file: Path, tmp_path: Path) -> N
     png = png_path.read_bytes()
     assert png[:8] == bytes.fromhex("89504e470d0a1a0a")
     assert int.from_bytes(png[16:20], byteorder="big") == 2560
-    assert int.from_bytes(png[20:24], byteorder="big") == 1320
+    assert int.from_bytes(png[20:24], byteorder="big") > 1320
+    assert page.evaluate(
+        """async ({ hex, pinFamily }) => {
+            const bytes = Uint8Array.from(hex.match(/../g), byte => parseInt(byte, 16));
+            const image = await createImageBitmap(new Blob([bytes], {type: 'image/png'}));
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0);
+            const pixels = ctx.getImageData(0, 1320, image.width, image.height - 1320).data;
+            return [...document.querySelectorAll('#legend button')].every(button => {
+                const swatch = button.querySelector('.legend-swatch');
+                ctx.fillStyle = getComputedStyle(swatch).backgroundColor;
+                const rgb = ctx.fillStyle.slice(1).match(/../g).map(byte => parseInt(byte, 16));
+                let found = false;
+                for (let i = 0; i < pixels.length && !found; i += 4) {
+                    found = rgb.every((channel, j) => pixels[i + j] === channel);
+                }
+                return found === (!pinFamily || button.getAttribute('aria-pressed') === 'true');
+            });
+        }""",
+        {"hex": png.hex(), "pinFamily": pin_family},
+    )
 
 
 def test_png_download_reports_encoding_failure(page: Page, report_file: Path) -> None:
