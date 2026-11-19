@@ -51,6 +51,7 @@
     "google-vertex/gemini-3.8-flash",
     "google-vertex/gemini-4-argon",
     "google-vertex/gemini-4-carbon",
-    "google-vertex/gemini-4-hydrogen"
+    "google-vertex/gemini-4-hydrogen",
+    "google-vertex/gemini-4-neon"
   ]
 }
