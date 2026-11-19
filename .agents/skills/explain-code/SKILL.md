@@ -57,6 +57,15 @@ authority.
    and name unknowns while explaining what is known. Continue when every
    material change connects to a problem and observable outcome, or its
    missing link is explicit.
+
+   **Newcomer check — before drafting.** Identify what a reader must
+   understand for the change to make sense. In Problem, explain what
+   the system does, who relies on it, and how the relevant part works
+   before describing what is wrong or missing.
+
+   Read the takeaway and Problem as if you had never seen the repo.
+   If either relies on a term, relationship, or assumption the reader
+   can't yet explain, add the missing context where it's first needed.
 3. **Draw the flow.** Include one Mermaid diagram of six participants or nodes
    or fewer, using plain role labels. Use a sequence diagram for requests and
    hand-offs, or a flowchart when relationships or branches explain it better.
