@@ -34,45 +34,51 @@ For Model, report the exact session model ID and effort from
 `$CLAUDE_EFFORT` (Claude Code) or `$PI_REASONING_LEVEL` (Pi), else
 `effort unknown`. Report measured elapsed time, not an estimate.
 
-Use sections appropriate to the verdict:
+Lead with the verdict and scope. Use the matching format without adding
+headings to the report.
+
+**HOLD or STOP**
 
 ````markdown
-### Verdict
+🟡 **HOLD** — <recommendation and scope reviewed>
 
-🟡 **HOLD** — <one-sentence recommendation and scope reviewed>
+<One short paragraph: what triggers the failure, how likely that trigger
+is in normal use, and what happens. Cite the evidence as `path:line`.
+If likelihood is unknown, name what's missing rather than guessing.>
 
-- **Model:** <exact model ID and effort, e.g. gemini-3.8-flash (high effort)>
-- **Elapsed:** <measured duration, e.g. 2m 30s>
+**Blast radius and rollback:** <Who or what is likely affected, and what
+would widen the impact if material. One-way door, two-way door, or
+unknown: what rollback restores and what it can't undo.>
 
-<!-- HOLD or STOP -->
-### Worst thing that could happen
-<Consequence and who or what it affects.>
-### How it could happen
-<Trigger → changed behaviour → impact, with preconditions, blast radius,
-and cited code and safeguards.>
-### Before commit or merge
-<Smallest useful mitigation, decision, or check.>
-
-<!-- PROCEED -->
-### Why no material risk was found
-<Why no concrete failure path is reachable; what you checked and why it stays
-bounded.>
-### Verified safeguards
-<Code, tests, configuration, or guards, with path:line.>
-
-<!-- HOLD, STOP, or PROCEED; omit when none -->
-### What I couldn't confirm
-<Only unknowns that could change the verdict.>
-
-<!-- UNKNOWN -->
-### Why this could not be assessed
-<Missing access, unresolvable ref, or unavailable evidence.>
-### What is needed to proceed
-<Input, permission, or command that would unblock review.>
+**Before commit or merge:** <Smallest useful mitigation or check.>
 ````
 
-For an approved PR comment, start with this exact attribution, then the
-verdict and report sections. Omit Model and Elapsed:
+A two-way door can still warrant STOP if the impact before rollback is
+unacceptable.
+
+**PROCEED**
+
+````markdown
+🟢 **PROCEED** — <scope reviewed>
+
+<One sentence on what keeps the worst credible outcome from happening,
+with a `path:line` citation.>
+````
+
+**UNKNOWN**
+
+````markdown
+⚪ **UNKNOWN** — <scope reviewed and what couldn't be assessed>
+
+**Needed:** <The input, access, or evidence that would unblock the review.>
+````
+
+For any verdict, add a separate **Not confirmed:** line only if the gap
+could change the decision and isn't already stated. For chat, end with
+**Model:** and **Elapsed:** on one line.
+
+For an approved PR comment, start with this exact attribution, then use
+the matching report format above. Omit Model and Elapsed:
 
 ```txt
 🤖 This review was written by an LLM agent (`<model ID>`, <effort> effort).
