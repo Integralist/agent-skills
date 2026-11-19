@@ -58,14 +58,15 @@ authority.
    material change connects to a problem and observable outcome, or its
    missing link is explicit.
 
-   **Newcomer check — before drafting.** Identify what a reader must
-   understand for the change to make sense. In Problem, explain what
-   the system does, who relies on it, and how the relevant part works
-   before describing what is wrong or missing.
+   **Newcomer check — follow one example.** In Problem, explain what
+   the system does and start with something a person or system is trying
+   to accomplish. Follow one concrete example until the reader can see
+   what happens and why it matters. Explain unfamiliar terms by the role
+   they play in that example, not just by renaming them.
 
-   Read the takeaway and Problem as if you had never seen the repo.
-   If either relies on a term, relationship, or assumption the reader
-   can't yet explain, add the missing context where it's first needed.
+   For a change, show where the old behaviour falls short and continue
+   the same example in Solution to show what happens now. Don't stop at
+   an intermediate step if a later step explains why it matters.
 3. **Draw the flow.** Include one Mermaid diagram of six participants or nodes
    or fewer, using plain role labels. Use a sequence diagram for requests and
    hand-offs, or a flowchart when relationships or branches explain it better.
