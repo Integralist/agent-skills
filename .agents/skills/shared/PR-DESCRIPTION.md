@@ -24,10 +24,7 @@ Use this template, even when the repo ships its own:
 ## Problem
 
 <What's wrong or missing, who or what it affects, and why it matters. State
-system role and prerequisite terms if crossing boundaries. Reference the
-issue or ticket as separate bullet items if there is one (for example,
-`- Part of #<root> — <title>` and `- Delivers #<slice> — <title>`, or
-`- Closes #<issue>`).>
+system role and prerequisite terms if crossing boundaries.>
 
 ## Solution
 
@@ -43,12 +40,34 @@ state what stays the same, and note trade-offs beside benefits.>
 
 <Optional: pre-merge checks—what tests were run and what they verify,
 migration steps, risks. Omit if empty.>
+
+---
+
+<details>
+<summary>📋 <b>Project metadata</b></summary>
+
+<Issue and ticket references as separate bullets, including project, slice,
+and delivered-task references with their required state and evidence. Keep
+the prescribed wording, such as `Part of`, `Delivers`, or `Closes`.>
+
+</details>
 ````
 
 ### Rules
 
-- Describe behaviour and intent, not a file-by-file inventory. The reviewer
-  gets line detail from the diff.
+- Put tracking metadata only in the final `Project metadata` block. Keep it
+  collapsed (no `open` attribute). Omit the block and its divider if empty.
+  Keep context and pre-merge requirements that reviewers need visible in the
+  main body.
+
+- Before showing the draft, do a concision pass. Keep each point once. Cut
+  sentences that don't change what the reviewer understands, checks, or
+  decides. Link to the diff or decision record for supporting detail.
+- After cutting, check that the visible body still states what changes,
+  why it matters, and what reviewers must verify before merging. Keep
+  material constraints, failure cases, risks, and verification gaps
+  visible. Split dense paragraphs by idea rather than packing more into
+  each sentence.
 - For GitHub-tracked projects, before drafting or updating issue references,
   read and follow [task and PR reconciliation](GITHUB-ISSUES.md#task-and-pr-reconciliation).
   A slice reference alone is not a delivered-task inventory.
@@ -67,7 +86,8 @@ migration steps, risks. Omit if empty.>
   cannot undo, such as deleted data.
 - Write each paragraph as one line. GitHub soft-wraps, so breaks at 80 columns
   render ragged.
-- Separate bullet items with a blank line so GitHub spaces them out.
+- Put a blank line between every pair of list items, including numbered items.
+  Use numbered lists only when the order matters.
 - Use an emoji only where it signals status faster than words (✅ verified, ⚠️
   caution, ❌ breaking), at most one per line, and never in the title, headings,
   or code.
