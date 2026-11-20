@@ -68,15 +68,20 @@ tell the user and wait. Do not fill the gap with a guess.
    bring its verdict back before continuing. Do not write the spec yet.
 4. **Spec.** Use [to-spec](../to-spec/SKILL.md) with the aligned idea,
    research, and preserved request/history (`intent.md` when present). Update
-   `spec.md` if grilling started from a draft. Have a separate read-only
-   reviewer run [critique](../critique/SKILL.md) on `spec.md`, resolve agreed
-   findings, then run [distill](../distill/SKILL.md) (`--prune`) to strip
-   accumulated repetition and caveats before handoff. Present a short
+   `spec.md` if grilling started from a draft. When a decision changes, update
+   every artifact that restates it (if an artifact is already approved, leave
+   it unchanged and record the proposed revision separately). Have a separate
+   read-only reviewer, on a different model family where available, run
+   [critique](../critique/SKILL.md)
+   on `spec.md` against the records it cites, resolve agreed findings, then
+   run [distill](../distill/SKILL.md) (`--prune`) to strip accumulated
+   repetition and caveats before handoff. Present a short
    [summarize](../summarize/SKILL.md)-style digest in chat. Do not plan or
    implement before alignment is confirmed.
 5. **Plan.** Use [to-plan](../to-plan/SKILL.md) with the spec and preserved
-   intent, then have a separate read-only reviewer run
-   [critique](../critique/SKILL.md) on the plan. Resolve agreed findings, then
+   intent, then have a separate read-only reviewer, on a different model
+   family where available, run [critique](../critique/SKILL.md) on the plan
+   against the spec and the records it cites. Resolve agreed findings, then
    run [distill](../distill/SKILL.md) (`--prune`) so slice summaries stay
    within [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md) budgets and shared
    sections are linked, not copied. Run [to-adr](../to-adr/SKILL.md) on the
