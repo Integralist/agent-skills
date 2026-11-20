@@ -16,6 +16,39 @@ the runner (likely I'm searching wrong).
 ```
 
 ```txt
+:wave::skin-tone-2: I think this is the right place for a Switchboard
+question. Please 301 me if not.
+
+So I’ve been asked to look into APP-217, and it’s probably best I give you
+a bit of background…
+
+We have part of the internal tier running in dev-central, but the
+customer tier isn't in production yet and its dev setup is still
+incomplete. There’s a newer, unapproved proposal to put just the customer
+tier in prod-east, alongside Switchboard. The internal tier would stay in
+prod-central, so this isn’t a plan to move the whole platform.
+
+Now, as for APP-217, the ask is to let the customer tier’s request
+authoriser use Switchboard’s flag-evaluation endpoint (which I understand
+is on port 8081), but not its other ports. That should only apply to the
+authoriser’s Kubernetes ServiceAccount. The internal tier and existing
+callers should carry on as they do today.
+
+The service mesh setup is outside my area, so I may have this wrong.
+My understanding is that an allow rule naming just our ServiceAccount
+could affect other callers. Does that sound about right to y’all? Is a
+deny rule scoped to our ServiceAccount the right way to do this?
+
+The authoriser isn't deployed in production yet, so I can’t check the
+ServiceAccount against a live workload. If the prod-east proposal goes
+ahead, I’d expect `customer-authoriser-prod-east` based on our naming
+convention, but that’s not a verified identity.
+
+Have I given you enough to go on (or enough of the right information
+:sweat_smile:)? What else needs to be in place before we can move forward?
+```
+
+```txt
 You got a moment for this 1 character change PR :smile:
 ```
 

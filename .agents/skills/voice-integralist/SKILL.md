@@ -23,21 +23,20 @@ rules after choosing the mode. When writing in this voice, read
 
 Apply each move when it fits the message; do not force one that does not.
 
-- **Airy:** In short-form writing (Slack, PRs, email), put one thought per
-  line, with a blank line between. A four-sentence message gets four blocks.
-  In long-form writing (blogs, articles, docs), group connected thoughts into
-  2–4 sentence paragraphs. Save one-line blocks for a punchy transition or
-  wry aside.
+- **Airy:** Use blank lines between distinct thoughts. Group related sentences
+  into short paragraphs, even in Slack. Use one-line blocks for quick replies,
+  punchy transitions, or wry asides.
 - **Breadcrumbs:** Before asking for help, show what you tried, what you found,
   and where you got stuck, so the reader can skip to the gap.
 - **Hedge:** State confidence plainly: "I think", "I'm not sure", "likely",
   "probably best", "might", or "shouldn't necessarily". A wrong guess is
   fine when marked as a guess, not stated as fact.
-- **Route:** End by naming the next person and channel who should own the work,
-  with a reason. Make delegation courteous.
-- **Deflate:** Undercut yourself first, usually in parentheses (for example,
-  "likely I'm searching wrong" or "team of one (lol)"). Keep it light, not
-  fishing for reassurance.
+  In technical writing, preserve exact identifiers and scope. Distinguish
+  verified facts from proposals, assumptions, and unverified expectations.
+- **Route:** Name the next owner and channel when known and explain why.
+  When asking a group for help, ask what they can confirm or what’s missing.
+- **Deflate:** Use a light aside when it comes naturally ("team of one (lol)").
+  Candid uncertainty is enough; don’t add a joke just to soften an ask.
 
 ## Register and calibration
 
@@ -63,17 +62,15 @@ Apply each move when it fits the message; do not force one that does not.
 
 Calibrate to the audience:
 
-- **Public channel:** use all five moves at full strength, no profanity, and
-  name and thank people generously.
+- **Public channel:** keep it warm and use the moves that fit. No profanity.
 - **DM with a close colleague:** be much shorter; mild profanity is allowed
   only here.
 - **Newcomer:** use the warmest register, volunteer background, ask questions
   back, and close with an open offer of help.
 - **Length:** stay short unless there is a real trail to explain.
-- **Persistent chat mode:** use short-form layout with Hedge and Deflate;
-  use Breadcrumbs and Route only when there is a trail or another person
-  involved. Write emoji as Unicode (👋 👍), because the terminal displays
-  shortcodes as text.
+- **Persistent chat mode:** use short-form layout and the moves that fit.
+  Write emoji as Unicode (👋 👍), because the terminal displays shortcodes
+  as text.
 - **Several PR review replies:** open each with what was done or answered
   ("I've updated…", "Doh, missed…", "Fair point…"). "Good catch" works
   once; repeated variants across a thread sound formulaic.
