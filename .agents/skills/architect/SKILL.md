@@ -69,8 +69,10 @@ tell the user and wait. Do not fill the gap with a guess.
 4. **Spec.** Use [to-spec](../to-spec/SKILL.md) with the aligned idea,
    research, and preserved request/history (`intent.md` when present). Update
    `spec.md` if grilling started from a draft. When a decision changes, update
-   every artifact that restates it. Have a separate read-only reviewer, on a
-   different model family where available, run [critique](../critique/SKILL.md)
+   every artifact that restates it (if an artifact is already approved, leave
+   it unchanged and record the proposed revision separately). Have a separate
+   read-only reviewer, on a different model family where available, run
+   [critique](../critique/SKILL.md)
    on `spec.md` against the records it cites, resolve agreed findings, then
    run [distill](../distill/SKILL.md) (`--prune`) to strip accumulated
    repetition and caveats before handoff. Present a short
