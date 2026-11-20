@@ -17,7 +17,8 @@ problems. If the document is sound, say so.
 
 1. **Read the whole document.** Use the path the user gave. If they gave none,
    ask which file to critique. For project documents, also read root
-   `GLOSSARY.md`; if absent, use root `CONTEXT.md` as the legacy glossary.
+   `GLOSSARY.md`; if absent, use root `CONTEXT.md` as the legacy glossary,
+   and the records the document cites or summarises (ADRs, specs, design docs).
 2. **Check for fallacies.** Look for straw man, false dichotomy, appeal to
    authority, slippery slope, circular reasoning, ad hominem, red herring,
    hasty generalization, false cause, moving the goalposts, equivocation,
@@ -35,8 +36,10 @@ problems. If the document is sound, say so.
    - Bloat and buried decisions: repeated sections across slices or artifacts,
      process/repo-rule boilerplate, walls of prose, or key decisions buried
      under uncollapsed technical detail.
-   - Consistency: contradictions or later sections that conflict with earlier
-     ones.
+   - Consistency: contradictions within the document, or with the records it
+     cites or summarises: absolute claims whose source has exceptions, status
+     claims beyond the source of truth, restated lists that differ from their
+     source, and "not applicable" sections the repository already answers.
    - Terminology: flag glossary conflicts or avoided alternatives only when
      they create ambiguity or change meaning; ignore harmless style variation.
 4. **Apply artifact-specific checks when relevant.** Skip this step for blog
