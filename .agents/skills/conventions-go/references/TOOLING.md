@@ -1,7 +1,21 @@
 # Go Tooling Reference
 
-Detail for the tooling steps in [conventions-go](../SKILL.md): choosing `go
-fix` fixers, and looking up APIs with `go doc`.
+Detail for the tooling steps in [conventions-go](../SKILL.md): installing
+tools, choosing `go fix` fixers, and looking up APIs with `go doc`.
+
+## Installing missing tools
+
+```bash
+go install mvdan.cc/gofumpt@latest
+go install github.com/incu6us/goimports-reviser/v3@latest
+go install github.com/go-critic/go-critic/cmd/go-critic@latest
+go install honnef.co/go/tools/cmd/staticcheck@latest
+go install github.com/kojah/gohawk@latest  # requires Go 1.26+
+```
+
+If an installed binary is not found on `PATH`, add `$(go env GOBIN)` (or
+`$(go env GOPATH)/bin`). See the pinned
+[Gohawk installation guide](https://github.com/kojah/gohawk/blob/d5b1c83eae03553d40cbd9d12d238d3e7d346ed8/docs/installation.md#install-the-cli).
 
 ## Modernizing with `go fix`
 
@@ -14,30 +28,14 @@ go fix -diff -rangeint ./path/to/pkg/...       # only rangeint
 go fix -stringsseq=false ./path/to/pkg/...     # all except stringsseq
 ```
 
-It respects the module's `go` directive. Raise the directive only when the
-task deliberately adopts a newer language or standard-library feature. Read a
-fixer's docs with `go tool fix help` or `go tool fix help <name>`.
-
-Mark a deprecated wrapper or compatibility shim with `//go:fix inline` when
-`go fix` should rewrite its callers, including those in other packages.
+It respects `go.mod`'s `go` directive; raise the directive only when the task
+deliberately adopts a newer feature. Read fixer docs with `go tool fix help`
+or `go tool fix help <name>`. Mark deprecated wrappers/shims with
+`//go:fix inline` when `go fix` should rewrite callers.
 
 ## Looking up APIs
 
-Use gopls `go_package_api` for workspace packages. Use `go doc` for
-dependencies, symbol details, source, commands, or unexported identifiers,
-adding `-src`, `-cmd`, `-u`, or `-all` as needed:
-
-```bash
-go doc <path>
-go doc <path>.<Symbol>
-go doc -src <path>.<Symbol>
-```
-
-Run `go doc` from inside the module so it resolves the version `go.mod`
-selects. If a dependency is unavailable, fix the module state first rather
-than recalling another version from memory.
-
-For other questions, use the source that owns the answer: the Go
-specification for language semantics, `go doc` or pkg.go.dev for
-standard-library APIs, the release notes for which version added something,
-and the module reference or command help for tooling and module behaviour.
+Use gopls `go_package_api` for workspace packages, and `go doc` (`-src`,
+`-cmd`, `-u`, `-all`) from inside the module for dependencies so it resolves
+the version pinned by `go.mod`. Check the Go spec, `go doc`, or release notes
+and cite the source rather than guessing.

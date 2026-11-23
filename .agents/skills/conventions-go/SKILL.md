@@ -2,402 +2,131 @@
 name: conventions-go
 description: >-
   MANDATORY for any work on Go files (*.go). Load this before editing,
-  reviewing, or creating any *.go file. Go coding conventions and style
-  guide covering naming, error handling, testing, HTTP handlers, caching,
-  concurrency, and observability.
+  reviewing, or creating any *.go file. House Go conventions covering
+  tooling, naming, error wrapping, logging, concurrency, testing, and
+  package layout.
 metadata:
   model-tier: moderate
 ---
 
 > [!NOTE]
 > If invoked directly with no specific task, load these conventions and stop.
-> They are ready to apply when asked to design, write, or edit Go code.
 
-Write Go that follows these rules and run the required tools after every edit.
-They apply to all Go, including CLIs and libraries. In an established repo,
-follow its existing architecture where it differs. The handler → service →
-repository guidance applies only to HTTP/API services of that shape.
+House deltas for Go (CLIs, libraries, and services). In an established repo,
+match its existing architecture where it differs.
 
-## Before editing
-
-- Match the `go` directive in `go.mod`, unless the task includes an upgrade.
-- Read the full conventions below for code style, runtime behaviour, testing,
-  commands, and package rules.
-- For new code, prefer newer standard-library APIs and named constants. When
-  editing use of an older API, ask before migrating it. See
-  [STDLIB-PREFERENCES.md](references/STDLIB-PREFERENCES.md) for the full tables.
+- Match the `go` directive in `go.mod` unless the task includes an upgrade.
 - For an HTTP/API service built as handlers → service → repository, also read
-  [SERVICE-ARCHITECTURE.md](../conventions-go/references/SERVICE-ARCHITECTURE.md). Do not apply that
-  layering to other programs.
+  [SERVICE-ARCHITECTURE.md](references/SERVICE-ARCHITECTURE.md). Do not apply
+  that layering to other programs.
 
 ## Tooling
 
-Use gopls for navigation and refactoring rather than text search or `sed`.
-Start a Go session with `go_workspace`, then run `go_vulncheck`. Use
-`go_rename_symbol` for renames, then `rg <old-name>` for comments, docs, and
-strings it cannot update. Before deleting an exported symbol or changing its
-signature, run `go_symbol_references`. Use `go_search` to find symbols,
-`go_file_context` after first reading a file, `go_package_api` for package
-exports, and `go_diagnostics` after edits.
+Prefer `gopls` over text search/`sed` when available (`go_rename_symbol` plus
+`rg` for comments/docs/strings, `go_symbol_references` before breaking
+signatures, `go_diagnostics` for type errors).
 
-After editing, run these on changed packages:
+Before finishing Go changes, run on changed packages (or use the repo's
+equivalent Make/lint targets):
 
-1. Preview modernizer rewrites with `go fix -diff ./path/to/pkg/...`; review
-   before applying. See [TOOLING.md](../conventions-go/references/TOOLING.md) for fixer selection and
-   `//go:fix inline`.
-2. Format with `gofumpt -l -w .`, then group imports:
+1. `gofumpt -l -w .`
+2. `goimports-reviser -company-prefixes "$(go list -m | cut -d/ -f1-2)" -project-name "$(go list -m)" ./...`
+3. `go vet ./...`, `go-critic check ./...`, `staticcheck ./...`, and
+   `gohawk ./path/to/pkg/...`
 
-   ```bash
-   goimports-reviser -company-prefixes "$(go list -m | cut -d/ -f1-2)" -project-name "$(go list -m)" ./...
-   ```
-3. Run `go vet ./...`, `go-critic check ./...`, `staticcheck ./...`, and
-   `gohawk ./path/to/pkg/...`; fix every finding. Fix causes rather than
-   suppressing them. If a suppression is warranted, use the exact form in
-   [LINTER-DIRECTIVES.md](references/LINTER-DIRECTIVES.md).
+Preview modernizer rewrites with `go fix -diff ./path/to/pkg/...` when
+modernizing. Fix root causes over suppressions; when a suppression is needed,
+use the exact syntax in
+[LINTER-DIRECTIVES.md](references/LINTER-DIRECTIVES.md). See
+[TOOLING.md](references/TOOLING.md) for install commands, `go fix` options,
+and `go doc` lookups.
 
-If Gohawk is not installed, get the latest with
-`go install github.com/kojah/gohawk@latest` (requires Go 1.26+). If installed
-but `command -v gohawk` finds nothing, add `$(go env GOBIN)` (or the default
-`$(go env GOPATH)/bin`) to `PATH`. Install other missing tools with `go install`
-and one of `mvdan.cc/gofumpt@latest`,
-`github.com/incu6us/goimports-reviser/v3@latest`,
-`github.com/go-critic/go-critic/cmd/go-critic@latest`, or
-`honnef.co/go/tools/cmd/staticcheck@latest`.
+## Naming and declarations
 
-See the pinned [Gohawk installation guide][gohawk-install]. When unsure,
-check the Go spec, `go doc`, release notes, or module reference;
-cite the source rather than guessing. See [TOOLING.md](../conventions-go/references/TOOLING.md)
-for API lookup guidance.
-
-[gohawk-install]: https://github.com/kojah/gohawk/blob/d5b1c83eae03553d40cbd9d12d238d3e7d346ed8/docs/installation.md#install-the-cli
-
-## Naming
-
-Names must make sense without their type. Apply the delete-the-type test: if
-you removed the type from a declaration, could a reader still tell what it
-refers to?
-
-- Abbreviate only `ctx`, `err`, `req`, `resp`, and `cfg`.
-- Prefix a generic struct name with its domain (`DNSClient`, `VaultClient`),
-  unless the package already narrows it (`redis.Client`).
-- Name fields and variables by role or target, not by type.
-- A generic name is fine when it's the only one of its kind in scope. When a
-  second appears, rename both, not just the newcomer.
-- Start default-value constants with `default`: `defaultDebugPort`, not
-  `debugDefaultPort` or `portDefault`.
-- Name a struct of dependencies for building a long-lived component
-  `*Params` (`WorkerParams`), and a struct of inputs for one call `*Opts`
-  (`FetchRecordOpts`).
-
-```go
-// Bad — names mirror the type, and the second is a suffix.
-type Service struct {
-	client     *http.Client
-	repo       *MySQLRepository
-	legacyRepo *PostgresRepository
-}
-
-// Good — each name says what it's for.
-type Service struct {
-	// auditRepo records who changed what, for compliance reviews.
-	auditRepo *PostgresRepository
-	// configRepo stores customer configs, the service's source of truth.
-	configRepo *MySQLRepository
-	// purgeAPI clears cached content after a config change.
-	purgeAPI *http.Client
-}
-```
-
-## Declarations
-
-- **Structs:** sort fields alphabetically, embedded structs first. Put JSON
-  tags on exported fields and `json:"-"` on internal-only ones. Use a pointer
-  field when nil means "not provided", as in partial updates.
-- **Constants and variables:** declare two or more together in one
-  `const ( … )` or `var ( … )` block, with a comment above each entry:
-
-  ```go
-  const (
-  	// defaultRefreshWindow is how long before expiry a token is renewed,
-  	// leaving headroom for slow upstream calls.
-  	defaultRefreshWindow = 5 * time.Minute
-  	// maxTokenAge caps a token's lifetime to limit damage if one leaks.
-  	maxTokenAge = 24 * time.Hour
-  )
-  ```
-- **Imports:** three groups separated by blank lines: standard library, third
-  party, then internal.
-- **Enums:** use a string type with an `All*` slice for validation:
-
-  ```go
-  // ConditionType names what a routing rule matches on, so rules can be
-  // stored and validated as data.
-  type ConditionType string
-
-  const (
-  	// HeaderCondition matches on a request header.
-  	HeaderCondition ConditionType = "header"
-  	// GeoCondition matches on the client's location.
-  	GeoCondition ConditionType = "geo"
-  )
-
-  // AllConditionTypes lists every valid ConditionType so input can be
-  // validated against one source of truth.
-  var AllConditionTypes = []ConditionType{HeaderCondition, GeoCondition}
-  ```
-
-**Constructors.** Write `NewX` factories that take dependencies and assign
-fields alphabetically. Past 4 parameters, counting `ctx`, take a `*Params`
-struct instead. For required parameters plus optional settings with sensible
-defaults, `NewX` takes only the required ones and `WithXxx` methods set the
-rest and return the receiver:
-
-```go
-// NewClient returns a Client for baseURL with safe defaults, so callers set
-// only what differs.
-func NewClient(baseURL string) *Client {
-	return &Client{baseURL: baseURL, httpClient: http.DefaultClient, timeout: 30 * time.Second}
-}
-
-// WithTimeout overrides the request timeout, for callers whose upstream is
-// slower or faster than the default allows.
-func (c *Client) WithTimeout(d time.Duration) *Client {
-	c.timeout = d
-	return c
-}
-```
-
-Skip `NewX` when it only copies arguments into fields and every caller is in
-the same package; build the struct directly. Keep it when it sets defaults,
-validates, derives state, or exposes unexported fields or types across a
-package boundary. Don't export fields just to avoid a constructor.
-
-**Interfaces.** Define one only to swap implementations, such as for mocks
-or several real backends, not to wrap a single concrete type. Define it on the
-consumer side, in `interface.go` when several packages share it, and add a
-compile-time check: `var _ redis.Client = (*MockRedisClient)(nil)`.
-
-**Embedded fields.** When accessing a field or method from an embedded value,
-name the embedded field explicitly—for example, `s.Logger.Info(...)` rather
-than `s.Info(...)`. This makes it clear which dependency owns the behavior.
+- **Role-based names:** Apply the delete-the-type test—names should make sense
+  without their type. Abbreviate only `ctx`, `err`, `req`, `resp`, and `cfg`.
+  Prefix generic structs with their domain (`DNSClient`) unless the package
+  already narrows them (`redis.Client`). When a second value of the same kind
+  enters scope, rename both.
+- **Standard suffixes/prefixes:** Start default constants with `default`
+  (`defaultDebugPort`). Name long-lived dependency structs `*Params` (required
+  past 4 constructor args including `ctx`) and per-call input structs `*Opts`.
+- **Layout:** Sort struct fields and constructor assignments alphabetically
+  (embedded structs first). Tag internal-only exported struct fields
+  `json:"-"`. Group related constants/variables in `const (...)`/`var (...)`
+  blocks. Group imports as stdlib, third-party, then internal.
+- **Enums:** String type plus an `All*` slice for validation.
+- **Constructors:** Use `NewX` for required dependencies and fluent `WithXxx`
+  methods returning the receiver for optional overrides. Skip `NewX` when a
+  same-package struct needs no defaults, validation, or hidden fields.
+- **Interfaces & embedding:** Define consumer-side interfaces only when
+  swapping implementations (`interface.go` when shared), with a compile-time
+  check (`var _ Store = (*MockStore)(nil)`). Access embedded fields explicitly
+  (`s.Logger.Info(...)`, not `s.Info(...)`).
+- **Stdlib preferences:** In new code, use stdlib constants (`http.MethodGet`,
+  `http.StatusOK`, `os.Interrupt`) over magic literals and `net/netip`
+  (`netip.Addr`, `netip.Prefix`, `netip.AddrPort`) over `net.IP`/`*net.IPNet`.
+  Define package constants for repeated custom literals.
 
 ## Comments
 
-**Writing.** Comment every declaration: functions, methods, types, struct
-fields, interface methods, constants, and variables, exported or not. Say
-what it is or does and why it exists: the constraint, policy, invariant, or
-caller need behind it. Describe the result or observable effect, not the
-steps taken. Make the why specific; restating the name adds nothing. Start an
-exported identifier's comment with its name.
+Comment every declaration—functions, methods, types, struct fields, interface
+methods, constants, and variables, exported or not. State what it is or does
+and why it exists (constraint, policy, invariant, or caller need), describing
+observable effect rather than steps, and never restating the name. Start
+exported comments with the identifier name.
 
-```go
-// Session tracks one authenticated client so requests can skip
-// re-checking credentials.
-type Session struct {
-	// expiresAt is when the token stops being valid; RefreshToken renews
-	// it early so long requests don't fail mid-flight.
-	expiresAt time.Time
-	// token is the bearer token sent upstream; unexported so callers
-	// can't log or leak it.
-	token string
-}
+Preserve existing doc comments (exported or not), markers (`TODO:`, `FIXME:`,
+`NOTE:`, `HACK:`, `XXX:`), directives (`//go:*`, `// Deprecated:`, `//nolint:`),
+and why-comments; remove only comments that restate the name, are stale, or
+are commented-out code.
 
-// TokenStore persists session tokens so sessions survive a restart.
-type TokenStore interface {
-	// Save stores the token for the session, replacing any earlier one,
-	// so a refresh never leaves two valid tokens.
-	Save(ctx context.Context, sessionID, token string) error
-}
+## Errors and logging
 
-// RefreshToken renews the session token before it expires. This avoids
-// forcing active clients to reauthenticate during long requests.
-func (s *Session) RefreshToken(ctx context.Context) error {
-```
-
-**Keeping.** Preserve doc comments on every identifier, exported or not;
-markers (`TODO:`, `FIXME:`, `NOTE:`, `HACK:`, `XXX:`); directives
-(`//go:build`, `//go:embed`, `//go:generate`, `// Deprecated:`, `//nolint:`),
-which tools read; and comments explaining a hidden constraint, workaround, or
-surprising behaviour. Remove only comments that restate the name below them,
-describe code that no longer exists, or are commented-out code. Before
-deleting a comment, classify it against these rules; if it isn't clearly
-redundant or stale, keep it.
-
-## Errors
-
-Decide which outcomes are ordinary for the operation before choosing error
-types. Handle a failure inside a module only if it can still fulfill the
-caller's contract; otherwise return an error the caller can act on. Never
-present unresolved corruption, denied authorization, or a violated invariant
-as success. Retry only operations safe to repeat, and stop on cancellation or
-deadline. After recovery, can the caller tell whether the operation succeeded
-and what it can safely do next?
-
-Pick the form by how callers react:
-
-- **Wrapped** with `fmt.Errorf` and `%w`: the default; adds context and keeps
-  the chain.
-- **Sentinel** (`var ErrNotFound = errors.New("not found")`): only when
-  callers in other packages branch on it with `errors.Is`.
-- **Custom type** implementing `Error()` and `Unwrap()`: when callers need
-  structured data, such as a status code or retry-after duration.
-
-Classify errors for retry decisions with `errors.Is` and `errors.AsType`.
-Prefer `errors.AsType[T]` (Go 1.26+) to `errors.As`:
-`if dnsErr, ok := errors.AsType[*net.DNSError](err); ok { … }`. Never panic;
-return errors.
-
-Start every wrapped message with its package or layer name, in the form
-`"<layer>: <what failed>: %w"`, so logs show where it came from. Don't repeat
-the prefix inside the message:
-
-```go
-fmt.Errorf("service: failed to create config: %w", err)
-fmt.Errorf("redis: failed to ping: %w", err) // not "failed to ping redis"
-```
-
-## Logging
-
-Log at layer boundaries and on error paths, not in every function, and don't
-log an error a caller already logs. Use `slog.LogAttrs` with the same event
-name for success and failure; the level tells them apart. Write the event name
-(the `msg` value, which the handler renames to `event`) and attribute keys in
-snake_case; leave attribute values as they arrive. Group related attributes
-with `slog.Group`. To silence a logger, especially in tests, use
-`slog.New(slog.DiscardHandler)` (Go 1.24+) rather than a handler wrapping
-`io.Discard`.
-
-```go
-logger.LogAttrs(ctx, slog.LevelError, "create_config",
-	slog.String("config_id", configID),
-	slog.Group("redis", slog.String("key", key), slog.Duration("ttl", ttl)),
-	slog.Any("err", err),
-)
-```
+- **Errors:** Start wrapped messages with the package or layer name without
+  repeating it: `fmt.Errorf("redis: failed to ping: %w", err)`. Never swallow
+  corruption, denied auth, or invariant violations. Prefer `errors.AsType[T]`
+  (Go 1.26+) over `errors.As`. Return errors instead of panicking.
+- **Logging:** Log at layer boundaries and error paths without double-logging.
+  Use `slog.LogAttrs` with one snake_case event name across success and error
+  (level distinguishes them), snake_case attribute keys, and `slog.Group` for
+  related fields. Silence loggers with `slog.New(slog.DiscardHandler)`
+  (Go 1.24+).
 
 ## Concurrency and context
 
-**Goroutines.** Use them for independent I/O-bound work where parallelism
-cuts latency, such as fanning out to several services, not for CPU-bound
-sequential logic, fast operations, or ordered work. Prefer `wg.Go` (Go 1.25+)
-to manual `wg.Add`/`go`/`wg.Done`; its function must not panic.
-
-**Cancellation.** Parent cancellation already reaches every child, so derive a
-context only with a reason: `WithCancelCause` to cancel fan-out work
-independently, or `WithTimeoutCause`/`WithDeadlineCause` for a tighter
-deadline than the parent's. Always use the `*Cause` variants so every
-cancellation carries a reason, pass causes through `context.AfterFunc`
-callbacks, and read them with `context.Cause(ctx)` rather than `ctx.Err()`
-alone:
-
-```go
-ctx, cancel := context.WithTimeoutCause(ctx, 5*time.Second, errors.New("service: timed out fetching config"))
-defer cancel()
-```
-
-**Values.** Use context values only for request-scoped metadata that crosses
-API boundaries, such as request ID, customer ID, or auth claims, never for
-function arguments or configuration. Key each value with an unexported struct
-type behind an exported variable, and read and write through generic helpers
-defined once in a `contextx`-style package rather than per-type wrappers:
-
-```go
-// WithValue stores val under key, typed so readers don't repeat assertions.
-func WithValue[T any](ctx context.Context, key any, val T) context.Context {
-	return context.WithValue(ctx, key, val)
-}
-
-// FromContext returns the value under key as a T, and false when it's
-// missing or another type, so callers never panic on a bad assertion.
-func FromContext[T any](ctx context.Context, key any) (T, bool) {
-	v, ok := ctx.Value(key).(T)
-	return v, ok
-}
-
-// customerIDCtxKey is unexported so no other package can collide with it.
-type customerIDCtxKey struct{}
-
-// CustomerIDContextKey keys the request's customer ID, for code that needs
-// the tenant without threading it through every signature.
-var CustomerIDContextKey = customerIDCtxKey{}
-
-ctx = contextx.WithValue(ctx, CustomerIDContextKey, "cust-123")
-id, ok := contextx.FromContext[string](ctx, CustomerIDContextKey)
-```
+- Prefer `wg.Go` (Go 1.25+, callback must not panic) over manual
+  `wg.Add`/`go`/`wg.Done`.
+- Use the `*Cause` variants (`WithCancelCause`, `WithTimeoutCause`,
+  `WithDeadlineCause`) and read reasons via `context.Cause(ctx)`.
+- Keep `context.Value` for request-scoped cross-boundary metadata only, keyed
+  by an unexported struct type behind an exported var and accessed through
+  generic `contextx` helpers rather than per-type wrappers.
 
 ## Testing
 
-Before writing or reviewing any `*_test.go` file, helper, mock, fuzz test, or
-benchmark, load the [go-testing](../go-testing/SKILL.md) skill for test
-structure. For acceptance suites and step definitions, also load
-[conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md) so
-code follows the feature's scenario structure. These rules bind whatever you
-write:
+Load [go-testing](../go-testing/SKILL.md) before writing or reviewing
+`*_test.go` files, and
+[conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md) for
+acceptance suites.
 
-- Test logic, branches, and error cases through the package's exported API, in
-  `*_test.go` with no build tags, preferably from `package foo_test`.
-  Integration-test cross-package and handler/database boundaries with
-  `//go:build e2e` in `e2e/` or godog `.feature` files.
-- Do not test unexported helpers directly. If a branch is awkward to reach,
-  change the public interface or delete the branch. Extract logic into a child
-  package under `internal/` only when it becomes a module with its own
-  interface and a second caller or adapter.
-- Write table tests as a `testCases` slice looped with `tc` and `t.Run`.
-- Mock with `testify/mock`, and add compile-time interface checks in test
-  utility packages.
-- Comment above each test function on what it validates.
-- Use `http.NewRequestWithContext` and `httptest.NewRequestWithContext`, never
-  the context-free versions, to satisfy the `noctx` linter.
-- Always name the `httptest.NewRecorder()` result `rr`.
-- Satisfy the `scopeguard` linter by folding a variable used only in an `if`
-  into its init statement. Where that hurts readability, such as two short
-  values compared to each other, suppress it instead:
+- Test through exported APIs (`package foo_test` preferred); put integration
+  tests under `//go:build e2e` in `e2e/` or godog `.feature` files. Don't test
+  unexported helpers directly—reshape the API, delete unreachable branches, or
+  extract a real `internal/` module.
+- Table tests use `testCases` / `tc` / `t.Run`; mock with `testify/mock` plus
+  compile-time interface checks; add a brief comment above each test stating
+  what it validates.
+- Use `http.NewRequestWithContext` / `httptest.NewRequestWithContext`
+  (`noctx`), name recorders `rr`, and fold single-use `if` vars for
+  `scopeguard` (or suppress with `//nolint:scopeguard` when paired values read
+  clearer).
 
-  ```go
-  if result := cm.extractCustomerID(tc.cacheKey); result != tc.expected {
-  	t.Errorf("extractCustomerID(%q) = %q, expected %q", tc.cacheKey, result, tc.expected)
-  }
+## Commands and packages
 
-  result := cm.customerKeySetName("customer123") //nolint:scopeguard // paired with expected below
-  expected := "br:customer123:_keys"             //nolint:scopeguard // paired with result above
-  ```
-
-## Commands
-
-Keep `main` thin: parse flags, build the logger and context, then call
-`run(ctx, …) error` and exit non-zero if it fails. `run` holds the program and
-returns errors rather than exiting, so it can be tested, and `main` is the
-only place that calls `os.Exit`.
-
-```go
-// main wires flags, logging, and context, then hands off to run so the
-// program logic stays testable.
-func main() {
-	flag.IntVar(&days, "days", defaultDays, "days before expiry to warn")
-	flag.Parse()
-
-	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
-	ctx := context.Background()
-
-	if err := run(ctx, logger); err != nil {
-		logger.LogAttrs(ctx, slog.LevelError, "run", slog.Any("err", err))
-		os.Exit(1)
-	}
-}
-```
-
-## Packages
-
-Every package has a `doc.go` holding only the package comment and the
-`package` clause, and a `README.md`. When you create a package, add both; when
-you edit one, add whichever is missing, and update `doc.go` if the package's
-purpose changed. Keep the `doc.go` comment to one or two sentences on what the
-package does and why. Keep the README short: its purpose in a sentence or two,
-a bullet list of what it owns, and a brief usage snippet, without repeating
-godoc.
-
-```go
-// Package redis provides a thin wrapper around go-redis with
-// connection pooling, health checks, and structured logging.
-package redis
-```
+- Keep `main` thin: parse flags, build logger/context, call
+  `run(ctx, ...) error`, and exit non-zero on error. Only `main` calls
+  `os.Exit`.
+- Every package has a `doc.go` (1–2 sentence package comment + `package`
+  clause) and a short `README.md` (purpose, owned responsibilities, brief
+  usage without repeating godoc).
