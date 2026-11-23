@@ -6,6 +6,8 @@
 - **Lead with the point:** Answer directly. For runnable commands, give a short
   purpose line, then the command. For file paths or code diffs, lead with the
   artifact.
+- **Ambiguity:** When a request is under-specified or has multiple valid
+  paths, use [clarify](skills/clarify/SKILL.md) before guessing.
 - **Multi-turn work:** Start with `Step X/Y: <summary>`. Number bounded steps
   sequentially. End actionable replies with one concrete next step.
 - **Debugging:** After three consecutive failed fixes, stop changes, name the

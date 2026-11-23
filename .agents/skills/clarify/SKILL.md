@@ -1,24 +1,26 @@
 ---
 name: clarify
 description: >-
-  Pin down the user's intent before starting work. Use when a request is too
-  vague to act on ("help me with this", "I need something", "let's work
-  on…"), or when another skill hits a vague request.
+  Turn an under-specified request into a clear brief before acting. Use
+  whenever a task leaves room to guess—missing goal, pass/fail check, scope,
+  examples, target location, or multiple valid approaches—without needing a
+  full grilling session. Also use when another skill hits an ambiguous ask.
 metadata:
-  model-tier: trivial
+  model-tier: moderate
 ---
 
-Before acting, use one structured interaction to pin down what the user wants.
-Keep the questions few and follow
-[EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md).
+Ask only for what the user knows and the codebase or context cannot answer.
+Follow [EXECUTIVE-SCAFFOLDING.md](../shared/EXECUTIVE-SCAFFOLDING.md).
 
-1. **Ask only for missing information:**
-   - **Audience:** Who is this for?
-   - **Goal:** What do they need?
-   - **Context:** What should you know?
-   - **Constraints:** What are the boundaries?
-   - **Format:** What should the output look like?
+1. **Check context first.** Inspect relevant files, docs, or repo rules
+   before asking. Do not ask for facts you can verify yourself.
+2. **Ask 1 to 4 numbered questions** in one round—skip anything already
+   clear or safe to decide yourself. Target only missing brief items:
+   - **Goal & bar:** Outcome, real numbers, or examples of good.
+   - **Pass/fail check:** Test, command, or yes/no check for done.
+   - **Target & bounds:** Where it goes, scope limits, or preferred option.
 
-   Continue when all five have answers, including answers already given in the
-   conversation.
-2. **Restate** the five answers to the user, then continue with the task.
+   Suggest a default for each question so the user can confirm in a word. If
+   deep design trade-offs surface, hand off to [grilling](../grilling/SKILL.md).
+3. **Restate and go.** Restate the settled goal, check, and target in a few
+   lines, then start (or confirm a plan first for non-trivial changes).
