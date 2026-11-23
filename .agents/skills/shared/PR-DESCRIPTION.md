@@ -2,8 +2,9 @@
 
 Read every commit, the full diff against the PR's base, and enough surrounding
 context (callers, config, tests, linked issues/specs) to explain why the
-change exists and what changes in behaviour. Apply
-[voice-product](../voice-product/SKILL.md).
+change exists and what changes in behaviour. Before drafting, read
+[voice-product](../voice-product/SKILL.md) and
+[CONCISE-PROSE.md](CONCISE-PROSE.md).
 
 Derive behaviour from code and tests—treat commit messages and issues as
 motivation, not proof. Separate implemented work from planned follow-ups.
@@ -21,8 +22,8 @@ Use this template, even when the repo ships its own:
 ````md
 ## Problem
 
-<What's wrong or missing, who or what it affects, and why it matters. State
-system role and prerequisite terms if crossing boundaries.>
+<What the project does in plain words, what's wrong or missing, who or what
+it affects, and why it matters.>
 
 ## Solution
 
@@ -46,10 +47,11 @@ risks. Omit if empty.>
 
 ## Rules
 
-- **Newcomer context:** Assume a reader unfamiliar with the repository—state
-  the system's role when crossing boundaries and explain unfamiliar domain
-  terms on first use (expanding an acronym alone is not enough). Name real
-  components, files, or environments.
+- **Newcomer context:** Assume a reader unfamiliar with the repository—open
+  `Problem` by stating what the project does in plain words (check
+  `README.md`, `GLOSSARY.md`, or `CONTEXT.md` if needed) and explain
+  unfamiliar domain terms on first use (expanding an acronym alone is not
+  enough). Name real components, files, or environments.
 - **Verification, risks & evidence:** List only checks actually run and what
   they verify; leave post-merge steps (such as deploys) to the ticket. For
   material risks, name what is affected and whether reverting restores prior

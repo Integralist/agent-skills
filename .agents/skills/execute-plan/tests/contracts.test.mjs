@@ -930,6 +930,26 @@ test("artifact publication excludes CLI metadata, not document frontmatter", () 
   assert.throws(() => check(policy.replace("Preserve frontmatter", "Remove frontmatter")));
 });
 
+test("PR descriptions require reading voice-product and CONCISE-PROSE.md before drafting", () => {
+  const files = [
+    [".agents/skills/shared/PR-DESCRIPTION.md", "CONCISE-PROSE.md"],
+    [".agents/skills/open-pr/SKILL.md", "../shared/CONCISE-PROSE.md"],
+    [".agents/skills/stacked-prs/SKILL.md", "../shared/CONCISE-PROSE.md"],
+  ];
+  for (const [relative, conciseTarget] of files) {
+    const content = read(relative);
+    const trigger = new RegExp(`Before drafting, read\\s+\\[voice-product\\]\\(\\.\\.\\/voice-product\\/SKILL\\.md\\)[\\s\\S]*?\\[${"CONCISE-PROSE\\.md"}\\]\\(${conciseTarget.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\)`);
+    assertRequiredReference(content, "../voice-product/SKILL.md", trigger);
+    assertRequiredReference(content, conciseTarget, trigger);
+    assert.throws(() => assertRequiredReference(content.replace("Before drafting, read", "Apply"), "../voice-product/SKILL.md", trigger));
+  }
+  const prDesc = read(".agents/skills/shared/PR-DESCRIPTION.md");
+  assert.doesNotMatch(prDesc, /when crossing boundaries/);
+  assert.match(prDesc, /stating what the project does in plain words/);
+  const openPr = read(".agents/skills/open-pr/SKILL.md");
+  assert.match(openPr, /first sentence state what the project does in plain words[\s\S]*README\.md/);
+});
+
 test("PR descriptions require task reconciliation before writing issue references", () => {
   const source = read(".agents/skills/shared/PR-DESCRIPTION.md");
   const target = "GITHUB-ISSUES.md#task-and-pr-reconciliation";

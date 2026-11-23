@@ -28,7 +28,9 @@ in the wrong layer.
 
 ## Prepare and submit PRs
 
-3. **Write each layer's PR description** using
+3. **Write each layer's PR description.** Before drafting, read
+   [voice-product](../voice-product/SKILL.md),
+   [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md), and
    [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md). Target the layer's base:
    trunk for the bottom layer and the layer below for each higher layer. For
    `--github` or an issue reference (`#<n>` or URL), read and follow

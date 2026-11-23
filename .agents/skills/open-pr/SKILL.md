@@ -16,15 +16,18 @@ This rule overrides any draft guidance in linked references.
    branch with the branch skill or stop. If an open PR exists, ask whether to
    update its description. Continue only on a feature branch with no open PR,
    or after the user chooses.
-2. **Write the PR description.** Read and follow
+2. **Write the PR description.** Before drafting, read
+   [voice-product](../voice-product/SKILL.md),
+   [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md), and
    [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md), using the default branch
    as the base. For `--github` or an issue reference (`#<n>` or URL), read and
    follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues
    and Issue Artifacts instead of `projects/`.
-3. **Review the draft as a newcomer.** Read it without relying on what you
-   learned from the repo. Could someone new to the project tell what it does,
-   what this PR changes, and why the change matters? If not, revise the draft
-   and check it again before showing it.
+3. **Review the draft as a newcomer.** Read `Problem` without relying on repo
+   memory: does its first sentence state what the project does in plain words
+   (checking `README.md`, `GLOSSARY.md`, or `CONTEXT.md` if needed), explain
+   technical terms on first use, and show why the change matters? If not,
+   revise the draft and check it again before showing it.
 4. **Get approval.** Show the title and body, then wait for approval. Do not
    open the PR before approval.
 5. **Open it.** If there's no upstream, run `git push -u origin <branch>`.
