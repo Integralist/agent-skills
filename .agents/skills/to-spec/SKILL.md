@@ -10,56 +10,45 @@ metadata:
   model-tier: complex
 ---
 
-Write `spec.md` from a file or discussion: what to build, for whom and the
-Gherkin criteria defining done. Capture interfaces, contracts, schemas and API
-shape, not implementation paths or code. Write the spec; do not plan, build
-or edit `docs/specs/`. Later living-spec changes use
-[spec-delta](../spec-delta/SKILL.md).
+Write `spec.md` from a file or discussion: what to build, for whom, and the
+Gherkin criteria defining done. Capture interfaces, contracts, schemas, and
+API shape—not implementation paths or code. Do not plan, build, or edit
+`docs/specs/` (later living-spec changes use
+[spec-delta](../spec-delta/SKILL.md)).
 
 **Stop and ask.** Follow the source as given. If something is missing,
 contradictory, or points to a wrong design, tell the user and wait. Do not fill
 gaps with guesses.
 
-**Workflow.**
+## Workflow
 
-1. **Choose the source and destination.** Use the named file, or this session
-   if none is named. For `--github` or an issue reference (`#<n>` or URL), read
-   and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) instead of `projects/`.
-   Keep the agreed spec. Before preserving request evidence or history, read
+1. **Choose source and workspace.** Use the named file, or this session if
+   none is named. For `--github` or an issue reference (`#<n>` or URL), read
+   and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) instead of
+   `projects/`. Before preserving request evidence or history, read
    [PROJECT-INTENT.md](../shared/PROJECT-INTENT.md). Use `intent.md` when
    needed; keep Development Brief to the current summary and a source link.
-2. **Read current truth.** Read linked research, `docs/adr/`, touched code
+2. **Read current truth.** Inspect linked research, `docs/adr/`, touched code,
    and owning `docs/specs/<capability>.feature` files so new criteria extend
-   or modify existing scenarios rather than duplicating behaviour. Living
-   specs are the baseline; without one, use code. Treat legacy Markdown
-   contracts as migration baselines, not the output format. Preserve
-   governing decisions.
+   or modify existing scenarios rather than duplicating them. Living specs are
+   the baseline (or code when none exist); preserve governing decisions.
 3. **Draft for the reader.** Before any prose or Gherkin, read
    [voice-product](../voice-product/SKILL.md),
    [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) and the
-   [writing guide and clarity check](references/SPEC-GUIDE.md). Keep prose
-   short and plain. Explain necessary jargon or component roles once with a
-   brief parenthetical gloss (a few words); do not write paragraph-long
-   definitions or repeat them across sections. Preserve exact values,
-   ownership, timing, and failures in concise rules, and fold repetitive
-   scenario variants into `Scenario Outline` tables. In Behavioural Delta, state
-   in 2–3 sentences what the baseline requires, what changes, and what stays
-   unchanged; omit it when behaviour does not change.
+   [writing guide and clarity check](references/SPEC-GUIDE.md). Apply the
+   guide's newcomer-clarity rules, Rule-first invariant pass, and template.
 4. **Write and check.** Write any needed `intent.md` in the selected mode.
-   Use the guide's metadata table. Set Status `Draft`,
-   Author from `git config user.name`, and Created from `date +%F`. Language
-   names the primary implementation language; put fixture/runtime languages
-   elsewhere. Add optional metadata only when it helps readers orient to the
-   project, baseline or decision status. Use repository-unique short SHAs in
-   baseline metadata and full SHAs in pinned source links, following
-   [Markdown conventions](../conventions-markdown/SKILL.md). Run the guide's
-   whole-draft clarity check before handoff. For a new spec or behaviour
-   change (when no parent workflow runs its own critique), have a separate
-   read-only reviewer run [critique](../critique/SKILL.md) on `spec.md` and
-   run the repository's spec check (such as `make check-specs` or its
-   acceptance runner dry-run) when available. For a scoped revision, review
-   changed sections and related terms/references without expanding the edit or
-   restarting architecture critique.
+   Fill metadata (`Status: Draft`, `Author` from `git config user.name`,
+   `Created` from `date +%F`, primary `Language`), following
+   [Markdown conventions](../conventions-markdown/SKILL.md) (short unique SHAs
+   in baseline metadata, full SHAs in pinned source links). Run the guide's
+   whole-draft clarity check before handoff, and run the repo's spec check
+   (e.g. `make check-specs` or acceptance dry-run) when available. For a
+   non-trivial new spec or behaviour change (when no parent workflow runs its
+   own critique), have a separate read-only reviewer run
+   [critique](../critique/SKILL.md) on `spec.md`. For a scoped revision,
+   review changed sections and related terms/references without expanding the
+   edit or restarting architecture critique.
 
    - **On disk:** Write in the source project folder or
      `projects/<yyyy-mm-dd>-<slug>/spec.md`. Read
@@ -67,6 +56,6 @@ gaps with guesses.
    - **GitHub:** Follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md)
      to publish `spec.md` as a Root Issue Artifact and update its index.
 
-**Done when** the requested spec is written, the clarity and contract checks
-are complete, and the user has its path and any unresolved questions or
-verification gaps. Document checks do not prove passing acceptance tests.
+**Done when** the spec is written, clarity and contract checks are complete,
+and the user has its path plus any open questions or verification gaps
+(document checks do not prove passing acceptance tests).

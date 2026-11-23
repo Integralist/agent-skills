@@ -1,72 +1,55 @@
 ---
 name: critique
 description: >-
-  Critique a document for logical fallacies and weaknesses, with a fix for each
-  issue. Use when reviewing a plan, proposal, or other document before acting
-  on it.
+  Critique a document for logical fallacies, reasoning flaws, unsupported
+  claims, and structural weaknesses, with a concrete fix for each issue. Use
+  when reviewing a plan, spec, proposal, or other document before acting on it.
 disable-model-invocation: true
 metadata:
   model-tier: complex
 ---
 
-Critique a document for logical fallacies and structural weaknesses. Quote each
-real issue and give a concrete fix; do not report style preferences or invent
-problems. If the document is sound, say so.
+Critique a document for reasoning flaws, factual/consistency gaps, and
+structural weaknesses. Quote each real issue and propose a concrete fix; drop
+style preferences and never invent problems. If the document is sound, say so.
 
 ## Workflow
 
-1. **Read the whole document.** Use the path the user gave. If they gave none,
-   ask which file to critique. For project documents, also read root
-   `GLOSSARY.md`; if absent, use root `CONTEXT.md` as the legacy glossary,
+1. **Read the document and its sources.** Use the given path (ask if none).
+   For project documents, also read root `GLOSSARY.md` (or legacy `CONTEXT.md`)
    and the records the document cites or summarises (ADRs, specs, design docs).
-2. **Check for fallacies.** Look for straw man, false dichotomy, appeal to
-   authority, slippery slope, circular reasoning, ad hominem, red herring,
-   hasty generalization, false cause, moving the goalposts, equivocation,
-   appeal to emotion, bandwagon, begging the question, and tu quoque. Also
-   flag other fallacies you find.
-3. **Check the argument.** Check every category:
-   - Argument structure: unsupported claims, gaps, or conclusions that do not
-     follow.
-   - Evidence: missing sources, irrelevant or thin evidence, misused
-     statistics.
-   - Assumptions: what is unstated and whether it is reasonable.
-   - Completeness: missing counterarguments or perspectives.
-   - Clarity: undefined terms, unexplained lettered IDs or shorthand before
-     first use, or vagueness where precision matters.
-   - Bloat and buried decisions: repeated sections across slices or artifacts,
-     process/repo-rule boilerplate, walls of prose, or key decisions buried
+2. **Check the substance:**
+   - **Reasoning & assumptions:** Logical fallacies, hidden or unjustified
+     assumptions, conclusions that outrun evidence, or missing counterarguments.
+   - **Consistency with cited records:** Internal contradictions, absolute
+     claims whose cited source has exceptions, status claims beyond the source
+     of truth, restated lists that diverge from their source, or "not
+     applicable" claims the repo already answers.
+   - **Newcomer clarity & terminology:** Undefined terms, unexplained lettered
+     IDs/shorthand before first use, vague obligations, or glossary conflicts
+     that create ambiguity (ignore harmless style variation).
+   - **Bloat & buried decisions:** Repeated sections across slices/artifacts,
+     copied repo-rule boilerplate, walls of prose, or key decisions buried
      under uncollapsed technical detail.
-   - Consistency: contradictions within the document, or with the records it
-     cites or summarises: absolute claims whose source has exceptions, status
-     claims beyond the source of truth, restated lists that differ from their
-     source, and "not applicable" sections the repository already answers.
-   - Terminology: flag glossary conflicts or avoided alternatives only when
-     they create ambiguity or change meaning; ignore harmless style variation.
-4. **Apply artifact-specific checks when relevant.** Skip this step for blog
-   posts, research, PDD drafts, and design notes.
-   - **Plans and task lists** (`plan.md`, `tasks*.md`, or documents built from
-     slices, milestones, and a File Changes table): read and follow
-     [the plan checklist](references/PLAN-CHECKLIST.md).
-   - **Specs and Gherkin** (`spec.md`, `*.feature`, or work involving
-     acceptance criteria or `docs/specs/`): read and follow
-     [the spec checklist](references/SPEC-CHECKLIST.md).
-5. **Report the findings.** Write two sections: **Logical Fallacies** and
-   **Document Weaknesses**. Include one entry per issue. If there are no
-   fallacies, say so. Focus on the weakest points; critique rather than
-   rewriting the document.
+3. **Apply artifact checklists when relevant** (skip for blog posts, research,
+   PDD drafts, and design notes):
+   - **Plans / task lists** (`plan.md`, `tasks*.md`, or slice/milestone docs):
+     read and follow [PLAN-CHECKLIST.md](references/PLAN-CHECKLIST.md).
+   - **Specs / Gherkin** (`spec.md`, `*.feature`, or `docs/specs/` work): read
+     and follow [SPEC-CHECKLIST.md](references/SPEC-CHECKLIST.md).
+4. **Report findings ordered by impact.** Critique rather than rewriting the
+   document. For each issue, include a quote, why it matters, and a concrete
+   fix:
 
-Use this format for every issue:
+   ```txt
+   **{Category or flaw — brief title}**
 
-```txt
-**{Fallacy name, or Category — brief title}**
+   > {Quoted passage}
 
-> {Quoted passage}
+   Problem: {Why it breaks reasoning, accuracy, or clarity.}
 
-Problem: {Why it is a fallacy or weakness, and why it matters.}
+   Fix: {Specific rewrite or concrete next step.}
+   ```
 
-Fix: {Specific rewrite or concrete next step.}
-```
-
-End with a summary: the number of fallacies, the most significant weaknesses,
-and the single highest-impact improvement. Every issue needs a quote and a
-fix.
+   End with a short summary naming the most significant weaknesses and the
+   single highest-impact fix.

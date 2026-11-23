@@ -1,93 +1,59 @@
 # Spec writing guide
 
-Before drafting or revising, read and apply
-[voice-product](../../voice-product/SKILL.md) to all explanatory prose,
-including Implementation Decisions and expanded detail. Preserve exact
-contracts and verbatim source quotations.
+Apply [voice-product](../../voice-product/SKILL.md) and
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) to all explanatory prose
+(including Implementation Decisions and `<details>`). Preserve exact
+contracts, values, timing, failure codes, and verbatim source quotes.
 
-## Reader path and clarity check
+## Reader clarity and handoff check
 
-Keep `spec.md` decision-first and compact. Follow
-[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md): open `Development Brief`,
-`Problem Statement`, and `Solution` in 1–3 sentences each, and link `intent.md`
-instead of embedding request or review history.
+Keep `Development Brief`, `Problem Statement`, and `Solution` to 1–3 plain
+sentences each, linking `intent.md` instead of repeating request/review
+history. Explain unfamiliar domain terms and component roles once on first use
+with a brief parenthetical gloss or compact table—never repeat multi-sentence
+definitions across sections. Omit defensive process disclaimers ("this draft
+does not approve X"); state decision status once in metadata.
 
-Explain necessary technical terms or component roles once with a short
-parenthetical gloss (a few words) or a compact table—never multi-sentence
-explanations repeated across sections. Omit defensive process disclaimers
-("this draft does not approve X"); state decision status once in metadata.
+Before handoff, verify:
 
-Before handoff, check the draft:
-
-1. Can a fresh reader spot the actor, action, permissions, outcome, and open
-   decisions in one pass? Distinguish new component responsibilities from
-   existing ones in one line.
-2. Is every obligation stated once (linked elsewhere) and Research separated
-   from Open Questions?
-3. Are externally referenced IDs, timing, and failure codes exact, with each
-   `Rule` matching its child scenarios and setup in `Given`?
+1. A newcomer to the repo can spot the actor, action, permissions, observable
+   outcome, and open decisions in one pass, with new component
+   responsibilities clearly distinguished from existing ones.
+2. Every obligation is stated once (linked elsewhere), and Research is
+   separate from Open Questions.
+3. IDs, timing, and failure codes are exact, each `Rule` matches its child
+   scenarios, and setup stays in `Given`.
 4. Check request coverage using
    [PROJECT-INTENT.md](../../shared/PROJECT-INTENT.md)'s handoff check.
 
-## Scenarios and scope
+## Scenarios, invariants, and scope
 
 Follow [SPEC-FORMAT.md](../../shared/SPEC-FORMAT.md). Fold repetitive variants
-into a `Scenario Outline` with `Examples` instead of copying near-identical
-scenarios, and link owning `.feature` files once created.
+into a `Scenario Outline` with `Examples`, and extend existing owning
+`docs/specs/<capability>.feature` scenarios rather than duplicating behaviour.
 
-Acceptance Criteria states observable behaviour; Testing Seams names the test
-boundary in a short `Boundary | What to verify` bullet or table without
-repeating setup commands. Living Specifications assigns each durable scenario to
-an owning `docs/specs/<capability>.feature` file.
+Before drafting Gherkin, check each `Rule` across five lenses:
 
-For changed living behaviour, follow the Behavioural Delta format below. Open
-with a plain-language summary that tells product and engineering readers what
-the baseline requires, what the proposal changes, and what remains unchanged.
-Keep migration chores—such as moving scenarios, editing feature descriptions,
-or updating test runners—in the plan unless they affect required behaviour.
-Retain exact scenario snapshots and technical terms when needed to preserve
-the contract.
-
-### Rule-first invariant pass
-
-Before drafting Gherkin, list each `Rule` and check five lenses so
-invariants and existing contracts are settled upfront:
-
-1. Happy path and actor or permission eligibility.
-2. Unauthorized, forbidden, or invalid cases, plus refusal precedence.
-3. Empty, missing, or boundary inputs.
+1. Happy path and actor/permission eligibility.
+2. Unauthorized, forbidden, or invalid inputs, plus refusal precedence.
+3. Empty, missing, or boundary values.
 4. Repeated, duplicate, or expired actions (idempotency and timing).
 5. Partial failure, concurrency, or rollback guarantees.
 
-For outbound calls, distinguish required upstream error responses, connection
-failures before a response, and timeouts. Give each required failure mode its
-own scenario or outline row, even when the expected outcome is the same.
+For outbound calls, distinguish upstream error responses, pre-response
+connection failures, and timeouts in separate scenarios or outline rows. When
+behaviour spans 3+ interacting states, retries/timeouts, or concurrent actors,
+run [STATE-MODEL.md](../../shared/STATE-MODEL.md) first so deadlocks and
+broken invariants become scenarios.
 
-When behaviour spans 3+ interacting states, retries/timeouts, or concurrent
-actors, run [STATE-MODEL.md](../../shared/STATE-MODEL.md) before drafting
-Gherkin so deadlocks and broken invariants become scenarios.
+In Behavioural Delta (omit if unchanged), summarize in 2–3 plain sentences
+what the baseline requires, what changes, and what stays unchanged; keep pure
+migration chores (moving scenarios, runner updates) in the plan unless they
+change required behaviour. Keep setup commands in the plan, not Testing Seams.
 
-Check owning `docs/specs/*.feature` files first; extend or modify an
-existing scenario or `Scenario Outline` rather than adding overlapping
-scenarios.
-
-### Tables, prose and lists
-
-Use a table when repeated facts are easier to compare or scan, such as component
-roles, terminology, feature gates, or state ownership. Keep explanations,
-reasoning, and flows in prose. Use numbered lists for ordered steps and user
-stories; use bullets for unordered items. Do not force long explanations into
-table cells.
-
-### Metadata
-
-Keep metadata concise. Use a table with Status, Author, Created and Language.
-Add Project, Baseline and Decision status rows only when they help orient the
-reader. Language names the primary implementation language; put fixture and
-runtime languages elsewhere. Baseline rows may use short SHAs that resolve
-uniquely in the named repository; keep full SHAs in pinned source links. Follow
-[Markdown conventions](../../conventions-markdown/SKILL.md). Use a clear label
-such as `Decision status`, not an ambiguous label such as `Authority`.
+Use a compact metadata table (`Status`, `Author`, `Created`, `Language`, plus
+optional `Project`, `Baseline`, `Decision status`—never ambiguous `Authority`—
+when they orient the reader). Put fixture/runtime languages outside `Language`.
 
 ## Spec template
 
@@ -103,12 +69,12 @@ such as `Decision status`, not an ambiguous label such as `Authority`.
 
 ## Development Brief
 
-{Current request, agreed boundaries and open choices. Link intent.md when
-present, otherwise the preserved source; omit a link if no source is available.}
+{Current request, agreed boundaries, and open choices. Link intent.md when
+present, otherwise the preserved source; omit if none.}
 
 ## Problem Statement
 
-{What is missing, for whom.}
+{What is missing, for whom, and why it matters.}
 
 ## Solution
 
@@ -124,46 +90,34 @@ present, otherwise the preserved source; omit a link if no source is available.}
 
 ## Behavioural Delta
 
-{Baseline and grouped scenarios per SPEC-FORMAT.md; omit if unchanged.}
+{2–3 sentence plain-language summary plus baseline and grouped scenarios per
+SPEC-FORMAT.md; omit if unchanged.}
 
 ## Testing Seams
 
-Use a small table to tell readers what each check proves, not just where it
-runs. Choose clear column labels such as **Boundary** and **What to verify**.
-For each boundary, state the observable result the check confirms and why it
-gives meaningful evidence. Name important failure conditions and expected
-outcomes; avoid vague phrases such as “works correctly” or “fallback absent.”
-For runnable applications, require local end-to-end integration coverage.
-Name the application entrypoint, real layers and infrastructure exercised,
-mocked upstreams, and important failure outcomes. Ground mocks in versioned
-upstream contracts or independently checked fixtures; record how conformance
-will be checked and which live-service guarantees remain unverified. Interfaces
-alone do not prove transport compatibility. Record agreed exceptions or why a
-local application runtime does not apply. Keep setup instructions and test
-commands in the implementation plan.
-
-Reuse acceptance scenarios when they exercise the required end-to-end
-application path. Otherwise, add integration tests for the missing coverage.
-Do not copy scenario text solely to maintain separate suites.
+{Short table showing what each check proves and key failure outcomes—avoid
+vague "works correctly" phrasing. For runnable apps, require local end-to-end
+integration coverage: name entrypoint, real layers/infra, mocked upstreams
+grounded in versioned contracts/fixtures (with conformance check and
+unverified live-service gaps), and agreed exceptions. Reuse acceptance
+scenarios when they cover the path; keep setup commands in the plan.}
 
 | Boundary | What to verify |
 | --- | --- |
-| {Test boundary} | {Observable result and why it provides meaningful evidence} |
+| {Test boundary} | {Observable result and why it gives meaningful evidence} |
 
 ## Implementation Decisions
 
 ### {Decision}
 
-{One clear paragraph in voice-product: what changes for the user or operator,
-which component acts, when, and what a failed check means. Explain necessary
-terms; make the decision understandable without opening the supporting detail.}
+{One plain paragraph: user/operator impact, acting component, timing, and
+what failure means—understandable without expanding details.}
 
 <details>
-<summary>{Descriptive label for the technical detail}</summary>
+<summary>{Descriptive label for supporting technical detail}</summary>
 
-{Explain supporting technical detail and rationale in voice-product too.
-Preserve exact fields, permissions, timing, failure codes and schemas; clearer
-wording cannot change the contract. Omit the dropdown when it adds no value.}
+{Supporting detail and rationale in voice-product, preserving exact schemas,
+fields, permissions, timing, and error codes. Omit if empty.}
 
 </details>
 
@@ -173,8 +127,8 @@ wording cannot change the contract. Omit the dropdown when it adds no value.}
 
 ## Living Specifications
 
-- {Existing owning feature link and behaviour, inline-code future path,
-  or "None — no durable behaviour changes"}
+- {Owning `docs/specs/<capability>.feature` link and behaviour, or "None — no
+  durable behaviour changes"}
 
 ## Research
 

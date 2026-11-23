@@ -1,94 +1,73 @@
 # Plan structure and slice rules
 
-Before drafting or revising prose, read and apply
-[voice-product](../../voice-product/SKILL.md) throughout the plan, including
-Notes and expanded detail, not only the Summary and slice outcomes. Preserve
-exact signatures, identifiers and contract values.
+Apply [voice-product](../../voice-product/SKILL.md) and
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) across all explanatory prose
+(Summary, slice outcomes, Notes, and `<details>`), preserving exact
+signatures, identifiers, and contract values.
 
-Use this guide while designing slices, milestones, acceptance checks, diagrams,
-and the plan document. Keep the top of each section scannable and short: follow
-[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) budgets and put the
-deliverable, blockers, gates, and milestones first. Collapse dense signature
-blocks, acceptance-verification tables, and supporting rationale inside
-`<details>` so they do not bury what needs review.
+Keep the top of each section decision-first and scannable (deliverable,
+blockers, gates, and milestones first); collapse multi-line signature blocks,
+acceptance-verification tables, and dense rationale inside `<details>`.
 
-**Link shared context once.** Never copy `Prerequisites`, `Pull Request
-Delivery`, `Local Running and Integration Tests`, repo rules, or shared
-interfaces into individual slices or GitHub
-Slice Sub-Issues; link the shared `plan.md` section instead.
-
-**Define lettered IDs before use.** Spell out a lettered prefix or shorthand on
-first use (`Slice 1 (S1)`, `Milestone 1.1 (M1.1)`), or keep a compact 3–5 row
-key once at the top instead of repeating definitions.
+- **Link shared context once:** Never copy `Prerequisites`, `Pull Request
+  Delivery`, `Local Running and Integration Tests`, repo rules, or shared
+  interfaces into individual slices or GitHub Slice Sub-Issues—link the shared
+  `plan.md` section.
+- **Newcomer clarity:** Spell out lettered IDs or shorthand before first use
+  (`Slice 1 (S1)`, `Milestone 1.1 (M1.1)`), or include a compact key once at
+  the top. Explain unfamiliar terms on first use.
 
 ## Slice design
 
-Cut vertical slices: each should trace through every layer it touches, be
-demoable on its own, and fit in one session. For single-layer or non-code
-work, use one flat `#### Milestones` list. For a wide rename, use expand–
-contract: add the new form, migrate call sites in slices, then remove the old
-form.
+Cut vertical slices: each traces through every layer it touches, is demoable
+on its own, and fits in one session. Use one flat `#### Milestones` list for
+single-layer or non-code work, and expand–contract (add new, migrate callers,
+remove old) for wide renames.
 
 For every slice:
 
-- State `Blocked by` and `Consumes`/`Produces` with exact signatures (placed
-  in `<details>` when multi-line). Implementers read their own slice plus the
-  linked shared contracts in `plan.md`.
-- Give milestones verifiable outcomes, keyed `M<slice>.<n>`. Describe what is
-  true when done, not which files change. Link each milestone to its spec
-  criterion when there is a spec. Without one, make the milestone wording
-  checkable. Never renumber assigned keys; task lists and execution logs use
-  them.
-- Include an acceptance-verification contract: criterion or milestone,
-  owning living feature and scenario names (including outline rows), testing
-  boundary, and verification command. Include each living `.feature` update
-  and missing steps or runner in the slice that implements its behaviour.
-  Follow the acceptance-test conventions in the
-  [skill](../../conventions-acceptance-tests/SKILL.md).
+- State `Blocked by` and `Consumes`/`Produces` with exact signatures (inside
+  `<details>` when multi-line).
+- Key verifiable outcome milestones `M<slice>.<n>` (what is true when done,
+  not files touched), linked to spec criteria when present; never renumber
+  assigned keys.
+- Include an acceptance-verification contract: criterion or milestone, owning
+  living feature and scenario names (including outline rows), testing
+  boundary, and verification command. Include living `.feature` updates and
+  missing steps/runner in the slice that implements the behaviour per
+  [conventions-acceptance-tests](../../conventions-acceptance-tests/SKILL.md).
   If no feature applies, explain why and name equivalent executable
-  assertions. A missing required feature or harness is planned work, not an
-  exemption. For application behaviour, name the real entrypoint, layers,
-  infrastructure, and mocked upstreams exercised. Build or extend the minimum
-  local harness in the first slice that needs it; later slices extend its
-  coverage rather than deferring integration to a final slice.
-- Choose an outcome diagram (individual, shared, mixed, or none) using
-  [OUTCOME-DIAGRAMS.md](../../shared/OUTCOME-DIAGRAMS.md), based on what helps
-  the reviewer understand the change.
-- When a slice introduces 3+ interacting states, retries/timeouts, or
-  concurrency without a prior spec check, run
-  [STATE-MODEL.md](../../shared/STATE-MODEL.md).
-- Choose the delivery shape using
-  [PULL-REQUEST-DELIVERY.md](../../shared/PULL-REQUEST-DELIVERY.md). Name
-  slices or milestones, not task numbers.
+  assertions (a missing feature or harness is planned work, not an
+  exemption). For runnable apps, build/extend the minimum local harness in the
+  first slice that needs it rather than deferring integration to the end.
+- Pick an outcome diagram via
+  [OUTCOME-DIAGRAMS.md](../../shared/OUTCOME-DIAGRAMS.md) when it helps
+  reviewers, run [STATE-MODEL.md](../../shared/STATE-MODEL.md) if a slice adds
+  3+ interacting states/retries/concurrency without a prior spec check, and
+  choose PR shape via
+  [PULL-REQUEST-DELIVERY.md](../../shared/PULL-REQUEST-DELIVERY.md) (naming
+  slices/milestones, not task numbers).
 
 The plan is complete when every requirement maps to a milestone and acceptance
-check, and every shared name is consistent. Planning records how acceptance
-will be proved; execution supplies passing evidence.
+check, and shared names match. Planning records how acceptance will be proved;
+execution supplies passing evidence.
 
 ## Local running and integration tests
 
-For runnable applications, define one shared local-running section, reusing
-existing project tooling. Follow the spec's Testing Seams; without a spec,
-settle the same decisions before handoff. Record agreed exceptions or why a
-local application runtime does not apply.
+For runnable applications, define one shared section matching the spec's
+Testing Seams (or settle the same decisions if no spec exists), reusing
+existing project tooling—or record why a local runtime does not apply:
 
-- Exercise the running application with production wiring, relevant real
-  storage/cache engines, and production outbound clients calling local
-  protocol mocks. Do not mock the application behaviour being verified.
-- Name mock contracts/fixtures and their conformance checks, configurable
-  endpoints, and synthetic identities/credentials. After dependency bootstrap,
-  the local path needs no live upstreams or credentials; never fall back to
-  live endpoints. Keep any required live-service checks explicit and separate.
-- Specify startup, bounded readiness checks, migrations/seeding, reset, test,
-  and teardown commands, including cleanup after failure. Share wiring between
-  manual development and automated tests, but isolate test state and cleanup
-  from developer data.
-- Reuse the project's native or container runtime; choose Docker or Apple
-  Container where appropriate, not both by default. Keep full observability
-  optional unless required to prove the agreed behaviour.
-
-Acceptance scenarios can run through this path; add focused integration checks
-only for gaps. Record mock-backed evidence as such, not as live-service proof.
+- Run the real application wiring, real storage/cache engines, and production
+  outbound clients against local protocol mocks (never mock the behaviour
+  under test or fall back to live endpoints; keep any live-service checks
+  explicit and separate).
+- Name mock contracts/fixtures, conformance checks, configurable endpoints,
+  synthetic credentials, and lifecycle commands (start, bounded readiness,
+  migrations/seed, reset, test, teardown including failure cleanup), isolating
+  test state from developer data. Reuse the repo's native or container runtime
+  (Docker or Apple Container, not both by default). Record mock-backed
+  evidence as such, not live-service proof.
 
 ## Plan template
 
@@ -103,11 +82,9 @@ only for gaps. Record mock-backed evidence as such, not as live-service proof.
 
 ## Summary
 
-{Two or three reader-facing sentences: the problem, what changes for whom,
-and why it matters.}
+{2–3 reader-facing sentences: problem, what changes for whom, why it matters.}
 
-{Optional shared outcome diagram: caption the covered slice or milestone IDs,
-then a fenced Mermaid block. Omit when better covered within Implementation.}
+{Optional shared outcome diagram with captioned slice/milestone IDs.}
 
 ## Prerequisites
 
@@ -116,7 +93,7 @@ then a fenced Mermaid block. Omit when better covered within Implementation.}
 ## Local Running and Integration Tests
 
 {Shared runtime, dependencies/mocks, contract checks, lifecycle and test
-commands per this guide; link existing setup. Or state why not applicable.}
+commands; link existing setup, or state why not applicable.}
 
 ## Pull Request Delivery
 
@@ -132,20 +109,17 @@ commands per this guide; link existing setup. Or state why not applicable.}
 broken, explaining unfamiliar terms on first use.}
 
 - **Gate / needs decision:** {approval or blocker, or omit}
-
 - **Blocked by:** None
 
 #### Solution
 
 {1–2 plain sentences on what changes and what stays untouched.}
 
-{Optional focused outcome diagram for Slice 1, captioned with its ID. Omit
-when covered by a shared diagram or clearer without one.}
+{Optional focused outcome diagram for Slice 1.}
 
 #### Slice 1 Milestones
 
-- [ ] **M1.1**: {checkable outcome}
-  {— [criterion](./spec.md#anchor), when there's a spec}
+- [ ] **M1.1**: {checkable outcome} {— [criterion](./spec.md#anchor)}
 
 <details>
 <summary>Contracts and acceptance verification</summary>
@@ -167,25 +141,27 @@ when covered by a shared diagram or clearer without one.}
 
 ### Slice 2: {what it delivers end to end}
 
-- **Delivers:** {observable behaviour}
+#### Problem / Solution
 
-{Optional focused outcome diagram for Slice 2, captioned with its ID. Omit
-when covered by a shared diagram or clearer without one.}
-
-- **Blocked by:** Slice 1 ({why})
-- **Consumes:** {signatures from Slice 1}
-- **Produces:** {exact signatures, or None}
+{1–2 sentences each; state Blocked by: Slice 1 ({why}) and optional diagram.}
 
 #### Slice 2 Milestones
 
-- [ ] **M2.1**: {checkable outcome}
-  {— [criterion](./spec.md#anchor), when there's a spec}
+- [ ] **M2.1**: {checkable outcome} {— [criterion](./spec.md#anchor)}
+
+<details>
+<summary>Contracts and acceptance verification</summary>
+
+- **Consumes:** {signatures from Slice 1}
+- **Produces:** {exact signatures, or None}
 
 #### Acceptance Verification
 
 | Criterion | Feature scenarios / assertions | Boundary | Command |
 | --- | --- | --- | --- |
 | {M2.1 + criterion} | {feature + names + rows} | {boundary} | `{command}` |
+
+</details>
 
 ### Documentation
 
@@ -200,6 +176,5 @@ when covered by a shared diagram or clearer without one.}
 
 ## Notes
 
-- **Coverage check:** {review result, remaining gaps, and any limitations}
-- {Risks, open questions, unverified assumptions.}
+{Design trade-offs, deferred work, intent-review record, and ADR status.}
 ````
