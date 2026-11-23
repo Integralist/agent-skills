@@ -26,8 +26,11 @@ true positives. Then resume at **Respond** in [FEEDBACK.md](FEEDBACK.md).
    - **Attacker control:** Pass if the attacker controls data that drives the
      bug. Fail if the input is internal, trusted, or fixed.
    - **Real impact:** Pass if it leads to code execution, privilege
-     escalation, or a leak. Fail if it is only a robustness issue, such as a
-     restartable crash.
+     escalation, authorization bypass (including fail-open checks),
+     integrity loss, data leak, or availability loss (remote or
+     tenant-triggered DoS, including repeatable crashes). Fail if it has no
+     confidentiality, integrity, authorization, or availability impact (for
+     example, a self-only local error).
    - **Math / bounds:** Pass if the condition is arithmetically possible
      after validation. Fail if validation makes it impossible, such as an
      underflow that cannot occur.
@@ -38,8 +41,10 @@ true positives. Then resume at **Respond** in [FEEDBACK.md](FEEDBACK.md).
 5. **Set verdict and severity.** Re-derive severity from impact times
    reachability rather than adopting the reviewer's rating. An unauthenticated,
    trivially reachable RCE is critical; the same bug behind three privilege
-   checks is not, and improbable preconditions make severity `low`. Before a
-   `FALSE POSITIVE` verdict, read
+   checks is not, and improbable preconditions make severity `low`. Treat
+   crash recoverability (such as process auto-restart) as a severity factor
+   based on blast radius and repeatability, not as a reason to mark a DoS
+   finding `FALSE POSITIVE`. Before a `FALSE POSITIVE` verdict, read
    [FALSE-POSITIVE-CHECKS.md](FALSE-POSITIVE-CHECKS.md) and support the
    rejection with evidence.
 6. **Check reported interactions.** Verify whether a reported interaction

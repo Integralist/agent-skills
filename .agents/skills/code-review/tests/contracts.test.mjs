@@ -223,3 +223,12 @@ test("new guidance links resolve", () => {
     }
   }
 });
+
+test("security feedback real-impact gate covers availability, integrity, and auth bypasses", () => {
+  const securityFeedback = flat(".agents/skills/code-review/references/SECURITY-FEEDBACK.md");
+  assert.match(securityFeedback, /authorization bypass/);
+  assert.match(securityFeedback, /integrity loss/);
+  assert.match(securityFeedback, /availability loss/);
+  assert.match(securityFeedback, /crash recoverability.*severity factor/i);
+  assert.doesNotMatch(securityFeedback, /Fail if it is only a robustness issue, such as a restartable crash/);
+});
