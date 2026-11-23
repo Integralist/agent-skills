@@ -1,20 +1,18 @@
 # PR title and description
 
-How to write a pull request's title and description. Read and follow the
-[voice-product](../voice-product/SKILL.md) skill before drafting, after reading
-every commit, the full diff against the PR's base, and enough surrounding
-context (callers, config, tests, and linked issues, specs, or decisions) to
-explain why the change exists and what changes in behaviour.
+Read every commit, the full diff against the PR's base, and enough surrounding
+context (callers, config, tests, linked issues/specs) to explain why the
+change exists and what changes in behaviour. Apply
+[voice-product](../voice-product/SKILL.md).
 
-Derive implemented behaviour from code and tests; treat commit messages and
-issue text as motivation, not proof. Separate implemented work from planned
-follow-ups.
+Derive behaviour from code and tests—treat commit messages and issues as
+motivation, not proof. Separate implemented work from planned follow-ups.
 
 ## Title
 
-Write it as the [commit](../commit/SKILL.md) skill writes a subject:
-`type(scope): <why it matters>`. If the repo lints PR titles (a workflow in
-`.github/workflows/` or a commitlint config), its rules win.
+Follow [commit](../commit/SKILL.md) subject style:
+`type(scope): <why it matters>`. If the repo lints PR titles (`.github/workflows/`
+or commitlint config), its rules win.
 
 ## Body
 
@@ -28,94 +26,49 @@ system role and prerequisite terms if crossing boundaries.>
 
 ## Solution
 
-<Lead with the key change: who changes what, where, and why, naming real
-components, files, or environments. Separate setup from runtime behaviour,
-state what stays the same, and note trade-offs beside benefits.>
-
-```mermaid
-<High-level diagram when flow, branching, or state changes.>
-```
+<Key change: what changed, where (real files/components), why, what stays the
+same, and any trade-offs.>
 
 ## Notes
 
-<Optional: pre-merge checks—what tests were run and what they verify,
-migration steps, risks. Omit if empty.>
+<Optional: pre-merge checks run and what they verify, migration steps, or
+risks. Omit if empty.>
 
 ---
 
 <details>
 <summary>📋 <b>Project metadata</b></summary>
 
-<Issue and ticket references as separate bullets, including project, slice,
-and delivered-task references with their required state and evidence. Keep
-the prescribed wording, such as `Part of`, `Delivers`, or `Closes`.>
+<Issue and ticket links as separate bullets (`Part of`, `Delivers`, `Closes`).>
 
 </details>
 ````
 
-### Rules
+## Rules
 
-- Put tracking metadata only in the final `Project metadata` block. Keep it
-  collapsed (no `open` attribute). Omit the block and its divider if empty.
-  Keep context and pre-merge requirements that reviewers need visible in the
-  main body.
-
-- Before showing the draft, do a concision pass. Keep each point once. Cut
-  sentences that don't change what the reviewer understands, checks, or
-  decides. Link to the diff or decision record for supporting detail.
-- After cutting, check that the visible body still states what changes,
-  why it matters, and what reviewers must verify before merging. Keep
-  material constraints, failure cases, risks, and verification gaps
-  visible. Split dense paragraphs by idea rather than packing more into
-  each sentence.
-- For GitHub-tracked projects, before drafting or updating issue references,
+- **Newcomer context:** Assume a reader unfamiliar with the repository—state
+  the system's role when crossing boundaries and explain unfamiliar domain
+  terms on first use (expanding an acronym alone is not enough). Name real
+  components, files, or environments.
+- **Verification, risks & evidence:** List only checks actually run and what
+  they verify; leave post-merge steps (such as deploys) to the ticket. For
+  material risks, name what is affected and whether reverting restores prior
+  behaviour (flag irreversible effects like data deletion). Add concise
+  before/after evidence (test output or screenshot) when it clarifies a
+  behaviour change.
+- **Project metadata:** Keep tracking links in the collapsed `Project metadata`
+  block (no `open` attribute); omit the block and divider if empty. For
+  For GitHub-tracked projects, before drafting or updating issue references,
   read and follow [task and PR reconciliation](GITHUB-ISSUES.md#task-and-pr-reconciliation).
   A slice reference alone is not a delivered-task inventory.
-- In `Problem`, briefly introduce the system's role and avoid unexplained
-  jargon or acronyms: explain necessary terms on first use in plain words
-  (expanding an acronym is not enough), even when a term looks familiar.
-- In `Solution`, name concrete components, files, or environments rather than
-  vague abstractions, and say what stays unchanged in refactors.
-- Keep `Notes` strictly to what a reviewer can check before merging. Leave
-  post-merge work, such as deploys, to the ticket. List only testing you or
-  the user actually ran, stating what it exercises and verifies.
-- Include concise before/after evidence when it clarifies a behavior change:
-  a regression test, screenshot for a visual change, or observed output.
-- For material risks, name affected users, systems, or data, and say whether
-  reverting the code restores prior behavior; call out effects a revert
-  cannot undo, such as deleted data.
-- Write each paragraph as one line. GitHub soft-wraps, so breaks at 80 columns
-  render ragged.
-- Put a blank line between every pair of list items, including numbered items.
-  Use numbered lists only when the order matters.
-- Use an emoji only where it signals status faster than words (✅ verified, ⚠️
-  caution, ❌ breaking), at most one per line, and never in the title, headings,
-  or code.
-- Wrap a Markdown code block in 4 backticks so inner 3-backtick blocks don't
-  break it.
-
-### Diagram
-
-Include a high-level Mermaid diagram whenever the change alters how parts
-call each other, branch, or move through states. Omit it only when no useful
-flow exists:
-
-- `sequenceDiagram` for calls between parts
-- `flowchart` for branching
-- `stateDiagram-v2` for lifecycles
-
-Keep it high-level: plain role labels, only the slice that changed, a dozen
-nodes or fewer (prefer six or fewer when clear), setup separated from runtime
-when helpful, an error or rejection path when useful, and ` (new)` or
-` (changed)` on the steps the diff touches. Check it with the
-[conventions-mermaid](../conventions-mermaid/SKILL.md) skill.
-
-**Optional code map.** Add a second diagram only if it reveals a changed
-caller, dependency, or package boundary that matters to the review and isn't
-clear from the first diagram. Read [code-graph](../code-graph/SKILL.md) and
-use its tracing, change-mapping, and validation guidance with the same base
-and head as the PR diff.
-
-Under `Solution`, follow the first diagram with a short paragraph explaining
-what the map adds and what it helps reviewers check. Then include the map in
-a `mermaid` block. Do not export a PNG.
+- **GitHub rendering:** Write each paragraph on one line (GitHub turns
+  80-column hard wraps into jagged breaks). Use a blank line between list
+  items; wrap Markdown snippets in four backticks; use status emoji sparingly
+  (✅, ⚠️, ❌ — at most one per line, never in titles, headings, or code).
+- **Diagrams:** Include a concise Mermaid diagram (`sequenceDiagram`,
+  `flowchart`, or `stateDiagram-v2`, ~6–12 nodes with plain labels) whenever
+  the change alters how parts call each other, branch, or move through states;
+  omit it only when no useful flow exists. Check diagrams with
+  [conventions-mermaid](../conventions-mermaid/SKILL.md). If a changed
+  caller/package map materially aids review, consult
+  [code-graph](../code-graph/SKILL.md) and embed Mermaid (no PNG export).

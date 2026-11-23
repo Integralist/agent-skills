@@ -1,147 +1,62 @@
 # Subagent Steerability — When to Spawn, When Not To
 
-Guidance for any skill that delegates work to a subagent. The question is not
-"is this task big enough to delegate?" but "can the user steer it once it
-starts?"
+Delegate based on whether the user needs to steer work mid-flight, not just
+whether a task looks large.
 
-## The subagent starts blank
+## Subagents start blank
 
-A subagent inherits none of this conversation — it sees only the prompt you
-give it. Some harnesses spawn a subagent as a fresh CLI invocation of
-themselves (e.g. `pi --print ...` over bash), where this is absolute: no shared
-history, no open files, nothing but the argument string. Make every delegating
-prompt self-contained — the proposed-change list, the verified exemplar, the
-file paths, the review-only constraint — because there is no ambient context
-to fall back on.
+A subagent sees only the prompt you give it—no conversation history, no open
+files. Make every prompt self-contained: assigned scope, exact file paths,
+constraints (such as *review-only; do not modify code or state*), and required
+outputs.
 
-## The rule
+## Read-only vs. editing
 
-Split tasks by whether the subagent **edits the workspace**:
+- **Read-only work** (search, trace, audit, review, research, diagnose) is
+  safe to run in background or parallel subagents—there is nothing to steer
+  mid-flight.
+- **Editing or iterative work** must stay steerable. Do not seal multi-step
+  edits inside a fire-and-forget subagent. Instead, pick the right shape:
+  1. **Two-phase (audit → interactive apply):** Subagents investigate
+     read-only and return proposed changes; the main thread applies them with
+     the user.
+  2. **Verified-pattern fan-out:** For uniform, independent mechanical edits
+     across many files, verify one exemplar with the user in the main thread,
+     then fan out subagents to replicate that exact pattern. Fall back to
+     two-phase if any file needs new judgment.
+  3. **Chat-able teammate** (when supported; see [`AGENT-TEAMS.md`](./AGENT-TEAMS.md))
+     or **keep it in the main thread**.
 
-- **Read-only work** (find, trace, review, audit, research, diagnose, think) is
-  safe to delegate to a fire-and-forget subagent. The user consumes the result
-  at the end; there is nothing to steer mid-flight. A background or parallel
-  subagent is a good fit here.
-- **Editing or iterative work** (refactor, multi-step implementation, fixing
-  code) must not be delegated to a sealed subagent. A subagent the user can't
-  interrupt ploughs ahead while objections pile up, leaving a large diff to
-  unwind at the end. The user's "I don't like this, change it" never reaches a
-  subagent that isn't the main agent.
+## Model tiers
 
-Two subagent shapes make editing safe: **two-phase** when each edit needs its
-own decision, and **verified-pattern fan-out** when the decision is made once
-and mechanically repeated across files. Both are below.
+Never hardcode model IDs—choose within the active ecosystem by what a miss
+would cost:
 
-## What to do instead for editing work
+- **Cheapest tier:** Mechanical, high-recall work (bulk reads, grep/trace,
+  drafting git/PR/changelog prose, formatting, fan-out apply).
+- **Mid tier:** Read-only analysis checked before action (research summaries,
+  first-pass triage).
+- **Main (session) model or better:** Engineering judgment (code review,
+  security, root-cause diagnosis, design, ambiguous debugging, interactive
+  apply).
 
-Prefer these approaches, in order:
-
-1. **Two-phase: read-only audit → interactive apply.** A subagent investigates
-   and returns a *proposed-change list* (it edits nothing). The main thread
-   then applies the changes with the user, who can veto, adjust, or stop each
-   one. This keeps the parallel-scan speed of a subagent while returning every
-   edit to a steerable context. See `cleanup` and `fix-failing-tests` for
-   worked examples.
-2. **Verified-pattern fan-out.** When the edit is mechanical replication of
-   one pattern across many independent files, establish and verify the pattern
-   on a single representative case in the main thread, get the user's approval
-   of that case, then fan out subagents to apply the identical transform to
-   the rest. The user approves the pattern plus one worked example — not each
-   file — so the parallelism is real and the control point survives. Valid
-   only when the transform is uniform, the files are independent, and a
-   reviewed exemplar exists. If a file needs judgment the exemplar didn't
-   settle, it is not this pattern — fall back to the two-phase split. See
-   `tech-docs`.
-3. **A chat-able named teammate** (if the harness supports agent teams) — a
-   delegate the user can talk to directly mid-flight, rather than a
-   fire-and-forget dispatch. See [`AGENT-TEAMS.md`](./AGENT-TEAMS.md).
-4. **Keep it in the main thread.** When neither of the above applies, do the
-   editing work inline rather than sealing it in a subagent.
-
-## When a subagent reviews instead of edits
-
-If a skill spawns subagents purely to review, critique, or verify — and the
-main thread owns all implementation — say so explicitly in the subagent
-prompt: *review-only; do not modify code or run tools that change state.* This
-is the pattern in `code-review`, `redesign`, and `decide`, and it is why those
-skills need no steering gate.
-
-## Model tier for the subagent
-
-A subagent inherits the main model by default — often needlessly expensive.
-When your harness lets you set a subagent's model, pick the tier by what a miss
-would cost. Never hardcode a model name; the main agent chooses within its own
-ecosystem.
-
-- **Cheapest tier** — mechanical, high-recall, low-judgment: bulk file reads,
-  grep/trace, drafting commit/PR/changelog prose, formatting, and the apply
-  agents of a verified-pattern fan-out.
-- **Mid tier** — read-only analysis whose output is checked before anyone acts
-  on it: research summaries, first-pass triage of failures.
-- **Main (session) model or better** — engineering judgment: code review,
-  security analysis, root-cause diagnosis, design, ambiguous debugging, and the
-  interactive apply phase of a two-phase split.
-
-A mechanical read-only scan is the natural place for a cheap tier; review and
-the interactive apply stay on the main model.
-
-Never silently downgrade work touching product-code correctness or design/
-debug judgment. Disclose the downgrade at the gate that approves the work —
-the verified-pattern exemplar, or a direct prompt — and let the user veto.
-Mechanical, read-only, git, and docs delegation needs no prompt.
-
-## Turn budgets for the subagent
-
-Every tool call (reading a file, running grep, executing a command) consumes a
-turn. When a subagent runs with an unconfigured or low default limit (often 20
-turns), deep searches and multi-file audits trigger wrap-up warnings or abort
-prematurely.
-
-Set the turn limit to match the task's scope:
-
-- **Mechanical lookups and quick scans** — 15–20 turns.
-- **Audits, code reviews, and diagnostics** — 30–50 turns (e.g.,
-  `max_turns: 40`).
-- **Adversarial verification** — 40–50 turns to allow extensive caller
-  searches.
+Never silently downgrade product-code correctness or design/debug judgment—
+disclose at the approval gate so the user can veto. Mechanical, read-only,
+git, and docs delegation needs no prompt.
 
 ## Completion and retry
 
-A turn budget is a limit, not evidence that a subagent finished its assignment.
-The parent agent owns checking completion, retrying interrupted work, and
-reporting any incomplete pass.
+Always set a finite `max_turns` proportional to scope (raise above low harness
+defaults for multi-file audits; never leave it unbounded). Stop a running
+subagent and pull work back to the main thread if it loops, stalls, or burns
+turns without progress. Verify results rather than assuming completion:
 
-1. Define the assigned scope and completion criteria in every subagent prompt.
-   Require a final status of `COMPLETE` or `INCOMPLETE`, with unfinished work
-   listed for the latter. A completion marker does not replace checking
-   required files, findings, or other outputs.
-2. Check the platform's stop reason and the subagent's status. Treat an
-   explicit turn-limit stop, `INCOMPLETE` status, missing status, or missing
-   required output as incomplete. If the platform hides the stop reason,
-   report that completion could not be verified rather than claiming the turn
-   limit was hit.
-3. Retry incomplete work once with a materially higher turn limit, ideally
-   double the original. Keep the same task and model settings; pass the partial
-   result and remaining work so the retry can continue. For work with side
-   effects, use a clean sandbox or verified checkpoint to avoid repeating them.
-4. Verify the retry against the original completion criteria. If it remains
-   incomplete, continue in the main thread when feasible; otherwise mark the
-   result incomplete and do not rely on it as a finished review.
-5. Report turn-limit exhaustion with `⚠️` immediately after the relevant
-   subagent-pass summary, even if the retry completed. State the original
-   limit, retry limit, and retry outcome. If completion is unverifiable, use
-   the same placement but describe the uncertainty accurately. For example:
-   `⚠️ Initial pass hit 40 turns; retry at 80 completed.`
-
-## Named vs. inline subagent launch
-
-When the harness distinguishes saved agent definitions from inline characters
-(such as `spawn_named_subagent` and `spawn_inline_subagent`):
-
-- **Named / saved subagent** — Use when pre-configured, reviewed agent files
-  exist in the project or user environment (`.pi/agents/*.md`). The agent runs
-  under its saved configuration (system prompt, tools, model, turn limit).
-- **Inline subagent** — Use when the skill defines an inline character,
-  custom system prompt, or temporary persona. Supply all required fields
-  (`name`, `system_prompt`, `prompt`, `description`) and explicit execution
-  settings (`model`, `thinking`, `max_turns`).
+1. Require a clear `COMPLETE` or `INCOMPLETE` (with remaining work) status in
+   the prompt, and verify required files/outputs independently.
+2. If a subagent stops early, returns `INCOMPLETE`, or omits required output,
+   retry at most once with a higher bounded turn limit (passing partial
+   results and remaining work; use a clean checkpoint for side effects), then
+   finish in the main thread or report the gap.
+3. Flag any turn-limit hit, retry, or unverifiable completion with `⚠️` next
+   to the pass summary, stating what happened—never present an incomplete pass
+   as finished.

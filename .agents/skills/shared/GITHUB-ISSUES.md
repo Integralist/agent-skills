@@ -2,27 +2,21 @@
 
 Use this guide when the user or calling skill passes `--github`, an issue
 number (`#<n>`), or a GitHub issue URL, or when the current session's active
-project is already tracked in GitHub Issues. Keep the on-disk
-`projects/<yyyy-mm-dd>-<slug>/` workspace as the default when GitHub mode is
-not selected.
+project is already tracked in GitHub Issues. Keep `projects/<yyyy-mm-dd>-<slug>/`
+as the default when GitHub mode is not selected.
 
 A project lives **either** on disk (`projects/<yyyy-mm-dd>-<slug>/`) **or** in
-GitHub Issues: leave project documents solely as Root Issue Artifacts and do not
-persist files under `projects/` unless the repository's `AGENTS.md` explicitly
-requires on-disk project records in Git (in which case, persist only the
-`AGENTS.md`-required files under `projects/`). Durable repository files
-(`docs/specs/<capability>.feature`, `docs/adr/README.md`, system-wide
-`docs/adr/ADR-<NNNN>.md`, `docs/research/`, and `GLOSSARY.md`) remain on disk
-in Git and are delivered via pull requests. Keep remote GitHub writes behind
-explicit user approval. Mirror GitHub-tracked workspaces outside the checkout
-under `$XDG_STATE_HOME` so work continues offline without risking accidental
-commits (see [Local mirror and offline outbox](#local-mirror-and-offline-outbox)).
+GitHub Issues: leave project documents solely as Root Issue Artifacts and do
+not persist files under `projects/` unless the repository's `AGENTS.md`
+explicitly requires on-disk project records in Git (in which case persist only
+those required files). Durable repo files (`docs/specs/*.feature`, `docs/adr/`,
+`docs/research/`, `GLOSSARY.md`) stay in Git via PRs. Keep remote GitHub
+writes behind explicit user approval.
 
 ## Label bootstrap
 
 Before creating the first project, slice, or task issue (never during read-only
-discovery or when inspecting a cited issue), ensure the three workflow labels
-exist idempotently in the current repository:
+discovery or when inspecting a cited issue), ensure the workflow labels exist:
 
 ```bash
 gh label create project --description "Root project tracking issue" --color 1D76DB --force
@@ -32,160 +26,85 @@ gh label create task --description "Executable task sub-issue within a slice" --
 
 ## 3-level issue hierarchy and naming
 
-Map the on-disk project structure onto a 3-level GitHub Sub-Issue tree using
-`--parent` and `--blocked-by`:
+Map projects onto a 3-level GitHub Sub-Issue tree using `--parent` and
+`--blocked-by`, keeping descriptions scannable and self-contained for readers
+unfamiliar with the project via [voice-product](../voice-product/SKILL.md)
+(decision-first summary above `<details>`, dense detail collapsed below;
+replace stale status rather than appending chronology):
 
 1. **Root Project Issue (`--label project`):**
    - **Title:** `<Project Title> (<slug>)`
-   - **Body:** Replaces `projects/<date>-<slug>/README.md`, following
-     [PROJECT-README.md](PROJECT-README.md). Add a `Slug` row with value
-     `<slug>` to its opening Field/Value metadata table.
-   - **Lazy creation rule:** First skill that writes a project artifact creates
-     the Root Issue if no active Root Issue exists in the session or arguments,
-     attaches its artifact, and passes `#<root-issue>` to downstream steps.
+   - **Body:** Follows [PROJECT-README.md](PROJECT-README.md) with a `Slug` row
+     in its opening metadata table. Lead with a short summary and one concrete
+     `Next action`; link artifacts instead of repeating them.
+   - **Lazy creation:** First skill that writes a project artifact creates the
+     Root Issue if none is active, attaches its artifact, and passes
+     `#<root-issue>` downstream.
 2. **Slice Sub-Issues (`--label slice`, `--parent <root-issue>`):**
-   - **Title:** `<slug> / S<N>: <Slice Title>`
-   - **Dependencies:** Pass `--blocked-by <slice-issue>` for slices that depend
-     on earlier slices.
-   - **Body (two layers):** Keep the visible top <= 220 words in
-     [PR-DESCRIPTION.md](PR-DESCRIPTION.md) style: `## Problem` (1–2 plain
-     sentences introducing system role and terms on first use, plus
-     blank-line-spaced `Parent Project`, `Artifacts`, `Gate`, and
-     `Blocked by` bullets) and `## Solution` (what changes and why, plus
-     `Status`). Never copy shared `plan.md` sections (prerequisites, PR
-     delivery tables, repo rules, or other slices' contracts) into a Slice
-     issue—link them once. Put `M<n>.<m>` milestone checkboxes and compiled
-     task links inside `<details><summary>Milestones and tasks</summary>`, and
-     put `Consumes`/`Produces` (with captioned signature blocks),
-     `Acceptance Verification`, and `## Starting Context` (appended by
-     `to-tasks`) inside `<details><summary>Contracts and verification
-     details</summary>`. Do not attach artifacts to Slice issues.
+   - **Title:** `<slug> / S<N>: <Slice Title>` (pass `--blocked-by` for
+     earlier dependent slices).
+   - **Body:** Keep `## Problem` (context plus `Parent Project`, `Artifacts`,
+     `Gate`, `Blocked by`) and `## Solution` (what changes, why, `Status`)
+     short and scannable—link shared `plan.md` sections instead of copying
+     them. Collapse `M<n>.<m>` milestones/task links and `Consumes`/`Produces`/
+     `Acceptance Verification`/`Starting Context` inside `<details>` blocks.
+     Do not attach artifacts to Slice issues.
 3. **Task Sub-Issues (`--label task`, `--parent <slice-issue>`):**
-   - **Title:** `<slug> / S<N>-T<M>: <Task Title>`
-   - **Just-in-time creation:** Created one slice at a time by `to-tasks` (or
-     `execute-plan` Step 2) against live code, chained in dependency order with
-     `--blocked-by <prev-task-issue>`.
-   - **Body (two layers):** Keep the visible top <= 220 words in
-     [PR-DESCRIPTION.md](PR-DESCRIPTION.md) style: `## Problem` (1–2 plain
-     sentences introducing system role and terms on first use, plus blank-line-spaced
-     `Parent Slice`, `Blocked by`, and `Supports` bullets), `## Solution`
-     (what changes and why, plus `Location` and one-line `Verify`), and
-     optional 1–2 bullet `## Notes`. Put `Stub`, `Test (red)`, and
-     `Implementation guidance (green)` inside a `<details><summary>Stub,
-     test, and implementation details</summary>` block. Never repeat `AGENTS.md`
-     or process checklists inline, stick to the template sections (with optional
-     `Prerequisites` inside `<details>` only for task-specific setup), and write
-     guidance as short flat bullets rather than prose paragraphs. Do not attach
-     artifacts to Task issues, and
-     omit the trailing `- [ ] Task <n> complete` checkbox (the Task Sub-Issue's
-     open/closed state tracks completion).
-
-## Issue readability
-
-Before writing or revising any issue description, read
-[CONCISE-PROSE.md](CONCISE-PROSE.md) and apply
-[voice-product](../voice-product/SKILL.md). Treat Root, Slice, and Task
-descriptions as decision-first navigation on top, with dense supporting detail
-collapsed below.
-
-- **Root Issue (<= 250 words):** Lead with `Summary` (2 sentences max) and
-  `Next action` (one owner, one action, one link). Keep `Artifacts`,
-  `Gates`, and `Slice tracking` to short phrases. Never repeat review
-  history, PR rules, or spec prose; link the owning artifact or comment.
-- **Slice & Task Issues:** Keep the summary, blockers, gates, and next check
-  above `<details>`. Put dense supporting detail (contracts, verification
-  tables, stubs, and tests) inside `<details>`—held to the same brevity and
-  no-boilerplate rules—with blank lines around the Markdown so GitHub renders
-  it.
-- **Updates:** Replace stale status instead of appending chronology. Preserve
-  unique evidence in its owning artifact or an issue comment before removing it
-  from a description.
+   - **Title:** `<slug> / S<N>-T<M>: <Task Title>` (created just-in-time one
+     slice at a time by `to-tasks` or `execute-plan`, chained with
+     `--blocked-by`).
+   - **Body:** Keep `## Problem` (context plus `Parent Slice`, `Blocked by`,
+     `Supports`), `## Solution` (`Location`, one-line `Verify`), and optional
+     `## Notes` brief. Collapse `Stub`, `Test (red)`, and `Implementation
+     guidance (green)` inside `<details>` as concise bullets—never repeat
+     `AGENTS.md` inline. Do not attach artifacts to Task issues, and omit the
+     trailing `- [ ] Task <n> complete` checkbox (open/closed state tracks it).
 
 ## Root Issue Artifacts
 
-Store all project-level documents as Issue Artifacts on the **Root Project
-Issue** using `gh issue artifact`:
+Store project-level documents on the **Root Project Issue** via `gh issue
+artifact`:
 
-| Document | Artifact command & type |
-| --- | --- |
-| `project.md`, `discovery[-mN].md`, `design[-mN].md` | `gh issue artifact create <root> --name "<filename>" --body-file -` (default `generic`) |
-| `intent.md`, `research.md`, `spec.md`, `prd.md` | `gh issue artifact create <root> --name "<filename>" --body-file -` (default `generic`) |
-| `plan.md` | `gh issue artifact create <root> --name "plan.md" --type plan --body-file -` |
-| `ADR-<NNNN>.md` (project-scoped) | `gh issue artifact create <root> --name "ADR-<NNNN>.md" --body-file -`; index its artifact URL in `docs/adr/README.md` |
-| `execution.md` (`execute-plan` log) | `gh issue artifact create <root> --name "execution.md" --body-file -` |
+- `plan.md`: `gh issue artifact create <root> --name "plan.md" --type plan --body-file -`
+- All other project docs (`project.md`, `discovery*.md`, `design*.md`,
+  `intent.md`, `research.md`, `spec.md`, `prd.md`, `execution.md`, and
+  project-scoped `ADR-<NNNN>.md` indexed in `docs/adr/README.md`):
+  `gh issue artifact create <root> --name "<filename>" --body-file -`
+- Read/update with `gh issue artifact list`, `view --json body --jq .body`,
+  and `edit --body-file -`. Publish only the extracted artifact body, not the
+  CLI's rendered metadata. Preserve frontmatter that belongs to the document
+  itself. Update the Root Issue's `## Artifacts` table and `## Next action`
+  when artifacts change.
 
-List and read existing artifacts on the Root Issue with:
+## Discovery and formatting
 
-```bash
-gh issue artifact list <root> --json number,name,type,url
-gh issue artifact view <root> <artifact-number> --json body --jq .body
-gh issue artifact edit <root> <artifact-number> --body-file -
-```
-
-Publish only the extracted artifact body, not the CLI's rendered metadata.
-Preserve frontmatter that belongs to the document itself.
-
-Whenever an artifact is created or its status changes, update the `##
-Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
-<root> --body-file -`).
-
-## Discovery and selection
-
-- **Explicit issue reference:** If the user passes `#<number>` or an issue URL,
-  first verify any URL's `<owner>/<repo>` matches the current checkout
-  (`gh repo view --json nameWithOwner --jq .nameWithOwner`); reject
-  foreign-repository issue URLs and stop rather than passing a bare `#<number>`
-  that targets the checkout's repository. Inspect the issue with `gh issue view
-  <id> --json number,title,state,labels,body,parent,subIssues,blockedBy`
-  (read-only; do not bootstrap labels or mutate the issue). If it is a Slice or
-  Task sub-issue, resolve its `parent` chain to identify the Root Issue.
-- **Listing open projects:** Run `gh issue list --label project --state open`
-  (or `gh issue list --search 'in:title "(<slug>)" state:open' --label=project`
-  when the project slug is known). If more than one open project matches, ask
-  the user which one to use.
-- **Listing slices or tasks for a project:** Traverse `subIssues` from the
-  parent issue (`gh issue view <parent> --json subIssues`) or filter by slug
-  and label:
-
-  ```bash
-  gh issue list --search 'in:title "<slug> /" state:open' --label=slice
-  gh issue list --search 'in:title "<slug> /" state:open' --label=task
-  ```
-
-## Formatting and cross-reference rules
-
-- **Do not hard-wrap prose at 80 columns** in GitHub Issue bodies, comments, or
-  Issue Artifacts. GitHub's issue renderer converts single newlines inside a
-  paragraph into hard `<br>` line breaks. Write each paragraph and list item on
-  a single line.
-- **Use descriptive link text alongside the issue number** for every issue
-  cross-reference so readers know what target an issue ID refers to without
-  hovering (for example,
-  `[Slice 1](https://github.com/<owner>/<repo>/issues/25) (#25)` or
-  `[Task 1](https://github.com/<owner>/<repo>/issues/27) (#27)`).
-- **Caption signature code blocks:** Introduce any code block under
-  `Produces:` with a short phrase explaining what the snippet represents.
-- **Define lettered IDs before use:** In Issue Artifacts (including `plan.md`)
-  and issue bodies, spell out what each lettered prefix, symbol, or shorthand
-  stands for before its first use (for example, `Slice 1 (S1)`,
-  `Milestone 1.1 (M1.1)`, `Contract 1 (C1)`, or `Task 1 (T1)`).
+- **Explicit issue reference:** Verify any URL's `<owner>/<repo>` matches
+  `gh repo view --json nameWithOwner --jq .nameWithOwner`; reject
+  foreign-repository issue URLs rather than targeting the current checkout.
+  Inspect read-only (`gh issue view <id> --json number,title,state,labels,body,parent,subIssues,blockedBy`)
+  and follow `parent` up to the Root Issue.
+- **Listing:** Use `gh issue list --label project --state open` (ask if
+  multiple match), and traverse `subIssues` or filter `in:title "<slug> /"`
+  with `--label=slice` / `--label=task`.
+- **GitHub formatting:** Do not hard-wrap prose at 80 columns (GitHub renders
+  single newlines as `<br>`). Use descriptive link text alongside the issue
+  number (e.g. `[Slice 1](https://github.com/<owner>/<repo>/issues/25) (#25)`). Caption `Produces:` code blocks and
+  spell out lettered IDs (`Slice 1 (S1)`, `Milestone 1.1 (M1.1)`) before first
+  use.
 
 ## Branch guard, execution, and hybrid closure lifecycle
 
-1. **Branch guard before edits:** Before making the first implementation edit
-   in `next-task`, `next-slice`, or `execute-plan`, check the current Git
-   branch. If on `main` or `master`, switch to or create the feature branch
-   named in `plan.md`'s `Pull Request Delivery` table (or run the
-   [branch skill](../branch/SKILL.md) to create `<git-username>/<slug>`) unless
-   the user explicitly approved committing to the default branch.
-2. **Task completion (closes locally per task):** When a task passes
-   verification and is committed locally, post its
-   [BUILD-ITEM.md](BUILD-ITEM.md) evidence table and commit SHA as a comment on
-   `#<task-issue>` (`gh issue comment <task-issue> --body-file -`), require the
-   comment command to succeed, and then close the issue (`gh issue close
-   <task-issue>`). A task does not wait for PR merge or parent slice acceptance
-   unless its own outcome requires that gate. In `execute-plan`, use these
-   commit trailers:
+1. **Branch guard:** Before the first implementation edit in `next-task`,
+   `next-slice`, or `execute-plan`, if on `main`/`master`, switch to or create
+   the feature branch from `plan.md` (or via [branch](../branch/SKILL.md))
+   unless the user explicitly approved committing to the default branch.
+2. **Task completion (closes locally):** After verification and local commit,
+   post the [BUILD-ITEM.md](BUILD-ITEM.md) evidence table and commit SHA via
+   `gh issue comment <task-issue> --body-file -`, require it to succeed, then
+   run `gh issue close <task-issue>` (`gh issue close` has no comment-file
+   flag). A task does not wait for PR merge or parent slice acceptance unless
+   its own outcome requires that gate. In `execute-plan`, include commit
+   trailers:
 
    ```text
    Execution-Plan: #<root-issue>
@@ -193,31 +112,19 @@ Artifacts` table and `## Next action` in the Root Issue body (`gh issue edit
    Execution-Kind: implementation
    ```
 
-3. **Slice acceptance (closes locally per `ACCEPT-SLICE.md`):** When all Task
-   Sub-Issues under `#<slice-issue>` are closed and
-   [ACCEPT-SLICE.md](ACCEPT-SLICE.md) passes locally, tick the `M<n>.<m>`
-   milestone checkboxes in `#<slice-issue>`'s body, post the slice acceptance
-   and review summary (`gh issue comment <slice-issue> --body-file -`), require
-   it to succeed, and close `#<slice-issue>` (`gh issue close <slice-issue>`).
-   Closing accepted slices locally allows subsequent
-   `next-slice` or `execute-plan` runs to see immediately which slice is next.
-4. **Pull requests and Root Issue closure (`open-pr`, `stacked-prs`):** Keep
-   `#<root-issue>` open during local execution so the repository's issue list
-   reflects active/in-review work until code lands on the default branch:
-   - **Single PR or final slice PR:** Include `Closes #<root-issue>` and list
-     delivered slices on separate bullet lines (`- Closes #<root-issue>` and
-     `- Delivers #<slice-issue>`). When the PR merges to the default branch,
-     GitHub closes `#<root-issue>` automatically.
-   - **Early backup or work-in-progress PR:** If open Slice Sub-Issues remain
-     on `#<root-issue>` and you want to push work to GitHub early (for example,
-     before time away), open a draft PR (`gh pr create --draft`). Pushing a
-     branch or opening a draft PR does not close `#<root-issue>` until merged.
-   - **Partial or stacked slice PR merged before the project is complete:** If
-     a PR merges an individual slice while other Slice Sub-Issues on
-     `#<root-issue>` remain open, list `- Part of #<root-issue>` and
-     `- Delivers #<slice-issue>` as separate bullets (never `Closes
-     #<root-issue>`) so merging that slice does not close the project early. Put
-     `- Closes #<root-issue>` only on the final slice PR.
+3. **Slice acceptance (closes locally):** Once all Task Sub-Issues are closed
+   and [ACCEPT-SLICE.md](ACCEPT-SLICE.md) passes locally, tick `M<n>.<m>`
+   checkboxes in `#<slice-issue>`, post the acceptance summary with `gh issue
+   comment <slice-issue> --body-file -`, require it to succeed, then close
+   `#<slice-issue>`.
+4. **PRs and Root Issue closure (`open-pr`, `stacked-prs`):** Keep
+   `#<root-issue>` open until code merges to the default branch:
+   - **Single or final slice PR:** `- Closes #<root-issue>` and
+     `- Delivers #<slice-issue>` as separate bullets.
+   - **Early / WIP PR:** Use `gh pr create --draft`.
+   - **Partial / stacked slice PR with slices remaining:** Use
+     `- Part of #<root-issue>` and `- Delivers #<slice-issue>` (never
+     `Closes #<root-issue>` until the final slice PR).
 
 ## Task and PR reconciliation
 
@@ -225,100 +132,25 @@ Before drafting or updating a PR, and when recovering missed task closure:
 
 - Inventory every delivered task from the plan, issue links, execution
   records, commits and actual diff, not only the first task or parent slice.
-- For every task, verify its own outcome, required checks, commit SHA,
-  posted evidence and issue state. Publish missing evidence before closing a
-  verified, committed task; leave tasks with missing required checks or
-  approval open. Follow step 2 above, with approved GitHub writes.
+- For every task, verify its own outcome, required checks, commit SHA, posted
+  evidence and issue state. Publish missing evidence before closing a verified,
+  committed task; leave tasks with missing required checks or approval open.
+  Follow step 2 above, with approved GitHub writes.
 - For already merged work, verify the delivered snapshot and reuse valid
   evidence; rerun missing or affected checks and record limits. Do not invent
   past results or repeat completed implementation to recover bookkeeping.
-- List every delivered task in the PR as
-  `- Delivers #<task-issue> — <title>` with its state and evidence link.
-  `Delivers` is a navigation label, not a GitHub closing keyword; it never
-  replaces task evidence and explicit closure. Keep Root Issue and slice
-  references under step 4 above; do not add `Closes` for an incomplete task.
-- Task closure does not accept a slice, satisfy ratification, or close the
-  Root Issue. Reconcile parent summaries and plan status without advancing
-  their gates or milestone checkboxes.
+- List every delivered task in the PR as `- Delivers #<task-issue> — <title>`
+  with its state and evidence link. `Delivers` is a navigation label, not a
+  GitHub closing keyword; it never replaces task evidence and explicit
+  closure. Keep Root Issue and slice references under step 4 above; do not add
+  `Closes` for an incomplete task.
+- Task closure does not accept a slice, satisfy ratification, or close the Root
+  Issue. Reconcile parent summaries and plan status without advancing their
+  gates or milestone checkboxes.
 
 ## Local mirror and offline outbox
 
-Keep a write-through mirror of every GitHub-tracked project outside the Git
-checkout at:
-
-```txt
-${XDG_STATE_HOME:-$HOME/.local/state}/project-workspaces/<host>/<owner>/<repo>/<root-issue>-<slug>/
-```
-
-If GitHub is unreachable before the Root Issue exists, use
-`pending-<yyyy-mm-dd>-<slug>/` and rename it once `#<root-issue>` is created.
-Never store these mirrors inside the repository working tree.
-
-- **Mirrored files:** Maintain `manifest.json` (repo, `rootIssue`, `slug`,
-  `updatedAt` per synced item, and `idMap` for offline IDs), `root.json`,
-  `artifacts/<filename>`, `slices/S<N>.json`, `tasks/S<N>-T<M>.json`, and an
-  ordered `outbox.jsonl` queue of deferred mutations.
-- **Write-through while online:** On every `gh issue view`, `gh issue edit`,
-  `gh issue close`, `gh issue comment`, or `gh issue artifact` read/write,
-  refresh the mirrored JSON/file and `manifest.json` timestamps. Before writing
-  to GitHub, check `outbox.jsonl`: if pending entries exist, reconcile them
-  first instead of overwriting remote state. When first mirroring an existing
-  Root Issue (`manifest.json` does not exist yet), run a read-only hydration of
-  the Root Issue, all its existing Root Issue Artifacts, and any open Slice or
-  Task Sub-Issues so mid-flight projects have a full local backup right away.
-- **Degraded reads when GitHub fails:** If `gh` fails due to a network, auth,
-  or GitHub outage, print
-  `⚠️ GitHub unavailable — running from local mirror and queuing updates.`,
-  then read from the mirror.
-- **Automatic deferred writes when GitHub fails:** Without pausing for extra
-  approval, continue writing artifacts and updating local slice/task state in
-  the mirror. Assign placeholder IDs (`local:root`, `local:S<N>`,
-  `local:S<N>-T<M>`) for uncreated issues, use that placeholder in commit
-  trailers when no remote issue exists yet, and append one JSON object per
-  skipped mutation (`create_issue`, `edit_issue`, `comment_issue`,
-  `close_issue`, `create_artifact`, `edit_artifact`) to `outbox.jsonl`.
-- **Replay on recovery:** When `gh` succeeds again and `outbox.jsonl` is
-  non-empty, compare GitHub's current `updatedAt` against `manifest.json`
-  first. Stop and ask only if a remote issue or artifact changed more recently
-  than the mirror's baseline. Replay `outbox.jsonl` in order, recording each
-  `<local-id> -> #<issue>` mapping in `idMap` and substituting those numbers
-  into queued bodies, links, and `--parent`/`--blocked-by` flags. Remove
-  applied lines and print
-  `✅ GitHub back online — synced <N> queued updates to #<root-issue>.`
-
-Use these exact schemas for `manifest.json` and each single-line entry in
-`outbox.jsonl` (point `bodyFile` at mirrored Markdown files rather than
-inlining large bodies):
-
-```json
-{
-  "version": 1,
-  "host": "github.com",
-  "owner": "<owner>",
-  "repo": "<repo>",
-  "rootIssue": "#123",
-  "slug": "<slug>",
-  "items": {
-    "root": { "id": "#123", "state": "OPEN", "updatedAt": "2026-04-01T10:00:00Z" },
-    "artifact:plan.md": { "id": 45, "updatedAt": "2026-04-01T10:05:00Z" }
-  },
-  "idMap": { "local:S1-T1": "#145" }
-}
-```
-
-```jsonl
-{"op":"create_issue","localId":"local:S1-T1","title":"<slug> / S1-T1: <Title>","labels":["task"],"parent":"#25","blockedBy":["#27"],"bodyFile":"tasks/S1-T1.md"}
-{"op":"edit_artifact","root":"#123","name":"plan.md","artifactType":"plan","bodyFile":"artifacts/plan.md","baseUpdatedAt":"2026-04-01T10:05:00Z"}
-{"op":"comment_issue","target":"local:S1-T1","bodyFile":"tasks/S1-T1-evidence.md","baseUpdatedAt":null}
-{"op":"close_issue","target":"local:S1-T1","baseUpdatedAt":null}
-```
-
-- **Cleanup on closure:** Keep the workspace directory while `#<root-issue>`
-  is open. When a Task or Slice Sub-Issue closes and has no pending entries in
-  `outbox.jsonl`, remove its `tasks/` or `slices/` JSON file (recording
-  `"CLOSED"` in `manifest.json`). Delete the entire `<root-issue>-<slug>/`
-  mirror directory only when `#<root-issue>` is `CLOSED` on GitHub and
-  `outbox.jsonl` is empty. During read-only discovery for the current repo,
-  prune any stale mirror directory that meets both conditions. Never delete a
-  `pending-*` directory or a mirror with a non-empty `outbox.jsonl`; if GitHub
-  closed `#<root-issue>` while `outbox.jsonl` is non-empty, stop and ask.
+Never store local mirrors inside the Git checkout. Before reading or writing
+GitHub issues or artifacts, read and follow
+[GITHUB-OFFLINE-MIRROR.md](GITHUB-OFFLINE-MIRROR.md) to keep the local mirror
+warm and handle outages via the offline outbox.
