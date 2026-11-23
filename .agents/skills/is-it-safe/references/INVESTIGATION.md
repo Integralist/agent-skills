@@ -47,7 +47,9 @@ no host files outside the checkout, host credentials, or production access.
 Otherwise skip it and say why.
 
 For a candidate depending on cross-module callers or safeguards, use one
-independent read-only subagent to refute that path. Follow
+independent read-only subagent to refute that path—unless already running
+inside a subagent, in which case never spawn a nested subagent and disprove
+the path inline instead. Follow
 [SUBAGENT-STEERABILITY.md](../../shared/SUBAGENT-STEERABILITY.md). Provide the
 resolved revision/diff, candidate chain, scoped paths, and known evidence.
 Grant only verified read-only tools (no tests, edits, or remote writes) and a

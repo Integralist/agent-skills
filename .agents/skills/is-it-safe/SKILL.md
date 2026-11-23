@@ -3,8 +3,8 @@ name: is-it-safe
 description: >-
   Find the worst credible consequence of committing or merging a code change.
   Use when the user asks whether the current branch, a commit or range, or a
-  pull request is safe to commit or merge.
-disable-model-invocation: true
+  pull request is safe to commit or merge, or when code-review runs an
+  adversarial safety pass.
 argument-hint: "[PR URL | PR number | commit/range | base ref]"
 metadata:
   model-tier: complex
@@ -17,7 +17,9 @@ analysis, not a code review or risk matrix.
 **Read-only.** Change, approve, commit, push, or merge nothing; post a PR
 comment only after approval in step 6. Judge reachability and consequence, not
 style or maintainability. A test gap isn't proof of a defect; a passing suite
-isn't proof of safety. State your evidence.
+isn't proof of safety. State your evidence. When invoked inside a subagent
+(such as from `code-review`), keep disproof inline with no nested subagents
+and skip step 6.
 
 Read [INVESTIGATION.md](references/INVESTIGATION.md) for target resolution,
 impact tracing, and disproof. Read [REPORT.md](references/REPORT.md) for

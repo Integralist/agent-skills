@@ -63,6 +63,18 @@ conventions exist, even for small, low-risk changes. Select guidance with
 [CONVENTIONS.md](CONVENTIONS.md). The conventions reviewer supplements the
 generalist and any specialists.
 
+Start a separate read-only adversarial safety reviewer following
+[is-it-safe](../../is-it-safe/SKILL.md) whenever the diff can change runtime,
+build, deploy, data, or operational behaviour. Skip it for pure documentation,
+comment-only, formatting-only, or trivial non-behavioural diffs, and note why
+in the report. Prefer a different frontier model on the same provider when one
+is configured and available in the session; otherwise use the main model (never
+downgrade) and report which model ran. Give it `DIFF_PATH`, `CONTEXT_PATH`, the
+changed-file list, and the absolute paths to `is-it-safe/SKILL.md` and its
+references; explicitly instruct it to stay read-only, disprove inline without
+spawning nested subagents, skip PR-comment offers, and return its verdict,
+traced failure path, unknowns, and `COMPLETE`/`INCOMPLETE` status.
+
 Use [subagent steerability](../../shared/SUBAGENT-STEERABILITY.md) for turn
 budgets and retries. Use the most capable available model for review judgment.
 Give every reviewer:
@@ -158,6 +170,13 @@ assigned lenses. A defect belongs to the profile whose question it answers.
 If `--plan` was passed but no intent document was found, skip the separate
 adherence review and say so once.
 
+7. **Adversarial safety (`is-it-safe`):** What is the worst credible
+   consequence of committing or merging these exact changes? Follow
+   [is-it-safe](../../is-it-safe/SKILL.md) against the reviewed snapshot: trace
+   one evidence-backed `trigger → changed behaviour → affected system/users →
+   consequence` path and try to disprove it inline (never spawn a nested
+   subagent, run unisolated tests, or offer a PR comment).
+
 ## Finding schema and severity
 
 Every reviewer returns:
@@ -237,7 +256,11 @@ Tell it to refute the claim:
 
 Default to refuted unless demonstrably real. An unconfirmed High security
 finding is unresolved; move it to open questions with evidence that would
-settle it. Every finding needs a verdict. Each verifier returns:
+settle it. Every finding needs a verdict. Verify any `HOLD` or `STOP` causal
+path from the adversarial safety reviewer under these same rules (a confirmed
+`STOP` is `High`; a confirmed `HOLD` is `High` or `Medium` by impact and
+likelihood; an unconfirmed `STOP` or material `UNKNOWN` moves to Open
+Questions). Each verifier returns:
 
 ```json
 {
@@ -282,6 +305,10 @@ Use this template:
 ### Conventions Coverage
 
 {List loaded rule paths and their file or purpose scope, plus skipped or missing guidance. Say when no conventions apply; unresolved gaps are not a clean pass.}
+
+### Adversarial Safety
+
+{`is-it-safe` verdict (`PROCEED`, `HOLD`, `STOP`, or `UNKNOWN`), model used, and concise worst-path summary—or why this pass was skipped for a non-behavioural diff.}
 
 ### Actionable Items
 

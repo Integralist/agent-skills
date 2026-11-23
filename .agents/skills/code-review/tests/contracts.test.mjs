@@ -232,3 +232,19 @@ test("security feedback real-impact gate covers availability, integrity, and aut
   assert.match(securityFeedback, /crash recoverability.*severity factor/i);
   assert.doesNotMatch(securityFeedback, /Fail if it is only a robustness issue, such as a restartable crash/);
 });
+
+test("adversarial safety reviewer runs is-it-safe without nested subagents", () => {
+  const skill = flat(skillPath);
+  const protocol = flat(protocolPath);
+  const isItSafe = read(".agents/skills/is-it-safe/SKILL.md");
+  const investigation = flat(".agents/skills/is-it-safe/references/INVESTIGATION.md");
+
+  assert.doesNotMatch(isItSafe, /^disable-model-invocation:/m);
+  assert.match(isItSafe.replace(/\s+/g, " "), /no nested subagents/);
+  assert.match(investigation, /never spawn a nested subagent/);
+  assert.match(skill, /adversarial safety reviewer following \[is-it-safe\]\(\.\.\/is-it-safe\/SKILL\.md\)/);
+  assert.match(protocol, /Skip it for pure documentation, comment-only, formatting-only/);
+  assert.match(protocol, /Prefer a different frontier model on the same provider/);
+  assert.match(protocol, /without spawning nested subagents/);
+  assert.match(protocol, /### Adversarial Safety/);
+});

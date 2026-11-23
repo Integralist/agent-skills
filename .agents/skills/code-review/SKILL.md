@@ -57,7 +57,10 @@ plan or task list for intent review.
 3. **Choose reviewers.** Start one read-only generalist reviewer. Add specialists
    for concrete risks, and a separate conventions reviewer whenever applicable
    conventions exist—even for small, low-risk changes. Use the protocol's roles,
-   prompts, and completion checks. For substantial or cross-cutting intent, add
+   prompts, and completion checks. For behavioural changes (skipping pure docs,
+   comment-only, or formatting diffs), also start a separate read-only
+   adversarial safety reviewer following [is-it-safe](../is-it-safe/SKILL.md).
+   For substantial or cross-cutting intent, add
    a separate spec-and-plan reviewer; otherwise keep those checks with the
    generalist. Unavailable guidance is not a clean pass.
 4. **Verify findings.** Have a verifier refute each finding using the protocol.
