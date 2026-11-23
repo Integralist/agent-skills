@@ -1,11 +1,9 @@
 # Redesign Findings Template
 
-Write the findings to `projects/<yyyy-mm-dd>-redesign-<slug>/redesign.md`,
-with today's date, creating the directory first. This is the source the
-to-plan skill plans from, so cite specific file paths and line numbers, and
-use real function signatures, types, and import paths rather than
-pseudocode. For a feature scope, leave out Purpose Drift. Wrap Markdown at
-80 columns.
+Write to `projects/<yyyy-mm-dd>-redesign-<slug>/redesign.md` (creating the
+directory first). Because `to-plan` plans from this file, cite real
+`file:line` paths, function signatures, types, and import paths rather than
+pseudocode. Omit Purpose Drift for feature scope.
 
 ````markdown
 # Redesign: {feature, subsystem, or codebase}
@@ -18,69 +16,48 @@ pseudocode. For a feature scope, leave out Purpose Drift. Wrap Markdown at
 
 ## Summary
 
-{One paragraph: what is wrong with the current implementation and the
-high-level reimplementation strategy.}
+{One paragraph: root problem and high-level reimplementation strategy.}
 
 ## Current State
 
-{The current implementation: key files, data flow, and where the problems
-are, with a Mermaid diagram if the system is complex (see
-[`conventions-mermaid`](../../conventions-mermaid/SKILL.md)).}
+{Key files, data/control flow, and core problems; add a Mermaid diagram via
+[`conventions-mermaid`](../../conventions-mermaid/SKILL.md) if helpful.}
 
 ## Findings
 
 ### Structure
-
-{Subagent 1's findings by severity. Each: file:line, trigger, impact,
-concrete remedy. End with the key insight.}
+{Ranked findings with `file:line`, impact, and concrete remedy; end with the
+key insight.}
 
 ### Standards and Precedent Drift
-
-{Subagent 2's findings. Each cites the standard (file and rule), or at
-least two peers that set the pattern.}
+{Rule violations (file + rule) and unwritten drift (>= 2 peer citations).}
 
 ### Purpose Drift
-
-{Subagent 3's findings. Each quotes the doc line.}
+{Omit for feature scope. Quoted doc lines vs. code reality.}
 
 ### Test Coverage
-
-{Subagent 4's coverage map, focused on boundaries the redesign touches.}
+{Boundary coverage map focused on seams the redesign touches.}
 
 ## Cross-Cutting Wins
-
-{Findings that resolve several axes; these go first.}
+{Restructurings that fix multiple axes; these lead.}
 
 ## Strategy
-
-{The ideal decomposition, the build order with prerequisites first, and what
-to keep versus rewrite. Mark each restructure target as pinned by existing
-tests or `BLOCKED-ON-TESTS: needs {specific missing tests}`.}
+{Target decomposition, prerequisite build order, keep vs. rewrite/delete, and
+each target marked pinned or `BLOCKED-ON-TESTS: needs {missing tests}`.}
 
 ## Behavioral Invariants
-
-{The behaviours the redesign must preserve, from purpose docs and existing
-tests. This is the post-redesign verification target.}
+{Behaviours the redesign must preserve (from purpose docs and tests).}
 
 ## What We Should Have Done First
-
-{Prerequisites that should have existed before this code was built:
-interfaces, shared types, test infrastructure, architectural decisions.}
+{Missing prerequisites: interfaces, shared types, test fakes, decisions.}
 
 ## Approval Bar
 
-The implementation treats the following as presumptive blockers — if any
-survive, justify them explicitly:
-
-- A code-judo move that would delete incidental complexity is left on
-  the table.
-- A file >1000 lines is preserved or made larger without strong reason.
+Treat these as presumptive blockers unless explicitly justified:
+- A dramatic simplification or code-judo deletion is left on the table.
 - Feature logic remains scattered across shared modules.
-- Unnecessary abstractions, wrappers, or escape-hatch-typed contracts
-  remain.
-- A near-duplicate of an existing canonical helper is kept.
+- Shallow wrappers, duplicate helpers, or escape-hatch contracts survive.
 
 ## Notes
-
-- {Risks, open questions, and every BLOCKED-ON-TESTS target.}
+- {Risks, open questions, and every `BLOCKED-ON-TESTS` target.}
 ````
