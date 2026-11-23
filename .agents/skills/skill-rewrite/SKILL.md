@@ -7,24 +7,21 @@ metadata:
   model-tier: moderate
 ---
 
-Rewrite an existing skill so the user can understand it in one pass, keeping
-agreed behaviour intact. Deliver the revised skill, its supporting references,
-and any updated links, rather than suggestions alone.
+Rewrite an existing skill so a human understands its purpose, boundaries, and
+deliverable in one pass while giving the agent room to do its best work.
+Deliver the revised skill, its references, and any updated links.
 
-**Before rewriting.** Read and follow the
-[rewrite workflow](references/REWRITE.md) and
-[writing-for-agents](../writing-for-agents/SKILL.md).
+**Before rewriting.** Read [writing-for-agents](../writing-for-agents/SKILL.md)
+and [REWRITE.md](references/REWRITE.md).
 
-**Agreement.** Use the user's stated priorities. When none are given, ask
-what must stay before showing your own inventory. Settle what to retain,
-extract into a reference, transfer to another workflow, or delete.
+**Approval.** Before editing, show:
+1. Combined UTF-8 byte totals before and after (default to a net reduction;
+   explain and get approval for any increase).
+2. Any behavioural or guardrail relaxations clearly called out so the user
+   can keep, adjust, or approve each one.
+3. The diff inline (or, for large diffs, a crisp summary plus the choice to
+   view the full diff inline or apply).
 
-**Approval.** Show the proposed rewrite and wait for approval before editing.
-Show the combined UTF-8 byte totals for the skill and all references, before
-and after. Default to a net reduction; get explicit approval for any increase
-and explain why it is necessary. For a large diff, offer a summary and the
-choice to see the full draft or approve applying it.
-
-**Completion.** Verify preserved behaviour and reference loading, then report
-what changed and any unrun checks. Done when the approved rewrite is written,
-the agreed changes hold, and no caller points at a removed rule.
+**Completion.** Run affected tests and link checks, verify callers still match
+any changed headings or references, and report what changed plus any unrun
+checks.

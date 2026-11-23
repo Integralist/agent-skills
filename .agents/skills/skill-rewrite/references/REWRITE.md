@@ -1,45 +1,21 @@
 # Rewrite workflow
 
-Preserve agreed behaviour while changing its wording and location.
-
-1. **Inventory.** Read the skill and every file it links to, then search for
-   callers and links to its sections. Identify purpose, scope, inputs,
-   defaults, approval gates, deliverables, and required or conditional reads.
-   Use the user's priorities to compare with your inventory; look up facts
-   yourself and ask only about decisions.
-
-2. **Settle the changes.** Summarise agreements and give each difference a
-   disposition and reason: retain inline, extract into a local reference,
-   transfer to its owning workflow or shared document, or delete. For a rule
-   guarding against a past error, compare representative runs with and
-   without the rule before proposing deletion. A passing run with the rule
-   present is not evidence it is unnecessary. If testing is unavailable,
-   report the gap and retain the guard unless the user accepts its removal.
-
-3. **Place the rules.** Use the writing-for-agents guidance to draft the
-   agreed rewrite. Logic belonging to another workflow goes there, not into
-   the skill's local references. Before transferring it, check the destination
-   has not already decided against owning it. Repoint callers and section
-   links to the new home. Local references need explicit loading conditions
-   in `SKILL.md`; keep decisions and approval gates visible in the main file.
-   Before seeking approval, compare combined UTF-8 byte totals for `SKILL.md`
-   and every Markdown file under the skill's `references/`, counting moved
-   files once. Include any destination text file receiving transferred rules.
-   Report line counts as context only; bytes are the size metric. Default to a
-   net reduction. If the rewrite must grow to preserve behavior, explain the
-   reason and get explicit user approval. Remove operative wording from the old
-   location when relocating a rule; keep only the pointer needed to load it.
-   Apply only after the user approves the proposal.
-
-4. **Verify.** Compare the written skill and relocated rules with every
-   agreed disposition. Check that retained behaviour is loaded before the
-   action it governs, conditional reads have clear triggers, and caller paths
-   and section anchors still resolve. Confirm a human can understand the
-   purpose, scope, core workflow, handoffs, decisions/gates, and deliverable
-   from one pass through `SKILL.md`; move specialized procedures, schemas, and
-   templates to concise references. For each cross-skill handoff, verify its
-   trigger, completed prerequisites, exact resume step, and direct-invocation
-   default. Exercise representative modes, missing inputs, approval gates, and
-   conditional reads, comparing behaviour where relevant. Mark unrun checks
-   as verification gaps; a short entry point or an existing reference file
-   does not prove preservation.
+1. **Inspect before drafting.** Read `SKILL.md`, all linked references, and
+   search the repo (including hidden `.agents/`, `.claude/`, and `tests/`) for
+   callers, heading anchors, and contract tests.
+2. **Separate signal from over-prescription:**
+   - **Keep:** Purpose, hard safety/approval gates, non-obvious house deltas,
+     domain/tool gotchas, and contract-tested requirements.
+   - **Extract:** Long conditional procedures, templates, or rare fallbacks
+     into `references/` with explicit *"read only when..."* triggers.
+   - **Cut or relax:** Textbook basics models already know, duplicated prose,
+     micromanaged sentence/step rituals, and ceremony that doesn't scale with
+     risk. Call out every intentional behavioural relaxation explicitly for
+     user approval rather than silently dropping rules.
+3. **Rewrite cleanly.** Follow
+   [writing-for-agents](../../writing-for-agents/SKILL.md) and its
+   [writing guide](../../writing-for-agents/references/WRITING.md). Never drop
+   frontmatter flags, `allowed-tools`, or tested triggers unintentionally.
+4. **Verify after approval.** Check UTF-8 byte counts, confirm every relative
+   link and anchor resolves, run affected repo tests/linters (`make check-rules`,
+   contract tests, etc.), and report any unrun verification as a gap.
