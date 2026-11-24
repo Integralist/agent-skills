@@ -951,7 +951,7 @@ test("artifact publication excludes CLI metadata, not document frontmatter", () 
 test("PR descriptions require reading voice-product and CONCISE-PROSE.md before drafting", () => {
   const files = [
     [".agents/skills/shared/PR-DESCRIPTION.md", "CONCISE-PROSE.md"],
-    [".agents/skills/open-pr/SKILL.md", "../shared/CONCISE-PROSE.md"],
+    [".agents/skills/pr-open/SKILL.md", "../shared/CONCISE-PROSE.md"],
     [".agents/skills/stacked-prs/SKILL.md", "../shared/CONCISE-PROSE.md"],
   ];
   for (const [relative, conciseTarget] of files) {
@@ -964,7 +964,7 @@ test("PR descriptions require reading voice-product and CONCISE-PROSE.md before 
   const prDesc = read(".agents/skills/shared/PR-DESCRIPTION.md");
   assert.doesNotMatch(prDesc, /when crossing boundaries/);
   assert.match(prDesc, /stating what the project does in plain words/);
-  const openPr = read(".agents/skills/open-pr/SKILL.md");
+  const openPr = read(".agents/skills/pr-open/SKILL.md");
   assert.match(openPr, /first sentence state what the project does in plain words[\s\S]*README\.md/);
 });
 
@@ -1002,7 +1002,7 @@ test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-IS
     ".agents/skills/next-task/SKILL.md",
     ".agents/skills/next-slice/SKILL.md",
     ".agents/skills/execute-plan/SKILL.md",
-    ".agents/skills/open-pr/SKILL.md",
+    ".agents/skills/pr-open/SKILL.md",
     ".agents/skills/stacked-prs/SKILL.md",
     ".agents/skills/spec-delta/SKILL.md",
   ].filter((skill) => existsSync(resolve(repo, skill)));
@@ -1016,7 +1016,7 @@ test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-IS
 });
 
 test("workflow references resolve without private checkout links", () => {
-  for (const relative of [githubIssuesPath, ".agents/skills/open-pr/SKILL.md", ".agents/skills/stacked-prs/SKILL.md", ".agents/skills/spec-delta/SKILL.md", ".agents/skills/pdd/SKILL.md", ".agents/skills/research/SKILL.md", ".agents/skills/to-adr/SKILL.md", ".agents/skills/to-prd/SKILL.md", skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"].filter((p) => existsSync(resolve(repo, p)))) {
+  for (const relative of [githubIssuesPath, ".agents/skills/pr-open/SKILL.md", ".agents/skills/stacked-prs/SKILL.md", ".agents/skills/spec-delta/SKILL.md", ".agents/skills/pdd/SKILL.md", ".agents/skills/research/SKILL.md", ".agents/skills/to-adr/SKILL.md", ".agents/skills/to-prd/SKILL.md", skillPath, policyPath, piPath, claudePath, compilerPath, taskGuidePath, executorPath, agentPath, commitsPath, autoPath, planPath, planGuidePath, specPath, specGuidePath, buildItemPath, acceptSlicePath, architectPath, nextTaskPath, nextSlicePath, reviewChangePath, reviewSkillPath, reviewModesPath, ".agents/skills/execute-plan/references/context-recovery.md"].filter((p) => existsSync(resolve(repo, p)))) {
     const content = stripFences(read(relative));
     assert.doesNotMatch(content, /\/(?:Users|home)\/[^/\s]+\/|\.\.\/pi-subagents\//);
     for (const match of content.matchAll(/\]\(([^\s)]+)\)/g)) {

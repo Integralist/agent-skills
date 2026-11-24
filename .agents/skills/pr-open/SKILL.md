@@ -1,5 +1,5 @@
 ---
-name: open-pr
+name: pr-open
 description: >-
   Open a GitHub pull request for the current branch. Use when the user asks to
   create, open, or write a PR.

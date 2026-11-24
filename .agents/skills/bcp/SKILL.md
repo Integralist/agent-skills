@@ -8,7 +8,7 @@ metadata:
 
 Ship the current changes by reading and following
 [branch](../branch/SKILL.md), [commit](../commit/SKILL.md), then
-[open-pr](../open-pr/SKILL.md). Stop if a step has nothing to do (for example,
+[pr-open](../pr-open/SKILL.md). Stop if a step has nothing to do (for example,
 no changes to commit).
 
 1. **Branch.** On the default branch, read and follow
@@ -19,7 +19,7 @@ no changes to commit).
    changes are committed.
 3. **Open the PR.** If `gh stack view` finds an active stack, read and follow
    [stacked-prs](../stacked-prs/SKILL.md); otherwise read and follow
-   [open-pr](../open-pr/SKILL.md). Finish when the PR or stack is up.
+   [pr-open](../pr-open/SKILL.md). Finish when the PR or stack is up.
 
 When asking which branch to use, show:
 
