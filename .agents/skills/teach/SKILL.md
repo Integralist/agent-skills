@@ -4,7 +4,7 @@ description: >-
   Teach the user a skill or concept over several sessions, keeping the learning
   state in the current workspace. Use when the user asks to learn a topic.
 disable-model-invocation: true
-argument-hint: What would you like to learn about?
+argument-hint: "[steering]"
 metadata:
   model-tier: moderate
 ---

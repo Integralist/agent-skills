@@ -6,7 +6,7 @@ material; this file provides navigation and current status.
 
 | Field | Value |
 | --- | --- |
-| Status | {Planning \| Ready \| In progress \| Complete} |
+| Status | {Planning, Ready, In progress, or Complete} |
 | Owner | {owner} |
 | Created | {YYYY-MM-DD} |
 | Updated | {YYYY-MM-DD} |

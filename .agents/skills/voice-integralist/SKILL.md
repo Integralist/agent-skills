@@ -4,7 +4,7 @@ description: >-
   Write or rewrite text in Mark's (Integralist's) voice for Slack, PRs, docs,
   and email. Use when the user asks for voice-integralist, integralist-voice,
   or Mark's voice, once or for all replies.
-argument-hint: "[--all | --off | text to rewrite]"
+argument-hint: "[--all | --off] [steering]"
 metadata:
   model-tier: trivial
 ---

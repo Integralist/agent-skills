@@ -5,7 +5,7 @@ description: >-
   rebase the base branch. Use when the user asks to clean up worktrees,
   remove stale branches for merged PRs, or after merging a PR from a
   worktree.
-argument-hint: "[pr-url | #<pr-number>]"
+argument-hint: "[--pr=<url|#number>] [steering]"
 allowed-tools: Bash(gh pr list:*), Bash(gh pr view:*), Bash(git log:*), Bash(git status:*), Bash(git worktree list:*)
 metadata:
   model-tier: trivial
@@ -17,7 +17,7 @@ remotes, and rebase the base branch onto `origin/<base>`.
 Always run from the repository's main checkout, not inside a worktree being
 removed.
 
-## Single-PR mode (`<pr-url | #<pr-number>>`)
+## Single-PR mode (`--pr=<url|#number>`)
 
 1. **Verify the PR.** Run
    `gh pr view <pr> --json state,headRefName,baseRefName,mergedAt,url`. If
@@ -33,7 +33,7 @@ removed.
 5. **Rebase the base branch.** Proceed to [Finish](#finish) with
    `baseRefName`.
 
-## Audit mode (no argument)
+## Audit mode (default, no `--pr`)
 
 1. **Inspect all worktrees.** Run `git worktree list` and
    `git status --short --branch`.

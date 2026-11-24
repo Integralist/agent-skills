@@ -4,7 +4,7 @@ description: >-
   Write a step-by-step task list from a plan file or this session's
   discussion.
 disable-model-invocation: true
-argument-hint: "[plan path | #<issue>] [--github] [--slice=<N>]"
+argument-hint: "[--plan=<path|#issue|url>] [--github] [--slice=<N>] [steering]"
 metadata:
   model-tier: complex
 ---
@@ -22,10 +22,11 @@ gaps with guesses.
 
 **Workflow.**
 
-1. **Choose the work.** Use the named plan and `--slice=<N>` (accepted in any
-   position), if supplied and the plan has slices. With no file, use this
-   session's discussion. Ask if the source does not define enough to make
-   tasks. For `--github` or an issue reference (`#<n>` or URL), read and follow
+1. **Choose the work.** Use `--plan=<path|#issue|url>` and `--slice=<N>`
+   (accepted in any position), if supplied and the plan has slices. With no
+   `--plan`, use this session's discussion. Ask if the source does not define
+   enough to make tasks. For `--github` or an issue reference (`#<n>` or URL),
+   read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
    Artifacts instead of `projects/`.
 2. **Inspect live code.** Ground every task in current code, not just plan

@@ -4,7 +4,7 @@ description: >-
   Create a sibling Git worktree on a feature branch for isolated project work.
   Use when starting feature planning or implementation off the main checkout,
   or when the user asks to create or open a worktree.
-argument-hint: "[<repo-path>] [<slug>]"
+argument-hint: "[--repo=<path>] [--slug=<slug>] [steering]"
 allowed-tools: Bash(git branch:*), Bash(git config:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git symbolic-ref:*), Bash(git worktree:*)
 metadata:
   model-tier: trivial
@@ -13,7 +13,7 @@ metadata:
 Create a sibling Git worktree `../<repo>-<slug>/` on `<git-username>/<slug>` so
 the main checkout stays clean on its default branch.
 
-1. **Resolve repo, base, and current checkout.** Use `<repo-path>` if given
+1. **Resolve repo, base, and current checkout.** Use `--repo=<path>` if given
    (otherwise `cwd`), passing `-C <repo-path>` to all `git` commands; if not
    inside a Git repository, ask for the repository path. Find the main
    checkout path and repo directory name `<repo>` (`git worktree list
@@ -27,7 +27,8 @@ the main checkout stays clean on its default branch.
 2. **Name the branch and worktree.** Lowercase `git config user.name` and
    collapse non-alphanumeric runs to single hyphens (`First Last` →
    `first-last`). Derive a short kebab-case `<slug>` without a Conventional
-   Commit prefix from the argument or session task (ask if unclear). Set:
+   Commit prefix from `--slug=<slug>`, steering, or the session task (ask if
+   unclear). Set:
    - Branch: `<git-username>/<slug>`
    - Path: `<parent-of-main-checkout>/<repo>-<slug>`
 

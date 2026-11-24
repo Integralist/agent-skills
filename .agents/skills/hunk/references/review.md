@@ -10,13 +10,13 @@
      how many windows are attached; ask before `hunk daemon restart --yes`.
 
    Choose the requested workflow:
-   - **`done`:** consider only sessions matching the current directory. If
+   - **`--done`:** consider only sessions matching the current directory. If
      none match, report there's no review to finish and stop without launching
      Hunk or touching another repository; otherwise run step 5's finish branch.
-   - **`comments`:** keep the target and threads; follow
+   - **`--comments`:** keep the target and threads; follow
      [Answering user notes](user-notes.md#answering-user-notes). If there are
      no user notes, say so and stop without changing the session.
-   - **`address`:** keep the target; follow
+   - **`--address`:** keep the target; follow
      [Addressing all feedback](addressing-feedback.md#addressing-all-feedback),
      then stop.
    - **Existing user notes during review:** check
@@ -27,17 +27,17 @@
 2. **Load the target** (unless the selected workflow keeps it). Clear agent
    state with the commands in [Clear agent state](#clear-agent-state), then
    reload:
-   - **Uncommitted** (no argument, `review`, `uncommitted`):
+   - **Uncommitted** (default, or `--review`):
      `hunk session reload "$SESSION_ID" -- diff --watch`; add
      `--exclude-untracked` if the user wants tracked changes only.
-   - **Staged:** `hunk session reload "$SESSION_ID" -- diff --staged --watch`.
-   - **Branch** (`branch` or `<base>...<head>`): use the given base or get it
+   - **Staged (`--staged`):** `hunk session reload "$SESSION_ID" -- diff --staged --watch`.
+   - **Branch (`--branch` or `--target=<base>...<head>`):** use the given base or get it
      from `git symbolic-ref --quiet --short refs/remotes/origin/HEAD`, strip
      `origin/`, and fall back to `main`; then reload with
      `hunk session reload "$SESSION_ID" -- diff "<base>...HEAD" --watch`.
-   - **Commit** (`<commit-sha>` or `show <ref>`):
+   - **Commit (`--target=<sha>`):**
      `hunk session reload "$SESSION_ID" -- show "<sha>" --watch`.
-   - **PR** (`PR #123`, `#123`, `owner/repo#123`, or URL): follow
+   - **PR (`--target=<pr-url|#num|owner/repo#num>`):** follow
      [Loading a pull request](pull-requests.md#loading-a-pull-request).
 
    Continue only after reload succeeds and the target is active.
@@ -78,16 +78,16 @@
    ```
 
    Give a short overview in chat and tell the user to leave notes in Hunk with
-   `c` then run `address`, or reply "next" to walk through stops one by one.
+   `c` then run `--address`, or reply "next" to walk through stops one by one.
 
 5. **Handle follow-up turns:**
    - **`next`, `prev`, or another file/hunk:** clear highlights, navigate, and
      highlight the expression with `--tone current --focus`.
-   - **`comments` or asks to read/answer notes:** follow
+   - **`--comments` or asks to read/answer notes:** follow
      [Answering user notes](user-notes.md#answering-user-notes).
-   - **`address` or asks to handle all feedback:** follow
+   - **`--address` or asks to handle all feedback:** follow
      [Addressing all feedback](addressing-feedback.md#addressing-all-feedback).
-   - **`done`, `stop`, or `clear`:** clear agent state, restore the working-tree
+   - **`--done`, `stop`, or `clear`:** clear agent state, restore the working-tree
      diff with `hunk session reload "$SESSION_ID" -- diff --watch --json`,
      leave the TUI and daemon running, say the review is finished, and stop.
 

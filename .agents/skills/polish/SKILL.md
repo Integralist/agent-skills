@@ -6,7 +6,7 @@ description: >-
   where clarity matters more than preserving every detail; use distill for
   long text.
 disable-model-invocation: true
-argument-hint: "[file path | pasted text]"
+argument-hint: "[--file=<path>] [steering]"
 metadata:
   model-tier: trivial
 ---
@@ -17,9 +17,9 @@ light companion to [distill](../distill/SKILL.md): use polish when you can see
 the whole passage at once; distill handles the inventory and audit needed for
 long text.
 
-**Target.** For pasted text, return the rewrite in chat and write nothing to
-disk. For a file, read it, propose the change, and write only after the user
-approves. Ask if the target is unclear.
+**Target.** For pasted text in `[steering]`, return the rewrite in chat and
+write nothing to disk. For `--file=<path>`, read it, propose the change, and
+write only after the user approves. Ask if the target is unclear.
 
 **Improve clarity.** Lead with the point: main clause first, conclusion
 before justification, no wind-up. Keep one idea per sentence; split sentences

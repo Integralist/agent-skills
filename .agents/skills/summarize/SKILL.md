@@ -5,7 +5,7 @@ description: >-
   audience-first shape, or format a copy-ready PR, Slack, or email update. Use
   when the user asks to summarise or recap something, or explain engineering
   work to non-engineers.
-argument-hint: "[session | file | URL | #<issue> | diff] [--github] [--shape pr|slack|email] [instructions]"
+argument-hint: "[--source=<session|file|url|#issue|diff>] [--github] [--shape=pr|slack|email] [steering]"
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(ls:*)
 metadata:
   model-tier: trivial
@@ -61,5 +61,5 @@ helpful context does not fit above.
   [SOURCES.md](references/SOURCES.md) before reading a URL, branch diff,
   GitHub issue (`--github`, `#<n>`, or URL), truncated file, or saving to
   `$TMPDIR`.
-- **Share-out (`--shape pr|slack|email` or non-engineer update):** Read
+- **Share-out (`--shape=pr|slack|email` or non-engineer update):** Read
   [OUTPUT-TEMPLATES.md](references/OUTPUT-TEMPLATES.md) before writing.

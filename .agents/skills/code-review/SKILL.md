@@ -6,7 +6,7 @@ description: >-
   reviewing a remote PR or local code, including unpushed or
   uncommitted changes, or triaging feedback and scanner findings (--feedback).
   Pass --plan=<path> to name the plan or task list.
-argument-hint: '[--feedback] [--branch | --uncommitted | --all-changes | --baseline=<commit> | path | PR_URL] [--plan=<path>] [instructions]'
+argument-hint: "[--feedback] [--branch | --uncommitted | --all-changes | --baseline=<commit> | --target=<path|pr-url>] [--plan=<path>] [steering]"
 metadata:
   model-tier: complex
 ---
@@ -34,12 +34,12 @@ and load their guidance.
 
 | Argument | Source |
 | --- | --- |
-| PR URL or `owner/repo#number` | Remote PR |
+| `--target=<pr-url>` or `--target=<owner/repo#number>` | Remote PR |
 | `--branch` | Local branch vs. default branch |
 | `--uncommitted` | Working-tree changes |
 | `--all-changes` | Local branch plus working tree |
 | `--baseline=<commit>` | Recorded execution and manifest |
-| File path or glob | Explicit paths |
+| `--target=<path>` or `--target=<glob>` | Explicit paths |
 
 If no source argument is given and the user has not named a target, ask the
 user which source to review before continuing. Use `--plan=<path>` to name a

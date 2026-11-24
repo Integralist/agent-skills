@@ -1,6 +1,6 @@
 # Addressing all feedback
 
-`address` settles all threads in one pass and approves requested edits.
+`--address` settles all threads in one pass and approves requested edits.
 
 1. **Classify every thread** from
    `hunk session comment list "$SESSION_ID" --type all --json`:

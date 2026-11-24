@@ -5,7 +5,7 @@ description: >-
   bullets, one next action. Use when the user asks for voice-adhd or an
   ADHD-friendly reply or rewrite, once or for all replies. For summarising a
   session, file, or URL, use summarize instead.
-argument-hint: "[--all | --off | text to rewrite]"
+argument-hint: "[--all | --off] [steering]"
 metadata:
   model-tier: trivial
 ---

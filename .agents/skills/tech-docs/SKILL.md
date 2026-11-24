@@ -4,7 +4,7 @@ description: >-
   Write or improve technical documentation. Use when writing a new document
   from scratch, or when editing, reviewing, or rewriting an existing one for
   clarity and quality.
-argument-hint: --new <topic> | --improve <file>
+argument-hint: "[--new[=<topic>] | --improve=<file>] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -20,7 +20,7 @@ overviews, rationale, and user impact. Before auditing or drafting, read
 [distill](../distill/SKILL.md) for long prose that needs condensing without
 losing load-bearing details.
 
-**Mode:** `--new <topic>` writes a document; `--improve <file>` rewrites one.
+**Mode:** `--new[=<topic>]` writes a document; `--improve=<file>` rewrites one.
 With neither flag, infer the mode from context and ask if it remains unclear.
 
 ## Improve an existing document

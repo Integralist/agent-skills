@@ -6,7 +6,7 @@ description: >-
   Use when asked how something would be built differently if started over,
   for a refactoring or redesign plan, or what to restructure or delete.
 disable-model-invocation: true
-argument-hint: "[feature, subsystem, or path; empty for the whole codebase]"
+argument-hint: "[--scope=<feature|subsystem|path>] [steering]"
 metadata:
   model-tier: frontier
 ---
@@ -16,10 +16,11 @@ how would we build it, and what could we delete?* Prefer deletion and
 structural simplification over tidying up the same messy design. Write a
 plan only—edit no code and give no PR verdict.
 
-1. **Set the scope.** Treat a feature name (`auth-middleware`) as a feature,
-   a subsystem/path (`api`) as a subsystem, and no argument as the whole
-   codebase (slug `codebase`). Ask if ambiguous. Identify the scoped files,
-   primary language, and a kebab-case slug.
+1. **Set the scope.** With `--scope=<feature|subsystem|path>`, treat a
+   feature name (`auth-middleware`) as a feature and a subsystem/path (`api`)
+   as a subsystem; with no `--scope`, audit the whole codebase (slug
+   `codebase`). Ask if ambiguous. Identify the scoped files, primary language,
+   and a kebab-case slug.
 2. **Gather context and run read-only audits.** Collect the repo metadata
    snapshot by reading and following [git-metadata](../git-metadata/SKILL.md)
    and read

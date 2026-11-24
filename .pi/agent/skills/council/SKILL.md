@@ -4,7 +4,7 @@ description: >-
   Run a read-only second-opinion code review across Copilot, Vertex, and
   Bedrock models using Pi subagents.
 disable-model-invocation: true
-argument-hint: '[--branch | --uncommitted | --all-changes | path | PR_URL] [focus]'
+argument-hint: "[--branch | --uncommitted | --all-changes | --target=<path|pr-url>] [steering]"
 metadata:
   model-tier: complex
 ---
@@ -32,11 +32,11 @@ instructions:
 
 | Argument | Source |
 | --- | --- |
-| PR URL or `owner/repo#number` | Remote PR via `gh pr view` and `gh pr diff` |
+| `--target=<pr-url>` or `--target=<owner/repo#number>` | Remote PR via `gh pr view` and `gh pr diff` |
 | `--branch` | Local branch commits vs. default branch (`main`, `master`, or `origin/HEAD`) |
 | `--uncommitted` | `git diff HEAD` plus untracked files (`git ls-files --others --exclude-standard`) |
 | `--all-changes` | `git diff "$BASE"` plus untracked files against default branch |
-| File path or glob | Explicit files plus `git diff HEAD -- <paths>` |
+| `--target=<path>` or `--target=<glob>` | Explicit files plus `git diff HEAD -- <paths>` |
 
 If no source argument is given:
 

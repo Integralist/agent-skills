@@ -85,7 +85,7 @@ test("explicit invocation keeps the session model coordinating", () => {
 });
 
 function assertAutoInvocation(content) {
-  assert.match(content, /argument-hint: "<plan-path> \[--auto\]"/);
+  assert.match(content, /argument-hint: "\[--plan=<path>\] \[--auto\] \[--github\] \[steering\]"/);
   assert.match(content, /Without `--auto`, confirm the plan/);
   assert.match(content, /\(references\/auto\.md\)/);
 }
@@ -93,7 +93,7 @@ function assertAutoInvocation(content) {
 test("--auto is the only opt-in spelling and interactive stays the default", () => {
   const content = flat(skillPath);
   assertAutoInvocation(content);
-  assert.throws(() => assertAutoInvocation(content.replace('[--auto]"', '[auto]"')));
+  assert.throws(() => assertAutoInvocation(content.replace('[--auto]', '[auto]')));
   assert.throws(() => assertAutoInvocation(content.replace("Without `--auto`, confirm the plan", "Always run unattended")));
   for (const relative of [skillPath, autoPath, commitsPath, "README.md", ".agents/AGENTS.md"])
     assert.doesNotMatch(read(relative), /execute-plan[^\n]*(?<![\w-])auto\b|`auto`/, `${relative}: still mentions bare auto`);

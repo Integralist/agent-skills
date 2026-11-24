@@ -4,7 +4,7 @@ description: >-
   Teach a topic or concept through a visual, beginner-friendly slide deck. Use
   when the user asks to learn or explain something as slides.
 disable-model-invocation: true
-argument-hint: Optional topic to teach
+argument-hint: "[steering]"
 metadata:
   model-tier: moderate
 ---

@@ -5,7 +5,7 @@ description: >-
   error handling, test style, document structure, and terminology. Use when
   the user asks whether a change fits the codebase, or another skill needs to
   judge project conformance.
-argument-hint: "[path | --uncommitted]"
+argument-hint: "[--target=<path|glob> | --uncommitted] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -23,9 +23,9 @@ emergent precedent, so defer where a guide answers the question:
 it and warn with `⚠️` that it should be renamed to `GLOSSARY.md`. This skill
 owns the patterns a codebase grew that no guide records.
 
-**Scope.** A path or glob audits those files. `--uncommitted`, or "what I'm
-working on", means files listed by `git status --porcelain`. With no
-argument, ask which path to check.
+**Scope.** `--target=<path|glob>` audits those files. `--uncommitted`, or
+"what I'm working on", means files listed by `git status --porcelain`. With no
+target, ask which path to check.
 
 1. **Find peers for every file.** Look for files doing the same job: package
    siblings, other implementations of an interface, tests of the same shape,

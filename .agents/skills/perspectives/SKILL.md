@@ -3,7 +3,7 @@ name: perspectives
 description: >-
   Quick multi-viewpoint "what are we missing?" pass on a problem, proposal,
   or design. Use when evaluating ideas, proposals, or trade-offs.
-argument-hint: '[topic or proposal] [optional: perspective]'
+argument-hint: "[--perspective=<name>] [steering]"
 metadata:
   model-tier: complex
 ---
@@ -14,9 +14,10 @@ is for breadth, not a durable recommendation: read and follow
 [decide](../decide/SKILL.md) for a consequential choice and
 [code-review](../code-review/SKILL.md) to find defects in existing code.
 
-**Input.** Take a topic or proposal and, optionally, one perspective. If the
-topic is too vague to frame as one focused question, ask one clarifying
-question; otherwise begin. Use practical names, and accept these aliases:
+**Input.** Take a topic, proposal, or steering text and, optionally,
+`--perspective=<name>` (accepted in any position). If the topic is too vague to
+frame as one focused question, ask one clarifying question; otherwise begin. Use
+practical names, and accept these aliases:
 
 | Perspective | Aliases |
 | --- | --- |
@@ -27,9 +28,9 @@ question; otherwise begin. Use practical names, and accept these aliases:
 | Alternatives | green, creative, options |
 | Process | blue, meta, next steps |
 
-**One perspective only.** If the user names one, cover only that perspective
-in depth: one short framing sentence and 5–10 concise points. Do not add a
-synthesis.
+**One perspective only.** If `--perspective=<name>` is passed (or one
+perspective is named), cover only that perspective in depth: one short framing
+sentence and 5–10 concise points. Do not add a synthesis.
 
 ## Full analysis
 

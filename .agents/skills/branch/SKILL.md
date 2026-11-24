@@ -3,7 +3,7 @@ name: branch
 description: >-
   Create a git feature branch named for the current session's work. Use when
   the user asks to start, create, or cut a branch.
-argument-hint: "[--cleanup [<branch>]]"
+argument-hint: "[--cleanup[=<branch>]] [steering]"
 allowed-tools: Bash(gh pr list:*), Bash(git branch:*), Bash(git config:*), Bash(git fetch:*), Bash(git rebase:*), Bash(git status:*), Bash(git switch:*), Bash(git symbolic-ref:*)
 metadata:
   model-tier: trivial
@@ -30,10 +30,11 @@ task, propose a slug and wait for the user to confirm it.
 **Create.** Run `git switch -c <name> <base>`. Done when the new branch is
 checked out and you've reported its name.
 
-## Cleanup (`--cleanup [<branch>]`)
+## Cleanup (`--cleanup[=<branch>]`)
 
-1. **Identify and verify.** Target `<branch>` if given, or the current branch
-   when not on `<default-branch>`. Stop if `<branch>` is `<default-branch>` or
+1. **Identify and verify.** Target `<branch>` from `--cleanup=<branch>` if
+   given, or the current branch when omitted and not on `<default-branch>`.
+   Stop if `<branch>` is `<default-branch>` or
    the working tree has uncommitted changes. Confirm the branch is merged via
    `gh pr list --head <branch> --state merged --json number,url` or
    `git branch --merged <default-branch>`. Stop if unmerged unless the user

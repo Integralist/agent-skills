@@ -6,7 +6,7 @@ description: >-
   Engineering need agreed scope, an evaluated solution direction, and an
   approved system design before engineering specs and plans.
 disable-model-invocation: true
-argument-hint: "[project path | #<issue> | <milestone>] [--github]"
+argument-hint: "[--project=<path|#issue|url>] [--milestone=<name>] [--github] [steering]"
 metadata:
   model-tier: complex
 ---
@@ -40,7 +40,8 @@ wait for the user.
 all README links in the same change. If multiple milestones are known from
 the start, use qualified names throughout.
 
-1. **Find the project.** Use the supplied path. Otherwise look in `projects/`
+1. **Find the project.** Use `--project=<path|#issue|url>` if supplied (and
+   `--milestone=<name>` when naming a milestone). Otherwise look in `projects/`
    and ask which project if more than one fits. If none exists, ask for the
    initiative's name and create `projects/<yyyy-mm-dd>-<slug>/`. Read its
    README, every PDD document, and all research, specs, and ADRs they link.

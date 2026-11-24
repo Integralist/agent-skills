@@ -5,7 +5,7 @@ description: >-
   run, drafting or refreshing the cases first. Use when the user wants to test
   a skill in this repo, add eval cases, or check a skill edit for regressions.
 disable-model-invocation: true
-argument-hint: "[skill-name]"
+argument-hint: "[--skill=<name>] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -30,7 +30,7 @@ would test the previous edit.
 ## Workflow
 
 1. **Choose the skill.** Confirm `.agents/skills/` exists; if not, stop with
-   a note. With no argument, list skills, flag those without cases, and ask
+   a note. With no `--skill`, list skills, flag those without cases, and ask
    which one. Do not continue until the target is named.
 2. **Settle the cases.** If `evals/cases.json` is missing, draft a starter
    suite with one case per described branch and hard rule. Otherwise compare

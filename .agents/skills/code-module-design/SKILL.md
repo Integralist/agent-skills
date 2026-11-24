@@ -6,7 +6,7 @@ description: >-
   deciding where a seam goes, making code more testable or easier for agents to
   navigate, or when asked how a feature or package is structured, where logic
   should live, or whether boundaries are clean.
-argument-hint: "[--review] [target or path]"
+argument-hint: "[--review] [--target=<path|symbol>] [steering]"
 metadata:
   model-tier: complex
 ---

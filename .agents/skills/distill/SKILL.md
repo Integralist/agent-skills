@@ -5,7 +5,7 @@ description: >-
   an inventory and audit. Use for a plan, technical guide, runbook, agent
   instructions, or any prose too long or hard to follow, especially before
   an agent executes it.
-argument-hint: "[file path | #<issue> | pasted text] [--github] [--prune]"
+argument-hint: "[--source=<path|#issue|url>] [--github] [--prune] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -17,10 +17,10 @@ case, so inventory the requirements and audit the result.
 
 ## Target and mode
 
-- **Pasted text:** Give the rewrite in chat and write nothing to disk.
-- **File:** Read it in full, propose the rewrite with its audit, and write
-  in-place only after the user approves (or within an already-approved
-  workflow).
+- **Pasted text (`[steering]`):** Give the rewrite in chat and write nothing to disk.
+- **File (`--source=<path>`):** Read it in full, propose the rewrite with its
+  audit, and write in-place only after the user approves (or within an
+  already-approved workflow).
 - **GitHub issue or artifact:** For `--github` or an issue reference (`#<n>` or
   URL), read and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to
   inspect and condense issue bodies or Root Issue Artifacts.

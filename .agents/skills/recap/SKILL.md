@@ -2,7 +2,7 @@
 name: recap
 description: Recap the current session — what's done, in progress, and next.
 disable-model-invocation: true
-argument-hint: (optional) a specific thread or task to recap
+argument-hint: "[steering]"
 metadata:
   model-tier: trivial
 ---

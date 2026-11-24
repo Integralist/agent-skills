@@ -4,7 +4,7 @@ description: >-
   Audit a codebase or paths for AI slop and clean it up with you steering each
   fix. Use when asked to find and remove sloppy, AI-generated code patterns.
 disable-model-invocation: true
-argument-hint: '[path | glob]'
+argument-hint: "[--target=<path|glob>] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -14,11 +14,11 @@ fixes; apply approved ones in the main thread, where the user can veto or adjust
 each one. Follow [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md),
 including its completion and retry protocol.
 
-1. **Gather files.** With no argument, include every source file except
+1. **Gather files.** With no `--target`, include every source file except
    vendored, generated, and fixture directories such as `vendor/`,
-   `node_modules/`, `testdata/`, and `.git/`. With a path or glob, expand it
-   and check that paths exist. If nothing is found, report "No files to
-   review" and stop.
+   `node_modules/`, `testdata/`, and `.git/`. With `--target=<path|glob>`,
+   expand it and check that paths exist. If nothing is found, report "No files
+   to review" and stop.
 2. **Prioritize risk.** Find the top 20 files by changes in the last year and
    the top 20 files most often touched by fix, bug, or broken commits. Flag
    their overlap as the highest-risk files; start the audit there.

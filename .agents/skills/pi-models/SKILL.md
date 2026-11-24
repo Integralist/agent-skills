@@ -4,7 +4,7 @@ description: >-
   Add, update, or prune Pi model definitions, overrides, and enabled models in
   .pi/agent/models.json and .pi/agent/settings.json from provider docs or an
   announcement URL.
-argument-hint: "[URL | model-name] [--provider=<id>] [--prune] [--install]"
+argument-hint: "[--source=<url|model>] [--provider=<id>] [--prune] [--install] [steering]"
 disable-model-invocation: true
 metadata:
   model-tier: moderate
@@ -21,9 +21,9 @@ profile IDs and pricing verification) before proposing edits.
 
 ## Arguments and modes
 
-- **`URL | model-name`** (optional): announcement URL, API docs URL, or model
-  ID to add or update. If omitted without `--prune`, inspect current configs
-  and ask what model or source URL to add, update, or prune.
+- **`--source=<url|model>`** (optional): announcement URL, API docs URL, or
+  model ID to add or update. If omitted without `--prune`, inspect current
+  configs and ask what model or source URL to add, update, or prune.
 - **`--provider=<id>`** (optional): target Pi provider ID (`github-copilot`,
   `google-vertex`, `amazon-bedrock`, and so on). Infer from the source or
   existing configuration when omitted; ask if still ambiguous.

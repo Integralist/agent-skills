@@ -6,7 +6,7 @@ description: >-
   problems, solutions, and user stories, plan summaries, or technical docs,
   even if no voice was requested; or when the user asks for product voice,
   once or for all replies.
-argument-hint: "[--all | --off | text to rewrite]"
+argument-hint: "[--all | --off] [steering]"
 metadata:
   model-tier: trivial
 ---

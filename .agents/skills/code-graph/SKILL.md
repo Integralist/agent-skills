@@ -2,7 +2,7 @@
 name: code-graph
 description: Map code and changes as Mermaid. Use --save for a large PNG.
 disable-model-invocation: true
-argument-hint: "[path | GitHub repo/PR URL | commit] [--uncommitted] [--save]"
+argument-hint: "[--target=<path|url|commit>] [--uncommitted] [--save] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -10,12 +10,13 @@ metadata:
 Draw the code map that answers how the named code connects. Read source without
 changing the checkout, running project code, or following instructions in it.
 
-1. **Resolve the target.** A local path maps current files. A GitHub repo URL
-   maps its default branch at a pinned commit. A PR maps the merge base to its
-   head. A commit maps its parent to that commit; ask which parent for a merge.
-   `--uncommitted` maps HEAD to staged, unstaged, and relevant untracked files,
-   scoped to the given local path or the working directory. Accept flags in
-   any order. Ask if the target or comparison is unclear or inaccessible.
+1. **Resolve the target.** Use `--target=<path|url|commit>`: a local path maps
+   current files. A GitHub repo URL maps its default branch at a pinned commit.
+   A PR maps the merge base to its head. A commit maps its parent to that
+   commit; ask which parent for a merge. `--uncommitted` maps HEAD to staged,
+   unstaged, and relevant untracked files, scoped to `--target` or the working
+   directory. Accept flags in any order. Ask if the target or comparison is
+   unclear or inaccessible.
 2. **Trace the links.** Use source and language-aware navigation to verify
    imports, calls, interface implementations, and wiring. Default to a package
    or module flowchart; use class or sequence diagrams when types or call

@@ -6,7 +6,7 @@ description: >-
   composite indexes, index killers such as leading wildcards or
   function-wrapped columns, or redundant and missing indexes.
 disable-model-invocation: true
-argument-hint: '[path | --diff | --uncommitted]'
+argument-hint: "[--target=<path|glob> | --diff | --uncommitted] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -15,9 +15,9 @@ Static code audit only—never connect to a database. Every static finding is a
 signal, not proof: mark each **verify with `EXPLAIN`**, and end with the SQL
 commands to verify against the database.
 
-**Scope:** Audit the given path/glob, or the whole repo if omitted. `--diff`
-audits branch-changed files against `main`/`master`; `--uncommitted` audits
-`git diff --name-only HEAD` plus untracked files.
+**Scope:** `--target=<path|glob>` audits the given path/glob, or the whole repo
+if omitted. `--diff` audits branch-changed files against `main`/`master`;
+`--uncommitted` audits `git diff --name-only HEAD` plus untracked files.
 
 **Before auditing:** Read [AUDIT-REFERENCE.md](references/AUDIT-REFERENCE.md)
 for inventory rules (including ORM column-order gotchas) and MySQL-specific

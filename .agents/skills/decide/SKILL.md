@@ -4,7 +4,7 @@ description: >-
   Decision memo with a contrarian check, saved to docs/decisions/. Use when
   the user wants help making a consequential, hard-to-reverse, or
   multi-stakeholder decision.
-argument-hint: "[decision topic]"
+argument-hint: "[steering]"
 metadata:
   model-tier: complex
 ---

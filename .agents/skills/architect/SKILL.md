@@ -4,8 +4,7 @@ description: >-
   Take a feature from an idea through research, grilling, a spec, and a plan.
   Use when architecting a feature from an idea or this session's discussion,
   or exploring a design before planning.
-argument-hint: >-
-  [--next [#<issue> | URL | <project-path>]] [--github] [steering]
+argument-hint: "[--next[=<#issue|url|path>]] [--github] [steering]"
 metadata:
   model-tier: complex
 ---
@@ -24,7 +23,7 @@ Start at Bootstrap unless the user names a later step, or PDD hands off an
 approved Design (carry the same workspace forward and start at Research). Once
 the workspace exists, pass its path or `#<issue>` to each downstream skill.
 
-**Resume with `--next`.** Resolve the named issue/path or active session
+**Resume with `--next[=<#issue|url|path>]`.** Resolve the named issue/path or active session
 workspace, inspect its artifacts read-only (via `GITHUB-ISSUES.md` for GitHub,
 or its README/files on disk), and compare with the completion conditions
 below. Report the last completed step, evidence, and exact next step, and
@@ -85,7 +84,7 @@ tell the user and wait. Do not fill the gap with a guess.
    [summarize](../summarize/SKILL.md)-style digest in chat.
 7. **Hand off.** Ask the user to choose one next step and start only that one:
    - Execute the plan with `execute-plan`, or by hand via
-     `/to-tasks <plan-path> --slice=1` (or `/to-tasks <plan-path>` for one
-     slice; use `#<root-issue>` in GitHub mode).
+     `/to-tasks --plan=<plan-path> --slice=1` (or `/to-tasks --plan=<plan-path>`
+     for one slice; `--plan=#<root-issue>` in GitHub mode).
    - Research another topic: return to step 3.
    - Write another plan: return to step 6.

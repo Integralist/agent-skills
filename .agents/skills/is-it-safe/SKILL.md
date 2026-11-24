@@ -5,7 +5,7 @@ description: >-
   Use when the user asks whether the current branch, a commit or range, or a
   pull request is safe to commit or merge, or when code-review runs an
   adversarial safety pass.
-argument-hint: "[PR URL | PR number | commit/range | base ref]"
+argument-hint: "[--target=<pr-url|#number|commit|ref>] [steering]"
 metadata:
   model-tier: complex
 ---
