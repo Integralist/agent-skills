@@ -1,8 +1,9 @@
 # Plan structure and slice rules
 
-Read and follow [voice-product](../../voice-product/SKILL.md) and
-[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) across all explanatory prose
-(Summary, slice outcomes, Notes, and `<details>`), preserving exact
+Read and follow [voice-product](../../voice-product/SKILL.md),
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md), and
+[NEWCOMER-NARRATIVE.md](../../shared/NEWCOMER-NARRATIVE.md) across explanatory
+prose (Summary, slice outcomes, Notes, and `<details>`), preserving exact
 signatures, identifiers, and contract values.
 
 Keep the top of each section decision-first and scannable (deliverable,
@@ -106,24 +107,20 @@ commands; link existing setup, or state why not applicable.}
 
 #### Problem
 
-{1–2 plain sentences introducing the system/context and what is missing or
-broken, explaining unfamiliar terms on first use.}
-
-- **Gate / needs decision:** {approval or blocker, or omit}
-- **Blocked by:** None
+{1–2 short paragraphs introducing the system/context and concrete example of
+what is missing or broken, explaining unfamiliar terms on first use.}
 
 #### Solution
 
-{1–2 plain sentences on what changes and what stays untouched.}
-
-{Optional focused outcome diagram for Slice 1.}
+{1–2 short paragraphs on what changes and what stays untouched, plus optional
+focused outcome diagram for Slice 1.}
 
 #### Slice 1 Milestones
 
 - [ ] **M1.1**: {checkable outcome} {— [criterion](./spec.md#anchor)}
 
 <details>
-<summary>Contracts and acceptance verification</summary>
+<summary>⚙️ <b>Technical details</b></summary>
 
 - **Consumes:** None
 - **Produces:** {exact signatures later slices rely on}
@@ -140,18 +137,26 @@ broken, explaining unfamiliar terms on first use.}
 
 </details>
 
+<details>
+<summary>📋 <b>Project metadata</b></summary>
+
+- **Gate / needs decision:** {approval or blocker, or omit}
+- **Blocked by:** None
+
+</details>
+
 ### Slice 2: {what it delivers end to end}
 
 #### Problem / Solution
 
-{1–2 sentences each; state Blocked by: Slice 1 ({why}) and optional diagram.}
+{1–2 short paragraphs each, plus optional outcome diagram.}
 
 #### Slice 2 Milestones
 
 - [ ] **M2.1**: {checkable outcome} {— [criterion](./spec.md#anchor)}
 
 <details>
-<summary>Contracts and acceptance verification</summary>
+<summary>⚙️ <b>Technical details</b></summary>
 
 - **Consumes:** {signatures from Slice 1}
 - **Produces:** {exact signatures, or None}
@@ -161,6 +166,13 @@ broken, explaining unfamiliar terms on first use.}
 | Criterion | Feature scenarios / assertions | Boundary | Command |
 | --- | --- | --- | --- |
 | {M2.1 + criterion} | {feature + names + rows} | {boundary} | `{command}` |
+
+</details>
+
+<details>
+<summary>📋 <b>Project metadata</b></summary>
+
+- **Blocked by:** Slice 1 ({why})
 
 </details>
 

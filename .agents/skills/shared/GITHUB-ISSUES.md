@@ -47,22 +47,35 @@ appending chronology):
 2. **Slice Sub-Issues (`--label slice`, `--parent <root-issue>`):**
    - **Title:** `<slug> / S<N>: <Slice Title>` (pass `--blocked-by` for
      earlier dependent slices).
-   - **Body:** Keep `## Problem` (context plus `Parent Project`, `Artifacts`,
-     `Gate`, `Blocked by`) and `## Solution` (what changes, why, `Status`)
-     short and scannable—link shared `plan.md` sections instead of copying
-     them. Collapse `M<n>.<m>` milestones/task links and `Consumes`/`Produces`/
-     `Acceptance Verification`/`Starting Context` inside `<details>` blocks.
-     Do not attach artifacts to Slice issues.
+   - **Body:** Follow [NEWCOMER-NARRATIVE.md](NEWCOMER-NARRATIVE.md) and
+     [CONCISE-PROSE.md](CONCISE-PROSE.md) for `## Problem` and `## Solution`
+     (link shared `plan.md` sections instead of copying them), and keep
+     `## Notes` to 1–3 short bullets with one fact per bullet (`Status`, plus
+     only active `Gate` or `Blocked by`—omit cleared/`None` fields and put
+     evidence links in `📋 Project metadata`). Collapse
+     supporting content below `---` into `<details>` blocks:
+     `⚙️ <b>Technical details</b>` (`Consumes`/`Produces`, mapping tables,
+     `Acceptance Verification`, `Starting Context`) and
+     `📋 <b>Project metadata</b>` (`Parent Project`, `Artifacts`,
+     `Pull requests`, `M<n>.<m>` milestones, and `## Tasks`). Do not attach
+     artifacts to Slice issues.
 3. **Task Sub-Issues (`--label task`, `--parent <slice-issue>`):**
    - **Title:** `<slug> / S<N>-T<M>: <Task Title>` (created just-in-time one
      slice at a time by `to-tasks` or `execute-plan`, chained with
      `--blocked-by`).
-   - **Body:** Keep `## Problem` (context plus `Parent Slice`, `Blocked by`,
-     `Supports`), `## Solution` (`Location`, one-line `Verify`), and optional
-     `## Notes` brief. Collapse `Stub`, `Test (red)`, and `Implementation
-     guidance (green)` inside `<details>` as concise bullets—never repeat
-     `AGENTS.md` inline. Do not attach artifacts to Task issues, and omit the
-     trailing `- [ ] Task <n> complete` checkbox (open/closed state tracks it).
+   - **Body:** Follow [NEWCOMER-NARRATIVE.md](NEWCOMER-NARRATIVE.md) and
+     [CONCISE-PROSE.md](CONCISE-PROSE.md) for `## Problem` and `## Solution`,
+     and keep `## Notes` to 1–3 short bullets with one fact per bullet (only
+     active `Blocked by`, `Location`, and one-line `Verify`—omit `None`
+     fields and put evidence links in `📋 Project metadata`). Collapse
+     supporting content below `---` into `<details>`
+     blocks as concise bullets: `⚙️ <b>Technical details</b>` (`Prerequisites`,
+     `Stub`, `Test (red)`, `Implementation guidance (green)`, `Verify`
+     boundary—never repeat `AGENTS.md` inline) and
+     `📋 <b>Project metadata</b>` (`Parent Slice`, `Parent Project`,
+     `Supports`, `Blocked by`, `Artifacts`, `Pull requests` / evidence). Do not
+     attach artifacts to Task issues, and omit the trailing
+     `- [ ] Task <n> complete` checkbox (open/closed state tracks it).
      After compiling tasks, update `#<slice-issue>` (`Status`, `## Tasks`) and
      sync `#<root-issue>`.
 

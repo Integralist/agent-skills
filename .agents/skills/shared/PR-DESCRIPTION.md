@@ -71,11 +71,13 @@ Omit if empty.>
   nodes) in a fenced `mermaid` block. Consult
   [code-graph](../code-graph/SKILL.md) if a caller/package map materially aids
   review (embed Mermaid, no PNG export).
-- **Details, checks & risks:** Keep `Notes` brief (checks actually run and what
-  they verify, concise before/after evidence, material risks with revert
-  impact, and required `AGENTS.md` gates). Tuck dense inventories and
-  checklists into collapsed `<details>` below `---` (no `open` attribute);
-  omit empty blocks and the divider.
+- **Details, checks & risks:** Keep `Notes` to 1–3 short bullets with one
+  fact per bullet—omit cleared gates, `None` blockers, and duplicate evidence
+  links (keep links in `Project metadata`). List only checks run and what they
+  verify (leave deploys to the ticket), concise before/after evidence, material
+  risks with revert impact, and required `AGENTS.md` gates. Tuck dense
+  inventories and checklists into collapsed `<details>` below `---` (no `open`
+  attribute); omit empty blocks and the divider.
 - **Project metadata:** Keep tracking links in `Project metadata`. For
   GitHub-tracked projects, before drafting or updating issue references,
   read and follow [task and PR reconciliation](GITHUB-ISSUES.md#task-and-pr-reconciliation).

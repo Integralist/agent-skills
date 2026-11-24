@@ -9,14 +9,16 @@ Each task must be executable from this document and a shell alone: the agent
 must not need to make a design choice or open an unnamed file. Supply missing
 judgment or split the task.
 
-Follow [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) and
+Follow [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md),
+[NEWCOMER-NARRATIVE.md](../../shared/NEWCOMER-NARRATIVE.md), and
 [PR-DESCRIPTION.md](../../shared/PR-DESCRIPTION.md) for the two-layer layout:
-keep the visible top short (<= 220 words per task: `Problem`, `Solution`,
-optional `Notes`, `Supports`, `Location`, and one-line `Verify`) with blank
-lines between bullets, and place `Stub`, `Test (red)`, and `Implementation
-guidance (green)` inside `<details>`. Never copy `AGENTS.md`, PR rules, or
-approval reminders into task bodies—link `AGENTS.md` once if a task needs a
-repo-specific rule.
+keep the visible top short (<= 220 words per task: `Problem`, `Solution`, and
+brief `Notes` with active blockers, `Location`, and one-line `Verify`) with
+blank lines between bullets, and place `Stub`, `Test (red)`, and
+`Implementation guidance (green)` under `⚙️ Technical details` and tracking
+fields (`Parent Slice`, `Supports`, `Blocked by`) under `📋 Project metadata`.
+Never copy `AGENTS.md`, PR rules, or approval reminders into task bodies—link
+`AGENTS.md` once if a task needs a repo-specific rule.
 
 Apply the same brevity and clarity inside `<details>`: use only the template
 sections below (plus optional `Prerequisites` in 1–3 short bullets when a task
@@ -26,13 +28,15 @@ action per bullet, no prose paragraphs or defensive disclaimers.
 
 Each task gives the executor:
 
-- **Visible top:** `Problem` (brief system/context intro + why the task
-  exists, explaining non-obvious terms on first use), `Solution` (what changes
-  and what stays untouched), optional `Notes`, `Supports` (milestone keys),
-  `Location`, and a runnable `Verify` command with its pass condition.
-- **Collapsed detail:** a stub only when needed to compile, the failing
-  test (red) and why it fails, and implementation guidance (`path:line` pattern
-  to follow; verbatim code only for tricky security or concurrency parts).
+- **Visible top:** `Problem` (1–2 short paragraphs introducing system role +
+  concrete gap, explaining non-obvious terms on first use), `Solution` (1–2
+  short paragraphs or <= 5 short bullets on what changes and what stays
+  untouched, plus optional outcome diagram), and `Notes` (active blockers,
+  `Location`, and a runnable `Verify` command with its pass condition).
+- **Collapsed detail:** `⚙️ Technical details` (stub only when needed to
+  compile, failing test and why it fails, implementation guidance as
+  `path:line` patterns, verbatim code only for tricky security/concurrency) and
+  `📋 Project metadata` (`Supports` milestone keys, `Blocked by`, and links).
 
 Include required fixtures, service launchers, or harness setup before the
 checks that need them. Scope Verify to the delivered outcome and
@@ -100,30 +104,29 @@ Conventions and gotchas:
 
 #### Problem
 
-{1–2 plain sentences introducing the system/context and what is missing or
-broken, explaining unfamiliar terms on first use.}
-
-- **Blocked by:** {previous task or "None"}
-
-- **Supports:** {milestone keys; omit when the source has none}
+{1–2 short paragraphs introducing the system/context and concrete gap,
+explaining unfamiliar terms on first use.}
 
 #### Solution
 
-{1–2 plain sentences on what changes and what stays untouched.}
+{1–2 short paragraphs or <= 5 short bullets on what changes and what stays
+untouched.}
 
 {Optional focused outcome diagram for Task {n}, captioned with its ID. Omit
 when covered by a shared diagram or clearer without one.}
+
+#### Notes
 
 - **Location:** `{path}`, `{path}`
 
 - **Verify:** `{command}` passes when {observable pass condition}.
 
-#### Notes
+- {Optional 1–2 short boundary, blocker, or scope bullets; omit if none.}
 
-- {Optional 1–2 short boundary or scope bullets; omit if none.}
+---
 
 <details>
-<summary>Stub, test, and implementation details</summary>
+<summary>⚙️ <b>Technical details</b></summary>
 
 **Stub** — add to `{path}` (only if the test needs it to compile):
 
@@ -143,6 +146,15 @@ Run `{command}`; it fails because {why the assertion fails}.
 
 - {step or `path:line` pattern to follow}
 - {tricky security/concurrency snippet only if needed}
+
+</details>
+
+<details>
+<summary>📋 <b>Project metadata</b></summary>
+
+- **Blocked by:** {previous task or "None"}
+
+- **Supports:** {milestone keys; omit when the source has none}
 
 </details>
 
