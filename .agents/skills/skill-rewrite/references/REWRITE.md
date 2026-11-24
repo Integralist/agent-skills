@@ -25,7 +25,11 @@
    skill names, link each skill once per step or paragraph instead of
    repeating its path nearby, re-read each edited sentence to fix mismatched
    prepositions or dropped purpose verbs, and never drop frontmatter flags,
-   `allowed-tools`, or tested triggers unintentionally.
+   `allowed-tools`, or tested triggers unintentionally. When removing
+   `disable-model-invocation: true`, audit and update `description` with clear
+   `Use when ...` triggers; keep noun-first names (`<noun>-<verb>`) with
+   `<verb> <noun>` triggers, and format numbered `argument-hint` inputs with
+   `#<...>` (such as `[pr-url | #<pr-number>]`).
 4. **Verify after approval.** Check UTF-8 byte counts, confirm every relative
    link and anchor resolves, run affected repo tests/linters (`make check-rules`,
    contract tests, etc.), and report any unrun verification as a gap.
