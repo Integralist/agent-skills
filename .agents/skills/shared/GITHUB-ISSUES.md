@@ -101,10 +101,12 @@ artifact`:
 ## Branch guard, execution, and hybrid closure lifecycle
 
 1. **Branch guard:** Before the first implementation edit in `next-task`,
-   `next-slice`, or `execute-plan`, if on `main`/`master`, switch to or create
-   the feature branch from `plan.md` (or create one by reading and following
-   [branch](../branch/SKILL.md)) unless the user explicitly approved committing
-   to the default branch.
+   `next-slice`, or `execute-plan`, if on `main`/`master` in the main
+   checkout, create a sibling worktree by reading and following
+   [worktree-create](../worktree-create/SKILL.md) (use
+   [branch](../branch/SKILL.md) only if already in a worktree, the user asked
+   to branch in-place, or there are uncommitted changes to carry over) unless
+   the user explicitly approved committing to the default branch.
 2. **Task completion (closes locally):** After verification and local commit,
    post the [BUILD-ITEM.md](BUILD-ITEM.md) evidence table and commit SHA via
    `gh issue comment <task-issue> --body-file -`, require it to succeed, then
@@ -125,7 +127,7 @@ artifact`:
    comment <slice-issue> --body-file -`, require it to succeed, close
    `#<slice-issue>`, and sync `#<root-issue>` (slice status, acceptance comment
    link, `Updated`, `## Next action`).
-4. **PRs and Root Issue closure (`open-pr`, `stacked-prs`):** Keep
+4. **PRs and Root Issue closure (`pr-open`, `stacked-prs`):** Keep
    `#<root-issue>` open until code merges to the default branch:
    - **Single or final slice PR:** `- Closes #<root-issue>` and
      `- Delivers #<slice-issue>` as separate bullets.

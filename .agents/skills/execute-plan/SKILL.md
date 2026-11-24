@@ -47,9 +47,13 @@ and stop. A context transition is not task or plan completion.
 1. **Set up.** Read the plan, its spec, and linked docs. For `--github` or an
    issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
-   Issue Artifacts instead of `projects/`. Record branch, HEAD,
-   and existing changes; keep those changes out of your commits. Record or
-   resume the review baseline and delivery manifest using
+   Issue Artifacts instead of `projects/`. Record branch, HEAD, and existing
+   changes; keep those changes out of your commits. If on `main` or `master` in
+   the main checkout without an approved exception, read and follow
+   [worktree-create](../worktree-create/SKILL.md) before editing (use
+   [branch](../branch/SKILL.md) only if the user asked to branch in-place or
+   has uncommitted changes to carry over). Record or resume the review
+   baseline and delivery manifest using
    [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md), and run baseline checks.
    Read the adapter for the current harness—[Claude Code](references/claude-code.md)
    or [Pi](references/pi-subagents.md)—and verify the worker model with

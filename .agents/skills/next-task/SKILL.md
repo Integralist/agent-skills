@@ -29,7 +29,11 @@ read-only review may also be delegated through
    Before the owning slice's first edit, record or resume its review baseline
    following [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). Retain that
    baseline across task invocations. The item or closing slice is selected
-   only when its review baseline and owner are identified.
+   only when its review baseline and owner are identified. If on the default
+   branch in the main checkout without an approved exception, read and follow
+   [worktree-create](../worktree-create/SKILL.md) before editing (use
+   [branch](../branch/SKILL.md) only if the user asked to branch in-place or
+   has uncommitted changes to carry over).
 3. **Build the item.** Follow [BUILD-ITEM.md](../shared/BUILD-ITEM.md).
    Verify it and tick it off only when its own outcome has passing evidence.
 4. **Accept a finished slice.** When every item in the owning slice is

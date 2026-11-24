@@ -63,11 +63,12 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**mysql-index-audit**](.agents/skills/mysql-index-audit/SKILL.md)                         | Find MySQL leftmost-prefix violations, index gaps, and unusable indexes.                                 |
 | [**next-slice**](.agents/skills/next-slice/SKILL.md)                                       | Implement and complete every task in the next actionable plan slice.                                     |
 | [**next-task**](.agents/skills/next-task/SKILL.md)                                         | Implement and complete the next actionable plan or task-list item.                                       |
-| [**open-pr**](.agents/skills/open-pr/SKILL.md)                                             | Write and open a concise PR with clear Problem and Solution sections.                                    |
 | [**pdd**](.agents/skills/pdd/SKILL.md)                                                     | Run a Product-Engineering initiative through Project, Discovery, and Design approvals.                   |
 | [**perspectives**](.agents/skills/perspectives/SKILL.md)                                   | Explore a proposal's evidence, sentiment, risks, benefits, alternatives, and process.                    |
 | [**pi-models**](.agents/skills/pi-models/SKILL.md)                                         | Add, update, or prune Pi model definitions, overrides, and enabled models from docs or a URL.            |
 | [**polish**](.agents/skills/polish/SKILL.md)                                               | Improve a short passage's clarity and concision.                                                         |
+| [**pr-merge**](.agents/skills/pr-merge/SKILL.md)                                           | Merge an open GitHub pull request and clean up its local worktree or branch.                             |
+| [**pr-open**](.agents/skills/pr-open/SKILL.md)                                             | Write and open a concise PR with clear Problem and Solution sections.                                    |
 | [**precedent**](.agents/skills/precedent/SKILL.md)                                         | Align work with patterns established by peer files.                                                      |
 | [**recap**](.agents/skills/recap/SKILL.md)                                                 | Summarize what is done, in progress, and next.                                                           |
 | [**redesign**](.agents/skills/redesign/SKILL.md)                                           | Plan a simpler rebuild of a feature, subsystem, or codebase, with tests pinned first.                    |
@@ -95,6 +96,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**voice-product**](.agents/skills/voice-product/SKILL.md)                                 | Write in a plain, audience-first voice once, or for the whole session with `--all`.                      |
 | [**wait-what**](.agents/skills/wait-what/SKILL.md)                                         | Re-pitch a message that did not land.                                                                    |
 | [**worktree-cleanup**](.agents/skills/worktree-cleanup/SKILL.md)                           | Remove stale worktrees and branches for merged PRs, prune remotes, and rebase the base branch.           |
+| [**worktree-create**](.agents/skills/worktree-create/SKILL.md)                             | Create a sibling Git worktree on a feature branch for isolated project work.                             |
 | [**writing-for-agents**](.agents/skills/writing-for-agents/SKILL.md)                       | Apply conventions that make skills and instruction files predictable.                                    |
 
 ## Install
@@ -201,7 +203,7 @@ flowchart TD
     end
 
     PDD --> Spec
-    Small --> Delivery[commit → open-pr or stacked-prs]
+    Small --> Delivery[commit → pr-open or stacked-prs]
     Execute --> Delivery
     Docs --> Delivery
 ```

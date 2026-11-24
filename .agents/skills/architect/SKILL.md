@@ -41,7 +41,10 @@ tell the user and wait. Do not fill the gap with a guess.
 2. **Clarify.** Take the idea from the message or session. If missing, ask;
    if under-specified, read and follow [clarify](../clarify/SKILL.md) before
    starting research. Carry the original request and later clarifications
-   downstream, not just a summary.
+   downstream, not just a summary. Outside `--github` mode, if still on the
+   default branch of the main checkout, read and follow
+   [worktree-create](../worktree-create/SKILL.md) so project artifacts live in
+   a sibling worktree (unless the user prefers working in-place).
 3. **Research.** Read and follow [research](../research/SKILL.md) scoped to
    the workspace. For runnable applications, inspect local-running commands,
    dependencies, upstream contracts, and integration-test tooling. Present a

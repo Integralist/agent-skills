@@ -24,7 +24,11 @@ slice.
    for the slice using [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md), including
    when resuming older work. If the slice's items are complete, go to step 3.
    If all slices are accepted with current required reviews, report that no
-   slice is left and stop. Identify the slice, baseline, and review owner.
+   slice is left and stop. Identify the slice, baseline, and review owner. If
+   on the default branch in the main checkout without an approved exception,
+   read and follow [worktree-create](../worktree-create/SKILL.md) before
+   editing (use [branch](../branch/SKILL.md) only if the user asked to branch
+   in-place or has uncommitted changes to carry over).
 2. **Work the slice.** Follow [BUILD-ITEM.md](../shared/BUILD-ITEM.md) for
    each item in document order. Skip items whose blocked-by items are not
    done. If nothing is ready, report the blockers and stop. Finish with every
