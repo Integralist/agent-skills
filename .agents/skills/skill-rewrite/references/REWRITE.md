@@ -19,8 +19,13 @@
      user approval rather than silently dropping rules.
 3. **Rewrite cleanly.** Follow
    [writing-for-agents](../../writing-for-agents/SKILL.md) and its
-   [writing guide](../../writing-for-agents/references/WRITING.md). Never drop
-   frontmatter flags, `allowed-tools`, or tested triggers unintentionally.
+   [writing guide](../../writing-for-agents/references/WRITING.md). Link every
+   invoked skill explicitly (`read and follow [<name>](../<name>/SKILL.md)`,
+   adjusting the relative path from `references/`) rather than leaving bare
+   skill names, link each skill once per step or paragraph instead of
+   repeating its path nearby, re-read each edited sentence to fix mismatched
+   prepositions or dropped purpose verbs, and never drop frontmatter flags,
+   `allowed-tools`, or tested triggers unintentionally.
 4. **Verify after approval.** Check UTF-8 byte counts, confirm every relative
    link and anchor resolves, run affected repo tests/linters (`make check-rules`,
    contract tests, etc.), and report any unrun verification as a gap.

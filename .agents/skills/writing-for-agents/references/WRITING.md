@@ -54,6 +54,15 @@ tool work, rather than the length of `SKILL.md` alone.
 
 **Pointers and handoffs.** Link named files and sections to exact targets;
 name structures accurately and avoid “above” or “below” unless unique and
-immediate. Load references before use. For cross-skill handoffs, name the
-trigger, completed prerequisites, and exact resume step; preserve direct-
-invocation behavior.
+immediate. Load references before use. When invoking another skill, link its
+`SKILL.md` explicitly (`read and follow [<name>](../<name>/SKILL.md)`,
+adjusting the relative path from `references/`) rather than naming the skill
+bare; bare names break portability and leave harnesses guessing whether to load
+it. Adjust surrounding prepositions and purpose phrases so the sentence still
+reads cleanly (`read and follow ... across`, not `to`; keep verbs such as `to
+validate it`), and when borrowing only one convention from an action skill,
+scope the verb (`read [<name>](...) and use its subject style`) so the agent
+does not run its full workflow. Link a skill once per step or paragraph rather
+than repeating its path in adjacent sentences. For cross-skill handoffs, name
+the trigger, completed prerequisites, and exact resume step; preserve
+direct-invocation behavior.
