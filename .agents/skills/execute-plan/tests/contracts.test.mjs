@@ -919,6 +919,24 @@ test("task closure stays separate from slice acceptance and PR navigation", () =
   ]) assert.throws(() => assertTaskReconciliation(policy.replace(before, after)));
 });
 
+test("GITHUB-ISSUES.md keeps Root and Slice descriptions synced on task compilation and slice acceptance", () => {
+  const policy = flat(githubIssuesPath);
+  const check = (text) => {
+    for (const rule of [
+      "GitHub-mode project README",
+      "Keep `Updated`, `## Artifacts`, slice tracking, and `## Next action` current whenever artifacts, compiled tasks, or slice state change.",
+      "After compiling tasks, update `#<slice-issue>` (`Status`, `## Tasks`) and sync `#<root-issue>`.",
+      "close `#<slice-issue>`, and sync `#<root-issue>` (slice status, acceptance comment link, `Updated`, `## Next action`).",
+    ]) assert.ok(text.includes(rule), `missing root-sync rule: ${rule}`);
+  };
+  check(policy);
+  for (const [before, after] of [
+    ["GitHub-mode project README", "optional summary"],
+    ["After compiling tasks, update `#<slice-issue>`", "After compiling tasks, skip updating"],
+    ["and sync `#<root-issue>` (slice status, acceptance comment link, `Updated`, `## Next action`)", "and leave `#<root-issue>` unchanged"],
+  ]) assert.throws(() => check(policy.replace(before, after)));
+});
+
 test("artifact publication excludes CLI metadata, not document frontmatter", () => {
   const policy = flat(githubIssuesPath);
   const check = (text) => {

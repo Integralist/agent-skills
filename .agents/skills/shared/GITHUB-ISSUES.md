@@ -16,7 +16,7 @@ writes behind explicit user approval.
 ## Label bootstrap
 
 Before creating the first project, slice, or task issue (never during read-only
-discovery or when inspecting a cited issue), ensure the workflow labels exist:
+discovery or inspection), ensure labels exist:
 
 ```bash
 gh label create project --description "Root project tracking issue" --color 1D76DB --force
@@ -35,9 +35,12 @@ appending chronology):
 
 1. **Root Project Issue (`--label project`):**
    - **Title:** `<Project Title> (<slug>)`
-   - **Body:** Follows [PROJECT-README.md](PROJECT-README.md) with a `Slug` row
-     in its opening metadata table. Lead with a short summary and one concrete
-     `Next action`; link artifacts instead of repeating them.
+   - **Body:** GitHub-mode project README (follows
+     [PROJECT-README.md](PROJECT-README.md) with a `Slug` row). Lead with a
+     short summary and one concrete `Next action`; link artifacts instead of
+     repeating them. Keep `Updated`, `## Artifacts`, slice tracking, and
+     `## Next action` current whenever artifacts, compiled tasks, or slice
+     state change.
    - **Lazy creation:** First skill that writes a project artifact creates the
      Root Issue if none is active, attaches its artifact, and passes
      `#<root-issue>` downstream.
@@ -60,6 +63,8 @@ appending chronology):
      guidance (green)` inside `<details>` as concise bullets—never repeat
      `AGENTS.md` inline. Do not attach artifacts to Task issues, and omit the
      trailing `- [ ] Task <n> complete` checkbox (open/closed state tracks it).
+     After compiling tasks, update `#<slice-issue>` (`Status`, `## Tasks`) and
+     sync `#<root-issue>`.
 
 ## Root Issue Artifacts
 
@@ -74,14 +79,14 @@ artifact`:
 - Read/update with `gh issue artifact list`, `view --json body --jq .body`,
   and `edit --body-file -`. Publish only the extracted artifact body, not the
   CLI's rendered metadata. Preserve frontmatter that belongs to the document
-  itself. Update the Root Issue's `## Artifacts` table and `## Next action`
+  itself. Sync `#<root-issue>` (`Updated`, `## Artifacts`, `## Next action`)
   when artifacts change.
 
 ## Discovery and formatting
 
 - **Explicit issue reference:** Verify any URL's `<owner>/<repo>` matches
   `gh repo view --json nameWithOwner --jq .nameWithOwner`; reject
-  foreign-repository issue URLs rather than targeting the current checkout.
+  foreign-repository issue URLs.
   Inspect read-only (`gh issue view <id> --json number,title,state,labels,body,parent,subIssues,blockedBy`)
   and follow `parent` up to the Root Issue.
 - **Listing:** Use `gh issue list --label project --state open` (ask if
@@ -117,8 +122,9 @@ artifact`:
 3. **Slice acceptance (closes locally):** Once all Task Sub-Issues are closed
    and [ACCEPT-SLICE.md](ACCEPT-SLICE.md) passes locally, tick `M<n>.<m>`
    checkboxes in `#<slice-issue>`, post the acceptance summary with `gh issue
-   comment <slice-issue> --body-file -`, require it to succeed, then close
-   `#<slice-issue>`.
+   comment <slice-issue> --body-file -`, require it to succeed, close
+   `#<slice-issue>`, and sync `#<root-issue>` (slice status, acceptance comment
+   link, `Updated`, `## Next action`).
 4. **PRs and Root Issue closure (`open-pr`, `stacked-prs`):** Keep
    `#<root-issue>` open until code merges to the default branch:
    - **Single or final slice PR:** `- Closes #<root-issue>` and
