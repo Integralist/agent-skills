@@ -9,8 +9,8 @@ metadata:
 ---
 
 Produce a deep, cited reference document as a foundation for later planning or
-implementation. If the request has no clear topic or repository, use the
-clarify skill first.
+implementation. If the request has no clear topic or repository, read and
+follow [clarify](../clarify/SKILL.md) first.
 
 **Choose the output path.** By default, write
 `docs/research/<yyyy-mm-dd>-<slug>.md` using today's date. If the user or a
