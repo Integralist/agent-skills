@@ -57,69 +57,32 @@ authority.
    and name unknowns while explaining what is known. Continue when every
    material change connects to a problem and observable outcome, or its
    missing link is explicit.
-
-   **Newcomer check — follow one example.** In Problem, explain what
-   the system does and start with something a person or system is trying
-   to accomplish. Follow one concrete example until the reader can see
-   what happens and why it matters. Explain unfamiliar terms by the role
-   they play in that example, not just by renaming them.
-
-   For a change, show where the old behaviour falls short and continue
-   the same example in Solution to show what happens now. Don't stop at
-   an intermediate step if a later step explains why it matters.
-3. **Draw the flow.** Include one Mermaid diagram of six participants or nodes
-   or fewer, using plain role labels. Use a sequence diagram for requests and
-   hand-offs, or a flowchart when relationships or branches explain it better.
-   Separate setup from runtime, mark new or changed elements against unchanged
-   context, and include a rejection path when useful. For existing code, show
-   current flow. For a test, show input, expected response, and harness
-   assertion. Put source in a fenced `text` block inside Solution. Read and
-   follow [conventions-mermaid](../conventions-mermaid/SKILL.md) for syntax
-   and layout, but skip `mmdc` rendering: show source only, no images or HTML,
-   and
-   do not ask permission unless the user requests it. Omit the diagram only
-   when no useful flow exists. Confirm it matches the prose.
+3. **Draw the flow.** Read and follow
+   [NEWCOMER-NARRATIVE.md](../shared/NEWCOMER-NARRATIVE.md) for diagram craft,
+   capped at six participants or nodes. For existing code, show current flow;
+   for a test, show input, expected response, and harness assertion. Put source
+   in a fenced `text` block inside `Solution`, and skip `mmdc` rendering (show
+   source only, no images or HTML, and do not ask permission unless the user
+   requests it).
 4. **Write the explanation.** Read
-   [EXPLANATION-TEMPLATE.md](references/EXPLANATION-TEMPLATE.md) before
-   drafting. Read and follow [voice-product](../voice-product/SKILL.md) for
-   wording and [voice-adhd](../voice-adhd/SKILL.md) for structure within the
-   headings. Aim for about 150 words of prose besides diagram and sources;
-   it is a target, not a cap. Use short paragraphs or up to five bullets.
+   [EXPLANATION-TEMPLATE.md](references/EXPLANATION-TEMPLATE.md) and
+   [NEWCOMER-NARRATIVE.md](../shared/NEWCOMER-NARRATIVE.md) before drafting.
+   Read and follow [voice-product](../voice-product/SKILL.md) for wording and
+   [voice-adhd](../voice-adhd/SKILL.md) for structure within headings, using
+   short paragraphs or up to five bullets.
 
-   **Define names once, then use them consistently.** At the first
-   mention of a system or component a newcomer may not know, add a
-   short parenthetical explaining what it does in this example. This
-   applies to the takeaway too, not just Problem. If you want to use
-   a shorter name later, introduce it at first mention. Otherwise,
-   keep the same name in the prose and diagram labels.
-
-   Before sending, check that the opening defines the primary system,
-   even if its name appears in a link. If the definition is missing,
-   revise before sending. Scan for undefined names and unintroduced
-   aliases so readers never have to guess whether two labels name the
-   same thing.
-
-   - **Problem:** Stand alone. Introduce prerequisite concepts before dependent
-     terms; explain their purpose, provider or user, and connection. Explain
-     familiar-looking terms such as "key", "token", or "issuer" too; expanding
-     an acronym is not enough. Reread Problem alone and keep the context needed
-     to explain the gap and consequence, even beyond the word target.
-   - **Solution:** Give one action per sentence, naming who changes what,
-     where, and why. Separate setup from request time. Name real files, owners,
-     or environments, not abstractions such as "shared key configuration". Say
-     what stays the same, especially in refactors, and keep constraints beside
-     benefits. For tests, state input, handler, and check: "The harness sends
-     an expired-token request and checks that the gateway returns HTTP 401."
-     Claim speed, safety, adoption, or plans only with evidence.
+   - **Tests:** State input, handler, and check (for example: "The harness
+     sends an expired-token request and checks that the gateway returns HTTP
+     401.").
    - **Notes:** Optional, one to three bullets, only for clarifications that
-     would interrupt Problem or Solution (for example, what a test exercises).
+     would interrupt `Problem` or `Solution` (such as what a test exercises).
    - **Sources:** One line with the strongest `path:line` references from the
      inspected repo or revision-pinned URLs; cite motivation separately when
      its source differs.
 
-   Finish when a newcomer can name each component's role, follow actors and
-   messages, explain what the code does and why it helps, and say what the
-   evidence does not establish.
+   Run the newcomer check before sending, and finish when a newcomer can name
+   each component's role, follow actors and messages, explain what the code
+   does and why it helps, and say what the evidence does not establish.
 5. **PR clarification offer.** Only for a user-selected PR, ask after the
    explanation and Sources: "Would you like me to draft a clarification
    comment for the PR author? I'll show it to you before posting." Then wait.

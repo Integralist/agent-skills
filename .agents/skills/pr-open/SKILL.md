@@ -23,11 +23,12 @@ This rule overrides any draft guidance in linked references.
    as the base. For `--github` or an issue reference (`#<n>` or URL), read and
    follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues
    and Issue Artifacts instead of `projects/`.
-3. **Review the draft as a newcomer.** Read `Problem` without relying on repo
-   memory: does its first sentence state what the project does in plain words
-   (checking `README.md`, `GLOSSARY.md`, or `CONTEXT.md` if needed), explain
-   technical terms on first use, and show why the change matters? If not,
-   revise the draft and check it again before showing it.
+3. **Review the draft as a newcomer.** Run the newcomer check from
+   [NEWCOMER-NARRATIVE.md](../shared/NEWCOMER-NARRATIVE.md): does `Problem`'s
+   first sentence state what the project does in plain words (checking
+   `README.md`, `GLOSSARY.md`, or `CONTEXT.md` if needed), tuck dense
+   inventories into `Notes` or `<details>`, and obey repo `AGENTS.md` rules?
+   If not, revise and recheck before showing it.
 4. **Get approval.** Show the title and body, then wait for approval. Do not
    open the PR before approval.
 5. **Open it.** If there's no upstream, run `git push -u origin <branch>`.
