@@ -18,8 +18,16 @@ the entry point into an empty index; explain the core coordination.
 and pair them with the safe alternative. Explain why where it helps the agent
 handle an unlisted case. Write each rule once; cut redundant instructions,
 duplicates, and facts cheaply discoverable from code, configuration, or
-`--help`. Preserve unwritten conventions and gotchas. Keep small, stable facts
-inline when extracting them would only add a read.
+`--help`. Preserve unwritten conventions, gotchas, and empirical fixes for
+observed model blind spots (such as newcomer system-role context). Keep small,
+stable facts inline when extracting them would only add a read.
+
+**Leave room to think.** Teach house deltas, not textbook basics or starter
+scripts that bury them. State invariants, risk scaling, and pass/fail checks
+instead of fixed turn scripts, stacked self-reviews, or unconditional subagent
+pipelines. Ban failure modes rather than normal domain terms. Keep shared
+files especially lean: isolate rare fallbacks in conditional references so
+callers do not pay an always-on context tax.
 
 **Size.** When rewriting agent-facing instructions, measure combined UTF-8
 bytes before and after: the main file plus all its references. Count moved

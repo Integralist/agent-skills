@@ -11,10 +11,12 @@ human-facing `description`. Where supported, the flag keeps the skill out of
 the model's discovery context; the user starts it explicitly.
 
 Allow model invocation by omitting the flag when the agent must start the
-skill itself or another skill must reach it. Its description appears in the
-model's skill listing, so name what it does and when to use it, with concrete
-artifacts and verbs. Put the workflow in the body, not the description.
-Split out a model-invoked skill only for a distinct trigger.
+skill itself, another skill must reach it, or it guards quality when a
+recurring problem appears (such as ambiguity or stiff prose). Its description
+appears in the model's skill listing, so phrase triggers in the user's
+symptom words rather than internal skill jargon, using concrete artifacts and
+verbs. Put the workflow in the body, not the description. Split out a
+model-invoked skill only for a distinct trigger.
 
 ## Arguments
 

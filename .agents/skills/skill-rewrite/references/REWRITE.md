@@ -2,10 +2,15 @@
 
 1. **Inspect before drafting.** Read `SKILL.md`, all linked references, and
    search the repo (including hidden `.agents/`, `.claude/`, and `tests/`) for
-   callers, heading anchors, and contract tests.
+   callers, heading anchors, and contract tests. Check `git log` for recently
+   added fixes so empirical guardrails are not mistaken for bloat. If
+   references are already conditional and steps are test-locked safety gates,
+   report that the skill is already lean rather than forcing cuts.
 2. **Separate signal from over-prescription:**
    - **Keep:** Purpose, hard safety/approval gates, non-obvious house deltas,
-     domain/tool gotchas, and contract-tested requirements.
+     domain/tool gotchas, empirical fixes for observed model blind spots (such
+     as newcomer context), and contract-tested requirements (surface test
+     conflicts before proposing cuts).
    - **Extract:** Long conditional procedures, templates, or rare fallbacks
      into `references/` with explicit *"read only when..."* triggers.
    - **Cut or relax:** Textbook basics models already know, duplicated prose,
