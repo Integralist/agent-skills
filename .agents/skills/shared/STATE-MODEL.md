@@ -33,5 +33,6 @@ timeouts / expiry / idempotency windows, or concurrent / out-of-order actors.
 5. **Optional visual projection:** When readers benefit from a statechart,
    project the explored graph to plain-English Mermaid `stateDiagram-v2`
    (collapsed without merging states that break different rules, marking
-   failing states red and states that can reach them amber) and validate with
-   [conventions-mermaid](../conventions-mermaid/SKILL.md).
+   failing states red and states that can reach them amber) and read and
+   follow [conventions-mermaid](../conventions-mermaid/SKILL.md) to validate
+   it.

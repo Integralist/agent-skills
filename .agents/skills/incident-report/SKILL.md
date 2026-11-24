@@ -26,8 +26,8 @@ paths, causes) rather than starting a new investigation.
    degraded production gets a plain bug report: say so, and drop Severity,
    Detection, and the Timeline's mitigated and resolved rows. Done when the
    report type is chosen.
-3. **Write the report** using [the template](references/TEMPLATE.md), following
-   [conventions-markdown](../conventions-markdown/SKILL.md) and
+3. **Write the report** using [the template](references/TEMPLATE.md), reading
+   and following [conventions-markdown](../conventions-markdown/SKILL.md) and
    [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md). Cite every factual claim:
    `path/to/file.go:42` for code, log timestamps for events, capture
    filenames for evidence. Label any uncited claim "unverified assumption"

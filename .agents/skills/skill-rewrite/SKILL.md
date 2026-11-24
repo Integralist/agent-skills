@@ -11,7 +11,8 @@ Rewrite an existing skill so a human understands its purpose, boundaries, and
 deliverable in one pass while giving the agent room to do its best work.
 Deliver the revised skill, its references, and any updated links.
 
-**Before rewriting.** Read [writing-for-agents](../writing-for-agents/SKILL.md)
+**Before rewriting.** Read and follow
+[writing-for-agents](../writing-for-agents/SKILL.md)
 and [REWRITE.md](references/REWRITE.md).
 
 **Approval.** Before editing, show:

@@ -1,9 +1,9 @@
 # Review a delivered change
 
-Run the code-review skill before declaring a standalone slice or an executed
-plan complete. Tests prove specified behaviour; review also checks defects,
-conventions, and contract drift. Reviewers remain read-only; the caller owns
-corrections and completion.
+Read and follow [code-review](../code-review/SKILL.md) before declaring a
+standalone slice or an executed plan complete. Tests prove specified
+behaviour; review also checks defects, conventions, and contract drift.
+Reviewers remain read-only; the caller owns corrections and completion.
 
 ## Baseline
 
@@ -28,9 +28,11 @@ snapshots and reviewer context.
 
 ## Review
 
-Invoke code-review with `--baseline=<commit>` and the delivery manifest,
-plan/spec paths, test evidence, and exact delivered snapshot using its
-[recorded execution source](../code-review/references/MODES.md). Include committed and
+Read and follow [code-review](../code-review/SKILL.md) with
+`--baseline=<commit>` and the delivery manifest, plan/spec paths, test
+evidence, and exact delivered snapshot using its
+[recorded execution source](../code-review/references/MODES.md). Include
+committed and
 uncommitted work, not only the current working diff. Keep source stable: no
 code or test edits during the review. Read all reviewer and verifier results
 and confirm file and convention coverage as code-review requires. If the

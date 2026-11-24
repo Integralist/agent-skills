@@ -58,10 +58,12 @@ and stop. A context transition is not task or plan completion.
    interactive mode, confirmed by the user.
 2. **Prepare the next slice.** Choose the first unfinished slice whose
    blocked-by slices are accepted. If `Pull Request Delivery` assigns the
-   slice its own layer, use stacked-prs for local setup only; never submit it.
-   Reuse a still-valid task list. Otherwise have a premium subagent follow the
-   [to-tasks skill](../to-tasks/SKILL.md), explicitly using the premium model
-   from EXECUTION-MODELS. Review the list: every unchecked milestone has task
+   slice its own layer, read and follow
+   [stacked-prs](../stacked-prs/SKILL.md) for local setup only; never submit
+   it. Reuse a still-valid task list. Otherwise have a premium subagent read
+   and follow [to-tasks](../to-tasks/SKILL.md), explicitly using the premium
+   model from EXECUTION-MODELS. Review the list: every unchecked milestone has
+   task
    coverage in `Supports`, paths and signatures are real, and each test fails
    on an assertion. Return gaps to the writer. Preserve the slice's starting
    snapshot for scoped review. Proceed when the list and review baseline are
@@ -81,9 +83,10 @@ and stop. A context transition is not task or plan completion.
       after three failed fixes for the same problem.
    4. Commit the task before launching the next worker. Follow
       [task-commits.md](references/task-commits.md).
-4. **Accept each slice.** Own review scheduling. Run code-review on the
-   delivered diff for risky slices (security, public API or contract, schema,
-   or concurrency), using [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). Other
+4. **Accept each slice.** Own review scheduling. Read and follow
+   [code-review](../code-review/SKILL.md) on the delivered diff for risky
+   slices (security, public API or contract, schema, or concurrency), using
+   [REVIEW-CHANGE.md](../shared/REVIEW-CHANGE.md). Other
    slices need no repeated full review here; the final review still covers the
    whole plan. Explicitly pass coordinator review ownership when invoking
    [ACCEPT-SLICE.md](../shared/ACCEPT-SLICE.md) or a standalone slice command.
@@ -95,9 +98,10 @@ and stop. A context transition is not task or plan completion.
    requirement by requirement. Put remaining work in
    `tasks-final-verification.md` beside the plan, create its task list as in
    step 2, and run it through step 3. Accept this residual work as a slice
-   using step 4. Run final code-review on all delivered changes, including
-   residual work and corrections; slice reviews do not replace this whole-plan
-   gate. Route required fixes through the residual task loop, rerun affected
+   using step 4. Read and follow [code-review](../code-review/SKILL.md) for
+   the final review on all delivered changes, including residual work and
+   corrections; slice reviews do not replace this whole-plan gate. Route
+   required fixes through the residual task loop, rerun affected
    checks and audit, and review corrections before completion. Complete only
    when acceptance, final audit, and final review all pass; otherwise report
    incomplete or partly verified with remaining gaps.

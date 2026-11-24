@@ -14,10 +14,10 @@ photo with explanation, quote, table, or timeline. A layout is a tool, not a
 required slide. Avoid invented people, customer names, quotations, or data.
 
 **Diagrams.** Use the smallest diagram that explains the relationship.
-Render it into the delivery format rather than leaving raw markup. Use
-[Mermaid conventions](../conventions-mermaid/SKILL.md) when applicable.
-Keep standalone source or images only when requested or needed to reproduce
-the deck.
+Render it into the delivery format rather than leaving raw markup. Read and
+follow [conventions-mermaid](../conventions-mermaid/SKILL.md) when
+applicable. Keep standalone source or images only when requested or needed to
+reproduce the deck.
 
 **Size and legibility.** Default to 16:9 unless the brief or template dictates
 another ratio. Use 24pt or larger headings and aim for at least 18pt body

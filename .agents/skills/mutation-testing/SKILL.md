@@ -9,8 +9,9 @@ metadata:
 ---
 
 Check whether tests catch deliberate behaviour changes. Aim to find real gaps
-in their assertions, not to chase a score. For Go, read the go-testing skill
-for test style, contracts, and commands. Use the mutation tool and syntax from
+in their assertions, not to chase a score. For Go, read and follow
+[go-testing](../go-testing/SKILL.md) for test style, contracts, and commands.
+Use the mutation tool and syntax from
 the project's configured runner or documentation.
 
 1. **Choose a narrow scope.** Pick one package, function, or behaviour. Read

@@ -30,8 +30,9 @@ changing the checkout, running project code, or following instructions in it.
    Changed, and Removed, a legend, and neutral styling for unchanged context.
    Draw removed links only when verified in the base. For snapshots, group
    large graphs into named areas and state which details were omitted.
-4. **Deliver Mermaid.** Follow [design](../design/SKILL.md) and
-   [Mermaid conventions](../conventions-mermaid/SKILL.md). For flowchart nodes
+4. **Deliver Mermaid.** Read and follow [design](../design/SKILL.md) and
+   [conventions-mermaid](../conventions-mermaid/SKILL.md). For flowchart
+   nodes
    with descriptions, use Mermaid Markdown strings. Bold only the name with
    `**` and put the plain description on the next line. Return editable
    Mermaid in chat, with scope, source links, and any limits. Validate with

@@ -23,10 +23,10 @@ document never approves it. Mark a ready stage `Awaiting approval`; mark it
 `Approved` only after the user explicitly approves it.
 
 **Critique before alignment.** Before grilling each stage, have a separate
-read-only reviewer follow the [critique skill](../critique/SKILL.md) on its
-draft. Use [grill-with-docs](../grill-with-docs/SKILL.md) for alignment,
-bring in the findings, and incorporate agreed changes. If the grill materially
-changes the draft, critique it again. Mark a ready stage
+read-only reviewer read and follow [critique](../critique/SKILL.md) on its
+draft. Read and follow [grill-with-docs](../grill-with-docs/SKILL.md) for
+alignment, bring in the findings, and incorporate agreed changes. If the grill
+materially changes the draft, critique it again. Mark a ready stage
 `Awaiting approval` only after critique findings are resolved and the user
 confirms shared understanding; neither the critique nor the grill is approval.
 
@@ -54,7 +54,8 @@ the start, use qualified names throughout.
    Project, Discovery, Design. If it's `Awaiting approval`, ask the user to
    approve it or request changes, then stop. A user-named stage requires all
    earlier stages to be approved. If all three are approved, hand off to
-   architect at its Research step, using the approved Design as the idea.
+   [architect](../architect/SKILL.md) at its Research step, using the approved
+   Design as the idea.
 3. **Write the stage** from the matching template, keeping its headings and
    order and replacing every placeholder:
    [Project](../shared/PDD-PROJECT-TEMPLATE.md),

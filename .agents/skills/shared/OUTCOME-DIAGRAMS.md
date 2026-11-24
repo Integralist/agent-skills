@@ -44,9 +44,10 @@ additions without inventing design details.
 
 ## Check the visual
 
-Use the conventions-mermaid skill to render and inspect each diagram. Check
-that the result and the changed parts are clear at a glance, the text is
-legible, and the diagram matches the written outcome.
+Read and follow [conventions-mermaid](../conventions-mermaid/SKILL.md) to
+render and inspect each diagram. Check that the result and the changed parts
+are clear at a glance, the text is legible, and the diagram matches the
+written outcome.
 
 ## Example
 

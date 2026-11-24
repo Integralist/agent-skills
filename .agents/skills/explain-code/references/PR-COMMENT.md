@@ -2,7 +2,7 @@
 
 Read this before drafting a comment.
 
-1. **Draft** once the user accepts, using
+1. **Draft** once the user accepts, reading and following
    [voice-integralist](../../voice-integralist/SKILL.md): a brief, airy,
    first-person understanding check from a reader of the PR, not its author.
    Keep Problem and Solution, useful Notes, caveats, evidence as

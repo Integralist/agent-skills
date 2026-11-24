@@ -64,9 +64,9 @@ Use source evidence to check:
 A finding must name its demonstrated cost: duplicated responsibility, leaked
 implementation, caller coordination, coupling, or another specific cost. A
 layout that differs from a preferred pattern is not a cost. If a claim relies
-on project precedent, use the precedent skill and cite at least two peers.
-Finish with evidence for every finding, or conclude that placement is sound or
-the evidence is inconclusive.
+on project precedent, read and follow [precedent](../../precedent/SKILL.md)
+and cite at least two peers. Finish with evidence for every finding, or
+conclude that placement is sound or the evidence is inconclusive.
 
 ## 4. Report
 

@@ -10,7 +10,8 @@ Complete every ready item in one slice of a plan or task list, then offer one
 commit for the slice. Keep implementation and troubleshooting in the main
 thread. Delegate test runs as
 [BUILD-ITEM.md](../shared/BUILD-ITEM.md) describes; read-only review may also
-be delegated through code-review. Stop after this slice.
+be delegated through [code-review](../code-review/SKILL.md). Stop after this
+slice.
 
 1. **Select the file and slice.** Use the file named by the user, or the one
    already in use this session. If neither exists, ask for the path. For
@@ -36,4 +37,4 @@ be delegated through code-review. Stop after this slice.
    verification gaps still open.
 4. **Report and offer to commit.** State what was done, review status, and
    what is left. Ask whether to commit once for the whole slice, not per
-   task. If the user agrees, use the commit skill.
+   task. If the user agrees, read and follow [commit](../commit/SKILL.md).

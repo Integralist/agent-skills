@@ -1,8 +1,8 @@
 # HTML report format
 
-Read after [design](../../design/SKILL.md) and its selected theme and HTML
-guidance. They own visual rules, appearance switching, and inspection; this
-reference owns architecture-review content.
+Read and follow [design](../../design/SKILL.md) and its selected theme and
+HTML guidance first. They own visual rules, appearance switching, and
+inspection; this reference owns architecture-review content.
 
 Render one HTML file with sparse prose and diagrams carrying the explanation.
 The existing Tailwind and Mermaid CDN dependencies may remain; say that the

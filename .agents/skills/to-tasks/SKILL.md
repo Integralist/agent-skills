@@ -37,8 +37,9 @@ gaps with guesses.
    conditional reads.
 4. **Write the file** in the plan's project folder, or create
    `projects/<yyyy-mm-dd>-<slug>/` if there is no plan. Before drafting the
-   Summary, read [voice-product](../voice-product/SKILL.md). Before adding the
-   file to an index, read [PROJECTS-README.md](../shared/PROJECTS-README.md).
+   Summary, read and follow [voice-product](../voice-product/SKILL.md). Before
+   adding the file to an index, read
+   [PROJECTS-README.md](../shared/PROJECTS-README.md).
    Use `tasks.md` for a single-slice plan or session discussion; use
    `tasks-slice-<n>.md` for a multi-slice plan. If `tasks.md` already exists
    in that project, rename it to `tasks-slice-1.md` first. Set Status to

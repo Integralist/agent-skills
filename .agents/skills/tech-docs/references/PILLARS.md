@@ -23,7 +23,8 @@ walkthrough.
 ## 3. Visualise simply
 
 Use a Mermaid diagram of 15 nodes or fewer for architecture, workflows, and
-lifecycles, following [conventions-mermaid](../../conventions-mermaid/SKILL.md).
+lifecycles, reading and following
+[conventions-mermaid](../../conventions-mermaid/SKILL.md).
 Delete prose the diagram replaces. Use a table for many dimensions across
 many cases, such as environment matrices or permission grids. Use indented
 text for a chain or hierarchy too simple to diagram.

@@ -2,8 +2,8 @@
 
 Run living `.feature` contracts under
 [godog](https://github.com/cucumber/godog) via `go test` and the project's Make
-test target. Load the
-[acceptance-test conventions](../../conventions-acceptance-tests/SKILL.md) for
+test target. Read and follow
+[conventions-acceptance-tests](../../conventions-acceptance-tests/SKILL.md) for
 scenario-to-code structure, isolation, and step assertions; this document is
 the Go wiring example.
 

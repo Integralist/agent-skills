@@ -8,6 +8,6 @@ metadata:
   model-tier: complex
 ---
 
-Read and follow [grilling](../grilling/SKILL.md) for the interview. Use
-[domain-modeling](../domain-modeling/SKILL.md) to keep the glossary and ADRs
-current as terms and decisions settle.
+Read and follow [grilling](../grilling/SKILL.md) for the interview, and read
+and follow [domain-modeling](../domain-modeling/SKILL.md) to keep the glossary
+and ADRs current as terms and decisions settle.

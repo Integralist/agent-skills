@@ -45,8 +45,9 @@ explains which files to create and when.
    know something, write a learning record for it. Finish when one tightly
    scoped skill is chosen.
 4. **Write the lesson.** Before creating lesson or reference-sheet HTML,
-   load [design](../design/SKILL.md) and its selected theme and HTML guidance.
-   Create the file and help the user open it with a single command.
+   read and follow [design](../design/SKILL.md) and its selected theme and
+   HTML guidance. Create the file and help the user open it with a single
+   command.
 5. **Record learning.** Update state when the user shows real understanding:
    create a learning record, add a glossary term once they use it correctly,
    create a reference sheet for knowledge they will reuse, and record

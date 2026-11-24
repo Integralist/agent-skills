@@ -32,8 +32,8 @@ directly or a compiled task list. Use the same gate in both cases.
    Build the minimum required harness as part of the slice; a complete,
    product-wide end-to-end suite is not a prerequisite unless the slice's
    contract or project policy requires one. When adding or changing the
-   harness or steps, follow the
-   [acceptance-test conventions](../conventions-acceptance-tests/SKILL.md).
+   harness or steps, read and follow
+   [conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md).
 
    Reconcile expected scenario identities and counts, including every Scenario
    Outline example row, with those executed and passed. A zero exit code, unit

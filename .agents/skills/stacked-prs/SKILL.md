@@ -11,8 +11,8 @@ metadata:
 Manage dependent PRs with `gh stack`. The caller supplies branches in order;
 ask if the user names none. Run only requested steps (for example, step 2
 alone to prepare a layer). Before switching, adding, syncing, rebasing, or
-submitting layers, commit pending work with the commit skill so it cannot land
-in the wrong layer.
+submitting layers, commit pending work by reading and following
+[commit](../commit/SKILL.md) so it cannot land in the wrong layer.
 
 ## Set up the stack
 

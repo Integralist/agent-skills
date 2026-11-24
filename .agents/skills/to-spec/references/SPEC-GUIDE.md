@@ -1,7 +1,7 @@
 # Spec writing guide
 
-Apply [voice-product](../../voice-product/SKILL.md) and
-[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) to all explanatory prose
+Read and follow [voice-product](../../voice-product/SKILL.md) and
+[CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) across all explanatory prose
 (including Implementation Decisions and `<details>`). Preserve exact
 contracts, values, timing, failure codes, and verbatim source quotes.
 

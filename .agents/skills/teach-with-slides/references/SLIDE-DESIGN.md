@@ -1,7 +1,8 @@
 # Teaching with slides
 
 Read after confirming the topic, format, and theme, before outlining slides.
-Load [design](../../design/SKILL.md) first for theme and presentation rules.
+Read and follow [design](../../design/SKILL.md) first for theme and
+presentation rules.
 
 - Use a warm, encouraging voice that invites rather than talks down.
 - Define technical terms on first use and prefer concrete examples.

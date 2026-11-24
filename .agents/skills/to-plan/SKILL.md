@@ -35,7 +35,7 @@ gaps with guesses.
 3. **Slice the work.** Design vertical slices using
    [PLAN-GUIDE.md](references/PLAN-GUIDE.md), following its rules, template,
    and conditional reads.
-4. **Write `plan.md` (and any needed `intent.md`).** Read
+4. **Write `plan.md` (and any needed `intent.md`).** Read and follow
    [voice-product](../voice-product/SKILL.md) before drafting explanatory
    prose (Summary, slice outcomes, Notes, and `<details>`). Set Status
    `Planning`, Author (`git config user.name`), and Created (`date +%F`).

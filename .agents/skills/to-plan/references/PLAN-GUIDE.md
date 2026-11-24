@@ -1,6 +1,6 @@
 # Plan structure and slice rules
 
-Apply [voice-product](../../voice-product/SKILL.md) and
+Read and follow [voice-product](../../voice-product/SKILL.md) and
 [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md) across all explanatory prose
 (Summary, slice outcomes, Notes, and `<details>`), preserving exact
 signatures, identifiers, and contract values.
@@ -34,7 +34,8 @@ For every slice:
 - Include an acceptance-verification contract: criterion or milestone, owning
   living feature and scenario names (including outline rows), testing
   boundary, and verification command. Include living `.feature` updates and
-  missing steps/runner in the slice that implements the behaviour per
+  missing steps/runner in the slice that implements the behaviour, reading and
+  following
   [conventions-acceptance-tests](../../conventions-acceptance-tests/SKILL.md).
   If no feature applies, explain why and name equivalent executable
   assertions (a missing feature or harness is planned work, not an

@@ -32,7 +32,7 @@ gaps with guesses.
    and owning `docs/specs/<capability>.feature` files so new criteria extend
    or modify existing scenarios rather than duplicating them. Living specs are
    the baseline (or code when none exist); preserve governing decisions.
-3. **Draft for the reader.** Before any prose or Gherkin, read
+3. **Draft for the reader.** Before any prose or Gherkin, read and follow
    [voice-product](../voice-product/SKILL.md),
    [SPEC-FORMAT.md](../shared/SPEC-FORMAT.md) and the
    [writing guide and clarity check](references/SPEC-GUIDE.md). Apply the
@@ -45,7 +45,7 @@ gaps with guesses.
    whole-draft clarity check before handoff, and run the repo's spec check
    (e.g. `make check-specs` or acceptance dry-run) when available. For a
    non-trivial new spec or behaviour change (when no parent workflow runs its
-   own critique), have a separate read-only reviewer run
+   own critique), have a separate read-only reviewer read and follow
    [critique](../critique/SKILL.md) on `spec.md`. For a scoped revision,
    review changed sections and related terms/references without expanding the
    edit or restarting architecture critique.

@@ -73,9 +73,10 @@ authority.
    Separate setup from runtime, mark new or changed elements against unchanged
    context, and include a rejection path when useful. For existing code, show
    current flow. For a test, show input, expected response, and harness
-   assertion. Put source in a fenced `text` block inside Solution. Follow
-   [conventions-mermaid](../conventions-mermaid/SKILL.md) for syntax and
-   layout, but skip `mmdc` rendering: show source only, no images or HTML, and
+   assertion. Put source in a fenced `text` block inside Solution. Read and
+   follow [conventions-mermaid](../conventions-mermaid/SKILL.md) for syntax
+   and layout, but skip `mmdc` rendering: show source only, no images or HTML,
+   and
    do not ask permission unless the user requests it. Omit the diagram only
    when no useful flow exists. Confirm it matches the prose.
 4. **Write the explanation.** Read

@@ -54,7 +54,7 @@ line per task rather than a repeated boilerplate paragraph.
 - Cite existing code as `path:line`. Before finishing, check every cited
   symbol still resolves and every new name is spelled consistently.
 - Include tasks for missing acceptance steps, fixtures, and the minimum
-  runner before checks that need them. Follow
+  runner before checks that need them. Read and follow
   [conventions-acceptance-tests](../../conventions-acceptance-tests/SKILL.md),
   including for Make/Bash workflows. Carry forward the plan's acceptance
   mapping; if absent, derive it from the slice's criteria before handoff.

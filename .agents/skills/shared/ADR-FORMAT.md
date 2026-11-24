@@ -17,9 +17,10 @@ with lock-in, boundary and ownership rules, deliberate deviations from the
 obvious path, constraints the code can't show, and rejected options someone
 would otherwise re-propose.
 
-**Template.** Write Context and Consequences with the voice-product skill;
-keep the decision, options, and constraints precise. When the source doesn't
-cover a section, write `_Not specified in source._` rather than inventing it.
+**Template.** Write Context and Consequences by reading and following
+[voice-product](../voice-product/SKILL.md); keep the decision, options, and
+constraints precise. When the source doesn't cover a section, write
+`_Not specified in source._` rather than inventing it.
 Use `Proposed` while the plan is tentative and `Accepted` once it's committed.
 
 ````markdown

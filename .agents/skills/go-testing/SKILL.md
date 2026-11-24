@@ -9,12 +9,12 @@ metadata:
 ---
 
 Write Go tests test-first, with each case proving one behaviour through the
-package's public API. Load the conventions-go skill too: it sets
-style and linter rules for test code (`testCases`/`tc`, `rr`, `noctx`,
-`scopeguard`, comments, `testify/mock`), and wins where the two overlap.
-Before writing or changing tests, read
-[TEST-CONTRACTS](../shared/TEST-CONTRACTS.md) for assertion contracts. For
-acceptance suites, also load
+package's public API. Read and follow
+[conventions-go](../conventions-go/SKILL.md) too: it sets style and linter
+rules for test code (`testCases`/`tc`, `rr`, `noctx`, `scopeguard`, comments,
+`testify/mock`), and wins where the two overlap. Before writing or changing
+tests, read [TEST-CONTRACTS](../shared/TEST-CONTRACTS.md) for assertion
+contracts. For acceptance suites, also read and follow
 [conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md): it
 owns scenario-to-code structure for Go/Godog and Make/Bash workflows.
 

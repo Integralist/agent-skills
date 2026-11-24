@@ -10,8 +10,8 @@ metadata:
 ---
 
 Create a short, warm deck that teaches one idea without watering it down.
-Use [voice-product](../voice-product/SKILL.md) to connect concepts to why they
-matter to the learner.
+Read and follow [voice-product](../voice-product/SKILL.md) to connect
+concepts to why they matter to the learner.
 
 ## Plan and confirm
 
@@ -44,10 +44,10 @@ matter to the learner.
 3. **Deliver** the path or link. Mention assumptions, style deviations, or
    missing assets in the message, not on the slides.
 
-Before drafting, load [design](../design/SKILL.md) and its selected theme
-and slide guidance (also HTML guidance for browser decks). Read
+Before drafting, read and follow [design](../design/SKILL.md) and its
+selected theme and slide guidance (also HTML guidance for browser decks). Read
 [SLIDE-DESIGN.md](references/SLIDE-DESIGN.md) for teaching-specific guidance.
-Read
-[conventions-mermaid](../conventions-mermaid/SKILL.md) when using Mermaid.
+Read and follow [conventions-mermaid](../conventions-mermaid/SKILL.md) when
+using Mermaid.
 
 Done when inspected and delivered in the confirmed format and theme.

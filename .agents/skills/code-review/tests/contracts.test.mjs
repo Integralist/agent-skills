@@ -242,7 +242,7 @@ test("adversarial safety reviewer runs is-it-safe without nested subagents", () 
   assert.doesNotMatch(isItSafe, /^disable-model-invocation:/m);
   assert.match(isItSafe.replace(/\s+/g, " "), /no nested subagents/);
   assert.match(investigation, /never spawn a nested subagent/);
-  assert.match(skill, /adversarial safety reviewer following \[is-it-safe\]\(\.\.\/is-it-safe\/SKILL\.md\)/);
+  assert.match(skill, /adversarial safety reviewer to read and follow \[is-it-safe\]\(\.\.\/is-it-safe\/SKILL\.md\)/);
   assert.match(protocol, /Skip it for pure documentation, comment-only, formatting-only/);
   assert.match(protocol, /Prefer a different frontier model on the same provider/);
   assert.match(protocol, /without spawning nested subagents/);

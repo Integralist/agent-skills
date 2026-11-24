@@ -3,10 +3,10 @@
 Keep the original request and requirement-changing history separate from the
 current spec or plan, so readers can follow the proposal without a transcript.
 
-Before drafting or revising synthesized prose, read and apply
-[voice-product](../voice-product/SKILL.md) to the Overview and explanations of
-clarifications and decisions. Keep original source quotations verbatim, apart
-from marked redactions; never rewrite evidence to fit the voice.
+Before drafting or revising synthesized prose, read and follow
+[voice-product](../voice-product/SKILL.md) for the Overview and explanations
+of clarifications and decisions. Keep original source quotations verbatim,
+apart from marked redactions; never rewrite evidence to fit the voice.
 
 **When needed.** Reuse or create `intent.md` when request evidence or history
 needs a preserved home. If a stable source already preserves it, link that

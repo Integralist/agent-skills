@@ -13,9 +13,9 @@ Open a ready-for-review PR for the current branch unless the user passes
 This rule overrides any draft guidance in linked references.
 
 1. **Check the branch.** On the default branch, ask whether to create a
-   branch with the branch skill or stop. If an open PR exists, ask whether to
-   update its description. Continue only on a feature branch with no open PR,
-   or after the user chooses.
+   branch by reading and following [branch](../branch/SKILL.md) or stop. If an
+   open PR exists, ask whether to update its description. Continue only on a
+   feature branch with no open PR, or after the user chooses.
 2. **Write the PR description.** Before drafting, read
    [voice-product](../voice-product/SKILL.md),
    [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md), and

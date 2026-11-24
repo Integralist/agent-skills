@@ -28,9 +28,10 @@ gh label create task --description "Executable task sub-issue within a slice" --
 
 Map projects onto a 3-level GitHub Sub-Issue tree using `--parent` and
 `--blocked-by`, keeping descriptions scannable and self-contained for readers
-unfamiliar with the project via [voice-product](../voice-product/SKILL.md)
-(decision-first summary above `<details>`, dense detail collapsed below;
-replace stale status rather than appending chronology):
+unfamiliar with the project by reading and following
+[voice-product](../voice-product/SKILL.md) (decision-first summary above
+`<details>`, dense detail collapsed below; replace stale status rather than
+appending chronology):
 
 1. **Root Project Issue (`--label project`):**
    - **Title:** `<Project Title> (<slug>)`
@@ -96,8 +97,9 @@ artifact`:
 
 1. **Branch guard:** Before the first implementation edit in `next-task`,
    `next-slice`, or `execute-plan`, if on `main`/`master`, switch to or create
-   the feature branch from `plan.md` (or via [branch](../branch/SKILL.md))
-   unless the user explicitly approved committing to the default branch.
+   the feature branch from `plan.md` (or create one by reading and following
+   [branch](../branch/SKILL.md)) unless the user explicitly approved committing
+   to the default branch.
 2. **Task completion (closes locally):** After verification and local commit,
    post the [BUILD-ITEM.md](BUILD-ITEM.md) evidence table and commit SHA via
    `gh issue comment <task-issue> --body-file -`, require it to succeed, then

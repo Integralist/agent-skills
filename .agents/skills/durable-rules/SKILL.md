@@ -13,9 +13,9 @@ metadata:
 
 Look for recurring friction and systemic patterns in a coding session or
 finished work. Propose durable fixes—checks, conventions, instruction changes,
-or skill changes. A one-off mistake or waste is not a rule. Follow
-[writing-for-agents](../writing-for-agents/SKILL.md) for any instruction text
-you propose.
+or skill changes. A one-off mistake or waste is not a rule. Read and follow
+[writing-for-agents](../writing-for-agents/SKILL.md) for any instruction
+text you propose.
 
 ## Workflow
 

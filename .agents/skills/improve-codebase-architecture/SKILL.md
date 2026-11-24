@@ -44,9 +44,10 @@ as decisions not to relitigate.
    not just move it. Done when you have a list of candidates.
 3. **Write the HTML report** to `<tmpdir>/architecture-review-<timestamp>.html`
    (`$TMPDIR`, falling back to `/tmp`, or `%TEMP%` on Windows), so nothing
-   lands in the repo and each run gets a fresh file. Before drafting, load
-   [design](../design/SKILL.md) and its selected theme and HTML guidance,
-   then follow [HTML-REPORT.md](references/HTML-REPORT.md). Give each candidate
+   lands in the repo and each run gets a fresh file. Before drafting, read
+   and follow [design](../design/SKILL.md) and its selected theme and HTML
+   guidance, then follow [HTML-REPORT.md](references/HTML-REPORT.md). Give each
+   candidate
    a card
    with its files, the problem, the solution in plain English, benefits in
    terms of locality, leverage, and tests, a before/after diagram, and a
@@ -58,10 +59,11 @@ as decisions not to relitigate.
    the file (`open` on macOS, `xdg-open` on Linux, `start` on Windows), give
    its absolute path, and ask "Which of these would you like to explore?"
    Done when the user picks one.
-4. **Grill the chosen candidate** with the grilling skill: constraints,
-   dependencies, the shape of the deepened module, what sits behind the
-   seam, and which tests survive. Keep the domain model current as decisions
-   settle, using [domain-modeling](../domain-modeling/SKILL.md):
+4. **Grill the chosen candidate** by reading and following
+   [grilling](../grilling/SKILL.md): constraints, dependencies, the shape of
+   the deepened module, what sits behind the seam, and which tests survive.
+   Keep the domain model current as decisions settle by reading and following
+   [domain-modeling](../domain-modeling/SKILL.md):
    - Add a new concept's name to the glossary when you name a deepened
      module after it, creating `GLOSSARY.md` if neither file exists, and
      update a term the moment it's sharpened.

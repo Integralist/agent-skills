@@ -106,10 +106,11 @@ touches.}
 
 **Writing it.** Cite every factual claim inline: `path/to/file.go:42` for
 code in the document's repository, a commit-pinned permalink for another
-repository, and a URL for external docs, following
+repository, and a URL for external docs, reading and following
 [conventions-markdown](../../conventions-markdown/SKILL.md). Label an uncited
-claim "unverified assumption" and say how to verify it. Draw diagrams
-following [conventions-mermaid](../../conventions-mermaid/SKILL.md). Keep
+claim "unverified assumption" and say how to verify it. Draw diagrams by
+reading and following
+[conventions-mermaid](../../conventions-mermaid/SKILL.md). Keep
 findings decision-relevant and concise, following
 [CONCISE-PROSE.md](../../shared/CONCISE-PROSE.md): answer the research
 questions directly, put raw inventories or background history inside

@@ -19,8 +19,8 @@ Instruct the user to install the extension, run `/reload`, and stop:
 pi install git:github.com/Integralist/pi-subagents
 ```
 
-*(Note: Users who prefer sequential in-thread execution without subagents should
-use [next-task](../../next-task/SKILL.md) instead.)*
+*(Note: Users who prefer sequential in-thread execution without subagents
+should read and follow [next-task](../../next-task/SKILL.md) instead.)*
 
 If `spawn_inline_subagent` is present but missing the `allow_model_fallback`
 field, stop and give this update command, then `/reload` or a fresh session.

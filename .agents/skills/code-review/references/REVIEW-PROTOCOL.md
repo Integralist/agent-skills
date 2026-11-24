@@ -136,9 +136,10 @@ assigned lenses. A defect belongs to the profile whose question it answers.
    (*Mysterious Name*, *Data Clumps*, *Primitive Obsession*, *Long Parameter
    List*, *Flag Argument*, *Temporary Field*, *Mutable/Global Data*), or tests
    that pin internal helpers instead of the module interface. For an unwritten
-   consistency finding, use precedent and cite at least two peer `file:line`
-   locations; one peer is a coincidence. Hand off documented requirements to
-   conventions and whether errors are handled to reliability.
+   consistency finding, read and follow [precedent](../../precedent/SKILL.md)
+   and cite at least two peer `file:line` locations; one peer is a
+   coincidence. Hand off documented requirements to conventions and whether
+   errors are handled to reliability.
 5. **Conventions:** Does the code follow explicit applicable rules? Own
    documented naming, structure, idioms, error-handling style, comments,
    formatting, and test layout. Read selected skills and applicable references

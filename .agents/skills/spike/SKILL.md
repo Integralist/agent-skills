@@ -70,7 +70,8 @@ for branch templates and the verdict format.
    `projects/<project>/research.md` (or `docs/research/<yyyy-mm-dd>-<slug>.md`
    when standalone, or an Issue Artifact per
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) in issue mode). Record any
-   settled decision with [to-adr](../to-adr/SKILL.md) when applicable.
+   settled decision by reading and following [to-adr](../to-adr/SKILL.md)
+   when applicable.
 5. **Clean up and hand off.** Delete spike files from the working tree (keep a
    `spike/<slug>` branch only if the user asks to archive the primary source).
    Resume [architect](../architect/SKILL.md) at Grill, or stop and report the

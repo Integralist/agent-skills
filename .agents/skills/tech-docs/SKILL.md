@@ -13,11 +13,12 @@ Write or improve short, accurate technical documents that explain why and
 what, not how, and resist code rot. Deliver the document, not suggestions;
 preserve the author's intent and accuracy, and invent nothing.
 
-Follow [conventions-markdown](../conventions-markdown/SKILL.md) (including
-link rules) and [voice-product](../voice-product/SKILL.md) for overviews,
-rationale, and user impact. Before auditing or drafting, read
-[PILLARS.md](references/PILLARS.md). Use distill for long prose that needs
-condensing without losing load-bearing details.
+Read and follow [conventions-markdown](../conventions-markdown/SKILL.md)
+(including link rules) and [voice-product](../voice-product/SKILL.md) for
+overviews, rationale, and user impact. Before auditing or drafting, read
+[PILLARS.md](references/PILLARS.md). Read and follow
+[distill](../distill/SKILL.md) for long prose that needs condensing without
+losing load-bearing details.
 
 **Mode:** `--new <topic>` writes a document; `--improve <file>` rewrites one.
 With neither flag, infer the mode from context and ask if it remains unclear.

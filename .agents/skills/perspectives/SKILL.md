@@ -10,8 +10,9 @@ metadata:
 
 Explore a problem, proposal, or design through six distinct perspectives,
 based on Edward de Bono's Six Thinking Hats, then surface what matters. This
-is for breadth, not a durable recommendation: use decide for a consequential
-choice and code-review to find defects in existing code.
+is for breadth, not a durable recommendation: read and follow
+[decide](../decide/SKILL.md) for a consequential choice and
+[code-review](../code-review/SKILL.md) to find defects in existing code.
 
 **Input.** Take a topic or proposal and, optionally, one perspective. If the
 topic is too vague to frame as one focused question, ask one clarifying

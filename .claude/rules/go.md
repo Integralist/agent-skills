@@ -99,8 +99,8 @@ are commented-out code.
 
 ## Testing
 
-Load [go-testing](../skills/go-testing/SKILL.md) before writing or reviewing
-`*_test.go` files, and
+Read and follow [go-testing](../skills/go-testing/SKILL.md) before writing or
+reviewing `*_test.go` files, and read and follow
 [conventions-acceptance-tests](../skills/conventions-acceptance-tests/SKILL.md) for
 acceptance suites.
 

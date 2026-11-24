@@ -59,8 +59,9 @@ plan or task list for intent review.
    conventions exist—even for small, low-risk changes. Use the protocol's roles,
    prompts, and completion checks. For behavioural changes (skipping pure docs,
    comment-only, or formatting diffs), also start a separate read-only
-   adversarial safety reviewer following [is-it-safe](../is-it-safe/SKILL.md).
-   For substantial or cross-cutting intent, add
+   adversarial safety reviewer to read and follow
+   [is-it-safe](../is-it-safe/SKILL.md). For substantial or cross-cutting
+   intent, add
    a separate spec-and-plan reviewer; otherwise keep those checks with the
    generalist. Unavailable guidance is not a clean pass.
 4. **Verify findings.** Have a verifier refute each finding using the protocol.

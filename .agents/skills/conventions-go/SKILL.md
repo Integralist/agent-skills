@@ -105,8 +105,8 @@ are commented-out code.
 
 ## Testing
 
-Load [go-testing](../go-testing/SKILL.md) before writing or reviewing
-`*_test.go` files, and
+Read and follow [go-testing](../go-testing/SKILL.md) before writing or
+reviewing `*_test.go` files, and read and follow
 [conventions-acceptance-tests](../conventions-acceptance-tests/SKILL.md) for
 acceptance suites.
 

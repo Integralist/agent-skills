@@ -32,7 +32,7 @@ or points to a wrong design, tell the user and wait; do not guess.
    metrics, audience, or non-goals missing from the spec.
 3. **Write the PRD.** Read [PRD-TEMPLATE.md](references/PRD-TEMPLATE.md)
    and use it in the source's project folder or a new
-   `projects/<yyyy-mm-dd>-<slug>/`. Read
+   `projects/<yyyy-mm-dd>-<slug>/`. Read and follow
    [voice-product](../voice-product/SKILL.md) before drafting. Set Status to
    `Draft`; fill Author and Created with `git config user.name` and `date +%F`.
    Trace every statement to the source; where it is silent, write

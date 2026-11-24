@@ -36,8 +36,9 @@ CLI. The source formats are documented in `scripts/report.py`.
 
 **Maintenance.** When a harness changes its log format, update its `load_*`
 function in `scripts/report.py` and its test in `scripts/test_report.py`. For
-chart changes, first load [design](../design/SKILL.md) and its selected
-theme and HTML guidance. The generator embeds shared design assets; keep
+chart changes, first read and follow [design](../design/SKILL.md) and its
+selected theme and HTML guidance. The generator embeds shared design assets;
+keep
 only chart layout and behaviour in `scripts/template.html` and update
 `scripts/test_browser.py`.
 Run `make -C <skill-base-dir> test`; browser tests require Google Chrome.

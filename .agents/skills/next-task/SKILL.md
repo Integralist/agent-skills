@@ -9,7 +9,8 @@ metadata:
 Complete one ready item from a plan or task list, then tick it off. Do one
 item per run. Keep implementation and troubleshooting in the main thread.
 Delegate test runs as [BUILD-ITEM.md](../shared/BUILD-ITEM.md) describes;
-read-only review may also be delegated through code-review.
+read-only review may also be delegated through
+[code-review](../code-review/SKILL.md).
 
 1. **Select the file.** Use the file named by the user, or the one already in
    use this session. If neither exists, ask for its path. For `--github` or an
@@ -40,4 +41,5 @@ read-only review may also be delegated through code-review.
    verification gaps still open.
 5. **Report and offer to commit.** Distinguish item completion from slice
    acceptance. State required review status and what is left, then ask
-   whether to commit. If the user agrees, use the commit skill.
+   whether to commit. If the user agrees, read and follow
+   [commit](../commit/SKILL.md).

@@ -16,8 +16,8 @@ embedded, that charts benchmark scores against a chosen metric, one line per
 model family through its effort levels. It works offline, with no server and
 no credentials in the browser. Read [data.md](references/data.md) for API
 limits, units, import formats, URL parameters, and the 1Password setup. Before
-changing the generator or page, load [design](../design/SKILL.md) and its
-selected theme and HTML guidance, then read
+changing the generator or page, read and follow [design](../design/SKILL.md)
+and its selected theme and HTML guidance, then read
 [PAGE-BEHAVIOR.md](references/PAGE-BEHAVIOR.md). The generator embeds shared
 design assets; do not maintain a separate palette in this skill.
 

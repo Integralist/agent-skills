@@ -21,7 +21,8 @@ plan only—edit no code and give no PR verdict.
    codebase (slug `codebase`). Ask if ambiguous. Identify the scoped files,
    primary language, and a kebab-case slug.
 2. **Gather context and run read-only audits.** Collect the repo metadata
-   snapshot via [git-metadata](../git-metadata/SKILL.md) and read
+   snapshot by reading and following [git-metadata](../git-metadata/SKILL.md)
+   and read
    [SUBAGENTS.md](references/SUBAGENTS.md). Run the applicable read-only
    review lenses (in parallel subagents for larger scopes, following
    [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md) for model
@@ -41,7 +42,8 @@ plan only—edit no code and give no PR verdict.
 4. **Write findings.** Follow
    [FINDINGS-TEMPLATE.md](references/FINDINGS-TEMPLATE.md) and write
    `projects/<yyyy-mm-dd>-redesign-<slug>/redesign.md`.
-5. **Create the implementation plan.** Run [to-plan](../to-plan/SKILL.md)
+5. **Create the implementation plan.** Read and follow
+   [to-plan](../to-plan/SKILL.md)
    with `redesign.md` as source and write `plan.md` beside it, requiring:
    - **Slice 1** pins existing behaviour with characterization tests for each
      touched boundary (explicitly noting this documented exception to
@@ -52,4 +54,5 @@ plan only—edit no code and give no PR verdict.
      slice verifying behavioural invariants and reduced complexity.
 
    Report both paths and a short summary.
-6. **Surface durable rules.** Follow [durable-rules](../durable-rules/SKILL.md).
+6. **Surface durable rules.** Read and follow
+   [durable-rules](../durable-rules/SKILL.md).

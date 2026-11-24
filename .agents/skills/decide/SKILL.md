@@ -39,7 +39,7 @@ criteria.
      hidden assumptions, sunk costs, selection bias, and second-order effects,
      and test reversibility.
 3. **Draft and confirm.** Read
-   [MEMO-TEMPLATE.md](references/MEMO-TEMPLATE.md) and apply
+   [MEMO-TEMPLATE.md](references/MEMO-TEMPLATE.md), and read and follow
    [voice-product](../voice-product/SKILL.md). Omit sections that don't apply
    (e.g. `Stakeholders` for a solo call). Show the draft or concise summary
    with the recommendation, trade-offs, and kill criteria; wait for approval

@@ -11,7 +11,7 @@ motivation, not proof. Separate implemented work from planned follow-ups.
 
 ## Title
 
-Follow [commit](../commit/SKILL.md) subject style:
+Read [commit](../commit/SKILL.md) and use its subject style:
 `type(scope): <why it matters>`. If the repo lints PR titles (`.github/workflows/`
 or commitlint config), its rules win.
 

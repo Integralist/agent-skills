@@ -16,8 +16,9 @@ beside each verdict:
 
 ## Report
 
-Keep it short. Use [voice-product](../../voice-product/SKILL.md): plain language
-for a human who may act. Name who does what, under which condition, with what
+Keep it short. Read and follow [voice-product](../../voice-product/SKILL.md):
+plain language for a human who may act. Name who does what, under which
+condition, with what
 observable impact. Keep the causal path, preconditions, `path:line` evidence,
 uncertainty, and mitigation. Lead with the worst outcome; add another only if
 independently material. Don't pad PROCEED with generic risks.

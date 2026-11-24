@@ -34,8 +34,9 @@ interactive/auto mode, approval limits, and acceptance/review gates. The saved
 next action resumes execution; it does not restart setup or waive a blocker.
 
 **Fallback.** When recovery fails, lacks sufficient fresh headroom, or the
-harness cannot perform it, use the handoff skill to write a temporary document
-referencing the execution log and checkpoint. If the extension already wrote
+harness cannot perform it, read and follow [handoff](../../handoff/SKILL.md)
+to write a temporary document referencing the execution log and checkpoint.
+If the extension already wrote
 one, refine it rather than creating conflicting state. Report the full path
 and stop; do not start a new session automatically in this first adapter.
 Other harnesses use this same safe checkpoint and handoff path when context
