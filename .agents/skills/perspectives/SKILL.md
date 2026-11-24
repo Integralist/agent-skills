@@ -45,7 +45,9 @@ come together.
    hypotheses, not facts or your own feelings. Keep it short: feelings are
    signals, not proof.
 3. **Risks:** Identify ways it could fail, downsides, constraints, and
-   second-order effects. Distinguish demonstrated risks from speculation.
+   second-order effects—including checks a domain expert would insist on that
+   the request omitted (making the design deeper without expanding feature
+   scope). Distinguish demonstrated risks from speculation.
 4. **Benefits:** Identify benefits, leverage, opportunities, and best cases;
    state what must be true for each to happen.
 5. **Alternatives:** Include options that avoid or change the central

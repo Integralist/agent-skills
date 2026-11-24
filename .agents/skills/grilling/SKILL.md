@@ -48,7 +48,9 @@ model tier. Follow the
 [shared subagent guidance](../shared/SUBAGENT-STEERABILITY.md), including its
 completion and retry protocol. Do not block on running
 exploration: wait only for questions that depend on its result, and ask the
-rest of the frontier now. Put decisions to the user and wait for their answer.
+rest of the frontier now. Settle empirical choices by inspection or an
+experiment before asking; reserve grilling questions for product, scope, or
+trade-off choices that evidence cannot settle.
 
 ## Stop condition
 

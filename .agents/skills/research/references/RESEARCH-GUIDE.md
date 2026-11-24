@@ -51,9 +51,12 @@ only the repo revision and high-risk files visible), then follows the template.
 
 ## Topic research
 
-Use every tool: read source, fetch docs through MCP, search the web and [the
-knowledge sources](../../shared/KNOWLEDGE-SOURCES.md), and check sibling
-repositories in `../` for prior art.
+Use every tool: start from the rawest material (source, specs, schemas,
+wire payloads, or logs) before digested summaries, fetch docs through MCP,
+search the web and [the knowledge sources](../../shared/KNOWLEDGE-SOURCES.md),
+and check sibling repositories if present for prior art. Also check 2–3
+neighboring systems or fields that solved the same problem shape under other
+names, noting what carries over and where the analogy breaks.
 
 **Investigators.** When a topic has substantial independent questions,
 dispatch up to three read-only investigators under

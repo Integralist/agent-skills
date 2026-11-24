@@ -20,7 +20,8 @@ style preferences and never invent problems. If the document is sound, say so.
    and the records the document cites or summarises (ADRs, specs, design docs).
 2. **Check the substance:**
    - **Reasoning & assumptions:** Logical fallacies, hidden or unjustified
-     assumptions, conclusions that outrun evidence, or missing counterarguments.
+     assumptions, conclusions that outrun raw evidence (relying only on
+     summaries), missing counterarguments, or no independent check of done.
    - **Consistency with cited records:** Internal contradictions, absolute
      claims whose cited source has exceptions, status claims beyond the source
      of truth, restated lists that diverge from their source, or "not
