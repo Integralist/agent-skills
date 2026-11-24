@@ -94,6 +94,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**voice-integralist**](.agents/skills/voice-integralist/SKILL.md)                         | Write in Integralist's voice once, or for the whole session with `--all`.                                |
 | [**voice-product**](.agents/skills/voice-product/SKILL.md)                                 | Write in a plain, audience-first voice once, or for the whole session with `--all`.                      |
 | [**wait-what**](.agents/skills/wait-what/SKILL.md)                                         | Re-pitch a message that did not land.                                                                    |
+| [**worktree-cleanup**](.agents/skills/worktree-cleanup/SKILL.md)                           | Remove stale worktrees and branches for merged PRs, prune remotes, and rebase the base branch.           |
 | [**writing-for-agents**](.agents/skills/writing-for-agents/SKILL.md)                       | Apply conventions that make skills and instruction files predictable.                                    |
 
 ## Install
