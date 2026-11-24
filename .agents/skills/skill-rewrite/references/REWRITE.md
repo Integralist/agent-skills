@@ -28,8 +28,11 @@
    `allowed-tools`, or tested triggers unintentionally. When removing
    `disable-model-invocation: true`, audit and update `description` with clear
    `Use when ...` triggers; keep noun-first names (`<noun>-<verb>`) with
-   `<verb> <noun>` triggers, and format numbered `argument-hint` inputs with
-   `#<...>` (such as `[pr-url | #<pr-number>]`).
+   `<verb> <noun>` triggers. Audit `argument-hint` and body argument handling
+   so `[steering]` is the only optional positional argument, every optional
+   target, path, ref, mode, or option uses `--flag` or `--key[=<value>]`
+   (bound with `=`), and numbered GitHub refs use `#<...>` (such as
+   `--pr=<url|#number>`).
 4. **Verify after approval.** Check UTF-8 byte counts, confirm every relative
    link and anchor resolves, run affected repo tests/linters (`make check-rules`,
    contract tests, etc.), and report any unrun verification as a gap.

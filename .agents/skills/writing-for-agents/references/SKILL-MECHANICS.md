@@ -30,14 +30,18 @@ description. Split out a model-invoked skill only for a distinct trigger.
 ## Arguments
 
 `argument-hint` is an autocomplete hint, not a parser or validation schema.
-Use `#<number>` for numbered GitHub items (such as `"[pr-url | #<pr-number>]"`
-or `"[source path | #<issue>]"`) rather than bare names like `pr-number`.
-Use `--flag` (or `--key=value`) for mode toggles and options rather than bare
-positional keywords, so flag order does not matter and options cannot collide
-with targets or file paths; accept flags in any position. State meaningful
-defaults, mode selection, missing-input handling, and any flag that changes
-behaviour in the body or a required reference. Explain what syntax leaves
-unspecified rather than repeating the hint.
+Keep `[steering]` as the only optional positional argument so users can always
+pass freeform instructions without colliding with named inputs. Use `--flag`,
+`--key=<value>`, or `--key[=<value>]` for every optional target, path, ref,
+option, and mode toggle—never multiple positional arguments, bare mode
+keywords, or space-separated optional flag values (such as
+`--cleanup [<branch>]`). Bind optional values with `=` so flags work in any
+position and cannot swallow trailing `[steering]` words; format numbered
+GitHub items with `#<...>` (such as `--pr=<url|#number>` or
+`--source=<path|#issue|url>`). State meaningful defaults, mode selection,
+missing-input handling, and any flag that changes behaviour in the body or a
+required reference. Explain what syntax leaves unspecified rather than
+repeating the hint.
 
 ## Model tier
 
