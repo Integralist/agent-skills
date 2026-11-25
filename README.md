@@ -68,6 +68,7 @@ https://www.integralist.co.uk/posts/how-i-use-ai/
 | [**pi-models**](.agents/skills/pi-models/SKILL.md)                                         | Add, update, or prune Pi model definitions, overrides, and enabled models from docs or a URL.            |
 | [**polish**](.agents/skills/polish/SKILL.md)                                               | Improve a short passage's clarity and concision.                                                         |
 | [**pr-merge**](.agents/skills/pr-merge/SKILL.md)                                           | Merge an open GitHub pull request and clean up its local worktree or branch.                             |
+| [**pr-monitor**](.agents/skills/pr-monitor/SKILL.md)                                       | Check PR CI and review feedback, apply approved fixes, log amendments, and monitor re-runs.              |
 | [**pr-open**](.agents/skills/pr-open/SKILL.md)                                             | Write and open a concise PR with clear Problem and Solution sections.                                    |
 | [**precedent**](.agents/skills/precedent/SKILL.md)                                         | Align work with patterns established by peer files.                                                      |
 | [**recap**](.agents/skills/recap/SKILL.md)                                                 | Summarize what is done, in progress, and next.                                                           |
