@@ -4,14 +4,17 @@ description: >-
   Open a GitHub pull request for the current branch. Use when the user asks to
   create, open, or write a PR.
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch --show-current), Bash(git merge-base:*), Bash(gh pr view:*), Bash(mmdc:*)
-argument-hint: "[--draft] [steering]"
+argument-hint: "[--draft] [--monitor-auto] [steering]"
 metadata:
   model-tier: moderate
 ---
 
 Open a ready-for-review PR for the current branch unless the user passes
 `--draft` to this skill. Only that explicit flag permits a draft PR.
-This rule overrides any draft guidance in linked references.
+This rule overrides any draft guidance in linked references. Title and body
+approval always stays interactive; pass `--monitor-auto` to forward `--auto`
+to [pr-monitor](../pr-monitor/SKILL.md) if background monitoring finds
+issues.
 
 1. **Check the branch.** On the default branch, ask whether to create a
    branch by reading and following [branch](../branch/SKILL.md) or stop. If an
@@ -44,3 +47,16 @@ This rule overrides any draft guidance in linked references.
 
    Append `--draft` only if the user passed it to this skill.
    Share the PR URL from `gh`.
+6. **Monitor in the background.** Unless `--draft` was passed, return control
+   after sharing the URL by spawning a read-only background subagent following
+   [SUBAGENT-STEERABILITY.md](../shared/SUBAGENT-STEERABILITY.md), waking the
+   main thread on finish (or asking whether to wait inline or stop if
+   background subagents are unavailable). Have it read and follow
+   [pr-monitor](../pr-monitor/SKILL.md) in read-only mode (watch CI and the
+   post-CI bot window, then collect and triage any failures or feedback via
+   `steps 1–2` without editing files or writing to GitHub) for the new PR
+   URL. When it finishes:
+   - If green and quiet, report the clean PR state.
+   - If issues arrive, show the verified findings—or, when `--monitor-auto`
+     was passed, run `pr-monitor` with `--pr=<url> --auto` (honouring its
+     hard stops if the checkout moved or is dirty).
