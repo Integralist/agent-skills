@@ -6,6 +6,12 @@
     "github-copilot/gpt-6-luna": "xhigh"
   },
   "hideThinkingBlock": true,
+  "notices": {
+    "cacheMisses": true,
+    "cacheWarming": true,
+    "compactionCosts": true,
+    "reasoningDrops": true
+  },
   "theme": "nord-contrast",
   "packages": [
     "git:github.com/Integralist/pi-auto-model",
