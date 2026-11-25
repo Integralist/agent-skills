@@ -29,8 +29,13 @@ description. Split out a model-invoked skill only for a distinct trigger.
 
 ## Arguments
 
-`argument-hint` is an autocomplete hint, not a parser or validation schema.
-Keep `[steering]` as the only optional positional argument so users can always
+Always declare `argument-hint` in frontmatter on every skill that accepts any
+flag, target, mode toggle (such as `--github` or `--draft`), or `[steering]`.
+Keep `argument-hint` in sync with the body: every flag or GitHub issue mode in
+the body belongs in `argument-hint`, and every flag in `argument-hint` belongs
+in the body. `argument-hint` is an autocomplete hint, not a parser or
+validation schema. Keep `[steering]` as the only optional positional argument
+so users can always
 pass freeform instructions without colliding with named inputs. Use `--flag`,
 `--key=<value>`, or `--key[=<value>]` for every optional target, path, ref,
 option, and mode toggle—never multiple positional arguments, bare mode

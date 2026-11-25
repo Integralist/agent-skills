@@ -28,11 +28,14 @@
    `allowed-tools`, or tested triggers unintentionally. When removing
    `disable-model-invocation: true`, audit and update `description` with clear
    `Use when ...` triggers; keep noun-first names (`<noun>-<verb>`) with
-   `<verb> <noun>` triggers. Audit `argument-hint` and body argument handling
-   so `[steering]` is the only optional positional argument, every optional
-   target, path, ref, mode, or option uses `--flag` or `--key[=<value>]`
-   (bound with `=`), and numbered GitHub refs use `#<...>` (such as
-   `--pr=<url|#number>`). Audit `allowed-tools` against
+   `<verb> <noun>` triggers. Always declare `argument-hint` in frontmatter when
+   the skill accepts flags, targets, mode toggles (such as `--github`), or
+   `[steering]`. Audit `argument-hint` and body argument handling together so
+   every body flag appears in `argument-hint`, `[steering]` is the only
+   optional positional argument, every optional target, path, ref, mode, or
+   option uses `--flag` or `--key[=<value>]` (bound with `=`), and numbered
+   GitHub refs use `#<...>` (such as `--pr=<url|#number>`). Audit
+   `allowed-tools` against
    [SKILL-MECHANICS.md](../../writing-for-agents/references/SKILL-MECHANICS.md):
    tighten wildcarded dual-purpose commands to strictly read-only subcommands
    or exact invocations, and keep mutating or remote-write commands out.
