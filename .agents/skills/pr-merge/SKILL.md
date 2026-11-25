@@ -5,7 +5,7 @@ description: >-
   when the user asks to merge a PR, land a pull request, or merge and clean
   up.
 argument-hint: "[--pr=<url|#number>] [steering]"
-allowed-tools: Bash(gh pr view:*), Bash(gh pr list:*), Bash(gh repo view:*), Bash(git status:*), Bash(git worktree list:*), Bash(git symbolic-ref:*)
+allowed-tools: Bash(gh pr view:*), Bash(gh pr list:*), Bash(gh repo view:*), Bash(git status:*), Bash(git worktree list:*), Bash(git symbolic-ref --quiet --short HEAD), Bash(git symbolic-ref refs/remotes/origin/HEAD)
 metadata:
   model-tier: trivial
 ---

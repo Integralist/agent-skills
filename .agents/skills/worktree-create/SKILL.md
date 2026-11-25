@@ -5,7 +5,7 @@ description: >-
   Use when starting feature planning or implementation off the main checkout,
   or when the user asks to create or open a worktree.
 argument-hint: "[--repo=<path>] [--slug=<slug>] [steering]"
-allowed-tools: Bash(git branch:*), Bash(git config:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git symbolic-ref:*), Bash(git worktree:*)
+allowed-tools: Bash(git branch --show-current), Bash(git branch --list:*), Bash(git config --get:*), Bash(git config user.name), Bash(git rev-parse:*), Bash(git status:*), Bash(git symbolic-ref --quiet --short HEAD), Bash(git symbolic-ref refs/remotes/origin/HEAD), Bash(git worktree list:*)
 metadata:
   model-tier: trivial
 ---

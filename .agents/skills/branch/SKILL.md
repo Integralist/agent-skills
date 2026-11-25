@@ -4,7 +4,7 @@ description: >-
   Create a git feature branch named for the current session's work. Use when
   the user asks to start, create, or cut a branch.
 argument-hint: "[--cleanup[=<branch>]] [steering]"
-allowed-tools: Bash(gh pr list:*), Bash(git branch:*), Bash(git config:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git switch:*), Bash(git symbolic-ref:*), Bash(git worktree list:*)
+allowed-tools: Bash(gh pr list:*), Bash(git branch --show-current), Bash(git branch --merged:*), Bash(git config --get:*), Bash(git config user.name), Bash(git rev-parse:*), Bash(git status:*), Bash(git symbolic-ref --quiet --short HEAD), Bash(git symbolic-ref refs/remotes/origin/HEAD), Bash(git worktree list:*)
 metadata:
   model-tier: trivial
 ---

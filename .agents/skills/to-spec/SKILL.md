@@ -5,7 +5,7 @@ description: >-
   criteria, with any delta against the living spec. Use when specifying a
   feature, saving a spec discussed in chat, or when another skill needs a spec.
 argument-hint: "[--source=<path|#issue|url>] [--github] [steering]"
-allowed-tools: Bash(git config:*), Bash(date:*), Glob, Grep, Read, Write
+allowed-tools: Bash(git config --get:*), Bash(git config user.name), Bash(date +*), Glob, Grep, Read, Write
 metadata:
   model-tier: complex
 ---

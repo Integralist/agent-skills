@@ -60,6 +60,16 @@ When unsure, choose `moderate`.
 ## Allowed tools
 
 `allowed-tools` pre-approves routine commands in harnesses that honour it,
-such as Claude Code. Keep entries narrow and low-risk, such as
-`Bash(git status:*)`; leave risky actions to the normal permission prompt.
-The skill must also work in harnesses that ignore this field.
+such as Claude Code. Only list strictly read-only commands or exact
+non-destructive invocations—never wildcard dual-purpose commands whose flags
+can mutate or delete state:
+
+- Prefer `Bash(git rev-parse:*)`, `Bash(git branch --show-current)`, or
+  `Bash(git symbolic-ref --quiet --short HEAD)` over `Bash(git branch:*)` or
+  `Bash(git symbolic-ref:*)`.
+- Prefer `Bash(git config --get:*)`, `Bash(git worktree list:*)`, and
+  `Bash(gh pr view:*)` over `Bash(git config:*)`, `Bash(git worktree:*)`, or
+  `Bash(gh pr:*)`.
+- Keep mutating and remote-write commands (commits, pushes, PR edits, API
+  writes) out of `allowed-tools` so runtime permissions and auto-mode policies
+  govern them. The skill must also work in harnesses that ignore this field.

@@ -4,7 +4,7 @@ description: >-
   Create git commits with intelligent file grouping. Use when
   committing changes or drafting a commit message.
 argument-hint: '[--force]'
-allowed-tools: Bash(git status:*), Bash(git add:*), Bash(git diff:*), Bash(git commit:*)
+allowed-tools: Bash(git status:*), Bash(git diff:*)
 metadata:
   model-tier: trivial
 ---

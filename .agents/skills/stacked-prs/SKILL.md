@@ -3,7 +3,7 @@ name: stacked-prs
 description: >-
   Create, submit, sync, and merge stacked pull requests with the gh stack
   extension. Use when the user or a coordinating skill asks for stacked PRs.
-allowed-tools: Bash(git branch:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(gh extension:*), Bash(gh stack:*), Bash(gh pr:*)
+allowed-tools: Bash(git branch --show-current), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(gh extension list:*), Bash(gh stack --help), Bash(gh stack view:*), Bash(gh pr view:*), Bash(gh pr checks:*)
 metadata:
   model-tier: moderate
 ---

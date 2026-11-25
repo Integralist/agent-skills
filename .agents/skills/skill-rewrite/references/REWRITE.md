@@ -32,7 +32,10 @@
    so `[steering]` is the only optional positional argument, every optional
    target, path, ref, mode, or option uses `--flag` or `--key[=<value>]`
    (bound with `=`), and numbered GitHub refs use `#<...>` (such as
-   `--pr=<url|#number>`).
+   `--pr=<url|#number>`). Audit `allowed-tools` against
+   [SKILL-MECHANICS.md](../../writing-for-agents/references/SKILL-MECHANICS.md):
+   tighten wildcarded dual-purpose commands to strictly read-only subcommands
+   or exact invocations, and keep mutating or remote-write commands out.
 4. **Verify after approval.** Check UTF-8 byte counts, confirm every relative
    link and anchor resolves, run affected repo tests/linters (`make check-rules`,
    contract tests, etc.), and report any unrun verification as a gap.

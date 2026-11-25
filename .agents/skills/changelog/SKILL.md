@@ -4,7 +4,7 @@ description: >-
   Add an entry to the project's CHANGELOG.md from the uncommitted diff or the
   branch's changes against main. Use when the user asks to update the
   changelog, add a changelog entry, or record changes.
-allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git branch:*), Bash(date:*), Read, Edit, Write
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git branch --show-current), Bash(date +*), Read, Edit, Write
 metadata:
   model-tier: trivial
 ---

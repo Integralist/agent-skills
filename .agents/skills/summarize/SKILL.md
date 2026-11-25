@@ -6,7 +6,7 @@ description: >-
   when the user asks to summarise or recap something, or explain engineering
   work to non-engineers.
 argument-hint: "[--source=<session|file|url|#issue|diff>] [--github] [--shape=pr|slack|email] [steering]"
-allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git branch:*), Bash(git rev-parse:*), Bash(ls:*)
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git branch --show-current), Bash(git rev-parse:*), Bash(ls:*)
 metadata:
   model-tier: trivial
 ---
