@@ -961,11 +961,15 @@ test("PR descriptions require reading voice-product and CONCISE-PROSE.md before 
     assertRequiredReference(content, conciseTarget, trigger);
     assert.throws(() => assertRequiredReference(content.replace("Before drafting, read", "Apply"), "../voice-product/SKILL.md", trigger));
   }
-  const prDesc = read(".agents/skills/shared/PR-DESCRIPTION.md");
+  const prDesc = flat(".agents/skills/shared/PR-DESCRIPTION.md");
   assert.doesNotMatch(prDesc, /when crossing boundaries/);
-  assert.match(prDesc, /stating what the project does in plain words/);
-  const openPr = read(".agents/skills/pr-open/SKILL.md");
-  assert.match(openPr, /first sentence state what the project does in plain words[\s\S]*README\.md/);
+  assert.match(prDesc, /GLOSSARY\.md[\s\S]*stating what the project does in plain words/);
+  const openPr = flat(".agents/skills/pr-open/SKILL.md");
+  assert.match(openPr, /first sentence link the primary system to `GLOSSARY\.md`\/`CONTEXT\.md` or state what the project does in plain words[\s\S]*README\.md/);
+  const narrative = flat(".agents/skills/shared/NEWCOMER-NARRATIVE.md");
+  assert.match(narrative, /blob\/<branch>\/<file>#<slug>/);
+  assertRequiredReference(read(".agents/skills/voice-product/SKILL.md"), "../shared/NEWCOMER-NARRATIVE.md", /link targets/);
+  assertRequiredReference(read(".agents/skills/domain-modeling/SKILL.md"), "../voice-product/SKILL.md", /reading and following\s+\[voice-product\]/);
 });
 
 test("PR descriptions require task reconciliation before writing issue references", () => {

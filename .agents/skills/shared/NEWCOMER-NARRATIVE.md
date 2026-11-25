@@ -7,18 +7,23 @@ alone).
 
 ## Narrative craft
 
-- **Open with the system's role:** State what the project or primary system does
-  in plain words up front (check `README.md`, `GLOSSARY.md`, or `CONTEXT.md`
-  if needed), even when its name appears in a link.
+- **Open with the system's role:** Check root `GLOSSARY.md` (or legacy
+  `CONTEXT.md`). If the primary system has a heading there, link its first
+  mention instead of adding a parenthetical gloss; otherwise state what the
+  project does in plain words up front (check `README.md` if needed).
 - **Follow one concrete example:** Start `Problem` with what a person or system
   is trying to do, show where old behaviour falls short, and continue the same
   example in `Solution` to show what happens now and why it matters. Do not
   stop at an intermediate step if a later step explains the payoff.
-- **Define names once, reuse consistently:** On first mention of an unfamiliar
-  system, component, or term (including "key", "token", or "issuer"), add a
-  short parenthetical gloss of its role in this example—expanding an acronym is
-  not enough. Declare any short alias at first mention; otherwise reuse exact
-  names across prose and diagram labels.
+- **Link glossary terms, gloss the rest once:** On first mention of any
+  unfamiliar system, component, or term, link to its `GLOSSARY.md` or
+  `CONTEXT.md` heading when one exists—relative path in repo files; full
+  `https://github.com/<owner>/<repo>/blob/<branch>/<file>#<slug>` URL in GitHub
+  PRs and issues (default branch, or the PR's head branch if this PR adds the
+  entry), with lowercase hyphenated slugs (`## Trellis` → `#trellis`). When
+  no heading exists, add a short parenthetical gloss of its role in this
+  example—expanding an acronym is not enough. Declare any short alias at first
+  mention; otherwise reuse exact names across prose and diagram labels.
 - **Scannable paragraphs:** Never pack `Problem` or `Solution` into one dense
   wall of text. Use **1–2 short, blank-line-separated paragraphs** per section
   (or up to 5 short bullets in `Solution`), keeping ~1–3 sentences per
@@ -43,7 +48,8 @@ and confirm diagram labels match the prose.
 ## Newcomer check
 
 Reread `Problem` and `Solution` without repo memory: verify the opening
-defines the primary system, paragraphs are short and separated (at most 2 per
-section, no walls of text), every term and actor is defined on first use with
-consistent names, and a newcomer can follow the example to see why it matters.
+links or defines the primary system, paragraphs are short and separated (at most
+2 per section, no walls of text), every term and actor is linked or glossed on
+first use with consistent names, and a newcomer can follow the example to see
+why it matters.
 Revise and recheck if anything is missing.

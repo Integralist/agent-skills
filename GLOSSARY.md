@@ -1,24 +1,35 @@
 # Agent Skills Glossary
 
-Terminology for planning, task compilation, and execution workflows.
+Shared terms for how this repository plans, splits, and builds features.
 
 ## Delivery and execution
 
-**Slice**:
-A narrow, independently verifiable increment that delivers behavior across the
-system boundaries it touches.
+### Slice
 
-**Slice milestone**:
-A verifiable outcome delivered by a slice, used to track coarse plan progress
-rather than executable implementation steps.
+A small vertical cut of a feature that delivers working behaviour across every
+system layer it touches, verified end to end. Teams ship work in slices so
+every merge delivers usable behaviour rather than half-wired layers waiting on
+later changes.
+
+### Slice milestone
+
+A checkable outcome that marks what must work when a slice finishes. Milestones
+let a plan track real progress without locking engineers into specific file
+lists before coding starts.
 _Avoid_: Plan task
 
-**Implementation task**:
-A bounded unit of executable work compiled for a slice. Several tasks may
-support one slice milestone, and one task may support several milestones.
+### Implementation task
+
+One self-contained coding step compiled for a slice, with a failing test first
+and the smallest change to pass it. Tasks give an engineer or agent a clear
+unit of work; several tasks can serve one slice milestone, and one task can
+support several milestones.
 _Avoid_: Slice milestone
 
-**PDD milestone**:
-An initiative-level outcome that scopes Product-Engineering Discovery and
-Design approvals. It is distinct from a slice milestone in an engineering plan.
+### PDD milestone
+
+A project-level checkpoint in Product-Engineering Discovery and Design (PDD)
+where stakeholders approve scope, specs, or architecture. Keeping PDD milestones
+separate from slice milestones stops sign-off gates from colliding with
+engineering delivery steps.
 _Avoid_: Slice milestone

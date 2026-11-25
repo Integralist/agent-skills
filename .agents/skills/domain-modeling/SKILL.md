@@ -49,26 +49,34 @@ without invoking it.
 
 ## Glossary format
 
+Give every term a Markdown heading (`### <Term>` under `## <Domain Area>` when
+grouped, or `## <Term>` when flat) so PRs, issues, and docs can link directly
+to its `#<slug>` anchor. Apply the same headings to legacy `CONTEXT.md`. Write
+entries in plain, newcomer-friendly prose by reading and following
+[voice-product](../voice-product/SKILL.md).
+
 ````md
 # {Project Name} Glossary
 
 {One or two sentences on the project and the glossary's scope.}
 
-## Language
+## Core concepts
 
-**Order**:
-A request from a customer to purchase one or more items.
+### Order
+
+A customer request to purchase one or more items. Orders exist to lock pricing
+and fulfilment boundaries separately from a shopper's cart.
 _Avoid_: Purchase, transaction
 
-**Customer**:
-A person or organization that places orders.
+### Customer
+
+A person or organization that places orders. Customers own billing profiles and
+order history across sessions.
 _Avoid_: Client, buyer, account
 ````
 
-- Be opinionated: choose the best term and list alternatives under `_Avoid_`.
-- Keep definitions to one or two sentences describing what the term is, not
-  what it does.
-- Include project-specific domain terms only. Do not define general
+- Be opinionated: choose one term and list alternatives under `_Avoid_`.
+- Explain what the term is, why it exists, and any necessary "how" in one short
+  paragraph; keep file paths, schemas, and decision history in specs and ADRs.
+- Include project-specific domain terms and systems only; omit general
   programming concepts such as timeouts or error types.
-- Group related terms under subheadings in the single `GLOSSARY.md` as
-  clusters emerge.

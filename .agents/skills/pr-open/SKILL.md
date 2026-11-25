@@ -32,8 +32,9 @@ issues.
    Issue Artifacts instead of `projects/`.
 3. **Review the draft as a newcomer.** Run the newcomer check from
    [NEWCOMER-NARRATIVE.md](../shared/NEWCOMER-NARRATIVE.md): does `Problem`'s
-   first sentence state what the project does in plain words (checking
-   `README.md`, `GLOSSARY.md`, or `CONTEXT.md` if needed), tuck dense
+   first sentence link the primary system to `GLOSSARY.md`/`CONTEXT.md` or
+   state what the project does in plain words (checking `README.md` if
+   needed), link defined terms instead of repeating glosses, tuck dense
    inventories into `Notes` or `<details>`, and obey repo `AGENTS.md` rules?
    If not, revise and recheck before showing it.
 4. **Get approval.** Show the title and body, then wait for approval. Do not

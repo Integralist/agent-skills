@@ -24,9 +24,10 @@ stricter target-repo `AGENTS.md` rules (such as one-way-door declarations):
 ````md
 ## Problem
 
-<1–2 short, blank-line-separated paragraphs: open with <System name> (<what
-the project does in plain words>) and a concrete user or system example; then
-show what is missing or wrong, who it affects, and why it matters.>
+<1–2 short, blank-line-separated paragraphs: open with the primary system—linked
+to its `GLOSSARY.md` or `CONTEXT.md` heading if present, else `<System name>
+(<what the project does in plain words>)`—and a concrete user or system
+example; then show what is missing or wrong, who it affects, and why it matters.>
 
 ## Solution
 
@@ -66,8 +67,9 @@ Omit if empty.>
 
 - **Narrative & diagram:** Follow
   [NEWCOMER-NARRATIVE.md](NEWCOMER-NARRATIVE.md) across `Problem` and
-  `Solution`—opening `Problem` by
-  stating what the project does in plain words—and embed the diagram (~6–12
+  `Solution`—linking defined systems and terms to `GLOSSARY.md` or
+  `CONTEXT.md`, or stating what the project does in plain words up front when
+  none exist—and embed the diagram (~6–12
   nodes) in a fenced `mermaid` block. Consult
   [code-graph](../code-graph/SKILL.md) if a caller/package map materially aids
   review (embed Mermaid, no PNG export).

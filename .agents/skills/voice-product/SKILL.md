@@ -38,10 +38,11 @@ failure cases and uncertainty; clearer wording cannot change their contract.
 
 - For project-specific prose, use terms in the project root `GLOSSARY.md`; if
   absent, use root `CONTEXT.md` as the legacy glossary. Prefer defined terms
-  over listed alternatives. Explain each glossary term once on first
-  use with a brief parenthetical gloss (a few words); do not expand it into a
-  paragraph or repeat the definition later. Surface conflicts rather than
-  silently changing meaning.
+  over listed alternatives. When a term has a heading there, link its first
+  mention (see [NEWCOMER-NARRATIVE.md](../shared/NEWCOMER-NARRATIVE.md) for link
+  targets) instead of adding a parenthetical gloss. Otherwise gloss it briefly
+  once on first use; never repeat definitions later. Surface conflicts rather
+  than silently changing meaning.
 - Start with the reader's problem, question, or goal.
 - Explain technical choices by their effects in one or two crisp sentences:
   what changes, for whom, and why it matters.
