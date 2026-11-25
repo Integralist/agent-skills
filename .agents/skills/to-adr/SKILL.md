@@ -24,7 +24,8 @@ or points to a wrong design, tell the user and wait; do not guess.
    by the calling skill); otherwise use this session's discussion. Read it in
    full. For `--github` or an issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
-   Artifacts instead of `projects/`.
+   Artifacts instead of `projects/`; also follow it when this session's active
+   project is already tracked in GitHub Issues.
 2. **Screen decisions.** List each settled fork; keep only those passing all
    three ADR-FORMAT.md tests. Give each its own ADR with a rejected alternative
    and why it lost. For each dropped decision, identify the failed test.

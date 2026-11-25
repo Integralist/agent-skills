@@ -5,6 +5,7 @@ description: >-
   sketches, and focused HTML artifacts. Use when the user asks to see or be
   shown something.
 disable-model-invocation: true
+argument-hint: "[steering]"
 metadata:
   model-tier: moderate
 ---

@@ -20,8 +20,9 @@ before and why it changed.
    change, and create its README as
    [PROJECTS-README.md](../skills/shared/PROJECTS-README.md) describes. For `--github`
    or an issue reference (`#<n>` or URL), read and follow
-   [GITHUB-ISSUES.md](../skills/shared/GITHUB-ISSUES.md) to use GitHub Issues and
-   Issue Artifacts instead of `projects/`.
+   [GITHUB-ISSUES.md](../skills/shared/GITHUB-ISSUES.md) to use GitHub Issues
+   and Issue Artifacts instead of `projects/`; also follow it when this
+   session's active project is already tracked in GitHub Issues.
 3. **Pin the baseline before editing anything.** Record
    `git log -1 --format=%H -- <living-spec>` and copy the affected scenarios
    from `git show HEAD:<living-spec>`.

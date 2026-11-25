@@ -5,6 +5,7 @@ description: >-
   during design or research. Use when research leaves a consequential runtime,
   performance, concurrency, migration, or API-shape unknown that prose cannot
   resolve.
+argument-hint: "[--github] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -68,8 +69,10 @@ for branch templates and the verdict format.
    question, run it, and capture the raw output.
 4. **Record the verdict.** Append a `Spike verdict` block to the active
    `projects/<project>/research.md` (or `docs/research/<yyyy-mm-dd>-<slug>.md`
-   when standalone, or an Issue Artifact per
-   [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) in issue mode). Record any
+   when standalone, or for `--github` or an issue reference, an Issue Artifact
+   per [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md); also use it when this
+   session's active project is already tracked in GitHub Issues). Record any
+   settled
    settled decision by reading and following [to-adr](../to-adr/SKILL.md)
    when applicable.
 5. **Clean up and hand off.** Delete spike files from the working tree (keep a

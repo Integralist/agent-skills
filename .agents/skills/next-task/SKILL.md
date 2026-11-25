@@ -2,6 +2,7 @@
 name: next-task
 description: Work on the next task in a plan or task list.
 disable-model-invocation: true
+argument-hint: "[--plan=<path|#issue|url>] [--github] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -12,11 +13,14 @@ Delegate test runs as [BUILD-ITEM.md](../shared/BUILD-ITEM.md) describes;
 read-only review may also be delegated through
 [code-review](../code-review/SKILL.md).
 
-1. **Select the file.** Use the file named by the user, or the one already in
-   use this session. If neither exists, ask for its path. For `--github` or an
-   issue reference (`#<n>` or URL), read and follow
+1. **Select the plan.** Use `--plan=<path|#issue|url>`, the plan file or
+   GitHub project already active in this session, or ask if none exists. For
+   `--github` or an issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
-   Issue Artifacts instead of `projects/`.
+   Issue Artifacts instead of `projects/`; also follow it when the project is
+   already tracked in GitHub Issues (active in this session, named in
+   `Execution-Plan: #<n>` commit trailers, or matching an open
+   `project`-labelled issue when no local `projects/` folder applies).
 2. **Select the item or closing slice.** In a multi-slice file, first route
    any completed slice with missing acceptance or current required review to
    step 4. Otherwise, choose the first unticked item in document order whose

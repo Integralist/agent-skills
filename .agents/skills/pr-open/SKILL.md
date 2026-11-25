@@ -4,6 +4,7 @@ description: >-
   Open a GitHub pull request for the current branch. Use when the user asks to
   create, open, or write a PR.
 allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(git branch --show-current), Bash(git merge-base:*), Bash(gh pr view:*), Bash(mmdc:*)
+argument-hint: "[--draft] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -20,9 +21,12 @@ This rule overrides any draft guidance in linked references.
    [voice-product](../voice-product/SKILL.md),
    [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md), and
    [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md), using the default branch
-   as the base. For `--github` or an issue reference (`#<n>` or URL), read and
-   follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues
-   and Issue Artifacts instead of `projects/`.
+   as the base. When this branch delivers a GitHub-tracked project (active in
+   this session, named in `Execution-Plan: #<n>` commit trailers, matching an
+   open `project`-labelled issue when no local `projects/` folder applies, or
+   referenced by `#<n>` or URL), read and follow
+   [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
+   Issue Artifacts instead of `projects/`.
 3. **Review the draft as a newcomer.** Run the newcomer check from
    [NEWCOMER-NARRATIVE.md](../shared/NEWCOMER-NARRATIVE.md): does `Problem`'s
    first sentence state what the project does in plain words (checking

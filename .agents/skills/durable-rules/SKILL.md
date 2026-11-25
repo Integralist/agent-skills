@@ -7,6 +7,7 @@ description: >-
   context friction; when the user asks what should be codified so it
   doesn't happen again; or at the end of a plan or piece of work.
 disable-model-invocation: true
+argument-hint: "[steering]"
 metadata:
   model-tier: moderate
 ---

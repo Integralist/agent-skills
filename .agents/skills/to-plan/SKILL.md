@@ -24,7 +24,9 @@ gaps with guesses.
 1. **Resolve source and workspace.** Use `--source=<path|#issue|url>` if
    given, or this session if omitted. For `--github` or an issue reference (`#<n>` or URL), read
    and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) instead of
-   `projects/`. Use the named spec or `spec.md` in the project folder (ask if
+   `projects/`; also follow it when this session's active project is already
+   tracked in GitHub Issues. Use the named spec or `spec.md` in the project
+   folder (ask if
    a named spec is missing; plan without a spec only when neither exists).
    Read existing `intent.md`; before preserving request evidence or history,
    read [PROJECT-INTENT.md](../shared/PROJECT-INTENT.md) (without a spec, link

@@ -24,7 +24,8 @@ or points to a wrong design, tell the user and wait; do not guess.
    in full, including its linked spec and plan. For `--github` or an issue
    reference (`#<n>` or URL),
    read and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub
-   Issues and Issue Artifacts instead of `projects/`.
+   Issues and Issue Artifacts instead of `projects/`; also follow it when this
+   session's active project is already tracked in GitHub Issues.
 2. **Check that a PRD adds value.** Write nothing; explain why if PDD
    documents (`project.md`, `discovery*.md`, `design*.md`) already frame the
    product, the work has no product surface (e.g. refactor, tooling, docs), or

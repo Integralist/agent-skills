@@ -25,7 +25,8 @@ gaps with guesses.
 1. **Choose source and workspace.** Use `--source=<path|#issue|url>` if given,
    or this session if omitted. For `--github` or an issue reference (`#<n>` or
    URL), read and follow [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) instead
-   of `projects/`. Before preserving request evidence or history, read
+   of `projects/`; also follow it when this session's active project is already
+   tracked in GitHub Issues. Before preserving request evidence or history, read
    [PROJECT-INTENT.md](../shared/PROJECT-INTENT.md). Use `intent.md` when
    needed; keep Development Brief to the current summary and a source link.
 2. **Read current truth.** Inspect linked research, `docs/adr/`, touched code,

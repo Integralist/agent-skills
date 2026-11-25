@@ -5,6 +5,7 @@ description: >-
   Atlassian MCP server. Use when the user asks to file, update, assign, move,
   or look up a Jira issue.
 disable-model-invocation: true
+argument-hint: "[steering]"
 metadata:
   model-tier: trivial
 ---

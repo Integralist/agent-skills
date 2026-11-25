@@ -6,6 +6,7 @@ description: >-
   a codebase's architecture, find shallow modules, or make code more testable
   and easier for agents to navigate.
 disable-model-invocation: true
+argument-hint: "[steering]"
 metadata:
   model-tier: complex
 ---

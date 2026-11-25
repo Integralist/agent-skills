@@ -24,11 +24,14 @@ gaps with guesses.
 
 1. **Choose the work.** Use `--plan=<path|#issue|url>` and `--slice=<N>`
    (accepted in any position), if supplied and the plan has slices. With no
-   `--plan`, use this session's discussion. Ask if the source does not define
-   enough to make tasks. For `--github` or an issue reference (`#<n>` or URL),
-   read and follow
+   `--plan`, use the active project plan or this session's discussion. Ask if
+   the source does not define enough to make tasks. For `--github` or an issue
+   reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
-   Artifacts instead of `projects/`.
+   Artifacts instead of `projects/`. Also follow it automatically when the
+   project is already tracked in GitHub Issues (active in this session, named
+   in `Execution-Plan: #<n>` commit trailers, or matching an open
+   `project`-labelled issue when no local `projects/` folder applies).
 2. **Inspect live code.** Ground every task in current code, not just plan
    wording. Load convention and testing skills for every language in the
    tasks. Know the relevant signatures, paths, and test patterns.

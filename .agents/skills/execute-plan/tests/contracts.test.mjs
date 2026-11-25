@@ -1002,8 +1002,6 @@ test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-IS
     ".agents/skills/next-task/SKILL.md",
     ".agents/skills/next-slice/SKILL.md",
     ".agents/skills/execute-plan/SKILL.md",
-    ".agents/skills/pr-open/SKILL.md",
-    ".agents/skills/stacked-prs/SKILL.md",
     ".agents/skills/spec-delta/SKILL.md",
   ].filter((skill) => existsSync(resolve(repo, skill)));
   const trigger = /For `--github` or an issue reference \(`#<n>` or URL\), read and follow \[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
@@ -1012,6 +1010,13 @@ test("execution, PR delivery, and spec-delta skills conditionally load GITHUB-IS
     assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);
     assertRequiredReference(content, "../shared/GITHUB-ISSUES.md", trigger);
     assert.throws(() => assertRequiredReference(content.replaceAll(/read\s+and\s+follow/gi, "optional:"), "../shared/GITHUB-ISSUES.md", trigger));
+  }
+  const autoDetectDeliveryTrigger = /When this (?:branch|stack) delivers a GitHub-tracked project[^\n]*(?:\n[^\n]*){0,5}read and follow\s+\[GITHUB-ISSUES\.md\]\(\.\.\/shared\/GITHUB-ISSUES\.md\)/;
+  for (const relative of [".agents/skills/pr-open/SKILL.md", ".agents/skills/stacked-prs/SKILL.md"]) {
+    const content = read(relative);
+    assert.doesNotMatch(content, /allowed-tools:[^\n]*gh (?:issue|label):/);
+    assertRequiredReference(content, "../shared/GITHUB-ISSUES.md", autoDetectDeliveryTrigger);
+    assert.throws(() => assertRequiredReference(content.replaceAll(/read\s+and\s+follow/gi, "optional:"), "../shared/GITHUB-ISSUES.md", autoDetectDeliveryTrigger));
   }
 });
 

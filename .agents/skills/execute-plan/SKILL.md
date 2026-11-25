@@ -44,12 +44,16 @@ and stop. A context transition is not task or plan completion.
 
 ## Workflow
 
-1. **Set up.** Read the plan from `--plan=<path>` (or ask if missing), its
-   spec, and linked docs. For `--github` or an issue reference (`#<n>` or URL),
-   read and follow
+1. **Set up.** Read the plan from `--plan=<path|#issue|url>` or the active
+   session/branch project (ask if missing), its spec, and linked docs. For
+   `--github` or an issue reference (`#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
-   Issue Artifacts instead of `projects/`. Record branch, HEAD, and existing
-   changes; keep those changes out of your commits. If on `main` or `master` in
+   Issue Artifacts instead of `projects/`. Also follow it automatically when
+   the project is already tracked in GitHub Issues (active in this session,
+   named in `Execution-Plan: #<n>` commit trailers, or matching an open
+   `project`-labelled issue when no local `projects/` folder applies). Record
+   branch, HEAD, and existing changes; keep those changes out of your commits.
+   If on `main` or `master` in
    the main checkout without an approved exception, read and follow
    [worktree-create](../worktree-create/SKILL.md) before editing (use
    [branch](../branch/SKILL.md) only if the user asked to branch in-place or

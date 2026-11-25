@@ -4,6 +4,7 @@ description: >-
   Create, submit, sync, and merge stacked pull requests with the gh stack
   extension. Use when the user or a coordinating skill asks for stacked PRs.
 allowed-tools: Bash(git branch --show-current), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(gh extension list:*), Bash(gh stack --help), Bash(gh stack view:*), Bash(gh pr view:*), Bash(gh pr checks:*)
+argument-hint: "[steering]"
 metadata:
   model-tier: moderate
 ---
@@ -32,11 +33,14 @@ submitting layers, commit pending work by reading and following
    [voice-product](../voice-product/SKILL.md),
    [CONCISE-PROSE.md](../shared/CONCISE-PROSE.md), and
    [PR-DESCRIPTION.md](../shared/PR-DESCRIPTION.md). Target the layer's base:
-   trunk for the bottom layer and the layer below for each higher layer. For
-   `--github` or an issue reference (`#<n>` or URL), read and follow
+   trunk for the bottom layer and the layer below for each higher layer. When
+   this stack delivers a GitHub-tracked project (active in this session,
+   named in `Execution-Plan: #<n>` commit trailers, matching an open
+   `project`-labelled issue when no local `projects/` folder applies, or
+   referenced by `#<n>` or URL), read and follow
    [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and
-   Issue Artifacts instead of `projects/`. Show every title and body, then wait
-   for the user's approval.
+   Issue Artifacts instead of `projects/`. Show every title and body, then
+   wait for the user's approval.
 4. **Submit** with `gh stack submit --auto --open` to push and open PRs ready
    for review; `--auto` alone opens drafts. Then write each approved body to
    a temporary file and run

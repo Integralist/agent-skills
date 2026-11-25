@@ -4,6 +4,7 @@ description: >-
   Research a topic, pattern, or codebase in depth and save a sourced reference
   document. Use when investigating a topic, exploring an external repository,
   or doing architecture research.
+argument-hint: "[--github] [steering]"
 metadata:
   model-tier: moderate
 ---
@@ -19,7 +20,8 @@ coordinating skill names an active `projects/<project>/` directory, write
 create a project directory solely because research may help later. For `--github`
 or an issue reference (`#<n>` or URL), read and follow
 [GITHUB-ISSUES.md](../shared/GITHUB-ISSUES.md) to use GitHub Issues and Issue
-Artifacts instead of `projects/`.
+Artifacts instead of `projects/`; also follow it when this session's active
+project is already tracked in GitHub Issues.
 
 For project scope, create `projects/README.md` from
 [PROJECTS-README.md](../shared/PROJECTS-README.md) and

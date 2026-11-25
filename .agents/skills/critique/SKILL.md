@@ -5,6 +5,7 @@ description: >-
   claims, and structural weaknesses, with a concrete fix for each issue. Use
   when reviewing a plan, spec, proposal, or other document before acting on it.
 disable-model-invocation: true
+argument-hint: "[steering]"
 metadata:
   model-tier: complex
 ---
