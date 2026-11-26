@@ -86,6 +86,11 @@ and why it exists (constraint, policy, invariant, or caller need), describing
 observable effect rather than steps, and never restating the name. Start
 exported comments with the identifier name.
 
+Keep comments, identifiers, and test descriptions timeless: never reference
+point-in-time plan or delivery artifacts such as slices, phases, milestones, or
+PRs (`Slice 4`, `Phase 2`), because they lose meaning once the work lands.
+Describe the enduring behaviour, capability, or invariant instead.
+
 Preserve existing doc comments (exported or not), markers (`TODO:`, `FIXME:`,
 `NOTE:`, `HACK:`, `XXX:`), directives (`//go:*`, `// Deprecated:`, `//nolint:`),
 and why-comments; remove only comments that restate the name, are stale, or
