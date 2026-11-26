@@ -85,11 +85,14 @@ and `go doc` lookups.
 ## Functions
 
 - **Compose multi-step flows:** When a function or transaction callback
-  mixes high-level flow with multiple distinct steps (SQL queries,
-  validation blocks, or loops) and grows past roughly 40 lines, extract
-  each cohesive step into an unexported helper or method so the caller
-  reads as an ordered sequence. Note non-obvious ordering constraints in
-  a brief comment, and avoid pass-through wrappers that add no domain meaning.
+  combines multiple distinct steps (SQL queries, validation blocks, or loops),
+  extract each cohesive step into an unexported helper or method so the caller
+  reads as an ordered sequence. Note non-obvious ordering constraints in a
+  brief comment, and avoid pass-through wrappers that add no domain meaning.
+- **One query per function:** Keep each database helper to a single query
+  rather than bundling multiple queries into one function; separate functions
+  give each query a distinct call boundary for OTel tracing and error
+  attribution.
 - **Name compound conditions:** When an `if` condition combines multiple flags
   or low-level checks to enforce a rule, extract the combined condition itself
   into a predicate function whose name states the policy, role, or expected
