@@ -97,6 +97,12 @@ and `go doc` lookups.
   extract each cohesive step into an unexported helper or method so the caller
   reads as an ordered sequence. Note non-obvious ordering constraints in a
   brief comment, and avoid pass-through wrappers that add no domain meaning.
+- **Keep validation from hiding the main flow:** Leave simple guard clauses
+  inline. When a block of checks makes the main operation hard to see,
+  group related checks into helpers named for the rules they enforce.
+  Keep rules with the type or operation that owns them. The caller should
+  show what must be true before it acts, without spelling out every check.
+  Don't move unrelated checks into a catch-all validation helper.
 - **One query per function:** Keep each database helper to a single query
   rather than bundling multiple queries into one function; separate functions
   give each query a distinct call boundary for OTel tracing and error
