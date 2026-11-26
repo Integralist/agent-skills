@@ -44,10 +44,14 @@ and `go doc` lookups.
 ## Naming and declarations
 
 - **Role-based names:** Apply the delete-the-type test—names should make sense
-  without their type. Abbreviate only `ctx`, `err`, `req`, `resp`, and `cfg`.
-  Prefix generic structs with their domain (`DNSClient`) unless the package
-  already narrows them (`redis.Client`). When a second value of the same kind
-  enters scope, rename both.
+  without their type and at the point of use (including in tests) without
+  reading the assignment or query behind them. Spell out words in full with no
+  clipped stems inside identifiers, and qualify generic nouns or predicates
+  with their domain subject and format; reserve `ctx`, `err`, `req`, `resp`,
+  and `cfg` for standalone variables (plus standard initialisms such as `ID`,
+  `URL`, `TLS`). Prefix generic structs with their domain (`DNSClient`) unless
+  the package already narrows them (`redis.Client`). When a second value of
+  the same kind enters scope, rename both.
 - **Standard suffixes/prefixes:** Start default constants with `default`
   (`defaultDebugPort`). Name long-lived dependency structs `*Params` (required
   past 4 constructor args including `ctx`) and per-call input structs `*Opts`.
@@ -77,6 +81,15 @@ and `go doc` lookups.
 - **Stdlib preferences:** In new code, use stdlib constants (`http.MethodGet`,
   `http.StatusOK`, `os.Interrupt`) over magic literals and `net/netip`
   (`netip.Addr`, `netip.Prefix`, `netip.AddrPort`) over `net.IP`/`*net.IPNet`.
+
+## Functions
+
+- **Compose multi-step flows:** When a function or transaction callback
+  mixes high-level flow with multiple distinct steps (SQL queries,
+  validation blocks, or loops) and grows past roughly 40 lines, extract
+  each cohesive step into an unexported helper or method so the caller
+  reads as an ordered sequence. Note non-obvious ordering constraints in
+  a brief comment, and avoid trivial one-line pass-throughs.
 
 ## Comments
 

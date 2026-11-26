@@ -38,10 +38,14 @@ and `go doc` lookups.
 ## Naming and declarations
 
 - **Role-based names:** Apply the delete-the-type test—names should make sense
-  without their type. Abbreviate only `ctx`, `err`, `req`, `resp`, and `cfg`.
-  Prefix generic structs with their domain (`DNSClient`) unless the package
-  already narrows them (`redis.Client`). When a second value of the same kind
-  enters scope, rename both.
+  without their type and at the point of use (including in tests) without
+  reading the assignment or query behind them. Spell out words in full with no
+  clipped stems inside identifiers, and qualify generic nouns or predicates
+  with their domain subject and format; reserve `ctx`, `err`, `req`, `resp`,
+  and `cfg` for standalone variables (plus standard initialisms such as `ID`,
+  `URL`, `TLS`). Prefix generic structs with their domain (`DNSClient`) unless
+  the package already narrows them (`redis.Client`). When a second value of
+  the same kind enters scope, rename both.
 - **Standard suffixes/prefixes:** Start default constants with `default`
   (`defaultDebugPort`). Name long-lived dependency structs `*Params` (required
   past 4 constructor args including `ctx`) and per-call input structs `*Opts`.
@@ -53,14 +57,33 @@ and `go doc` lookups.
 - **Constructors:** Use `NewX` for required dependencies and fluent `WithXxx`
   methods returning the receiver for optional overrides. Skip `NewX` when a
   same-package struct needs no defaults, validation, or hidden fields.
+- **Parameters:** Never use a variadic parameter (`...T`) to simulate an
+  optional argument or avoid updating existing call sites; `...T` hides arity
+  and silently ignores extra arguments. Add a plain parameter and update call
+  sites (passing `nil` or a zero value where unused), or use `*Opts` /
+  `WithXxx`.
 - **Interfaces & embedding:** Define consumer-side interfaces only when
   swapping implementations (`interface.go` when shared), with a compile-time
   check (`var _ Store = (*MockStore)(nil)`). Access embedded fields explicitly
   (`s.Logger.Info(...)`, not `s.Info(...)`).
+- **Magic literals:** Name literals that carry domain meaning—even when used
+  only once. In particular, never use bare integers as positional slice/array
+  indexes (`listeners[2]`) or role-based length checks (`len(listeners) > 2`);
+  implicit ordering hides what each slot means. Use named constants
+  (`slackListenerIndex`) or struct fields, and define constants for repeated
+  custom literals.
 - **Stdlib preferences:** In new code, use stdlib constants (`http.MethodGet`,
   `http.StatusOK`, `os.Interrupt`) over magic literals and `net/netip`
   (`netip.Addr`, `netip.Prefix`, `netip.AddrPort`) over `net.IP`/`*net.IPNet`.
-  Define package constants for repeated custom literals.
+
+## Functions
+
+- **Compose multi-step flows:** When a function or transaction callback
+  mixes high-level flow with multiple distinct steps (SQL queries,
+  validation blocks, or loops) and grows past roughly 40 lines, extract
+  each cohesive step into an unexported helper or method so the caller
+  reads as an ordered sequence. Note non-obvious ordering constraints in
+  a brief comment, and avoid trivial one-line pass-throughs.
 
 ## Comments
 
@@ -69,6 +92,11 @@ methods, constants, and variables, exported or not. State what it is or does
 and why it exists (constraint, policy, invariant, or caller need), describing
 observable effect rather than steps, and never restating the name. Start
 exported comments with the identifier name.
+
+Keep comments, identifiers, and test descriptions timeless: never reference
+point-in-time plan or delivery artifacts such as slices, phases, milestones, or
+PRs (`Slice 4`, `Phase 2`), because they lose meaning once the work lands.
+Describe the enduring behaviour, capability, or invariant instead.
 
 Preserve existing doc comments (exported or not), markers (`TODO:`, `FIXME:`,
 `NOTE:`, `HACK:`, `XXX:`), directives (`//go:*`, `// Deprecated:`, `//nolint:`),
