@@ -21,14 +21,17 @@ Read [Review](references/review.md) for the workflow. Read [Loading a pull
 request](references/pull-requests.md) before loading a PR, [Answering user
 notes](references/user-notes.md) when handling notes, and [Addressing all
 feedback](references/addressing-feedback.md) for `--address`.
+- **`--comments`:** Reply-only pass; keep target and threads. Never edit
+  repository files—answer questions, propose diffs for requested edits, and
+  wait for explicit approval (or `--address`).
 - **`--address`:** Keep target; invocation approves requested edits. Delete
   resolved threads only after listing them and the user's explicit yes;
   deletion is irreversible.
 - **`--done`:** Finish only a session for the current directory. If none, report
   no review; do not launch Hunk or touch another repository.
 - **PR number without a repository:** Confirm the repository before fetching.
-- **Requested edits:** Usual code-edit approval applies except for `--address`.
-  Never edit an unrelated checkout for a remote PR.
+- **Requested edits:** Only `--address` or explicit approval in chat
+  authorizes file edits. Never edit an unrelated checkout for a remote PR.
 
 Inspect every hunk. Publish findings or walkthrough stops in one inline-note
 batch, focus stop 1, and give a short chat overview. Finish when requested

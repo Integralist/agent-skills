@@ -18,13 +18,17 @@ during review.
    reload arguments (source options, `--`, command, refs, flags, pathspecs) in
    Bash array `RELOAD_ARGS`. Ask rather than guess if the target is unclear.
 
-2. **Act on each note and reply under it, even if no code changed:**
+2. **Handle each note and reply under it, even if no code changed:**
    - **Question:** answer it.
-   - **Requested edit:** get approval under usual code-edit rules, edit the
-     matching checkout, run relevant checks, and report the change, checks,
-     and anything untested. For remote PRs, never edit an unrelated checkout.
-   - **Blocked, declined, unclear, or awaiting approval:** reply with the
-     reason or question.
+   - **Requested edit without `--address` or explicit approval (including
+     `--comments`):** do not edit repository files. Propose the concrete
+     change (diff or summary), reply under the note as awaiting approval,
+     and pause for explicit approval in chat or `--address`.
+   - **Approved edit (`--address` or explicit approval in chat):** edit the
+     matching checkout, run relevant checks, and reply with the change,
+     checks, and anything untested. Never edit an unrelated checkout for a
+     remote PR.
+   - **Blocked, declined, or unclear:** reply with the reason or question.
 
    ```bash
    hunk session comment add "$SESSION_ID" --reply-to "<note-id>" \
