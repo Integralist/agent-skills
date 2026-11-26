@@ -68,10 +68,15 @@ and `go doc` lookups.
   swapping implementations (`interface.go` when shared), with a compile-time
   check (`var _ Store = (*MockStore)(nil)`). Access embedded fields explicitly
   (`s.Logger.Info(...)`, not `s.Info(...)`).
+- **Magic literals:** Name literals that carry domain meaning—even when used
+  only once. In particular, never use bare integers as positional slice/array
+  indexes (`listeners[2]`) or role-based length checks (`len(listeners) > 2`);
+  implicit ordering hides what each slot means. Use named constants
+  (`slackListenerIndex`) or struct fields, and define constants for repeated
+  custom literals.
 - **Stdlib preferences:** In new code, use stdlib constants (`http.MethodGet`,
   `http.StatusOK`, `os.Interrupt`) over magic literals and `net/netip`
   (`netip.Addr`, `netip.Prefix`, `netip.AddrPort`) over `net.IP`/`*net.IPNet`.
-  Define package constants for repeated custom literals.
 
 ## Comments
 
