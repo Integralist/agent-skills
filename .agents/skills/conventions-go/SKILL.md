@@ -89,7 +89,12 @@ and `go doc` lookups.
   validation blocks, or loops) and grows past roughly 40 lines, extract
   each cohesive step into an unexported helper or method so the caller
   reads as an ordered sequence. Note non-obvious ordering constraints in
-  a brief comment, and avoid trivial one-line pass-throughs.
+  a brief comment, and avoid pass-through wrappers that add no domain meaning.
+- **Name compound conditions:** When an `if` condition combines multiple flags
+  or low-level checks to enforce a rule, extract the combined condition itself
+  into a predicate function whose name states the policy, role, or expected
+  behaviour at the call site—never leave readers to deduce the rule from
+  inline boolean expressions.
 
 ## Comments
 
