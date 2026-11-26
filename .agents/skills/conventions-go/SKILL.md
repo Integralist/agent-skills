@@ -59,6 +59,11 @@ and `go doc` lookups.
 - **Constructors:** Use `NewX` for required dependencies and fluent `WithXxx`
   methods returning the receiver for optional overrides. Skip `NewX` when a
   same-package struct needs no defaults, validation, or hidden fields.
+- **Parameters:** Never use a variadic parameter (`...T`) to simulate an
+  optional argument or avoid updating existing call sites; `...T` hides arity
+  and silently ignores extra arguments. Add a plain parameter and update call
+  sites (passing `nil` or a zero value where unused), or use `*Opts` /
+  `WithXxx`.
 - **Interfaces & embedding:** Define consumer-side interfaces only when
   swapping implementations (`interface.go` when shared), with a compile-time
   check (`var _ Store = (*MockStore)(nil)`). Access embedded fields explicitly
