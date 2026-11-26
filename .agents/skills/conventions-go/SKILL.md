@@ -53,8 +53,9 @@ and `go doc` lookups.
   the package already narrows them (`redis.Client`). When a second value of
   the same kind enters scope, rename both.
 - **Standard suffixes/prefixes:** Start default constants with `default`
-  (`defaultDebugPort`). Name long-lived dependency structs `*Params` (required
-  past 4 constructor args including `ctx`) and per-call input structs `*Opts`.
+  (`defaultDebugPort`). Use `*Params` for long-lived dependency constructors
+  with more than four required arguments, counting `ctx`; use `*Opts` for
+  cohesive per-call inputs.
 - **Layout:** Sort struct fields and constructor assignments alphabetically
   (embedded structs first). Tag internal-only exported struct fields
   `json:"-"`. Group related constants/variables in `const (...)`/`var (...)`
@@ -63,11 +64,18 @@ and `go doc` lookups.
 - **Constructors:** Use `NewX` for required dependencies and fluent `WithXxx`
   methods returning the receiver for optional overrides. Skip `NewX` when a
   same-package struct needs no defaults, validation, or hidden fields.
-- **Parameters:** Never use a variadic parameter (`...T`) to simulate an
-  optional argument or avoid updating existing call sites; `...T` hides arity
-  and silently ignores extra arguments. Add a plain parameter and update call
-  sites (passing `nil` or a zero value where unused), or use `*Opts` /
-  `WithXxx`.
+- **Parameters:** Put `ctx context.Context` first in every context-taking
+  function or method signature (after the receiver, if any); never store it
+  in `*Params` or `*Opts`. Outside long-lived dependency constructors, limit
+  signatures to four explicit parameters, excluding the receiver; count
+  `ctx` and handles such as `tx`. Above four, group cohesive per-call inputs
+  in a named `*Opts` struct, keeping context and dependencies explicit. If
+  inputs do not form a cohesive group, redesign rather than pack unrelated
+  values into a struct. Never use a variadic parameter (`...T`) to simulate
+  an optional argument or avoid updating existing call sites; `...T` hides
+  arity and silently ignores extra arguments. Add a plain parameter and
+  update call sites (passing `nil` or a zero value where unused), or use
+  `*Opts` / `WithXxx`.
 - **Interfaces & embedding:** Define consumer-side interfaces only when
   swapping implementations (`interface.go` when shared), with a compile-time
   check (`var _ Store = (*MockStore)(nil)`). Access embedded fields explicitly
